@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HomePilot 小程序原型 v0.3</title>
+<style>
+  :root{
+    --desk:#EFEDE6; --desk-ink:#26241C; --desk-sub:#6E6A5E; --desk-line:#DBD7CC;
+    --desk-card:#F7F6F1; --desk-accent:#2F6B4A;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --desk:#1B1A15; --desk-ink:#E9E6DB; --desk-sub:#A39F91; --desk-line:#33312A;
+           --desk-card:#232219; --desk-accent:#7FBF9B; }
+  }
+  :root[data-theme="dark"]{ --desk:#1B1A15; --desk-ink:#E9E6DB; --desk-sub:#A39F91; --desk-line:#33312A;
+           --desk-card:#232219; --desk-accent:#7FBF9B; }
+  :root[data-theme="light"]{ --desk:#EFEDE6; --desk-ink:#26241C; --desk-sub:#6E6A5E; --desk-line:#DBD7CC;
+           --desk-card:#F7F6F1; --desk-accent:#2F6B4A; }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--desk); color:var(--desk-ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:1560px; margin:0 auto; padding:48px 32px 80px;}
+
+  /* ---------- desk header ---------- */
+  .desk-head{max-width:720px; margin-bottom:12px;}
+  .desk-head .eyebrow{
+    font-size:12px; letter-spacing:.18em; color:var(--desk-accent);
+    font-weight:600; margin-bottom:10px;
+  }
+  .desk-head h1{font-size:30px; font-weight:700; letter-spacing:.01em; text-wrap:balance;}
+  .desk-head p{color:var(--desk-sub); font-size:14.5px; margin-top:10px; max-width:60ch;}
+  .desk-head .tech{
+    margin-top:16px; font-size:13px; color:var(--desk-sub);
+    border-left:3px solid var(--desk-accent); padding:2px 0 2px 12px;
+  }
+
+  /* ---------- grid of frames ---------- */
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
+    gap:44px 36px; margin-top:44px; justify-items:center;
+  }
+  .cell{width:100%; max-width:420px; display:flex; flex-direction:column; gap:18px; align-items:center;}
+  .notes{width:100%; background:var(--desk-card); border:1px solid var(--desk-line);
+         border-radius:10px; padding:16px 18px;}
+  .notes h2{font-size:14px; font-weight:700; margin-bottom:8px;}
+  .notes h2 .no{color:var(--desk-accent); margin-right:6px;}
+  .notes ul{list-style:none;}
+  .notes li{font-size:13px; color:var(--desk-sub); padding-left:14px; position:relative; margin-top:5px;}
+  .notes li::before{content:""; position:absolute; left:0; top:9px; width:5px; height:5px;
+                    border-radius:50%; background:var(--desk-accent);}
+  .desk-foot{margin-top:52px; font-size:13px; color:var(--desk-sub); max-width:72ch;}
+
+  /* ---------- phone chrome (小程序恒为浅色模式，刻意不随主题翻转) ---------- */
+  .phone{
+    width:375px; max-width:100%; height:730px; flex:none;
+    background:#101010; border-radius:44px; padding:10px;
+    box-shadow:0 24px 60px rgba(20,18,10,.28);
+  }
+  .screen{
+    --g:#06AE56; --g-press:#059A4C; --g-tint:#E4F6EC;
+    --pg:#F6F6F3; --card:#FFFFFF;
+    --ink:#1A1A18; --sub:#6E6B63; --mut:#9B978C; --line:#EDECE7;
+    --amber:#A96A0C; --amber-tint:#FBF1DE;
+    --blue:#33639F; --blue-tint:#E7EEF7;
+    height:100%; border-radius:35px; overflow:hidden; background:var(--pg);
+    display:flex; flex-direction:column; position:relative;
+    font-size:14px; color:var(--ink);
+  }
+  .statusbar{
+    flex:none; height:40px; display:flex; align-items:flex-end; justify-content:space-between;
+    padding:0 24px 4px; font-size:12.5px; font-weight:600; background:var(--card);
+    font-variant-numeric:tabular-nums;
+  }
+  .navbar{
+    flex:none; height:44px; background:var(--card); display:flex; align-items:center;
+    justify-content:center; position:relative; font-weight:600; font-size:16px;
+  }
+  .navbar .back{position:absolute; left:14px; font-size:22px; font-weight:400; color:var(--ink); line-height:1;}
+  .capsule{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    width:84px; height:30px; border:1px solid #E3E2DD; border-radius:15px;
+    background:#FDFDFC; display:flex; align-items:center; color:#3B3A36;
+  }
+  .capsule span{flex:1; text-align:center; font-size:15px; line-height:1;}
+  .capsule span:first-child{border-right:1px solid #E9E8E3; letter-spacing:1px;}
+  .body{flex:1; overflow-y:auto; padding:12px 12px 16px; display:flex; flex-direction:column; gap:10px;}
+  .body.has-cta{padding-bottom:78px;}
+  .body.has-tab{padding-bottom:12px;}
+
+  .tabbar{
+    flex:none; height:56px; background:var(--card); border-top:1px solid var(--line);
+    display:flex; padding-bottom:6px;
+  }
+  .tabbar .tab{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+               gap:2px; font-size:10.5px; color:var(--mut);}
+  .tabbar .tab .ico{font-size:19px; line-height:1;}
+  .tabbar .tab.on{color:var(--g); font-weight:600;}
+
+  /* ---------- shared mini-program components ---------- */
+  .mcard{background:var(--card); border-radius:12px; padding:14px;}
+  .mcard + .mcard{margin-top:0;}
+  .kicker{font-size:11px; color:var(--mut); letter-spacing:.06em; margin-bottom:8px; font-weight:600;}
+  .pill{display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600;
+        padding:3px 9px; border-radius:999px;}
+  .pill.go{background:var(--g-tint); color:#067A3F;}
+  .pill.talk{background:var(--amber-tint); color:var(--amber);}
+  .pill.seek{background:var(--blue-tint); color:var(--blue);}
+  .pill.done{background:#EFEEEA; color:var(--mut);}
+  .num{font-variant-numeric:tabular-nums;}
+
+  .meter{height:6px; border-radius:3px; background:var(--line); overflow:hidden;}
+  .meter i{display:block; height:100%; border-radius:3px; background:var(--g);}
+
+  .btn{
+    display:flex; align-items:center; justify-content:center; width:100%;
+    height:44px; border:none; border-radius:10px; background:var(--g); color:#fff;
+    font-size:15px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .btn:active{background:var(--g-press);}
+  .btn.ok{background:var(--g-tint); color:#067A3F; cursor:default;}
+  .btn:focus-visible{outline:2px solid #045C30; outline-offset:2px;}
+
+  /* screen 1 list */
+  .lead-card{background:var(--card); border-radius:12px; padding:12px 14px; display:flex; gap:10px; align-items:center;}
+  .avatar{width:36px; height:36px; border-radius:50%; background:var(--g-tint); color:#067A3F;
+          display:flex; align-items:center; justify-content:center; font-weight:700; flex:none;}
+  .lead-card .t{font-size:13px; font-weight:600;}
+  .lead-card .s{font-size:11.5px; color:var(--sub); margin-top:1px;}
+  .sumline{font-size:12px; color:var(--sub); padding:2px 4px 0;}
+  .sumline b{color:var(--ink); font-weight:600;}
+
+  .gcard{background:var(--card); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:8px;}
+  .gcard .row1{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .cat{font-size:10.5px; font-weight:600; color:var(--sub); background:var(--pg);
+       border-radius:4px; padding:2px 6px; flex:none;}
+  .gcard h3{font-size:15px; font-weight:600; flex:1; margin:0 0 0 2px;}
+  .gcard .price{font-size:12.5px; color:var(--sub);}
+  .gcard .price b{color:#B4501E; font-size:14px; font-weight:700;}
+  .gcard .price s{color:var(--mut);}
+  .gcard .foot{display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--sub);}
+  .gcard .foot .n{font-weight:600; color:var(--ink);}
+  .gcard.muted h3, .gcard.muted .foot .n{color:var(--mut);}
+  .linkmore{text-align:center; font-size:12px; color:var(--mut); padding-top:2px;}
+
+  /* screen 2 detail */
+  .headcard{background:var(--card); border-radius:12px; padding:14px;}
+  .headcard .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .headcard .cnt{font-size:13px; color:var(--sub);}
+  .headcard .cnt b{font-size:20px; color:var(--ink); font-weight:700;}
+  .bonus{margin-top:9px; font-size:12px; color:var(--amber); background:var(--amber-tint);
+         border-radius:8px; padding:7px 10px;}
+  .quote{font-size:13.5px; color:var(--ink); line-height:1.75;}
+  .quote .sign{display:block; margin-top:8px; font-size:12px; color:var(--mut);}
+  .terms{display:flex; flex-direction:column;}
+  .terms .tr{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--line); font-size:13px;}
+  .terms .tr:last-child{border-bottom:none;}
+  .terms .tl{color:var(--sub);}
+  .terms .tv{font-weight:600;}
+  .terms .tv s{color:var(--mut); font-weight:400; margin-right:6px;}
+  .terms .tv.hot{color:#B4501E;}
+  .gl{padding:9px 0; border-bottom:1px solid var(--line);}
+  .gl:last-of-type{border-bottom:none;}
+  .gl b{font-size:13px; display:block; margin-bottom:2px;}
+  .gl p{font-size:12px; color:var(--sub); line-height:1.65;}
+  .gl p em{font-style:normal; color:var(--amber); font-weight:600;}
+  .tline{display:flex; gap:10px; padding:2px 0 10px;}
+  .tline:last-child{padding-bottom:0;}
+  .tline .dot{flex:none; width:8px; height:8px; border-radius:50%; background:var(--g); margin-top:6px;}
+  .tline .dt{font-size:11px; color:var(--mut); font-variant-numeric:tabular-nums;}
+  .tline .tt{font-size:13px; font-weight:600; margin-top:1px;}
+  .shots{display:flex; gap:6px; margin-top:7px;}
+  .shot{width:74px; height:56px; border-radius:6px; background:linear-gradient(140deg,#E8E4DA,#D6D0C2);
+        display:flex; align-items:center; justify-content:center; font-size:10px; color:#8B8577;}
+  .roster{display:flex; flex-direction:column;}
+  .roster .rr{display:flex; gap:10px; padding:7px 0; border-bottom:1px solid var(--line);
+              font-size:12.5px; align-items:center;}
+  .roster .rr:last-of-type{border-bottom:none;}
+  .roster .idx{color:var(--mut); font-variant-numeric:tabular-nums; width:20px; flex:none;}
+  .roster .who{font-weight:500;}
+  .roster .tag-me{font-size:10px; color:#067A3F; background:var(--g-tint); border-radius:4px; padding:1px 5px;}
+  .cta-dock{position:absolute; left:0; right:0; bottom:0; padding:10px 12px 18px;
+            background:linear-gradient(to top, var(--pg) 70%, transparent);}
+
+  /* screen 3 form */
+  .fhint{font-size:12px; color:var(--sub); padding:2px 4px 0;}
+  .fhint b{color:var(--ink);}
+  .q label.qt{display:block; font-size:13.5px; font-weight:600; margin-bottom:9px;}
+  .q .opt-note{font-weight:400; color:var(--mut); font-size:11.5px; margin-left:6px;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{border:1px solid var(--line); background:var(--pg); color:var(--ink);
+        border-radius:8px; padding:8px 13px; font-size:13px; font-family:inherit; cursor:pointer;}
+  .chip.on{background:var(--g-tint); border-color:var(--g); color:#067A3F; font-weight:600;}
+  .chip:focus-visible{outline:2px solid #045C30; outline-offset:1px;}
+  .fin{width:100%; border:1px solid var(--line); border-radius:8px; background:var(--pg);
+       padding:10px 12px; font-size:14px; font-family:inherit; color:var(--ink);}
+  .fin::placeholder{color:var(--mut);}
+  .privacy{font-size:11.5px; color:var(--mut); line-height:1.7; padding:0 4px;}
+  .form-done{display:none; flex-direction:column; align-items:center; gap:10px; padding:38px 20px; text-align:center;}
+  .form-done .big{font-size:40px; line-height:1;}
+  .form-done h3{font-size:16px;}
+  .form-done p{font-size:12.5px; color:var(--sub); max-width:30ch;}
+
+  /* screen 4 map */
+  .hero-stat{background:var(--card); border-radius:12px; padding:16px 14px;}
+  .hero-stat .n{font-size:30px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.01em;}
+  .hero-stat .n small{font-size:14px; color:var(--mut); font-weight:400;}
+  .hero-stat .cap{font-size:12px; color:var(--sub); margin:2px 0 10px;}
+  .bars{display:flex; flex-direction:column; gap:9px;}
+  .bar{display:grid; grid-template-columns:86px 1fr 30px; gap:8px; align-items:center; font-size:12px;}
+  .bar .bl{color:var(--sub); text-align:right;}
+  .bar .track{height:12px; border-radius:4px; background:var(--pg); overflow:hidden;}
+  .bar .track i{display:block; height:100%; background:var(--g); border-radius:0 4px 4px 0;}
+  .bar .bv{font-weight:600; font-variant-numeric:tabular-nums; color:var(--ink);}
+  .bar.top .bl{color:var(--ink); font-weight:600;}
+  .map-foot{font-size:11.5px; color:var(--mut); text-align:center; padding-top:2px;}
+
+  /* screen 5 团长发起 */
+  .fin.area{min-height:64px; resize:none; line-height:1.6;}
+  .qnote{font-size:11.5px; color:var(--mut); margin-top:8px; line-height:1.6;}
+  .adminbadge{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--amber);
+              background:var(--amber-tint); border-radius:8px; padding:8px 10px;}
+  .rowlink{display:flex; justify-content:space-between; align-items:center; font-size:13px;}
+  .rowlink .rv{color:var(--mut); font-size:12px;}
+  .flow{display:flex; align-items:center; gap:4px; flex-wrap:wrap; font-size:11px; color:var(--mut); padding:0 4px;}
+  .flow .fpill{border:1px solid var(--line); border-radius:999px; padding:2px 8px; background:var(--card);}
+  .flow .fpill.now{border-color:var(--g); color:#067A3F; font-weight:600;}
+
+  @media (max-width:430px){
+    .wrap{padding:32px 14px 60px;}
+    .phone{height:700px;}
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .bar .track i{transition:width .6s ease;}
+    .meter i{transition:width .4s ease;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="desk-head">
+    <div class="eyebrow">HOMEPILOT · 原型 V0.3</div>
+    <h1>本小区装修团购小程序 — 五屏流程原型</h1>
+    <p>业主侧四屏：团购列表 → 项目详情（接龙）→ 意向登记 → 小区进度地图；团长侧一屏：发起团购（仅团长可见）。原型可点：详情页能报名接龙，登记表能选能提交，发起页能发布。</p>
+    <p class="tech">技术注记：uniapp（Vue3）+ Laravel API + 阿里云轻量服务器（已备案域名）。日常用 H5 编译目标在浏览器测试，发布前在开发者工具/真机过微信特有环节。小程序界面按微信惯例恒为浅色。</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- ========== ① 团购列表 ========== -->
+    <div class="cell">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+        <div class="navbar">云璟湾 · 装修团
+          <div class="capsule"><span>···</span><span>◉</span></div>
+        </div>
+        <div class="body has-tab">
+          <div class="lead-card">
+            <div class="avatar">团</div>
+            <div>
+              <div class="t">团长：老K（3栋业主）</div>
+              <div class="s">自家工地全程公开 · 团购条件全员可见</div>
+            </div>
+          </div>
+          <div class="sumline">全小区已登记 <b class="num">46</b> 户 · <b class="num">3</b> 个团购进行中</div>
+
+          <div class="gcard">
+            <div class="row1"><span class="cat">装修公司</span><h3>「城建装饰」整装团购</h3><span class="pill go">接龙中</span></div>
+            <div class="price">半包 <b>618 元/㎡</b> <s>门市 688</s> · 满 20 户赠全屋水电升级</div>
+            <div class="meter"><i style="width:85%"></i></div>
+            <div class="foot"><span>已报名 <span class="n num">17</span> / 20 户</span><span>团长样板工地可看 ›</span></div>
+          </div>
+
+          <div class="gcard">
+            <div class="row1"><span class="cat">中央空调</span><h3>中央空调方案征集</h3><span class="pill talk">谈判中</span></div>
+            <div class="price">大金 / 美的两套方案对比中 · 满 25 户总价再降 3%</div>
+            <div class="foot"><span>意向 <span class="n num">23</span> 户</span><span>查看两套报价 ›</span></div>
+          </div>
+
+          <div class="gcard">
+            <div class="row1"><span class="cat">全屋定制</span><h3>全屋定制柜体</h3><span class="pill seek">意向征集</span></div>
+            <div class="price">达到 15 户意向后开始约厂商谈价</div>
+            <div class="foot"><span>已有 <span class="n num">9</span> 户感兴趣</span><span>登记意向 ›</span></div>
+          </div>
+
+          <div class="gcard muted">
+            <div class="row1"><span class="cat">瓷砖</span><h3>瓷砖拼单（首期）</h3><span class="pill done">已成团</span></div>
+            <div class="foot"><span><span class="n num">31</span> 户 · 已完成对接</span><span>成团纪要 ›</span></div>
+          </div>
+          <div class="linkmore">想团别的？在群里 @团长 发起</div>
+        </div>
+        <div class="tabbar">
+          <div class="tab on"><span class="ico">🛍</span>团购</div>
+          <div class="tab"><span class="ico">📊</span>小区进度</div>
+          <div class="tab"><span class="ico">👤</span>我的</div>
+        </div>
+      </div></div>
+      <div class="notes">
+        <h2><span class="no">①</span>团购列表（首页）</h2>
+        <ul>
+          <li>团长身份放在页面第一位——「以我为主」是公开的，信任来自透明而不是算法。</li>
+          <li>每张卡片必带两个数字：报名/意向户数 + 价格阶梯，「已报名 17/20」本身就是转化势能。</li>
+          <li>状态只有四种：接龙中 / 谈判中 / 意向征集 / 已成团，不设评论区，讨论留在微信群。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== ② 项目详情 ========== -->
+    <div class="cell">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+        <div class="navbar"><span class="back">‹</span>「城建装饰」整装团购
+          <div class="capsule"><span>···</span><span>◉</span></div>
+        </div>
+        <div class="body has-cta">
+          <div class="headcard">
+            <div class="top"><span class="pill go">接龙中</span>
+              <span class="cnt">已报名 <b class="num" id="cnt">17</b><span class="num"> / 20 户</span></span></div>
+            <div class="meter"><i id="cntbar" style="width:85%"></i></div>
+            <div class="bonus">🎁 满 20 户：全员赠全屋水电升级（点位不限量）</div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">团长的话</div>
+            <p class="quote">“我自己家就签的这家，合同、报价单、工地进度我全部公开在下面，大家随时来我家工地看。谈下来的条件对每一户一样，我作为团长拿的权益也不藏着——有问题群里直接问我。”
+              <span class="sign">—— 老K · 3栋2单元 · 团长</span></p>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">团购条件</div>
+            <div class="terms">
+              <div class="tr"><span class="tl">半包</span><span class="tv hot"><s>688</s>618 元/㎡</span></div>
+              <div class="tr"><span class="tl">全包</span><span class="tv hot"><s>1280</s>1150 元/㎡</span></div>
+              <div class="tr"><span class="tl">水电点位</span><span class="tv">不限量（原按点位计费）</span></div>
+              <div class="tr"><span class="tl">质保</span><span class="tv">隐蔽工程 10 年，书面写入合同</span></div>
+            </div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">买前必懂 · 3 分钟 · 看完再报名</div>
+            <div class="gl"><b>半包 vs 全包，差价差在哪</b>
+              <p>半包 = 人工 + 辅料，瓷砖地板洁具这些主材自己买；全包 = 全含。<em>差价大头在主材品牌</em>，对比报价先看主材清单。</p></div>
+            <div class="gl"><b>水电「点位」是什么</b>
+              <p>每个插座、开关、出水口算一个点位，按个收费最容易超预算——所以这次谈下的<em>「点位不限量」</em>是实在的让利。</p></div>
+            <div class="gl"><b>隐蔽工程质保为什么要 10 年</b>
+              <p>封进墙里的水电和防水，出了问题维修最贵。质保口头说不算数，<em>要写进合同</em>——本团购已写入。</p></div>
+            <div class="linkmore">完整版 8 条（含瓷砖尺寸、釉面怎么看）›</div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">团长样板工地（121㎡ · 四房）</div>
+            <div class="tline"><span class="dot"></span><div>
+              <div class="dt num">07-02</div><div class="tt">水电开槽完成，横平竖直验收通过</div>
+              <div class="shots"><div class="shot">工地照片</div><div class="shot">工地照片</div><div class="shot">工地照片</div></div>
+            </div></div>
+            <div class="tline"><span class="dot" style="background:#C9C5BA"></span><div>
+              <div class="dt num">06-20</div><div class="tt">开工交底，报价单（脱敏）已公开</div>
+            </div></div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">报名接龙 · 楼栋 + 昵称对外可见</div>
+            <div class="roster" id="roster">
+              <div class="rr"><span class="idx num">01</span><span class="who">3-2-1801 老K</span><span class="tag-me">团长</span></div>
+              <div class="rr"><span class="idx num">02</span><span class="who">5-1-902 Momo</span></div>
+              <div class="rr"><span class="idx num">03</span><span class="who">2-1-2203 大熊</span></div>
+              <div class="rr"><span class="idx num">04</span><span class="who">7-2-601 山茶</span></div>
+              <div class="rr"><span class="idx num">05</span><span class="who">1-1-1502 阿宽</span></div>
+            </div>
+            <div class="linkmore" id="rostermore">查看全部 17 户 ›</div>
+          </div>
+        </div>
+        <div class="cta-dock"><button class="btn" id="joinBtn">报名接龙</button></div>
+      </div></div>
+      <div class="notes">
+        <h2><span class="no">②</span>项目详情 + 接龙（试试点「报名接龙」）</h2>
+        <ul>
+          <li>「团长的话」直接声明自家已签约、权益不藏着——把第 4 点诉求做成明面上的规则。</li>
+          <li>样板工地时间线是最强转化素材：真实进度照片 + 脱敏报价单，成本只是随手拍。</li>
+          <li>接龙对外只显示楼栋+昵称，手机号只有团长可见；报名即入表，不用再群里刷屏统计。</li>
+          <li>「买前必懂」微科普：每个团购品类 3~5 条，只讲影响这次决策的概念，格式固定为"术语 → 大白话 → 对你的影响"。AI 生成初稿、团长把关，一次写好不需运营。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== ③ 意向登记 ========== -->
+    <div class="cell">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+        <div class="navbar"><span class="back">‹</span>装修意向登记
+          <div class="capsule"><span>···</span><span>◉</span></div>
+        </div>
+        <div class="body" id="formBody">
+          <div class="fhint">约 <b>2 分钟</b> · 明细仅团长可见，对外只展示汇总统计</div>
+
+          <div class="mcard q">
+            <label class="qt">1 / 4 · 你家是哪个户型？</label>
+            <div class="chips" data-mode="single">
+              <button class="chip">89㎡ · 三房</button>
+              <button class="chip">105㎡ · 三房</button>
+              <button class="chip on">121㎡ · 四房</button>
+              <button class="chip">143㎡ · 四房</button>
+            </div>
+          </div>
+
+          <div class="mcard q">
+            <label class="qt">2 / 4 · 预计什么时候开工？</label>
+            <div class="chips" data-mode="single">
+              <button class="chip">交房就开工</button>
+              <button class="chip on">交房后 3 个月内</button>
+              <button class="chip">半年内</button>
+              <button class="chip">还没定</button>
+            </div>
+          </div>
+
+          <div class="mcard q">
+            <label class="qt">3 / 4 · 对哪些团购感兴趣？<span class="opt-note">可多选</span></label>
+            <div class="chips" data-mode="multi">
+              <button class="chip on">装修公司</button>
+              <button class="chip on">中央空调</button>
+              <button class="chip">地暖</button>
+              <button class="chip on">全屋定制</button>
+              <button class="chip">封窗阳台</button>
+              <button class="chip">软装家具</button>
+            </div>
+          </div>
+
+          <div class="mcard q">
+            <label class="qt" for="phone-in">4 / 4 · 手机号（仅团长可见）</label>
+            <input class="fin" id="phone-in" type="tel" placeholder="有团购进展时通知你" value="138****6621">
+          </div>
+
+          <button class="btn" id="submitBtn">提交登记</button>
+          <p class="privacy">提交即同意：楼栋与昵称用于接龙展示；手机号仅团长用于团购通知，不提供给任何商家。</p>
+        </div>
+        <div class="body form-done" id="formDone">
+          <div class="big">✅</div>
+          <h3>登记完成</h3>
+          <p>你是本小区第 <b class="num">47</b> 户。去「小区进度」看看邻居们都在准备什么。</p>
+          <button class="btn ok">查看小区装修进度</button>
+        </div>
+      </div></div>
+      <div class="notes">
+        <h2><span class="no">③</span>意向登记（试试选选项、点提交）</h2>
+        <ul>
+          <li>只问 4 题、全部点选，是 V0.1 九模块问卷的极简版——精力有限，先要数据不要画像。</li>
+          <li>户型直接列本小区的四种，这是「只服务本小区」带来的体验红利。</li>
+          <li>第 3 题的答案就是团长发起下一个团购、和商家谈判的依据（"我手里有 23 户空调意向"）。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== ④ 进度地图 ========== -->
+    <div class="cell">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+        <div class="navbar">小区装修进度
+          <div class="capsule"><span>···</span><span>◉</span></div>
+        </div>
+        <div class="body has-tab">
+          <div class="hero-stat">
+            <div class="n num">46 <small>/ 312 户已登记</small></div>
+            <div class="cap">登记越多，团购谈判筹码越足</div>
+            <div class="meter"><i style="width:14.7%"></i></div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">户型分布 · 登记户数</div>
+            <div class="bars">
+              <div class="bar top"><span class="bl">121㎡ 四房</span><span class="track"><i style="width:100%"></i></span><span class="bv num">18</span></div>
+              <div class="bar"><span class="bl">105㎡ 三房</span><span class="track"><i style="width:83%"></i></span><span class="bv num">15</span></div>
+              <div class="bar"><span class="bl">89㎡ 三房</span><span class="track"><i style="width:50%"></i></span><span class="bv num">9</span></div>
+              <div class="bar"><span class="bl">143㎡ 四房</span><span class="track"><i style="width:22%"></i></span><span class="bv num">4</span></div>
+            </div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">预计开工时间</div>
+            <div class="bars">
+              <div class="bar top"><span class="bl">3 个月内</span><span class="track"><i style="width:100%"></i></span><span class="bv num">21</span></div>
+              <div class="bar"><span class="bl">交房就开工</span><span class="track"><i style="width:57%"></i></span><span class="bv num">12</span></div>
+              <div class="bar"><span class="bl">半年内</span><span class="track"><i style="width:38%"></i></span><span class="bv num">8</span></div>
+              <div class="bar"><span class="bl">还没定</span><span class="track"><i style="width:24%"></i></span><span class="bv num">5</span></div>
+            </div>
+          </div>
+
+          <div class="mcard">
+            <div class="kicker">团购意向 · 感兴趣户数</div>
+            <div class="bars">
+              <div class="bar top"><span class="bl">装修公司</span><span class="track"><i style="width:100%"></i></span><span class="bv num">38</span></div>
+              <div class="bar"><span class="bl">中央空调</span><span class="track"><i style="width:61%"></i></span><span class="bv num">23</span></div>
+              <div class="bar"><span class="bl">全屋定制</span><span class="track"><i style="width:50%"></i></span><span class="bv num">19</span></div>
+              <div class="bar"><span class="bl">封窗阳台</span><span class="track"><i style="width:45%"></i></span><span class="bv num">17</span></div>
+              <div class="bar"><span class="bl">地暖</span><span class="track"><i style="width:21%"></i></span><span class="bv num">8</span></div>
+              <div class="bar"><span class="bl">软装家具</span><span class="track"><i style="width:16%"></i></span><span class="bv num">6</span></div>
+            </div>
+          </div>
+
+          <div class="map-foot">数据来自 46 份登记 · 每晚更新 · 明细仅团长可见</div>
+        </div>
+        <div class="tabbar">
+          <div class="tab"><span class="ico">🛍</span>团购</div>
+          <div class="tab on"><span class="ico">📊</span>小区进度</div>
+          <div class="tab"><span class="ico">👤</span>我的</div>
+        </div>
+      </div></div>
+      <div class="notes">
+        <h2><span class="no">④</span>小区装修进度地图</h2>
+        <ul>
+          <li>登记数据的公共回报：邻居能看到"和我同户型的人在干什么"，这是微信群给不了的。</li>
+          <li>「登记越多，谈判筹码越足」把个人登记和集体利益直接挂钩，驱动填写。</li>
+          <li>封窗 17 户、地暖 8 户——哪个品类先成团一眼可见，团长按这个排团购优先级。</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ========== ⑤ 团长·发起团购 ========== -->
+    <div class="cell">
+      <div class="phone"><div class="screen">
+        <div class="statusbar"><span>9:41</span><span>􀙇 􀛨</span></div>
+        <div class="navbar"><span class="back">‹</span>发起团购
+          <div class="capsule"><span>···</span><span>◉</span></div>
+        </div>
+        <div class="body">
+          <div class="adminbadge">🔑 团长专属页面 · 入口在「我的 → 团长管理」，业主看不到</div>
+
+          <div class="mcard q">
+            <label class="qt">品类</label>
+            <div class="chips" data-mode="single">
+              <button class="chip on">封窗阳台</button>
+              <button class="chip">地暖</button>
+              <button class="chip">软装家具</button>
+              <button class="chip">自定义…</button>
+            </div>
+            <p class="qnote">按「小区进度」里的意向数排优先级：封窗已有 17 户感兴趣，最该先团。</p>
+          </div>
+
+          <div class="mcard q">
+            <label class="qt" for="title-in">标题</label>
+            <input class="fin" id="title-in" type="text" value="封窗阳台团购（断桥铝）">
+          </div>
+
+          <div class="mcard q">
+            <label class="qt">发起方式</label>
+            <div class="chips" data-mode="single">
+              <button class="chip on">先征集意向</button>
+              <button class="chip">直接开接龙</button>
+            </div>
+            <p class="qnote">还没和商家谈价 → 选「先征集意向」，攒够人数拿着"XX 户意向"去谈；条件已经谈好 → 选「直接开接龙」正式报名。</p>
+          </div>
+
+          <div class="mcard q">
+            <label class="qt" for="goal-in">目标户数</label>
+            <input class="fin" id="goal-in" type="number" value="15">
+            <p class="qnote">达到目标后你会收到订阅消息提醒，该去约商家谈价了。</p>
+          </div>
+
+          <div class="mcard q">
+            <label class="qt" for="terms-in">团购条件<span class="opt-note">谈成后再填也可以</span></label>
+            <textarea class="fin area" id="terms-in" placeholder="如：断桥铝 70 系　门市 1180 → 团购 980 元/㎡&#10;满 20 户再降 3%"></textarea>
+          </div>
+
+          <div class="mcard">
+            <div class="rowlink"><span>买前必懂（3~5 条）</span><span class="rv">AI 已生成 3 条草稿，待你把关 ›</span></div>
+          </div>
+
+          <div class="flow">发布后状态由你手动流转：
+            <span class="fpill now">意向征集</span>→<span class="fpill">谈判中</span>→<span class="fpill">接龙中</span>→<span class="fpill">已成团</span>
+          </div>
+
+          <button class="btn" id="pubBtn">发布到团购列表</button>
+          <p class="privacy">小程序不代收任何款项。报名仅为意向登记，签约与付款由业主直接对商家。</p>
+        </div>
+      </div></div>
+      <div class="notes">
+        <h2><span class="no">⑤</span>团长·发起团购（试试点「发布」）</h2>
+        <ul>
+          <li>权限用微信 openid 识别：数据库存一条团长记录，你的「我的」页多出管理入口，云函数对所有写操作二次校验——没有账号密码，也不需要独立后台。</li>
+          <li>两种发起方式对应真实节奏：先探人数再谈价（"我手里有 23 户意向"就是筹码），或条件谈好直接开接龙。状态机就四档，全部手动流转。</li>
+          <li>小程序全程不碰钱：不代收、不担保，签约付款业主直对商家——避开支付资质、资金责任和纠纷，这条要一直守住。</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="desk-foot">未来长成「小区公共服务工具」时，骨架不变：团购卡片=「项目」，接龙=「集体行动」，进度地图=「公示」——换个品类字段就是拼车、闲置、报修。原型中小区名「云璟湾」、公司与价格均为示意占位，以实际为准。</p>
+</div>
+
+<script>
+  // ② 报名接龙
+  var joined = false, cnt = 17;
+  var joinBtn = document.getElementById('joinBtn');
+  joinBtn.addEventListener('click', function(){
+    if (joined) return;
+    joined = true; cnt++;
+    document.getElementById('cnt').textContent = cnt;
+    document.getElementById('cntbar').style.width = (cnt/20*100) + '%';
+    var row = document.createElement('div');
+    row.className = 'rr';
+    row.innerHTML = '<span class="idx num">18</span><span class="who">6-1-1103 我</span><span class="tag-me">刚刚</span>';
+    document.getElementById('roster').appendChild(row);
+    document.getElementById('rostermore').textContent = '查看全部 ' + cnt + ' 户 ›';
+    joinBtn.textContent = '已报名 ✓（可在"我的"里取消）';
+    joinBtn.classList.add('ok');
+  });
+
+  // ③ 选项 chips
+  document.querySelectorAll('.chips').forEach(function(group){
+    var multi = group.dataset.mode === 'multi';
+    group.querySelectorAll('.chip').forEach(function(chip){
+      chip.addEventListener('click', function(){
+        if (multi) { chip.classList.toggle('on'); }
+        else {
+          group.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('on'); });
+          chip.classList.add('on');
+        }
+      });
+    });
+  });
+
+  // ③ 提交
+  document.getElementById('submitBtn').addEventListener('click', function(){
+    document.getElementById('formBody').style.display = 'none';
+    document.getElementById('formDone').style.display = 'flex';
+  });
+
+  // ⑤ 团长发布
+  var pubBtn = document.getElementById('pubBtn');
+  pubBtn.addEventListener('click', function(){
+    pubBtn.textContent = '已发布 ✓ 「封窗阳台」已出现在团购列表';
+    pubBtn.classList.add('ok');
+  });
+</script>
+
+</body>
+</html>
