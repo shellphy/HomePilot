@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureAdmin;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,11 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // API 的未登录请求直接 401 JSON（默认会试图重定向到不存在的 login 路由）；
-        // 网页侧的守卫统一送去 Filament 登录页
-        $middleware->redirectGuestsTo(
-            fn (Request $request) => $request->is('api/*') ? null : route('filament.admin.auth.login'),
-        );
+        // API 的未登录请求直接 401 JSON（默认会试图重定向到不存在的 login 路由）
+        $middleware->redirectGuestsTo(fn (Request $request) => null);
+
+        $middleware->alias([
+            'admin' => EnsureAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

@@ -28,6 +28,7 @@ class ResidentResource extends JsonResource
             'room_label' => $this->room_label,
             'phone' => $this->phone,
             'wechat_id' => $this->wechat_id,
+            'is_admin' => $this->is_admin,
             'party' => $this->party ? [
                 'type' => $this->party->type,
                 'label' => $this->party->typeLabel(),

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "登记明细",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

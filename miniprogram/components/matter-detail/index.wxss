@@ -122,12 +122,6 @@
   flex-shrink: 0;
 }
 
-.cta-note {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--text-muted);
-  margin-bottom: 12rpx;
-}
 .cta-dock {
   position: fixed;
   left: 0;

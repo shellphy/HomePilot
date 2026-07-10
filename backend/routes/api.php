@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\MatterAdminController;
+use App\Http\Controllers\Api\Admin\PartyAdminController;
+use App\Http\Controllers\Api\Admin\SettingAdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CensusController;
 use App\Http\Controllers\Api\JoinController;
@@ -43,4 +46,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/matters/{matter}/census', [CensusController::class, 'store']);
 
     Route::post('/uploads', [UploadController::class, 'store']);
+
+    // 管理端（管理员=被授权的成员，php artisan admin:grant）：审核、发布、明细、认证、设置
+    Route::middleware('admin')->prefix('admin')->group(function () {
+        Route::get('/matters', [MatterAdminController::class, 'index']);
+        Route::post('/matters', [MatterAdminController::class, 'store']);
+        Route::get('/matters/{matter}', [MatterAdminController::class, 'show']);
+        Route::put('/matters/{matter}', [MatterAdminController::class, 'update']);
+        Route::put('/matters/{matter}/approve', [MatterAdminController::class, 'approve']);
+        Route::delete('/matters/{matter}', [MatterAdminController::class, 'destroy']);
+        Route::get('/matters/{matter}/records', [MatterAdminController::class, 'records']);
+        Route::get('/parties', [PartyAdminController::class, 'index']);
+        Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
+        Route::get('/settings', [SettingAdminController::class, 'show']);
+        Route::put('/settings', [SettingAdminController::class, 'update']);
+    });
 });

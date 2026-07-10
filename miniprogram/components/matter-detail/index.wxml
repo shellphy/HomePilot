@@ -63,7 +63,6 @@
 </view>
 
 <view class="cta-dock">
-  <view class="cta-note">参与只是表态 · 不涉及任何付款 · 随时可取消</view>
   <t-button
     theme="{{joined ? 'light' : 'primary'}}"
     block

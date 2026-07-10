@@ -1,0 +1,25 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card">
+      <view class="q-title">题目</view>
+      <input class="fin" placeholder="如：打算怎么装？" value="{{text}}" data-field="text" bind:input="onInput" />
+
+      <view class="q-title">题型</view>
+      <view class="chips">
+        <view class="chip {{type === 'single' ? 'chip-on' : ''}}" data-type="single" bind:tap="pickType">单选</view>
+        <view class="chip {{type === 'multi' ? 'chip-on' : ''}}" data-type="multi" bind:tap="pickType">多选</view>
+      </view>
+
+      <view class="q-title">选项<text class="q-note">一行一个，至少两个</text></view>
+      <textarea class="fin farea" auto-height placeholder="全包&#10;半包&#10;清包" value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
+
+      <view class="switch-row">
+        <view class="switch-label">必答</view>
+        <switch checked="{{required}}" bind:change="onRequired" color="#06ae56" />
+      </view>
+    </view>
+
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存题目</t-button>
+    <t-button wx:if="{{qi >= 0}}" theme="danger" variant="text" block bind:tap="remove">删除这道题</t-button>
+  </page-status>
+</view>

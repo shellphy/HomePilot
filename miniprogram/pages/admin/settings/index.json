@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "社区设置",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

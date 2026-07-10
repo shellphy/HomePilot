@@ -1,5 +1,6 @@
 // 我的：我家在小区里的档案（标准布局：头像区 + 分组单元格）
 const matters = require('../../utils/api/matters');
+const admin = require('../../utils/api/admin');
 const { getMe } = require('../../utils/me');
 
 Page({
@@ -8,6 +9,7 @@ Page({
     joinedCount: 0,
     mineCount: 0,
     censusCount: 0,
+    pendingCount: 0,
     loadError: '',
   },
 
@@ -22,6 +24,9 @@ Page({
         matters.listMine(),
         matters.listJoined(),
       ]);
+      const pendingCount = me.is_admin
+        ? (await admin.listMatters(true)).pending_count
+        : 0;
 
 
       // 身份行：业主 · 楼栋 · 房号（空项不显示）；相关方则是 类型 · 名称
@@ -35,6 +40,7 @@ Page({
         censusCount: (me.censuses || []).length,
         mineCount: mineRes.data.length,
         joinedCount: joinedRes.data.length,
+        pendingCount,
         loadError: '',
       });
     } catch (error) {
@@ -53,6 +59,18 @@ Page({
   // 打开小区数据总览（各期征集都在里面）
   goCensus() {
     wx.navigateTo({ url: '/pages/insights/index' });
+  },
+
+  goAdminMatters() {
+    wx.navigateTo({ url: '/pages/admin/matters/index' });
+  },
+
+  goAdminParties() {
+    wx.navigateTo({ url: '/pages/admin/parties/index' });
+  },
+
+  goAdminSettings() {
+    wx.navigateTo({ url: '/pages/admin/settings/index' });
   },
 
   goJoined() {

@@ -206,20 +206,6 @@
   margin-top: 8rpx;
 }
 
-.pledge {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--text-muted);
-  line-height: 1.7;
-  padding: 8rpx 24rpx 20rpx;
-}
-
-.cta-note {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--text-muted);
-  margin-bottom: 12rpx;
-}
 .cta-dock {
   position: fixed;
   left: 0;

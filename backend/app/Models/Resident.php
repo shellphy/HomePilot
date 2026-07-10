@@ -21,6 +21,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $room_label
  * @property int|null $unit_id
  * @property int|null $party_id
+ * @property bool $is_admin
  * @property-read Unit|null $unit
  * @property-read Party|null $party
  */
@@ -39,6 +40,13 @@ class Resident extends Authenticatable
         'unit_id',
         'party_id',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_admin' => 'boolean',
+        ];
+    }
 
     /** @return BelongsTo<Unit, $this> */
     public function unit(): BelongsTo

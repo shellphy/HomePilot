@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('phone', 20)->default('');
             $table->foreignId('unit_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('party_id')->nullable()->constrained()->nullOnDelete();
+            $table->boolean('is_admin')->default(false);
+            $table->string('room_label', 30)->default('');
             $table->timestamps();
         });
     }

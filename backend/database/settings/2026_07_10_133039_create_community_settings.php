@@ -5,12 +5,12 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class extends SettingsMigration
 {
     /**
-     * 社区设置的出厂默认值（仅首次迁移写入）；之后一切修改都在 Filament「社区设置」页完成。
+     * 社区设置的出厂默认值（仅首次迁移写入）；之后一切修改都在小程序「小区管理 · 社区设置」页完成。
      */
     public function up(): void
     {
         $this->migrator->add('community.name', '天青府');
-        $this->migrator->add('community.app_name', '天青府邻里');
+        $this->migrator->add('community.app_name', '天青府家园');
         $this->migrator->add('community.slogan', '咱们小区自己的公共空间');
         $this->migrator->add('community.sub_slogan', '公益运营 · 不代收任何款项');
         $this->migrator->add('community.pledge', '本小程序公益运营 · 商家返点全部转为参团业主让利，随成交公示 · 平台不代收任何款项');

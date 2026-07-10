@@ -1,7 +1,6 @@
 // 团购详情体：该类型的全部行为（报名/评价/流转/成交公示入口）都在组件内，
 // 数据变更后向页面发 refresh 事件，由页面重新拉取。
 const matters = require('../../utils/api/matters');
-const profile = require('../../utils/api/profile');
 const { STATE_FLOW, pillClass, joinPercent } = require('../../utils/constants');
 
 function starsOf(rating) {
@@ -24,19 +23,10 @@ Component({
     pillClass: '',
     percent: 0,
     reviews: [],
-    pledge: '',
     reviewRating: 0,
     reviewContent: '',
     submitting: false,
     submittingReview: false,
-  },
-
-  lifetimes: {
-    attached() {
-      profile.getOptions().then((options) => {
-        this.setData({ pledge: (options.community && options.community.pledge) || '' });
-      }).catch(() => {});
-    },
   },
 
   observers: {

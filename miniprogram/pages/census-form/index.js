@@ -36,7 +36,8 @@ Page({
       const [census, me] = await Promise.all([matters.getCensus(this.data.id), getMe()]);
       const answers = census.answers || {};
       this.setData({
-        modules: census.modules,
+        // 空模块是管理端「先建模块再逐题添加」的中间态，作答时跳过
+        modules: census.modules.filter((module) => (module.questions || []).length),
         answers,
         picked: this.buildPicked(answers),
         needProfile: census.collects_contact && (!me.unit_label || !me.wechat_id),

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "相关方认证",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

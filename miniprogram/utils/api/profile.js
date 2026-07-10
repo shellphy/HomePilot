@@ -14,11 +14,17 @@ function getOptions() {
   return optionsCache;
 }
 
+// 管理端改了社区设置后调用，让下一次 getOptions 取到新值
+function invalidateOptions() {
+  optionsCache = null;
+}
+
 function getStats() {
   return request('/stats');
 }
 
 module.exports = {
   getOptions,
+  invalidateOptions,
   getStats,
 };

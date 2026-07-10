@@ -1,0 +1,26 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card search-card">
+      <input class="fin" placeholder="搜昵称 / 楼栋 / 微信号 / 手机号" value="{{keyword}}" bind:input="onSearch" />
+    </view>
+    <view class="card">
+      <block wx:for="{{records}}" wx:key="id">
+        <view class="row" hover-class="row-hover" data-id="{{item.id}}" bind:tap="toggle">
+          <view class="row-main">
+            <view class="row-title">{{item.unit_label || '未填楼栋'}}{{item.room_label ? ' ' + item.room_label : ''}} · {{item.nickname}}</view>
+            <view class="row-sub">微信 {{item.wechat_id || '未填'}}{{item.phone ? ' · 手机 ' + item.phone : ''}} · {{item.created_at}}</view>
+          </view>
+          <text class="row-arrow">{{openId === item.id ? '︿' : '﹀'}}</text>
+        </view>
+        <view class="answers" wx:if="{{openId === item.id}}">
+          <view class="aline" wx:for="{{item.answers}}" wx:for-item="answer" wx:key="question">
+            <text class="aq">{{answer.question}}</text>
+            <text class="aa">{{answer.answer}}</text>
+          </view>
+          <view wx:if="{{!item.answers.length}}" class="hint">没有答案</view>
+        </view>
+      </block>
+      <view wx:if="{{!records.length}}" class="hint">{{keyword ? '没有匹配的登记' : '还没有人登记'}}</view>
+    </view>
+  </page-status>
+</view>

@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "发布事务",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

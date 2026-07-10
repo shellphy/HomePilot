@@ -1,0 +1,18 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="kicker">{{title}}</view>
+    <view class="card">
+      <view class="row" hover-class="row-hover" wx:for="{{modules}}" wx:key="key" data-mi="{{index}}" bind:tap="goModule">
+        <view class="row-main">
+          <view class="row-title">{{item.title}}</view>
+          <view class="row-sub">{{item.questions.length}} 道题{{item.intro ? ' · ' + item.intro : ''}}</view>
+        </view>
+        <text class="row-arrow">›</text>
+      </view>
+      <view wx:if="{{!modules.length}}" class="hint">还没有题目。问卷按模块组织，先添加第一个模块。</view>
+    </view>
+
+    <t-button theme="light" block bind:tap="addModule">＋ 添加模块</t-button>
+    <view class="privacy">已经收到答案后，只加新题、不改老题不删选项，否则旧答案会和统计对不上。</view>
+  </page-status>
+</view>

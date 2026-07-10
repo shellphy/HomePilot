@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "全部事务",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

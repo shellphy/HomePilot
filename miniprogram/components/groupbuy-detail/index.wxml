@@ -121,10 +121,7 @@
   </view>
 </view>
 
-<view class="pledge">{{pledge}}</view>
-
 <view class="cta-dock" wx:if="{{matter.state !== 'done'}}">
-  <view class="cta-note">报名只是登记意向 · 不涉及任何付款 · 随时可取消</view>
   <t-button
     theme="{{joined ? 'light' : 'primary'}}"
     block

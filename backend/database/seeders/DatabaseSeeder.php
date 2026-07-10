@@ -6,7 +6,6 @@ use App\Models\Matter;
 use App\Models\MatterUpdate;
 use App\Models\Record;
 use App\Models\Resident;
-use App\Models\User;
 use App\Settings\CommunitySettings;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -23,12 +22,8 @@ class DatabaseSeeder extends Seeder
     {
         $settings = app(CommunitySettings::class);
 
-        User::factory()->create([
-            'name' => '管理员',
-            'email' => 'admin@homepilot.test', // 密码：password
-        ]);
-
-        $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K']);
+        // 管理员是被授权的成员（真机登录后 php artisan admin:grant 你的微信号或成员 ID）；种子里给老K
+        $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true]);
 
         $decoration = Matter::factory()->open()->for($initiator, 'initiator')->create([
             'category' => '装修公司',
@@ -169,7 +164,7 @@ class DatabaseSeeder extends Seeder
     }
 
     /**
-     * 装修意向摸底的进阶模块题库（种子内容；上线后在 Filament 事务表单里可视化维护）。
+     * 装修意向摸底的进阶模块题库（种子内容；上线后在小程序「小区管理」的问卷编辑里维护）。
      * 原则：生活方式优先、不用行业术语、每题都要能转化成团购谈判或内容规划的依据。
      *
      * @return array<int, array<string, mixed>>

@@ -10,7 +10,15 @@
     "pages/matter-update/index",
     "pages/groupbuy-deal/index",
     "pages/mine-matters/index",
-    "pages/profile-form/index"
+    "pages/profile-form/index",
+    "pages/admin/matters/index",
+    "pages/admin/matter-form/index",
+    "pages/admin/census-schema/index",
+    "pages/admin/census-module/index",
+    "pages/admin/census-question/index",
+    "pages/admin/records/index",
+    "pages/admin/parties/index",
+    "pages/admin/settings/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

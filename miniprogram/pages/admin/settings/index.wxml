@@ -1,0 +1,30 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <block wx:for="{{groups}}" wx:for-item="group" wx:key="title">
+      <view class="kicker">{{group.title}}</view>
+      <view class="card">
+        <block wx:for="{{group.fields}}" wx:for-item="field" wx:key="key">
+          <view class="q-title">{{field.label}}</view>
+          <input
+            wx:if="{{field.kind === 'input' || field.kind === 'number'}}"
+            class="fin"
+            type="{{field.kind === 'number' ? 'number' : 'text'}}"
+            value="{{values[field.key]}}"
+            data-key="{{field.key}}"
+            bind:input="onInput"
+          />
+          <textarea
+            wx:else
+            class="fin farea"
+            auto-height
+            value="{{values[field.key]}}"
+            data-key="{{field.key}}"
+            bind:input="onInput"
+          />
+        </block>
+      </view>
+    </block>
+
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存</t-button>
+  </page-status>
+</view>

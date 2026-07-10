@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "编辑模块",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

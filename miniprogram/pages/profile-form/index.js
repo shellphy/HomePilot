@@ -70,6 +70,9 @@ Page({
     const { identity, nickname, unitLabel, roomLabel, wechatId, phone, partyName, partyCategory, submitting } = this.data;
     if (submitting) return;
 
+    if (identity === 'resident' && !unitLabel.trim()) {
+      return wx.showToast({ title: '请填写楼栋号', icon: 'none' });
+    }
     if (identity !== 'resident' && !partyName.trim()) {
       return wx.showToast({ title: '请填写名称', icon: 'none' });
     }

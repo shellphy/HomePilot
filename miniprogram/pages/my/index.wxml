@@ -38,6 +38,29 @@
       </view>
     </view>
 
+    <!-- 管理员功能（is_admin 由 admin:grant 授权），直接平铺不做二级入口 -->
+    <view class="list" wx:if="{{me.is_admin}}">
+      <view class="row" hover-class="row-hover" bind:tap="goAdminMatters">
+        <text class="row-title">全部事务</text>
+        <view class="row-right">
+          <text class="row-note">{{pendingCount ? pendingCount + ' 件待审核' : ''}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+      <view class="row" hover-class="row-hover" bind:tap="goAdminParties">
+        <text class="row-title">相关方认证</text>
+        <view class="row-right">
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+      <view class="row" hover-class="row-hover" bind:tap="goAdminSettings">
+        <text class="row-title">社区设置</text>
+        <view class="row-right">
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
   </block>
 
   <view wx:elif="{{loadError}}" class="hint" bind:tap="loadMe">

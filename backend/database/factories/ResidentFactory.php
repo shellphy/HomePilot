@@ -48,6 +48,14 @@ class ResidentFactory extends Factory
     }
 
     /**
+     * 管理员（admin:grant 授权后的成员）。
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (): array => ['is_admin' => true]);
+    }
+
+    /**
      * 商家身份（绑定一个 merchant 相关方）。
      */
     public function merchant(string $name = '青城中央空调', string $category = '中央空调'): static

@@ -25,7 +25,7 @@ test('a resident can maintain their own contact profile independently of any cen
     expect(Unit::count())->toBe(1);
 });
 
-test('the room label is a separate private field and every field can be cleared', function () {
+test('the room label is a separate private field and optional fields can be cleared', function () {
     $resident = Resident::factory()->inUnit('5栋')->create(['room_label' => '', 'wechat_id' => 'old']);
     Sanctum::actingAs($resident);
 
@@ -34,14 +34,42 @@ test('the room label is a separate private field and every field can be cleared'
         ->assertJsonPath('data.room_label', '1801')
         ->assertJsonPath('data.unit_label', '5栋');
 
-    // 清空要真的清空：楼栋解绑、房号/微信号归空
-    $this->putJson('/api/me', ['unit_label' => '', 'room_label' => '', 'wechat_id' => ''])
+    // 选填字段清空要真的清空（房号/微信号）
+    $this->putJson('/api/me', ['room_label' => '', 'wechat_id' => ''])
         ->assertSuccessful()
-        ->assertJsonPath('data.unit_label', '')
         ->assertJsonPath('data.room_label', '');
 
     $resident->refresh();
-    expect($resident->unit_id)->toBeNull()
-        ->and($resident->room_label)->toBe('')
+    expect($resident->room_label)->toBe('')
         ->and($resident->wechat_id)->toBe('');
+});
+
+test('an owner cannot clear the unit label but a party member has no such requirement', function () {
+    $owner = Resident::factory()->inUnit('5栋')->create();
+    Sanctum::actingAs($owner);
+
+    $this->putJson('/api/me', ['unit_label' => ''])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('unit_label');
+
+    expect($owner->refresh()->unit->label)->toBe('5栋');
+
+    // 相关方账号没有楼栋概念，允许为空
+    $merchant = Resident::factory()->merchant()->create();
+    Sanctum::actingAs($merchant);
+    $this->putJson('/api/me', ['unit_label' => ''])->assertSuccessful();
+});
+
+test('a wechat id can only belong to one resident but resubmitting your own is fine', function () {
+    Resident::factory()->create(['wechat_id' => 'laoK-2026']);
+    $resident = Resident::factory()->create(['wechat_id' => 'mine']);
+    Sanctum::actingAs($resident);
+
+    $this->putJson('/api/me', ['wechat_id' => 'laoK-2026'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('wechat_id');
+
+    // 自己重复提交自己的微信号不算冲突；清空也不受唯一约束影响
+    $this->putJson('/api/me', ['wechat_id' => 'mine'])->assertSuccessful();
+    $this->putJson('/api/me', ['wechat_id' => ''])->assertSuccessful();
 });
