@@ -1,0 +1,38 @@
+/* 头像行：官方示例同款极简写法（padding:0 + 定宽 !important 压住 button 默认样式） */
+.avatar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8rpx;
+}
+.avatar-label {
+  margin: 0;
+}
+.avatar-wrapper {
+  padding: 0;
+  margin: 0;
+  width: 96rpx !important;
+  height: 96rpx;
+  border-radius: 50%;
+}
+.avatar-wrapper::after {
+  border: none;
+}
+.avatar {
+  display: block;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+}
+.avatar-fallback {
+  background: var(--brand-bg);
+  line-height: 96rpx;
+  text-align: center;
+  color: var(--brand-deep);
+  font-size: 40rpx;
+  font-weight: 700;
+}
+
+.privacy-inline {
+  padding: 20rpx 4rpx 0;
+}

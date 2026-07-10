@@ -1,0 +1,15 @@
+<view class="card gcard {{matter.state === 'done' ? 'gcard-done' : ''}}" bind:tap="goDetail">
+  <view class="gcard-row">
+    <view class="gcard-cat">{{matter.category}}</view>
+    <view class="gcard-title">{{matter.title}}</view>
+    <view class="pill {{pillClass}}">{{matter.state_label}}</view>
+  </view>
+  <view wx:if="{{matter.perk}}" class="gcard-perk">{{matter.perk}}</view>
+  <view wx:if="{{matter.state === 'open' && matter.target_count}}" class="meter gcard-meter">
+    <view class="meter-fill" style="width: {{percent}}%"></view>
+  </view>
+  <view class="gcard-foot">
+    <text><text class="gcard-num">{{matter.join_count}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} 户{{matter.state === 'seeking' ? '感兴趣' : '已报名'}}</text>
+    <text class="muted">查看详情 ›</text>
+  </view>
+</view>

@@ -1,0 +1,74 @@
+<view class="card">
+  <view class="head-row">
+    <view class="head-left">
+      <view class="mcard-tag mcard-tag-{{matter.type}}">{{matter.type_label}}</view>
+      <view class="pill {{pillClass}}">{{matter.state_label}}</view>
+    </view>
+    <view class="head-count">
+      <text class="head-num">{{matter.join_count}}</text>
+      <text>{{matter.target_count ? ' / ' + matter.target_count : ''}} {{meta.foot}}</text>
+    </view>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.pitch}}">
+  <view class="kicker">发起人说</view>
+  <view class="pitch">“{{matter.pitch}}”</view>
+  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · 牵头人</view>
+</view>
+
+<view class="card pending-tip" wx:if="{{!matter.is_approved}}">
+  ⏳ 待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）
+</view>
+
+<view class="card leader-ops" wx:if="{{isInitiator}}">
+  <view class="kicker">牵头人操作（这件事由你负责）</view>
+  <view class="leader-btns">
+    <t-button theme="light" size="medium" bind:tap="goProgress">发布进展</t-button>
+    <t-button theme="light" size="medium" bind:tap="flipState">流转状态</t-button>
+    <t-button theme="light" size="medium" bind:tap="goEdit">编辑</t-button>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.updates.length}}">
+  <view class="kicker">进展</view>
+  <view class="tline" wx:for="{{matter.updates}}" wx:key="index">
+    <view class="tline-dot {{index === 0 ? 'tline-dot-latest' : ''}}"></view>
+    <view class="tline-main">
+      <view class="tline-date">{{item.happened_on}}</view>
+      <view class="tline-content">{{item.content}}</view>
+      <view class="tline-shots" wx:if="{{item.images.length}}">
+        <image
+          wx:for="{{item.images}}"
+          wx:for-item="img"
+          wx:key="*this"
+          class="tline-shot"
+          src="{{img}}"
+          mode="aspectFill"
+          data-urls="{{item.images}}"
+          data-current="{{img}}"
+          bind:tap="previewImage"
+        />
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.roster.length}}">
+  <view class="kicker">{{meta.roster}} · 楼栋 + 昵称对外可见</view>
+  <view class="roster-row" wx:for="{{matter.roster}}" wx:key="index">
+    <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>
+    <text>{{item}}</text>
+  </view>
+</view>
+
+<view class="cta-dock">
+  <view class="cta-note">参与只是表态 · 不涉及任何付款 · 随时可取消</view>
+  <t-button
+    theme="{{joined ? 'light' : 'primary'}}"
+    block
+    size="large"
+    loading="{{submitting}}"
+    bind:tap="toggleJoin"
+  >{{joined ? meta.joinedCta : meta.joinCta}}</t-button>
+</view>

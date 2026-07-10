@@ -1,0 +1,22 @@
+<view class="page-body detail-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <block wx:if="{{matter}}">
+      <notice-detail wx:if="{{matter.type === 'notice'}}" matter="{{matter}}" />
+      <groupbuy-detail
+        wx:elif="{{matter.type === 'groupbuy'}}"
+        matter="{{matter}}"
+        joined="{{joined}}"
+        is-initiator="{{isInitiator}}"
+        my-review="{{myReview}}"
+        bind:refresh="reload"
+      />
+      <matter-detail
+        wx:else
+        matter="{{matter}}"
+        joined="{{joined}}"
+        is-initiator="{{isInitiator}}"
+        bind:refresh="reload"
+      />
+    </block>
+  </page-status>
+</view>

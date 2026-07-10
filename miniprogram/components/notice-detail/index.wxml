@@ -1,0 +1,4 @@
+<view class="card">
+  <view class="kicker">小区公告 · {{matter.published_on}}</view>
+  <view class="notice-body">{{matter.body}}</view>
+</view>

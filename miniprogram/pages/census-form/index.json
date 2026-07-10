@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "参与征集",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

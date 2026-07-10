@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "详情",
+  "usingComponents": {
+    "page-status": "/components/page-status/index",
+    "groupbuy-detail": "/components/groupbuy-detail/index",
+    "notice-detail": "/components/notice-detail/index",
+    "matter-detail": "/components/matter-detail/index"
+  }
+}

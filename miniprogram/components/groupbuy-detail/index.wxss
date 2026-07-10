@@ -1,0 +1,230 @@
+.head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.head-count {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+.head-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.head-meter {
+  margin-top: 20rpx;
+}
+.head-perk {
+  margin-top: 18rpx;
+  font-size: 24rpx;
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-radius: 16rpx;
+  padding: 14rpx 20rpx;
+}
+
+.pitch {
+  font-size: 27rpx;
+  line-height: 1.75;
+}
+.pitch-sign {
+  font-size: 23rpx;
+  color: var(--text-muted);
+  margin-top: 12rpx;
+}
+
+.pending-tip {
+  font-size: 24rpx;
+  color: var(--warn);
+  background: var(--warn-bg);
+  line-height: 1.7;
+}
+
+.term-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  font-size: 26rpx;
+}
+.term-row:last-child {
+  border-bottom: none;
+}
+.term-label {
+  color: var(--text-secondary);
+}
+.term-value {
+  font-weight: 600;
+  text-align: right;
+  max-width: 65%;
+}
+
+.gl {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.gl:last-child {
+  border-bottom: none;
+}
+.gl-term {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+.gl-explain {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.tline {
+  display: flex;
+  gap: 20rpx;
+  padding-bottom: 20rpx;
+}
+.tline:last-child {
+  padding-bottom: 0;
+}
+.tline-dot {
+  flex-shrink: 0;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: var(--line-dark);
+  margin-top: 10rpx;
+}
+.tline-dot-latest {
+  background: var(--brand);
+}
+.tline-date {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.tline-content {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-top: 2rpx;
+}
+.tline-shots {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 12rpx;
+  flex-wrap: wrap;
+}
+.tline-shot {
+  width: 148rpx;
+  height: 112rpx;
+  border-radius: 12rpx;
+  background: var(--line);
+}
+
+.leader-ops {
+  border: 2rpx dashed var(--brand);
+}
+.leader-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.roster-row {
+  display: flex;
+  gap: 20rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  font-size: 25rpx;
+}
+.roster-row:last-child {
+  border-bottom: none;
+}
+.roster-idx {
+  color: var(--text-muted);
+  width: 44rpx;
+  flex-shrink: 0;
+}
+
+.deal-card {
+  border: 2rpx solid var(--brand);
+}
+.deal-note {
+  font-size: 24rpx;
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+  border-radius: 16rpx;
+  padding: 16rpx 20rpx;
+  margin-top: 18rpx;
+  line-height: 1.7;
+}
+
+.review-form {
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid var(--line);
+  margin-bottom: 8rpx;
+}
+.review-form-title {
+  font-size: 25rpx;
+  color: var(--text-secondary);
+  margin-bottom: 14rpx;
+}
+.review-input {
+  height: auto;
+  min-height: 100rpx;
+  line-height: 1.6;
+  padding: 18rpx 24rpx;
+  margin: 18rpx 0;
+}
+.review-row {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.review-row:last-child {
+  border-bottom: none;
+}
+.review-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.review-name {
+  font-size: 25rpx;
+  font-weight: 600;
+}
+.review-stars {
+  font-size: 24rpx;
+  color: #f5a623;
+  letter-spacing: 2rpx;
+}
+.review-content {
+  font-size: 25rpx;
+  line-height: 1.7;
+  margin-top: 8rpx;
+}
+.review-date {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+}
+
+.pledge {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-muted);
+  line-height: 1.7;
+  padding: 8rpx 24rpx 20rpx;
+}
+
+.cta-note {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-bottom: 12rpx;
+}
+.cta-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #f6f6f3 75%, rgba(246, 246, 243, 0));
+}

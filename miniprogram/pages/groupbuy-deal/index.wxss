@@ -1,0 +1,32 @@
+.row-item {
+  display: flex;
+  gap: 12rpx;
+  align-items: center;
+  margin-bottom: 14rpx;
+}
+.row-label {
+  flex: 2;
+  min-width: 0;
+}
+.row-value {
+  flex: 5;
+  min-width: 0;
+}
+.row-del {
+  flex-shrink: 0;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.row-add {
+  text-align: center;
+  font-size: 25rpx;
+  color: var(--brand-deep);
+  padding: 12rpx 0 4rpx;
+}

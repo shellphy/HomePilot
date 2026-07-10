@@ -1,0 +1,60 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card">
+      <view class="avatar-row">
+        <text class="f-label avatar-label">头像</text>
+        <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+          <image wx:if="{{avatar}}" class="avatar" src="{{avatar}}" mode="aspectFill" />
+          <view wx:else class="avatar avatar-fallback">{{nickname ? nickname[0] : '邻'}}</view>
+        </button>
+      </view>
+
+      <view class="f-label">昵称</view>
+      <input
+        class="fin"
+        type="nickname"
+        placeholder="怎么称呼你"
+        value="{{nickname}}"
+        data-field="nickname"
+        bind:input="onInput"
+        bind:blur="onInput"
+        bind:change="onInput"
+      />
+
+      <view class="f-label">身份</view>
+      <view class="chips">
+        <view
+          wx:for="{{identities}}"
+          wx:key="key"
+          class="chip {{identity === item.key ? 'chip-on' : ''}}"
+          data-value="{{item.key}}"
+          bind:tap="pickIdentity"
+        >{{item.label}}</view>
+      </view>
+
+      <!-- 业主 -->
+      <block wx:if="{{identity === 'resident'}}">
+        <view class="f-label">楼栋号</view>
+        <input class="fin" placeholder="如：3栋" value="{{unitLabel}}" data-field="unitLabel" bind:input="onInput" />
+        <view class="f-label">房号<text class="q-note">仅管理员可见，不对外展示</text></view>
+        <input class="fin" placeholder="如：1801" value="{{roomLabel}}" data-field="roomLabel" bind:input="onInput" />
+        <view class="f-label">微信号</view>
+        <input class="fin" placeholder="方便邻里联络" value="{{wechatId}}" data-field="wechatId" bind:input="onInput" />
+        <view class="f-label">手机号</view>
+        <input class="fin" type="number" placeholder="仅管理员可见" value="{{phone}}" data-field="phone" bind:input="onInput" />
+        <view class="privacy privacy-inline">楼栋与昵称用于名单展示；房号、微信号和手机号仅管理员用于联络，不提供给任何商家。</view>
+      </block>
+
+      <!-- 商家等相关方 -->
+      <block wx:else>
+        <view class="f-label">名称</view>
+        <input class="fin" placeholder="如：青城中央空调" value="{{partyName}}" data-field="partyName" bind:input="onInput" />
+        <view class="f-label">主营</view>
+        <input class="fin" placeholder="如：中央空调 / 门窗 / 全屋定制" value="{{partyCategory}}" data-field="partyCategory" bind:input="onInput" />
+        <view class="privacy privacy-inline">相关方身份对全小区公开，报名、登记、发起都和业主一样，只是以这个身份出现；可随时切回业主。进入公示名单需管理员认证。</view>
+      </block>
+    </view>
+
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">保存</t-button>
+  </page-status>
+</view>

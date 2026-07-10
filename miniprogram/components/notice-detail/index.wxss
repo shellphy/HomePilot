@@ -1,0 +1,5 @@
+.notice-body {
+  font-size: 27rpx;
+  line-height: 1.8;
+  white-space: pre-line;
+}

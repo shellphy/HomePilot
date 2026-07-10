@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateProfileRequest extends FormRequest
 {
@@ -18,20 +17,19 @@ class UpdateProfileRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     * 全部字段可清空（传空即清空）；相关方身份走 PartyController。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'nickname' => ['sometimes', 'string', 'max:30'],
+            'nickname' => ['sometimes', 'nullable', 'string', 'max:30'],
             'avatar' => ['sometimes', 'url', 'max:255'],
-            'unit_label' => ['sometimes', 'string', 'max:30'],
+            'unit_label' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'room_label' => ['sometimes', 'nullable', 'string', 'max:30'],
             'phone' => ['sometimes', 'nullable', 'string', 'regex:/^1[3-9]\d{9}$/'],
-            'wechat_id' => ['sometimes', 'string', 'max:50'],
-            'role' => ['sometimes', Rule::in(['resident', 'merchant'])],
-            'merchant_name' => ['sometimes', 'string', 'max:50'],
-            'merchant_category' => ['sometimes', 'string', 'max:30'],
+            'wechat_id' => ['sometimes', 'nullable', 'string', 'max:50'],
         ];
     }
 

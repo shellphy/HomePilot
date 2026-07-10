@@ -1,0 +1,22 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card">
+      <view class="row" wx:for="{{matters}}" wx:key="id" data-id="{{item.id}}" bind:tap="goMatter">
+        <view class="row-main">
+          <view class="row-title">{{item.title}}</view>
+          <view class="row-sub">{{item.type_label}} · {{item.state_label}} · {{item.join_count}} 人参与</view>
+        </view>
+        <view wx:if="{{kind === 'mine'}}" class="pill {{item.is_approved ? 'pill-open' : 'pill-negotiating'}}">
+          {{item.is_approved ? '已公示' : '待审核'}}
+        </view>
+        <text wx:else class="muted">›</text>
+      </view>
+
+      <view wx:if="{{!matters.length}}" class="hint">
+        {{kind === 'mine' ? '你还没牵头张罗过事。回小区页点「我来张罗」试试。' : '你还没参与过小区的事。回小区页看看大家在张罗什么。'}}
+      </view>
+    </view>
+
+    <t-button wx:if="{{!matters.length}}" theme="light" block bind:tap="goCommunity">回小区页看看</t-button>
+  </page-status>
+</view>

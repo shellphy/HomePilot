@@ -4,22 +4,25 @@ namespace App\Models;
 
 use Database\Factories\ResidentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
+ * 成员：人通过与户的关系存在于社区中。
+ *
  * @property int $id
  * @property string $openid
  * @property string $nickname
  * @property string $avatar
- * @property string $unit_label
- * @property string $phone
  * @property string $wechat_id
- * @property string $role
- * @property string $merchant_name
- * @property string $merchant_category
+ * @property string $phone
+ * @property string $room_label
+ * @property int|null $unit_id
+ * @property int|null $party_id
+ * @property-read Unit|null $unit
+ * @property-read Party|null $party
  */
 class Resident extends Authenticatable
 {
@@ -30,36 +33,44 @@ class Resident extends Authenticatable
         'openid',
         'nickname',
         'avatar',
-        'unit_label',
-        'phone',
         'wechat_id',
-        'role',
-        'merchant_name',
-        'merchant_category',
+        'phone',
+        'room_label',
+        'unit_id',
+        'party_id',
     ];
 
-    public function isMerchant(): bool
+    /** @return BelongsTo<Unit, $this> */
+    public function unit(): BelongsTo
     {
-        return $this->role === 'merchant';
+        return $this->belongsTo(Unit::class);
     }
 
-    /** @return HasOne<Registration, $this> */
-    public function registration(): HasOne
+    /** @return BelongsTo<Party, $this> */
+    public function party(): BelongsTo
     {
-        return $this->hasOne(Registration::class);
+        return $this->belongsTo(Party::class);
     }
 
-    /** @return HasMany<Signup, $this> */
-    public function signups(): HasMany
+    /** @return HasMany<Record, $this> */
+    public function records(): HasMany
     {
-        return $this->hasMany(Signup::class);
+        return $this->hasMany(Record::class);
     }
 
     /**
-     * 接龙名单里的对外展示名，如 "3-2-1801 老K"。
+     * 把楼栋号绑定为户对象（不存在则创建）。
+     */
+    public function bindUnit(string $label): void
+    {
+        $this->update(['unit_id' => Unit::firstOrCreate(['label' => trim($label)])->id]);
+    }
+
+    /**
+     * 接龙名单里的对外展示名，如 "3栋 老K"。
      */
     public function displayName(): string
     {
-        return trim($this->unit_label.' '.$this->nickname);
+        return trim(($this->unit?->label ?? '').' '.$this->nickname);
     }
 }

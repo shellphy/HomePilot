@@ -1,0 +1,33 @@
+.ncard-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.ncard-tag {
+  font-size: 21rpx;
+  font-weight: 600;
+  color: var(--info);
+  background: var(--info-bg);
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  flex-shrink: 0;
+}
+.ncard-title {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.ncard-date {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.ncard-body {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 12rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}

@@ -1,0 +1,135 @@
+<view class="card">
+  <view class="head-row">
+    <view class="pill {{pillClass}}">{{matter.state_label}}</view>
+    <view class="head-count">
+      <text class="head-num">{{matter.join_count}}</text>
+      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 户</text>
+      <text wx:else> 户</text>
+    </view>
+  </view>
+  <view wx:if="{{matter.state === 'open' && matter.target_count}}" class="meter head-meter">
+    <view class="meter-fill" style="width: {{percent}}%"></view>
+  </view>
+  <view wx:if="{{matter.perk}}" class="head-perk">🎁 {{matter.perk}}</view>
+</view>
+
+<view class="card" wx:if="{{matter.pitch}}">
+  <view class="kicker">发起人的话</view>
+  <view class="pitch">“{{matter.pitch}}”</view>
+  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · 本团发起人</view>
+</view>
+
+<view class="card" wx:if="{{matter.glossary.length}}">
+  <view class="kicker">买前必懂 · 看完再决定</view>
+  <view class="gl" wx:for="{{matter.glossary}}" wx:key="term">
+    <view class="gl-term">{{item.term}}</view>
+    <view class="gl-explain">{{item.explain}}</view>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.terms.length}}">
+  <view class="kicker">团购条件</view>
+  <view class="term-row" wx:for="{{matter.terms}}" wx:key="label">
+    <text class="term-label">{{item.label}}</text>
+    <text class="term-value">{{item.value}}</text>
+  </view>
+</view>
+
+<view class="card deal-card" wx:if="{{matter.final_terms.length}}">
+  <view class="kicker">成交公示 · 最终条件</view>
+  <view class="term-row" wx:for="{{matter.final_terms}}" wx:key="label">
+    <text class="term-label">{{item.label}}</text>
+    <text class="term-value">{{item.value}}</text>
+  </view>
+  <view class="deal-note" wx:if="{{matter.final_note}}">{{matter.final_note}}</view>
+</view>
+
+<view class="card pending-tip" wx:if="{{!matter.is_approved}}">
+  ⏳ 待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）
+</view>
+
+<view class="card leader-ops" wx:if="{{isInitiator}}">
+  <view class="kicker">发起人操作（这个团购由你负责）</view>
+  <view class="leader-btns">
+    <t-button theme="light" size="medium" bind:tap="goProgress">发布进度</t-button>
+    <t-button theme="light" size="medium" bind:tap="flipState">流转状态</t-button>
+    <t-button theme="light" size="medium" bind:tap="goEdit">编辑团购</t-button>
+    <t-button wx:if="{{matter.state === 'done'}}" theme="primary" size="medium" bind:tap="goDeal">成交公示</t-button>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.updates.length}}">
+  <view class="kicker">进度更新</view>
+  <view class="tline" wx:for="{{matter.updates}}" wx:key="index">
+    <view class="tline-dot {{index === 0 ? 'tline-dot-latest' : ''}}"></view>
+    <view class="tline-main">
+      <view class="tline-date">{{item.happened_on}}</view>
+      <view class="tline-content">{{item.content}}</view>
+      <view class="tline-shots" wx:if="{{item.images.length}}">
+        <image
+          wx:for="{{item.images}}"
+          wx:for-item="img"
+          wx:key="*this"
+          class="tline-shot"
+          src="{{img}}"
+          mode="aspectFill"
+          data-urls="{{item.images}}"
+          data-current="{{img}}"
+          bind:tap="previewImage"
+        />
+      </view>
+    </view>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.roster.length}}">
+  <view class="kicker">报名接龙 · 楼栋 + 昵称对外可见</view>
+  <view class="roster-row" wx:for="{{matter.roster}}" wx:key="index">
+    <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>
+    <text>{{item}}</text>
+  </view>
+</view>
+
+<view class="card" wx:if="{{matter.state === 'done' && (reviews.length || joined)}}">
+  <view class="kicker">参团邻居的评价{{reviews.length ? '（' + reviews.length + '）' : ''}}</view>
+
+  <block wx:if="{{joined}}">
+    <view class="review-form">
+      <view class="review-form-title">{{myReview ? '我的评价（可修改）' : '这单结束了，给它打个分吧'}}</view>
+      <t-rate value="{{reviewRating}}" size="44rpx" bind:change="onRateChange" />
+      <textarea
+        class="fin review-input"
+        auto-height
+        placeholder="一句话真实感受：价格、手艺、售后…（后来装修的邻居就靠它了）"
+        value="{{reviewContent}}"
+        bind:input="onReviewInput"
+        maxlength="500"
+      />
+      <t-button theme="light" size="medium" block loading="{{submittingReview}}" bind:tap="submitReview">
+        {{myReview ? '更新评价' : '发布评价'}}
+      </t-button>
+    </view>
+  </block>
+
+  <view class="review-row" wx:for="{{reviews}}" wx:key="index">
+    <view class="review-head">
+      <text class="review-name">{{item.reviewer_name}}</text>
+      <text class="review-stars">{{item.stars}}</text>
+    </view>
+    <view class="review-content" wx:if="{{item.content}}">{{item.content}}</view>
+    <view class="review-date">{{item.reviewed_on}}</view>
+  </view>
+</view>
+
+<view class="pledge">{{pledge}}</view>
+
+<view class="cta-dock" wx:if="{{matter.state !== 'done'}}">
+  <view class="cta-note">报名只是登记意向 · 不涉及任何付款 · 随时可取消</view>
+  <t-button
+    theme="{{joined ? 'light' : 'primary'}}"
+    block
+    size="large"
+    loading="{{submitting}}"
+    bind:tap="toggleJoin"
+  >{{joined ? '已报名 ✓（点击取消）' : (matter.state === 'seeking' ? '我感兴趣，登记意向' : '报名接龙')}}</t-button>
+</view>

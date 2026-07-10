@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "张罗点事",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

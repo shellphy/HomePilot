@@ -26,4 +26,18 @@ function invalidateMe() {
   cached = null;
 }
 
-module.exports = { getMe, updateMe, invalidateMe };
+// 相关方入驻：创建并绑定相关方（可入驻类型由 /options 的 party_types 下发）
+async function bindParty(type, name, category) {
+  const res = await request('/me/party', { method: 'POST', data: { type, name, category } });
+  cached = Promise.resolve(res.data);
+  return res.data;
+}
+
+// 切回业主身份
+async function unbindParty() {
+  const res = await request('/me/party', { method: 'DELETE' });
+  cached = Promise.resolve(res.data);
+  return res.data;
+}
+
+module.exports = { getMe, updateMe, invalidateMe, bindParty, unbindParty };

@@ -1,0 +1,67 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <!-- 总览模式：概览 + 各期征集列表 -->
+    <block wx:if="{{!censusId}}">
+      <view class="card">
+        <view class="hero-num">{{residents}} <text class="hero-sub">位邻居已进入这个空间</text></view>
+        <view class="hero-cap">数据均为匿名聚合，明细仅管理员可见</view>
+      </view>
+
+      <block wx:if="{{items.length}}">
+        <view class="feed-head">征集数据</view>
+        <view class="card census-list">
+          <view
+            class="crow"
+            hover-class="crow-hover"
+            wx:for="{{items}}"
+            wx:key="id"
+            data-id="{{item.id}}"
+            bind:tap="goDetail"
+          >
+            <text class="crow-title">{{item.title}}</text>
+            <view class="crow-right">
+              <text class="crow-note">{{item.note}}</text>
+              <text class="crow-arrow">›</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </block>
+
+    <!-- 详情模式：单期完整聚合 -->
+    <block wx:for="{{blocks}}" wx:for-item="block" wx:key="id">
+      <view class="card">
+        <view class="hero-num">{{block.registered}} <text class="hero-sub">户已登记</text></view>
+        <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
+      </view>
+
+      <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
+        <view class="card" wx:if="{{section.questions.length}}">
+          <view class="kicker">{{section.title}}</view>
+          <view class="qa" wx:for="{{section.questions}}" wx:for-item="question" wx:key="text">
+            <view class="qa-text">{{question.text}}</view>
+            <view class="bar" wx:for="{{question.bars}}" wx:key="label">
+              <view class="bar-label">{{item.label}}</view>
+              <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
+              <view class="bar-value">{{item.count}}</view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <t-button
+        wx:if="{{block.state === 'open'}}"
+        theme="primary"
+        block
+        size="large"
+        class="census-cta"
+        data-id="{{block.id}}"
+        bind:tap="goCensusForm"
+      >
+        {{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}
+      </t-button>
+    </block>
+
+    <view class="map-foot">{{dataFootnote}}</view>
+  </page-status>
+</view>

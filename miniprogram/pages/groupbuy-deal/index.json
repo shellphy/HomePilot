@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "成交公示",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

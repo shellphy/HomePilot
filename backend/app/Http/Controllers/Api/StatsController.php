@@ -3,27 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Registration;
+use App\Models\Resident;
+use App\Settings\CommunitySettings;
 use Illuminate\Http\JsonResponse;
 
 class StatsController extends Controller
 {
     /**
-     * 小区装修进度地图的数据源：登记总量 + 户型/开工时间/品类意向分布。
+     * 小区概况：总户数与入驻成员数。
+     * 各类主题数据（装修意向等）的聚合在对应征集事务的 /matters/{id}/census 里。
      */
-    public function index(): JsonResponse
+    public function index(CommunitySettings $settings): JsonResponse
     {
-        $registrations = Registration::all();
-
         return response()->json([
-            'registered' => $registrations->count(),
-            'total_households' => config('homepilot.total_households'),
-            'layouts' => $registrations->countBy('layout')->sortDesc(),
-            'decoration_modes' => $registrations->countBy('decoration_mode')->sortDesc(),
-            'interests' => $registrations
-                ->flatMap(fn (Registration $registration): array => $registration->interests)
-                ->countBy()
-                ->sortDesc(),
+            'residents' => Resident::count(),
+            'total_households' => $settings->total_households,
         ]);
     }
 }

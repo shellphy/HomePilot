@@ -1,0 +1,121 @@
+.hero-num {
+  font-size: 56rpx;
+  font-weight: 700;
+}
+.hero-sub {
+  font-size: 26rpx;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.hero-cap {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  margin: 6rpx 0 20rpx;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 18rpx;
+  font-size: 24rpx;
+}
+.bar:last-child {
+  margin-bottom: 0;
+}
+.bar-label {
+  width: 190rpx;
+  text-align: right;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.bar-track {
+  flex: 1;
+  height: 24rpx;
+  border-radius: 8rpx;
+  background: var(--bg-page);
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 0 8rpx 8rpx 0;
+}
+.bar-value {
+  width: 60rpx;
+  font-weight: 600;
+}
+
+.map-foot {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-muted);
+  padding-top: 24rpx;
+}
+
+.feed-head {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 12rpx 8rpx 16rpx;
+}
+
+.qa {
+  margin-bottom: 24rpx;
+}
+.qa:last-child {
+  margin-bottom: 0;
+}
+.qa-text {
+  font-size: 25rpx;
+  font-weight: 600;
+  margin-bottom: 14rpx;
+}
+
+.census-cta {
+  margin-bottom: 12rpx;
+}
+
+/* 总览模式的征集列表 */
+.census-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.crow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  height: 112rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+.crow:last-child {
+  border-bottom: none;
+}
+.crow-hover {
+  opacity: 0.55;
+}
+.crow-title {
+  font-size: 28rpx;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+.crow-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+}
+.crow-note {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.crow-arrow {
+  font-size: 34rpx;
+  line-height: 1;
+  color: var(--line-dark);
+  flex-shrink: 0;
+}

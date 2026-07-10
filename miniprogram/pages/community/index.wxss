@@ -1,0 +1,62 @@
+/* 小区门户头 */
+.portal {
+  background: linear-gradient(135deg, #067a3f, #06ae56);
+  border-radius: 24rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 20rpx;
+  color: #ffffff;
+}
+.portal-name {
+  font-size: 38rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+.portal-sub {
+  font-size: 22rpx;
+  opacity: 0.85;
+  margin-top: 8rpx;
+  line-height: 1.6;
+}
+.portal-stats {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  margin-top: 26rpx;
+}
+.pstat {
+  flex: 1;
+}
+.pstat-num {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+.pstat-unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  opacity: 0.85;
+}
+.pstat-label {
+  font-size: 22rpx;
+  opacity: 0.85;
+  margin-top: 4rpx;
+}
+.portal-btn {
+  flex-shrink: 0;
+  background: #ffffff;
+  color: var(--brand-deep);
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 16rpx 36rpx;
+  border-radius: 999rpx;
+}
+.portal-btn-hover {
+  opacity: 0.8;
+}
+
+.feed-head {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 12rpx 8rpx 16rpx;
+}
+

@@ -1,0 +1,52 @@
+.mcard-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.mcard-tag {
+  font-size: 21rpx;
+  font-weight: 600;
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  background: var(--bg-page);
+}
+.mcard-tag-rights {
+  color: var(--danger);
+  background: #fbe9e0;
+}
+.mcard-tag-activity {
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+}
+.mcard-tag-aid {
+  color: var(--info);
+  background: var(--info-bg);
+}
+.mcard-title {
+  flex: 1;
+  font-size: 29rpx;
+  font-weight: 600;
+}
+.mcard-pitch {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 12rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.mcard-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  margin-top: 14rpx;
+}
+.mcard-num {
+  font-weight: 700;
+  color: var(--text-primary);
+}

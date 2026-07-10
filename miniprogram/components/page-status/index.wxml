@@ -1,0 +1,11 @@
+<view wx:if="{{loaded}}"><slot /></view>
+
+<view wx:elif="{{error}}" class="hint" bind:tap="onRetry">
+  {{error}}
+  <view class="hint-retry">点击重试</view>
+</view>
+
+<block wx:else>
+  <view class="card"><t-skeleton theme="paragraph" loading animation="gradient" /></view>
+  <view class="card"><t-skeleton theme="paragraph" loading animation="gradient" /></view>
+</block>

@@ -1,0 +1,50 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <!-- 前置门槛：该征集要求档案完整，先去个人资料补全 -->
+    <block wx:if="{{needProfile}}">
+      <view class="card gate">
+        <view class="gate-title">参与前先完善个人资料</view>
+        <view class="gate-sub">这项征集的名单以「楼栋 + 昵称」公示，需要你先填好楼栋号和微信号（在「我的 · 个人资料」里随时可改）。</view>
+        <t-button theme="primary" block bind:tap="goProfile">去完善资料</t-button>
+      </view>
+    </block>
+
+    <block wx:elif="{{current}}">
+      <view class="step-bar">
+        <view class="step-text">{{current.title}} · {{moduleIndex + 1}} / {{modules.length}}</view>
+        <view class="meter step-meter">
+          <view class="meter-fill" style="width: {{(moduleIndex + 1) / modules.length * 100}}%"></view>
+        </view>
+        <view wx:if="{{current.intro}}" class="step-intro">{{current.intro}}</view>
+      </view>
+
+      <view class="card" wx:for="{{current.questions}}" wx:for-item="question" wx:key="key">
+        <view class="q-title">
+          {{question.text}}
+          <text wx:if="{{question.required}}" class="f-required">必答</text>
+          <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
+        </view>
+        <view class="chips">
+          <view
+            wx:for="{{question.options}}"
+            wx:for-item="option"
+            wx:key="*this"
+            class="chip {{picked[question.key + '::' + option] ? 'chip-on' : ''}}"
+            data-qkey="{{question.key}}"
+            data-qtype="{{question.type}}"
+            data-value="{{option}}"
+            bind:tap="pick"
+          >{{option}}</view>
+        </view>
+      </view>
+
+      <view class="nav-btns">
+        <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" class="nav-prev" bind:tap="prev">上一步</t-button>
+        <t-button theme="primary" size="large" class="nav-next" loading="{{submitting}}" bind:tap="next">
+          {{moduleIndex + 1 < modules.length ? '下一模块' : '完成'}}
+        </t-button>
+      </view>
+      <view class="skip-note">带「必答」的答完就行，其他题跳过也没关系</view>
+    </block>
+  </page-status>
+</view>

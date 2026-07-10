@@ -1,0 +1,12 @@
+<view class="card mcard" bind:tap="goDetail">
+  <view class="mcard-row">
+    <view class="mcard-tag mcard-tag-{{matter.type}}">{{matter.type_label}}</view>
+    <view class="mcard-title">{{matter.title}}</view>
+    <view class="pill {{pillClass}}">{{matter.state_label}}</view>
+  </view>
+  <view wx:if="{{matter.pitch}}" class="mcard-pitch">{{matter.pitch}}</view>
+  <view class="mcard-foot">
+    <text><text class="mcard-num">{{matter.join_count}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} {{foot}}</text>
+    <text class="muted">查看详情 ›</text>
+  </view>
+</view>

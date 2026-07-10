@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CensusController;
+use App\Http\Controllers\Api\JoinController;
+use App\Http\Controllers\Api\MatterController;
+use App\Http\Controllers\Api\MatterUpdateController;
 use App\Http\Controllers\Api\OptionController;
+use App\Http\Controllers\Api\PartyController;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\ProgressUpdateController;
-use App\Http\Controllers\Api\ProjectController;
-use App\Http\Controllers\Api\RegistrationController;
-use App\Http\Controllers\Api\SignupController;
+use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StatsController;
-use App\Http\Controllers\Api\SurveyController;
 use App\Http\Controllers\Api\UploadController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,25 +17,30 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/options', [OptionController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    // 成员与身份
     Route::get('/me', [ProfileController::class, 'show']);
     Route::put('/me', [ProfileController::class, 'update']);
+    Route::post('/me/party', [PartyController::class, 'store']);
+    Route::delete('/me/party', [PartyController::class, 'destroy']);
 
-    Route::get('/registration', [RegistrationController::class, 'show']);
-    Route::put('/registration', [RegistrationController::class, 'store']);
-
-    Route::get('/survey', [SurveyController::class, 'show']);
-    Route::put('/survey', [SurveyController::class, 'store']);
-
+    // 小区概况（户数、入驻数）
     Route::get('/stats', [StatsController::class, 'index']);
 
-    Route::get('/projects', [ProjectController::class, 'index']);
-    Route::get('/projects/mine', [ProjectController::class, 'mine']);
-    Route::get('/projects/{project}', [ProjectController::class, 'show']);
-    Route::post('/projects', [ProjectController::class, 'store']);
-    Route::put('/projects/{project}', [ProjectController::class, 'update']);
-    Route::put('/projects/{project}/status', [ProjectController::class, 'updateStatus']);
-    Route::post('/projects/{project}/signup', [SignupController::class, 'store']);
-    Route::delete('/projects/{project}/signup', [SignupController::class, 'destroy']);
-    Route::post('/projects/{project}/progress', [ProgressUpdateController::class, 'store']);
+    // 事务与表态
+    Route::get('/matters', [MatterController::class, 'index']);
+    Route::get('/matters/mine', [MatterController::class, 'mine']);
+    Route::get('/matters/joined', [MatterController::class, 'joined']);
+    Route::get('/matters/{matter}', [MatterController::class, 'show']);
+    Route::post('/matters', [MatterController::class, 'store']);
+    Route::put('/matters/{matter}', [MatterController::class, 'update']);
+    Route::put('/matters/{matter}/state', [MatterController::class, 'updateState']);
+    Route::put('/matters/{matter}/deal', [MatterController::class, 'updateDeal']);
+    Route::post('/matters/{matter}/join', [JoinController::class, 'store']);
+    Route::delete('/matters/{matter}/join', [JoinController::class, 'destroy']);
+    Route::put('/matters/{matter}/review', [ReviewController::class, 'store']);
+    Route::post('/matters/{matter}/updates', [MatterUpdateController::class, 'store']);
+    Route::get('/matters/{matter}/census', [CensusController::class, 'show']);
+    Route::put('/matters/{matter}/census', [CensusController::class, 'store']);
+
     Route::post('/uploads', [UploadController::class, 'store']);
 });

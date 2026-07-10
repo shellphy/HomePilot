@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我参与的",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

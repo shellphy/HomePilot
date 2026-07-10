@@ -1,14 +1,13 @@
-const { request, uploadImage } = require('../../utils/request');
-const { getMe, updateMe } = require('../../utils/me');
+// 我的：我家在小区里的档案（标准布局：头像区 + 分组单元格）
+const matters = require('../../utils/api/matters');
+const { getMe } = require('../../utils/me');
 
 Page({
   data: {
     me: null,
-    registration: null,
-    myProjects: [],
-    showMerchantForm: false,
-    merchantName: '',
-    merchantCategory: '',
+    joinedCount: 0,
+    mineCount: 0,
+    censusCount: 0,
     loadError: '',
   },
 
@@ -18,13 +17,24 @@ Page({
 
   async loadMe() {
     try {
-      const [me, mineRes] = await Promise.all([getMe(), request('/projects/mine')]);
+      const [me, mineRes, joinedRes] = await Promise.all([
+        getMe(),
+        matters.listMine(),
+        matters.listJoined(),
+      ]);
+
+
+      // 身份行：业主 · 楼栋 · 房号（空项不显示）；相关方则是 类型 · 名称
+      const identityLine = me.party
+        ? [me.party.label, me.party.name].filter(Boolean).join(' · ')
+        : ['业主', me.unit_label, me.room_label].filter(Boolean).join(' · ');
+
       this.setData({
         me,
-        registration: me.registration || null,
-        myProjects: mineRes.data,
-        merchantName: me.merchant_name || '',
-        merchantCategory: me.merchant_category || '',
+        identityLine,
+        censusCount: (me.censuses || []).length,
+        mineCount: mineRes.data.length,
+        joinedCount: joinedRes.data.length,
         loadError: '',
       });
     } catch (error) {
@@ -36,81 +46,20 @@ Page({
     }
   },
 
-  // 微信原生头像选择
-  async onChooseAvatar(event) {
-    try {
-      const url = await uploadImage(event.detail.avatarUrl);
-      await updateMe({ avatar: url });
-      this.setData({ 'me.avatar': url });
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-    }
+  goProfile() {
+    wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 微信原生昵称填写（输入框失焦时保存）
-  async onNicknameBlur(event) {
-    const nickname = (event.detail.value || '').trim();
-    if (!nickname || nickname === this.data.me.nickname) return;
-    try {
-      await updateMe({ nickname });
-      this.setData({ 'me.nickname': nickname });
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-    }
+  // 打开小区数据总览（各期征集都在里面）
+  goCensus() {
+    wx.navigateTo({ url: '/pages/insights/index' });
   },
 
-  goRegistration() {
-    wx.navigateTo({ url: '/pages/registration/index' });
+  goJoined() {
+    wx.navigateTo({ url: '/pages/mine-matters/index?kind=joined' });
   },
 
-  goSurvey() {
-    wx.navigateTo({ url: '/pages/survey/index' });
-  },
-
-  goPublish() {
-    wx.navigateTo({ url: '/pages/leader-project/index' });
-  },
-
-  goProject(event) {
-    wx.navigateTo({ url: `/pages/project/index?id=${event.currentTarget.dataset.id}` });
-  },
-
-  // ---- 商家身份 ----
-
-  toggleMerchantForm() {
-    this.setData({ showMerchantForm: !this.data.showMerchantForm });
-  },
-
-  onMerchantInput(event) {
-    this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
-  },
-
-  async applyMerchant() {
-    const { merchantName, merchantCategory } = this.data;
-    if (!merchantName.trim()) return wx.showToast({ title: '请填写商家名称', icon: 'none' });
-    if (!merchantCategory.trim()) return wx.showToast({ title: '请填写主营品类', icon: 'none' });
-
-    try {
-      await updateMe({
-        role: 'merchant',
-        merchant_name: merchantName.trim(),
-        merchant_category: merchantCategory.trim(),
-      });
-      wx.showToast({ title: '已切换为商家身份', icon: 'success' });
-      this.setData({ showMerchantForm: false });
-      this.loadMe();
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-    }
-  },
-
-  async backToResident() {
-    try {
-      await updateMe({ role: 'resident' });
-      wx.showToast({ title: '已切回业主身份', icon: 'success' });
-      this.loadMe();
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-    }
+  goMine() {
+    wx.navigateTo({ url: '/pages/mine-matters/index?kind=mine' });
   },
 });

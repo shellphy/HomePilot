@@ -1,0 +1,138 @@
+.head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.head-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.head-count {
+  font-size: 25rpx;
+  color: var(--text-secondary);
+}
+.head-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mcard-tag {
+  font-size: 21rpx;
+  font-weight: 600;
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  color: var(--text-secondary);
+  background: var(--bg-page);
+}
+.mcard-tag-rights {
+  color: var(--danger);
+  background: #fbe9e0;
+}
+.mcard-tag-activity {
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+}
+.mcard-tag-aid {
+  color: var(--info);
+  background: var(--info-bg);
+}
+
+.pitch {
+  font-size: 27rpx;
+  line-height: 1.75;
+}
+.pitch-sign {
+  font-size: 23rpx;
+  color: var(--text-muted);
+  margin-top: 12rpx;
+}
+
+.pending-tip {
+  font-size: 24rpx;
+  color: var(--warn);
+  background: var(--warn-bg);
+  line-height: 1.7;
+}
+
+.leader-ops {
+  border: 2rpx dashed var(--brand);
+}
+.leader-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.tline {
+  display: flex;
+  gap: 20rpx;
+  padding-bottom: 20rpx;
+}
+.tline:last-child {
+  padding-bottom: 0;
+}
+.tline-dot {
+  flex-shrink: 0;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: var(--line-dark);
+  margin-top: 10rpx;
+}
+.tline-dot-latest {
+  background: var(--brand);
+}
+.tline-date {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.tline-content {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-top: 2rpx;
+}
+.tline-shots {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 12rpx;
+  flex-wrap: wrap;
+}
+.tline-shot {
+  width: 148rpx;
+  height: 112rpx;
+  border-radius: 12rpx;
+  background: var(--line);
+}
+
+.roster-row {
+  display: flex;
+  gap: 20rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  font-size: 25rpx;
+}
+.roster-row:last-child {
+  border-bottom: none;
+}
+.roster-idx {
+  color: var(--text-muted);
+  width: 44rpx;
+  flex-shrink: 0;
+}
+
+.cta-note {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-bottom: 12rpx;
+}
+.cta-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #f6f6f3 75%, rgba(246, 246, 243, 0));
+}

@@ -1,0 +1,29 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="form-hint">成交公示是团购的最后一步：把最终谈成的条件、返点让利的去向摊开给全小区看。透明是下一个团的信任来源。</view>
+
+    <view class="card">
+      <view class="q-title">最终成交条件<text class="q-note">已预填团购条件，请改成实际成交版</text></view>
+      <view class="row-item" wx:for="{{finalTerms}}" wx:key="index">
+        <input class="fin row-label" placeholder="名目" value="{{item.label}}" data-index="{{index}}" data-key="label" bind:input="onRowInput" />
+        <input class="fin row-value" placeholder="如 588 元/㎡" value="{{item.value}}" data-index="{{index}}" data-key="value" bind:input="onRowInput" />
+        <view class="row-del" data-index="{{index}}" bind:tap="removeTerm">✕</view>
+      </view>
+      <view class="row-add" bind:tap="addTerm">+ 添加一条</view>
+    </view>
+
+    <view class="card">
+      <view class="q-title">成交说明<text class="q-note">返点让利怎么给的，写在这里</text></view>
+      <textarea
+        class="fin farea"
+        auto-height
+        placeholder="如：商家返点 2% 已全部转为参团业主让利，每户在结算时直减 300 元。"
+        value="{{finalNote}}"
+        bind:input="onNoteInput"
+        maxlength="1000"
+      />
+    </view>
+
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">发布成交公示</t-button>
+  </page-status>
+</view>

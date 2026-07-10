@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "小区数据",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

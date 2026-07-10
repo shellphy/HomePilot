@@ -1,0 +1,21 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card">
+      <view class="q-title">一句话标题</view>
+      <input class="fin" placeholder="{{copy.titlePlaceholder}}" value="{{title}}" data-field="title" bind:input="onInput" />
+    </view>
+
+    <view class="card">
+      <view class="q-title">把事情说清楚</view>
+      <textarea class="fin farea" auto-height placeholder="{{copy.pitchPlaceholder}}" value="{{pitch}}" data-field="pitch" bind:input="onInput" maxlength="1000" />
+    </view>
+
+    <view class="card">
+      <view class="q-title">目标人数<text class="q-note">{{copy.targetHint}}</text></view>
+      <input class="fin" type="number" placeholder="不填则不设目标" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
+    </view>
+
+    <view class="privacy">发起即成为这件事的牵头人，负责更新进展。参与名单以「楼栋 + 昵称」对全小区公示。</view>
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存修改' : '提交审核'}}</t-button>
+  </page-status>
+</view>

@@ -1,0 +1,12 @@
+{
+  "navigationBarTitleText": "邻里",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "page-status": "/components/page-status/index",
+    "groupbuy-card": "/components/groupbuy-card/index",
+    "notice-card": "/components/notice-card/index",
+    "matter-card": "/components/matter-card/index",
+    "census-card": "/components/census-card/index"
+  }
+}

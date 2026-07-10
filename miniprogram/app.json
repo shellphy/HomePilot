@@ -1,13 +1,16 @@
 {
   "pages": [
-    "pages/groupbuys/index",
-    "pages/map/index",
+    "pages/community/index",
+    "pages/insights/index",
     "pages/my/index",
-    "pages/project/index",
-    "pages/registration/index",
-    "pages/leader-project/index",
-    "pages/leader-progress/index",
-    "pages/survey/index"
+    "pages/matter/index",
+    "pages/census-form/index",
+    "pages/groupbuy-form/index",
+    "pages/matter-form/index",
+    "pages/matter-update/index",
+    "pages/groupbuy-deal/index",
+    "pages/mine-matters/index",
+    "pages/profile-form/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",
@@ -21,9 +24,14 @@
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/groupbuys/index", "text": "团购" },
-      { "pagePath": "pages/map/index", "text": "小区意向" },
-      { "pagePath": "pages/my/index", "text": "我的" }
+      {
+        "pagePath": "pages/community/index",
+        "text": "小区"
+      },
+      {
+        "pagePath": "pages/my/index",
+        "text": "我的"
+      }
     ]
   },
   "usingComponents": {

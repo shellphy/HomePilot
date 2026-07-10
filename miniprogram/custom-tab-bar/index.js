@@ -2,8 +2,7 @@ Component({
   data: {
     value: '',
     list: [
-      { icon: 'shop', value: 'groupbuys', label: '团购' },
-      { icon: 'chart-bar', value: 'map', label: '小区意向' },
+      { icon: 'home', value: 'community', label: '小区' },
       { icon: 'user', value: 'my', label: '我的' },
     ],
   },
