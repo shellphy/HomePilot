@@ -1,0 +1,8 @@
+{
+  "name": "homepilot-miniprogram",
+  "version": "0.1.0",
+  "description": "本小区装修团购小程序",
+  "dependencies": {
+    "tdesign-miniprogram": "^1.11.2"
+  }
+}

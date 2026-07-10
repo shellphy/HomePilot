@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Resident;
 use App\Models\User;
 
 return [
@@ -42,6 +43,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // 小程序 API：Sanctum 令牌认证，持有者是业主（Resident）
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'residents',
+        ],
     ],
 
     /*
@@ -67,10 +74,11 @@ return [
             'model' => env('AUTH_MODEL', User::class),
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        // 小程序业主：Sanctum 个人访问令牌的持有者
+        'residents' => [
+            'driver' => 'eloquent',
+            'model' => Resident::class,
+        ],
     ],
 
     /*

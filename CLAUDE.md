@@ -9,7 +9,7 @@
 
 | 目录 | 作用 |
 |---|---|
-| `backend/` | Laravel 13 + Filament 5。对小程序提供 API；Filament 是**仅团长使用**的管理端（发布团购、流转状态、发进度、看登记明细）。数据库 SQLite。另有自己的 CLAUDE.md（laravel/boost 生成） |
+| `backend/` | Laravel 13 + Filament 5。对小程序提供 API。**人人可发起团购，发起人即该团团长**（projects.initiator_id），发起/编辑/发进度都在小程序内完成，权限=发起人本人；**Filament 负责管理员审核上架（is_approved）**、看登记/问卷明细、报表兜底。进阶问卷题库在 config/homepilot.php 的 survey 键，改题不发版。数据库 SQLite。另有自己的 CLAUDE.md（laravel/boost 生成） |
 | `miniprogram/` | 原生微信小程序（官方空模板起步），**唯一的开发目标** |
 | `miniprogram-template-components/` | TDesign 组件示例，**只读参考，禁止修改** |
 | `miniprogram-template-demo/` | tdesign-miniprogram-starter 完整示例，**只读参考，禁止修改**（页面结构、custom-tab-bar、请求封装的写法都参照它） |
@@ -34,7 +34,7 @@
 cd backend && php artisan test        # Pest 测试
 cd backend && vendor/bin/pint --dirty # 代码格式化（提交前跑）
 cd backend && vendor/bin/phpstan      # 静态分析
-cd backend && php artisan serve       # 本地起 API（小程序开发者工具里勾"不校验合法域名"）
+cd backend && php artisan serve --host=0.0.0.0   # 本地起 API，必须带 --host（否则可能只监听 IPv6，wx.uploadFile 走 IPv4 会连不上）；工具里勾"不校验合法域名"
 ```
 
 小程序只能在微信开发者工具里预览；改完小程序代码后提醒用户在工具里刷新验证。

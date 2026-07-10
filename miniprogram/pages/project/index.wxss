@@ -1,0 +1,158 @@
+.detail-body {
+  padding-bottom: 160rpx;
+}
+
+.head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.head-count {
+  font-size: 26rpx;
+  color: #6e6b63;
+}
+.head-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1a1a18;
+}
+.head-meter {
+  margin-top: 20rpx;
+}
+.head-perk {
+  margin-top: 18rpx;
+  font-size: 24rpx;
+  color: #a96a0c;
+  background: #fbf1de;
+  border-radius: 16rpx;
+  padding: 14rpx 20rpx;
+}
+
+.pitch {
+  font-size: 27rpx;
+  line-height: 1.75;
+}
+.pitch-sign {
+  font-size: 23rpx;
+  color: #9b978c;
+  margin-top: 12rpx;
+}
+
+.pending-tip {
+  font-size: 24rpx;
+  color: #a96a0c;
+  background: #fbf1de;
+  line-height: 1.7;
+}
+
+.term-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #edece7;
+  font-size: 26rpx;
+}
+.term-row:last-child {
+  border-bottom: none;
+}
+.term-label {
+  color: #6e6b63;
+}
+.term-value {
+  font-weight: 600;
+  text-align: right;
+  max-width: 65%;
+}
+
+.gl {
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #edece7;
+}
+.gl:last-child {
+  border-bottom: none;
+}
+.gl-term {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+.gl-explain {
+  font-size: 24rpx;
+  color: #6e6b63;
+  line-height: 1.65;
+}
+
+.tline {
+  display: flex;
+  gap: 20rpx;
+  padding-bottom: 20rpx;
+}
+.tline:last-child {
+  padding-bottom: 0;
+}
+.tline-dot {
+  flex-shrink: 0;
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #c9c5ba;
+  margin-top: 10rpx;
+}
+.tline-dot-latest {
+  background: #06ae56;
+}
+.tline-date {
+  font-size: 22rpx;
+  color: #9b978c;
+}
+.tline-content {
+  font-size: 26rpx;
+  font-weight: 600;
+  margin-top: 2rpx;
+}
+
+.leader-ops {
+  border: 2rpx dashed #06ae56;
+}
+.leader-btns {
+  display: flex;
+  gap: 16rpx;
+}
+
+.tline-shots {
+  display: flex;
+  gap: 12rpx;
+  margin-top: 12rpx;
+  flex-wrap: wrap;
+}
+.tline-shot {
+  width: 148rpx;
+  height: 112rpx;
+  border-radius: 12rpx;
+  background: #edece7;
+}
+
+.roster-row {
+  display: flex;
+  gap: 20rpx;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #edece7;
+  font-size: 25rpx;
+}
+.roster-row:last-child {
+  border-bottom: none;
+}
+.roster-idx {
+  color: #9b978c;
+  width: 44rpx;
+  flex-shrink: 0;
+}
+
+.cta-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #f6f6f3 75%, rgba(246, 246, 243, 0));
+}

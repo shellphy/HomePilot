@@ -1,0 +1,63 @@
+.initiate-card {
+  border: 2rpx dashed #06ae56;
+  text-align: center;
+}
+.initiate-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.initiate-sub {
+  font-size: 23rpx;
+  color: #6e6b63;
+  margin: 8rpx 0 20rpx;
+  line-height: 1.6;
+}
+
+.gcard-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+.gcard-cat {
+  font-size: 21rpx;
+  font-weight: 600;
+  color: #6e6b63;
+  background: #f6f6f3;
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  flex-shrink: 0;
+}
+.gcard-title {
+  flex: 1;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.gcard-done .gcard-title {
+  color: #9b978c;
+}
+.gcard-perk {
+  font-size: 25rpx;
+  color: #a96a0c;
+  margin-top: 14rpx;
+}
+.gcard-meter {
+  margin-top: 16rpx;
+}
+.gcard-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: #6e6b63;
+  margin-top: 14rpx;
+}
+.gcard-num {
+  font-weight: 700;
+  color: #1a1a18;
+}
+
+.hint {
+  text-align: center;
+  font-size: 24rpx;
+  color: #9b978c;
+  padding: 20rpx 0;
+}

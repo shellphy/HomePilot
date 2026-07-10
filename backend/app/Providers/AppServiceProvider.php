@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -24,6 +25,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureDevCommands();
+    }
+
+    /**
+     * `php artisan dev` 默认用 --host=localhost，macOS 上只监听 IPv6（::1），
+     * 导致 127.0.0.1 打不开、小程序 wx.uploadFile（走 IPv4）失败——换成 0.0.0.0。
+     */
+    protected function configureDevCommands(): void
+    {
+        if (! $this->app->runningInConsole()) {
+            return;
+        }
+
+        DevCommands::except('server');
+        DevCommands::artisan('serve --host=0.0.0.0', 'api');
     }
 
     /**

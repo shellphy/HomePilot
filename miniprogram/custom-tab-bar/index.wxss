@@ -1,0 +1,3 @@
+:host {
+  --td-tab-bar-active-color: #06ae56;
+}

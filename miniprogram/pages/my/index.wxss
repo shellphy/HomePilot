@@ -1,0 +1,157 @@
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+.avatar-btn {
+  padding: 0;
+  margin: 0;
+  width: 112rpx;
+  height: 112rpx;
+  min-height: 0;
+  border: none;
+  border-radius: 50%;
+  overflow: hidden;
+  background: transparent;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.avatar-btn::after {
+  border: none;
+}
+.avatar-img {
+  display: block;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+}
+.avatar-fallback {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: #e4f6ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #067a3f;
+  font-size: 40rpx;
+  font-weight: 700;
+}
+.profile-main {
+  flex: 1;
+  min-width: 0;
+}
+.nickname-input {
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 4rpx 0;
+}
+.profile-sub {
+  font-size: 24rpx;
+  color: #6e6b63;
+  margin-top: 8rpx;
+}
+
+.reg-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #edece7;
+  font-size: 26rpx;
+}
+.reg-label {
+  color: #6e6b63;
+}
+.reg-row-tags {
+  align-items: flex-start;
+}
+.reg-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  justify-content: flex-end;
+  max-width: 70%;
+}
+.reg-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+.reg-btn {
+  margin-top: 20rpx;
+}
+.reg-empty {
+  font-size: 25rpx;
+  color: #6e6b63;
+  line-height: 1.7;
+  margin-bottom: 24rpx;
+}
+
+.mine-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #edece7;
+}
+.mine-title {
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.mine-sub {
+  font-size: 23rpx;
+  color: #9b978c;
+  margin-top: 4rpx;
+}
+.mine-empty {
+  font-size: 25rpx;
+  color: #6e6b63;
+  line-height: 1.7;
+  margin-bottom: 8rpx;
+}
+.mine-btn {
+  margin-top: 20rpx;
+}
+
+.merchant-intro {
+  font-size: 24rpx;
+  color: #6e6b63;
+  line-height: 1.7;
+  margin-bottom: 20rpx;
+}
+.merchant-note {
+  font-size: 22rpx;
+  color: #9b978c;
+  line-height: 1.6;
+  margin: 16rpx 0;
+}
+.f-label {
+  font-size: 24rpx;
+  color: #6e6b63;
+  margin: 16rpx 0 10rpx;
+}
+.f-label:first-of-type {
+  margin-top: 0;
+}
+.fin {
+  background: #f6f6f3;
+  border: 1rpx solid #edece7;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 27rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.my-foot {
+  text-align: center;
+  font-size: 22rpx;
+  color: #9b978c;
+  padding-top: 12rpx;
+}

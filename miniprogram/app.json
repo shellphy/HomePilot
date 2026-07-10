@@ -1,24 +1,36 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/groupbuys/index",
+    "pages/map/index",
+    "pages/my/index",
+    "pages/project/index",
+    "pages/registration/index",
+    "pages/leader-project/index",
+    "pages/leader-progress/index",
+    "pages/survey/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationStyle": "custom"
+    "navigationBarBackgroundColor": "#ffffff",
+    "backgroundColor": "#f6f6f3"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9b978c",
+    "selectedColor": "#06ae56",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/groupbuys/index", "text": "团购" },
+      { "pagePath": "pages/map/index", "text": "小区进度" },
+      { "pagePath": "pages/my/index", "text": "我的" }
+    ]
+  },
+  "usingComponents": {
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-tag": "tdesign-miniprogram/tag/tag"
   },
   "style": "v2",
-  "renderer": "skyline",
-  "rendererOptions": {
-    "skyline": {
-      "defaultDisplayBlock": true,
-      "defaultContentBox": true,
-      "tagNameStyleIsolation": "legacy",
-      "disableABTest": true,
-      "sdkVersionBegin": "3.0.0",
-      "sdkVersionEnd": "15.255.255"
-    }
-  },
-  "componentFramework": "glass-easel",
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"
 }

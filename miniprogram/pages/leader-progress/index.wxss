@@ -1,0 +1,69 @@
+.q-title {
+  font-size: 27rpx;
+  font-weight: 600;
+  margin-bottom: 18rpx;
+}
+.q-note {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: #9b978c;
+  margin-left: 12rpx;
+}
+
+.fin {
+  background: #f6f6f3;
+  border: 1rpx solid #edece7;
+  border-radius: 16rpx;
+  padding: 0 24rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  font-size: 27rpx;
+  box-sizing: border-box;
+  width: 100%;
+}
+.farea {
+  height: auto;
+  min-height: 180rpx;
+  line-height: 1.6;
+  padding: 18rpx 24rpx;
+}
+
+.shots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.shot-wrap {
+  position: relative;
+}
+.shot {
+  width: 200rpx;
+  height: 150rpx;
+  border-radius: 12rpx;
+  background: #edece7;
+}
+.shot-del {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.shot-add {
+  width: 200rpx;
+  height: 150rpx;
+  border-radius: 12rpx;
+  border: 2rpx dashed #c9c5ba;
+  color: #9b978c;
+  font-size: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
