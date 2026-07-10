@@ -70,6 +70,25 @@ test('only the initiator can edit a project', function () {
         ->assertJsonPath('data.status', 'open');
 });
 
+test('only the initiator can flip the status through the status endpoint', function () {
+    $initiator = Resident::factory()->create();
+    $project = Project::factory()->for($initiator, 'initiator')->create();
+
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->putJson("/api/projects/{$project->id}/status", ['status' => 'open'])->assertForbidden();
+
+    Sanctum::actingAs($initiator);
+    $this->putJson("/api/projects/{$project->id}/status", ['status' => 'flying'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('status');
+
+    $this->putJson("/api/projects/{$project->id}/status", ['status' => 'open'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.status', 'open');
+
+    expect($project->refresh()->status->value)->toBe('open');
+});
+
 test('only the initiator can post progress updates', function () {
     $initiator = Resident::factory()->create();
     $project = Project::factory()->open()->for($initiator, 'initiator')->create();

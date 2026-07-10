@@ -19,6 +19,7 @@ Page({
     decorationModes: [],
     interests: [],
     loaded: false,
+    loadError: '',
   },
 
   onShow() {
@@ -38,9 +39,14 @@ Page({
         decorationModes: toBars(stats.decoration_modes),
         interests: toBars(stats.interests),
         loaded: true,
+        loadError: '',
       });
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      if (this.data.loaded) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      } else {
+        this.setData({ loadError: error.message });
+      }
     }
   },
 

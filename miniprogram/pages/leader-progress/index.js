@@ -40,10 +40,8 @@ Page({
       success: async ({ tempFiles }) => {
         this.setData({ uploading: true });
         try {
-          for (const file of tempFiles) {
-            const url = await uploadImage(file.tempFilePath);
-            this.setData({ images: [...this.data.images, url] });
-          }
+          const urls = await Promise.all(tempFiles.map((file) => uploadImage(file.tempFilePath)));
+          this.setData({ images: [...this.data.images, ...urls] });
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
         } finally {

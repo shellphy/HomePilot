@@ -1,5 +1,5 @@
 .initiate-card {
-  border: 2rpx dashed #06ae56;
+  border: 2rpx dashed var(--brand);
   text-align: center;
 }
 .initiate-title {
@@ -8,7 +8,7 @@
 }
 .initiate-sub {
   font-size: 23rpx;
-  color: #6e6b63;
+  color: var(--text-secondary);
   margin: 8rpx 0 20rpx;
   line-height: 1.6;
 }
@@ -21,8 +21,8 @@
 .gcard-cat {
   font-size: 21rpx;
   font-weight: 600;
-  color: #6e6b63;
-  background: #f6f6f3;
+  color: var(--text-secondary);
+  background: var(--bg-page);
   border-radius: 8rpx;
   padding: 4rpx 12rpx;
   flex-shrink: 0;
@@ -33,11 +33,11 @@
   font-weight: 600;
 }
 .gcard-done .gcard-title {
-  color: #9b978c;
+  color: var(--text-muted);
 }
 .gcard-perk {
   font-size: 25rpx;
-  color: #a96a0c;
+  color: var(--warn);
   margin-top: 14rpx;
 }
 .gcard-meter {
@@ -47,17 +47,10 @@
   display: flex;
   justify-content: space-between;
   font-size: 24rpx;
-  color: #6e6b63;
+  color: var(--text-secondary);
   margin-top: 14rpx;
 }
 .gcard-num {
   font-weight: 700;
-  color: #1a1a18;
-}
-
-.hint {
-  text-align: center;
-  font-size: 24rpx;
-  color: #9b978c;
-  padding: 20rpx 0;
+  color: var(--text-primary);
 }

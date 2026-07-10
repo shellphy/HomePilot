@@ -1,3 +1,4 @@
 :host {
-  --td-tab-bar-active-color: #06ae56;
+  /* 自定义 tabBar 不一定继承 page 上的变量，保留品牌色兜底值 */
+  --td-tab-bar-active-color: var(--brand, #06ae56);
 }

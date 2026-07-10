@@ -1,85 +1,93 @@
-<view class="page-body detail-body" wx:if="{{project}}">
-  <view class="card">
-    <view class="head-row">
-      <view class="pill {{pillClass}}">{{project.status_label}}</view>
-      <view class="head-count">
-        <text class="head-num">{{project.signups_count}}</text>
-        <text wx:if="{{project.target_households}}"> / {{project.target_households}} 户</text>
-        <text wx:else> 户</text>
+<view class="page-body detail-body">
+  <block wx:if="{{project}}">
+    <view class="card">
+      <view class="head-row">
+        <view class="pill {{pillClass}}">{{project.status_label}}</view>
+        <view class="head-count">
+          <text class="head-num">{{project.signups_count}}</text>
+          <text wx:if="{{project.target_households}}"> / {{project.target_households}} 户</text>
+          <text wx:else> 户</text>
+        </view>
+      </view>
+      <view wx:if="{{project.status === 'open' && project.target_households}}" class="meter head-meter">
+        <view class="meter-fill" style="width: {{percent}}%"></view>
+      </view>
+      <view wx:if="{{project.perk}}" class="head-perk">🎁 {{project.perk}}</view>
+    </view>
+
+    <view class="card" wx:if="{{project.pitch}}">
+      <view class="kicker">发起人的话</view>
+      <view class="pitch">“{{project.pitch}}”</view>
+      <view class="pitch-sign" wx:if="{{project.initiator_name}}">—— {{project.initiator_name}} · 本团发起人</view>
+    </view>
+
+    <view class="card" wx:if="{{project.terms.length}}">
+      <view class="kicker">团购条件</view>
+      <view class="term-row" wx:for="{{project.terms}}" wx:key="label">
+        <text class="term-label">{{item.label}}</text>
+        <text class="term-value">{{item.value}}</text>
       </view>
     </view>
-    <view wx:if="{{project.status === 'open' && project.target_households}}" class="meter head-meter">
-      <view class="meter-fill" style="width: {{percent}}%"></view>
+
+    <view class="card" wx:if="{{project.glossary.length}}">
+      <view class="kicker">买前必懂 · 看完再报名</view>
+      <view class="gl" wx:for="{{project.glossary}}" wx:key="term">
+        <view class="gl-term">{{item.term}}</view>
+        <view class="gl-explain">{{item.explain}}</view>
+      </view>
     </view>
-    <view wx:if="{{project.perk}}" class="head-perk">🎁 {{project.perk}}</view>
-  </view>
 
-  <view class="card" wx:if="{{project.pitch}}">
-    <view class="kicker">发起人的话</view>
-    <view class="pitch">“{{project.pitch}}”</view>
-    <view class="pitch-sign" wx:if="{{project.initiator_name}}">—— {{project.initiator_name}} · 本团发起人</view>
-  </view>
-
-  <view class="card" wx:if="{{project.terms.length}}">
-    <view class="kicker">团购条件</view>
-    <view class="term-row" wx:for="{{project.terms}}" wx:key="label">
-      <text class="term-label">{{item.label}}</text>
-      <text class="term-value">{{item.value}}</text>
+    <view class="card pending-tip" wx:if="{{!project.is_approved}}">
+      ⏳ 待管理员审核，通过后才会出现在团购列表里（只有你自己能看到这个页面）
     </view>
-  </view>
 
-  <view class="card" wx:if="{{project.glossary.length}}">
-    <view class="kicker">买前必懂 · 看完再报名</view>
-    <view class="gl" wx:for="{{project.glossary}}" wx:key="term">
-      <view class="gl-term">{{item.term}}</view>
-      <view class="gl-explain">{{item.explain}}</view>
+    <view class="card leader-ops" wx:if="{{isInitiator}}">
+      <view class="kicker">发起人操作（这个团购由你负责）</view>
+      <view class="leader-btns">
+        <t-button theme="light" size="medium" bind:tap="goProgress">发布进度</t-button>
+        <t-button theme="light" size="medium" bind:tap="flipStatus">流转状态</t-button>
+        <t-button theme="light" size="medium" bind:tap="goEdit">编辑团购</t-button>
+      </view>
     </view>
-  </view>
 
-  <view class="card pending-tip" wx:if="{{!project.is_approved}}">
-    ⏳ 待管理员审核，通过后才会出现在团购列表里（只有你自己能看到这个页面）
-  </view>
-
-  <view class="card leader-ops" wx:if="{{isInitiator}}">
-    <view class="kicker">发起人操作（这个团购由你负责）</view>
-    <view class="leader-btns">
-      <t-button theme="light" size="medium" bind:tap="goProgress">发布进度</t-button>
-      <t-button theme="light" size="medium" bind:tap="flipStatus">流转状态</t-button>
-      <t-button theme="light" size="medium" bind:tap="goEdit">编辑团购</t-button>
-    </view>
-  </view>
-
-  <view class="card" wx:if="{{project.progress_updates.length}}">
-    <view class="kicker">进度更新</view>
-    <view class="tline" wx:for="{{project.progress_updates}}" wx:key="index">
-      <view class="tline-dot {{index === 0 ? 'tline-dot-latest' : ''}}"></view>
-      <view class="tline-main">
-        <view class="tline-date">{{item.happened_on}}</view>
-        <view class="tline-content">{{item.content}}</view>
-        <view class="tline-shots" wx:if="{{item.images.length}}">
-          <image
-            wx:for="{{item.images}}"
-            wx:for-item="img"
-            wx:key="*this"
-            class="tline-shot"
-            src="{{img}}"
-            mode="aspectFill"
-            data-urls="{{item.images}}"
-            data-current="{{img}}"
-            bindtap="previewImage"
-          />
+    <view class="card" wx:if="{{project.progress_updates.length}}">
+      <view class="kicker">进度更新</view>
+      <view class="tline" wx:for="{{project.progress_updates}}" wx:key="index">
+        <view class="tline-dot {{index === 0 ? 'tline-dot-latest' : ''}}"></view>
+        <view class="tline-main">
+          <view class="tline-date">{{item.happened_on}}</view>
+          <view class="tline-content">{{item.content}}</view>
+          <view class="tline-shots" wx:if="{{item.images.length}}">
+            <image
+              wx:for="{{item.images}}"
+              wx:for-item="img"
+              wx:key="*this"
+              class="tline-shot"
+              src="{{img}}"
+              mode="aspectFill"
+              data-urls="{{item.images}}"
+              data-current="{{img}}"
+              bind:tap="previewImage"
+            />
+          </view>
         </view>
       </view>
     </view>
-  </view>
 
-  <view class="card" wx:if="{{project.roster.length}}">
-    <view class="kicker">报名接龙 · 楼栋 + 昵称对外可见</view>
-    <view class="roster-row" wx:for="{{project.roster}}" wx:key="index">
-      <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>
-      <text>{{item}}</text>
+    <view class="card" wx:if="{{project.roster.length}}">
+      <view class="kicker">报名接龙 · 楼栋 + 昵称对外可见</view>
+      <view class="roster-row" wx:for="{{project.roster}}" wx:key="index">
+        <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>
+        <text>{{item}}</text>
+      </view>
     </view>
+  </block>
+
+  <view wx:elif="{{loadError}}" class="hint" bind:tap="loadProject">
+    {{loadError}}
+    <view class="hint-retry">点击重试</view>
   </view>
+  <view wx:else class="hint">加载中…</view>
 </view>
 
 <view class="cta-dock" wx:if="{{project && project.status !== 'done' && !isMerchant}}">

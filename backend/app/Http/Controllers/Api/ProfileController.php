@@ -22,6 +22,7 @@ class ProfileController extends Controller
         $resident = $this->resident($request);
         $resident->update($request->validated());
 
-        return ResidentResource::make($resident);
+        // 与 show() 保持一致地带上登记信息，小程序端会直接把该响应当缓存用
+        return ResidentResource::make($resident->loadMissing('registration'));
     }
 }

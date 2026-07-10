@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request');
+const { getMe, invalidateMe } = require('../../utils/me');
 
 Page({
   data: {
@@ -14,6 +15,7 @@ Page({
     phone: '',
     submitting: false,
     loaded: false,
+    loadError: '',
   },
 
   onLoad() {
@@ -24,7 +26,7 @@ Page({
     try {
       const [options, me, mine] = await Promise.all([
         request('/options'),
-        request('/me'),
+        getMe(),
         request('/registration'),
       ]);
 
@@ -36,17 +38,18 @@ Page({
         layouts: options.layouts,
         decorationModes: options.decoration_modes,
         categories: options.categories,
-        unitLabel: me.data.unit_label || '',
-        wechatId: me.data.wechat_id || '',
-        phone: me.data.phone || '',
+        unitLabel: me.unit_label || '',
+        wechatId: me.wechat_id || '',
+        phone: me.phone || '',
         layout: (mine.data && mine.data.layout) || '',
         decorationMode: (mine.data && mine.data.decoration_mode) || '',
         interests,
         interestOn,
         loaded: true,
+        loadError: '',
       });
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      this.setData({ loadError: error.message });
     }
   },
 
@@ -86,20 +89,18 @@ Page({
 
     this.setData({ submitting: true });
     try {
-      await request('/me', {
-        method: 'PUT',
-        data: { unit_label: unitLabel.trim() },
-      });
       await request('/registration', {
         method: 'PUT',
         data: {
           layout,
           decoration_mode: decorationMode,
           interests,
+          unit_label: unitLabel.trim(),
           wechat_id: wechatId.trim(),
           ...(phone.trim() ? { phone: phone.trim() } : {}),
         },
       });
+      invalidateMe(); // 楼栋号和登记内容都变了，让「我的」页重新拉
       wx.showModal({
         title: '登记完成',
         content: '再花 3 分钟填一份进阶问卷（家庭、生活方式、预算），这些匿名数据是团长和商家谈判的筹码。现在填吗？',

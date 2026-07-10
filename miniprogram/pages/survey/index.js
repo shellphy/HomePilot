@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request');
+const { invalidateMe } = require('../../utils/me');
 
 Page({
   data: {
@@ -9,6 +10,7 @@ Page({
     picked: {}, // {'题key::选项': true}，WXML 不能调 indexOf，用查表渲染选中态
     submitting: false,
     loaded: false,
+    loadError: '',
   },
 
   onLoad() {
@@ -24,18 +26,17 @@ Page({
         answers,
         picked: this.buildPicked(answers),
         loaded: true,
+        loadError: '',
       });
       this.showModule(0);
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      this.setData({ loadError: error.message });
     }
   },
 
   showModule(index) {
     this.setData({ moduleIndex: index, current: this.data.modules[index] });
-    if (typeof wx.pageScrollTo === 'function') {
-      wx.pageScrollTo({ scrollTop: 0, duration: 0 });
-    }
+    wx.pageScrollTo({ scrollTop: 0, duration: 0 });
   },
 
   pick(event) {
@@ -82,6 +83,7 @@ Page({
     try {
       if (Object.keys(moduleAnswers).length) {
         await request('/survey', { method: 'PUT', data: { answers: moduleAnswers } });
+        invalidateMe(); // 「我的」页展示已答题数，需要重新拉
       }
 
       if (moduleIndex + 1 < modules.length) {

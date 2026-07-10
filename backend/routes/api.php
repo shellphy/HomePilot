@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{project}', [ProjectController::class, 'show']);
     Route::post('/projects', [ProjectController::class, 'store']);
     Route::put('/projects/{project}', [ProjectController::class, 'update']);
+    Route::put('/projects/{project}/status', [ProjectController::class, 'updateStatus']);
     Route::post('/projects/{project}/signup', [SignupController::class, 'store']);
     Route::delete('/projects/{project}/signup', [SignupController::class, 'destroy']);
     Route::post('/projects/{project}/progress', [ProgressUpdateController::class, 'store']);

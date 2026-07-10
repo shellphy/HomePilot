@@ -1,4 +1,5 @@
 const { request, uploadImage } = require('../../utils/request');
+const { getMe, updateMe } = require('../../utils/me');
 
 Page({
   data: {
@@ -8,6 +9,7 @@ Page({
     showMerchantForm: false,
     merchantName: '',
     merchantCategory: '',
+    loadError: '',
   },
 
   onShow() {
@@ -16,19 +18,21 @@ Page({
 
   async loadMe() {
     try {
-      const [meRes, mineRes] = await Promise.all([
-        request('/me'),
-        request('/projects/mine'),
-      ]);
+      const [me, mineRes] = await Promise.all([getMe(), request('/projects/mine')]);
       this.setData({
-        me: meRes.data,
-        registration: meRes.data.registration || null,
+        me,
+        registration: me.registration || null,
         myProjects: mineRes.data,
-        merchantName: meRes.data.merchant_name || '',
-        merchantCategory: meRes.data.merchant_category || '',
+        merchantName: me.merchant_name || '',
+        merchantCategory: me.merchant_category || '',
+        loadError: '',
       });
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      if (this.data.me) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      } else {
+        this.setData({ loadError: error.message });
+      }
     }
   },
 
@@ -36,7 +40,7 @@ Page({
   async onChooseAvatar(event) {
     try {
       const url = await uploadImage(event.detail.avatarUrl);
-      await request('/me', { method: 'PUT', data: { avatar: url } });
+      await updateMe({ avatar: url });
       this.setData({ 'me.avatar': url });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
@@ -48,7 +52,7 @@ Page({
     const nickname = (event.detail.value || '').trim();
     if (!nickname || nickname === this.data.me.nickname) return;
     try {
-      await request('/me', { method: 'PUT', data: { nickname } });
+      await updateMe({ nickname });
       this.setData({ 'me.nickname': nickname });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
@@ -87,13 +91,10 @@ Page({
     if (!merchantCategory.trim()) return wx.showToast({ title: '请填写主营品类', icon: 'none' });
 
     try {
-      await request('/me', {
-        method: 'PUT',
-        data: {
-          role: 'merchant',
-          merchant_name: merchantName.trim(),
-          merchant_category: merchantCategory.trim(),
-        },
+      await updateMe({
+        role: 'merchant',
+        merchant_name: merchantName.trim(),
+        merchant_category: merchantCategory.trim(),
       });
       wx.showToast({ title: '已切换为商家身份', icon: 'success' });
       this.setData({ showMerchantForm: false });
@@ -105,7 +106,7 @@ Page({
 
   async backToResident() {
     try {
-      await request('/me', { method: 'PUT', data: { role: 'resident' } });
+      await updateMe({ role: 'resident' });
       wx.showToast({ title: '已切回业主身份', icon: 'success' });
       this.loadMe();
     } catch (error) {

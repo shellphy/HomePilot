@@ -1,33 +1,41 @@
-<view class="page-body" wx:if="{{loaded && current}}">
-  <view class="step-bar">
-    <view class="step-text">{{current.title}} · {{moduleIndex + 1}} / {{modules.length}}</view>
-    <view class="meter step-meter">
-      <view class="meter-fill" style="width: {{(moduleIndex + 1) / modules.length * 100}}%"></view>
+<view class="page-body">
+  <block wx:if="{{loaded && current}}">
+    <view class="step-bar">
+      <view class="step-text">{{current.title}} · {{moduleIndex + 1}} / {{modules.length}}</view>
+      <view class="meter step-meter">
+        <view class="meter-fill" style="width: {{(moduleIndex + 1) / modules.length * 100}}%"></view>
+      </view>
+      <view wx:if="{{current.intro}}" class="step-intro">{{current.intro}}</view>
     </view>
-    <view wx:if="{{current.intro}}" class="step-intro">{{current.intro}}</view>
-  </view>
 
-  <view class="card" wx:for="{{current.questions}}" wx:for-item="question" wx:key="key">
-    <view class="q-title">{{question.text}}<text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text></view>
-    <view class="chips">
-      <view
-        wx:for="{{question.options}}"
-        wx:for-item="option"
-        wx:key="*this"
-        class="chip {{picked[question.key + '::' + option] ? 'chip-on' : ''}}"
-        data-qkey="{{question.key}}"
-        data-qtype="{{question.type}}"
-        data-value="{{option}}"
-        bindtap="pick"
-      >{{option}}</view>
+    <view class="card" wx:for="{{current.questions}}" wx:for-item="question" wx:key="key">
+      <view class="q-title">{{question.text}}<text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text></view>
+      <view class="chips">
+        <view
+          wx:for="{{question.options}}"
+          wx:for-item="option"
+          wx:key="*this"
+          class="chip {{picked[question.key + '::' + option] ? 'chip-on' : ''}}"
+          data-qkey="{{question.key}}"
+          data-qtype="{{question.type}}"
+          data-value="{{option}}"
+          bind:tap="pick"
+        >{{option}}</view>
+      </view>
     </view>
-  </view>
 
-  <view class="nav-btns">
-    <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" class="nav-prev" bind:tap="prev">上一步</t-button>
-    <t-button theme="primary" size="large" class="nav-next" loading="{{submitting}}" bind:tap="next">
-      {{moduleIndex + 1 < modules.length ? '下一模块' : '完成问卷'}}
-    </t-button>
+    <view class="nav-btns">
+      <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" class="nav-prev" bind:tap="prev">上一步</t-button>
+      <t-button theme="primary" size="large" class="nav-next" loading="{{submitting}}" bind:tap="next">
+        {{moduleIndex + 1 < modules.length ? '下一模块' : '完成问卷'}}
+      </t-button>
+    </view>
+    <view class="skip-note">不想答的题跳过就行，答多少都有用</view>
+  </block>
+
+  <view wx:elif="{{loadError}}" class="hint" bind:tap="loadSurvey">
+    {{loadError}}
+    <view class="hint-retry">点击重试</view>
   </view>
-  <view class="skip-note">不想答的题跳过就行，答多少都有用</view>
+  <view wx:else class="hint">加载中…</view>
 </view>

@@ -1,33 +1,3 @@
-.q-title {
-  font-size: 27rpx;
-  font-weight: 600;
-  margin-bottom: 18rpx;
-}
-.q-note {
-  font-size: 22rpx;
-  font-weight: 400;
-  color: #9b978c;
-  margin-left: 12rpx;
-}
-
-.fin {
-  background: #f6f6f3;
-  border: 1rpx solid #edece7;
-  border-radius: 16rpx;
-  padding: 0 24rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-  font-size: 27rpx;
-  box-sizing: border-box;
-  width: 100%;
-}
-.farea {
-  height: auto;
-  min-height: 180rpx;
-  line-height: 1.6;
-  padding: 18rpx 24rpx;
-}
-
 .shots {
   display: flex;
   flex-wrap: wrap;
@@ -40,7 +10,7 @@
   width: 200rpx;
   height: 150rpx;
   border-radius: 12rpx;
-  background: #edece7;
+  background: var(--line);
 }
 .shot-del {
   position: absolute;
@@ -60,8 +30,8 @@
   width: 200rpx;
   height: 150rpx;
   border-radius: 12rpx;
-  border: 2rpx dashed #c9c5ba;
-  color: #9b978c;
+  border: 2rpx dashed var(--line-dark);
+  color: var(--text-muted);
   font-size: 48rpx;
   display: flex;
   align-items: center;

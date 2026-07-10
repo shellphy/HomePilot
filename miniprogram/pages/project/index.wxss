@@ -9,12 +9,12 @@
 }
 .head-count {
   font-size: 26rpx;
-  color: #6e6b63;
+  color: var(--text-secondary);
 }
 .head-num {
   font-size: 40rpx;
   font-weight: 700;
-  color: #1a1a18;
+  color: var(--text-primary);
 }
 .head-meter {
   margin-top: 20rpx;
@@ -22,8 +22,8 @@
 .head-perk {
   margin-top: 18rpx;
   font-size: 24rpx;
-  color: #a96a0c;
-  background: #fbf1de;
+  color: var(--warn);
+  background: var(--warn-bg);
   border-radius: 16rpx;
   padding: 14rpx 20rpx;
 }
@@ -34,14 +34,14 @@
 }
 .pitch-sign {
   font-size: 23rpx;
-  color: #9b978c;
+  color: var(--text-muted);
   margin-top: 12rpx;
 }
 
 .pending-tip {
   font-size: 24rpx;
-  color: #a96a0c;
-  background: #fbf1de;
+  color: var(--warn);
+  background: var(--warn-bg);
   line-height: 1.7;
 }
 
@@ -49,14 +49,14 @@
   display: flex;
   justify-content: space-between;
   padding: 18rpx 0;
-  border-bottom: 1rpx solid #edece7;
+  border-bottom: 1rpx solid var(--line);
   font-size: 26rpx;
 }
 .term-row:last-child {
   border-bottom: none;
 }
 .term-label {
-  color: #6e6b63;
+  color: var(--text-secondary);
 }
 .term-value {
   font-weight: 600;
@@ -66,7 +66,7 @@
 
 .gl {
   padding: 18rpx 0;
-  border-bottom: 1rpx solid #edece7;
+  border-bottom: 1rpx solid var(--line);
 }
 .gl:last-child {
   border-bottom: none;
@@ -78,7 +78,7 @@
 }
 .gl-explain {
   font-size: 24rpx;
-  color: #6e6b63;
+  color: var(--text-secondary);
   line-height: 1.65;
 }
 
@@ -95,30 +95,21 @@
   width: 16rpx;
   height: 16rpx;
   border-radius: 50%;
-  background: #c9c5ba;
+  background: var(--line-dark);
   margin-top: 10rpx;
 }
 .tline-dot-latest {
-  background: #06ae56;
+  background: var(--brand);
 }
 .tline-date {
   font-size: 22rpx;
-  color: #9b978c;
+  color: var(--text-muted);
 }
 .tline-content {
   font-size: 26rpx;
   font-weight: 600;
   margin-top: 2rpx;
 }
-
-.leader-ops {
-  border: 2rpx dashed #06ae56;
-}
-.leader-btns {
-  display: flex;
-  gap: 16rpx;
-}
-
 .tline-shots {
   display: flex;
   gap: 12rpx;
@@ -129,21 +120,29 @@
   width: 148rpx;
   height: 112rpx;
   border-radius: 12rpx;
-  background: #edece7;
+  background: var(--line);
+}
+
+.leader-ops {
+  border: 2rpx dashed var(--brand);
+}
+.leader-btns {
+  display: flex;
+  gap: 16rpx;
 }
 
 .roster-row {
   display: flex;
   gap: 20rpx;
   padding: 14rpx 0;
-  border-bottom: 1rpx solid #edece7;
+  border-bottom: 1rpx solid var(--line);
   font-size: 25rpx;
 }
 .roster-row:last-child {
   border-bottom: none;
 }
 .roster-idx {
-  color: #9b978c;
+  color: var(--text-muted);
   width: 44rpx;
   flex-shrink: 0;
 }

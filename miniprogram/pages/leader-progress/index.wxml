@@ -1,24 +1,24 @@
 <view class="page-body">
   <view class="card">
     <view class="q-title">日期</view>
-    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+    <picker mode="date" value="{{date}}" bind:change="onDateChange">
       <view class="fin">{{date}}</view>
     </picker>
   </view>
 
   <view class="card">
     <view class="q-title">进度内容</view>
-    <textarea class="fin farea" placeholder="如：水电开槽完成，横平竖直验收通过" value="{{content}}" bindinput="onInput" maxlength="500" />
+    <textarea class="fin farea" placeholder="如：水电开槽完成，横平竖直验收通过" value="{{content}}" bind:input="onInput" maxlength="500" />
   </view>
 
   <view class="card">
     <view class="q-title">现场照片<text class="q-note">最多 9 张，拍了就传</text></view>
     <view class="shots">
       <view class="shot-wrap" wx:for="{{images}}" wx:key="*this">
-        <image class="shot" src="{{item}}" mode="aspectFill" data-url="{{item}}" bindtap="previewImage" />
-        <view class="shot-del" data-index="{{index}}" catchtap="removeImage">✕</view>
+        <image class="shot" src="{{item}}" mode="aspectFill" data-url="{{item}}" bind:tap="previewImage" />
+        <view class="shot-del" data-index="{{index}}" catch:tap="removeImage">✕</view>
       </view>
-      <view class="shot-add" bindtap="chooseImages">{{uploading ? '上传中…' : '+'}}</view>
+      <view class="shot-add" bind:tap="chooseImages">{{uploading ? '上传中…' : '+'}}</view>
     </view>
   </view>
 

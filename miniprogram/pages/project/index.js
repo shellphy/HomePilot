@@ -1,18 +1,6 @@
 const { request } = require('../../utils/request');
-
-const PILL_CLASS = {
-  open: 'pill-open',
-  negotiating: 'pill-negotiating',
-  seeking: 'pill-seeking',
-  done: 'pill-done',
-};
-
-const STATUS_FLOW = [
-  { value: 'seeking', label: '意向征集' },
-  { value: 'negotiating', label: '谈判中' },
-  { value: 'open', label: '接龙中' },
-  { value: 'done', label: '已成团' },
-];
+const { getMe } = require('../../utils/me');
+const { STATUS_FLOW, pillClass, signupPercent } = require('../../utils/constants');
 
 Page({
   data: {
@@ -24,6 +12,7 @@ Page({
     pillClass: '',
     percent: 0,
     submitting: false,
+    loadError: '',
   },
 
   onLoad(query) {
@@ -36,17 +25,22 @@ Page({
 
   async loadProject() {
     try {
-      const [projectRes, meRes] = await Promise.all([
+      const [projectRes, me] = await Promise.all([
         request(`/projects/${this.data.id}`),
-        request('/me'),
+        getMe(),
       ]);
       this.applyProject(projectRes.data, projectRes.joined);
       this.setData({
-        isInitiator: projectRes.data.initiator_id === meRes.data.id,
-        isMerchant: meRes.data.role === 'merchant',
+        isInitiator: projectRes.data.initiator_id === me.id,
+        isMerchant: me.role === 'merchant',
+        loadError: '',
       });
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      if (this.data.project) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      } else {
+        this.setData({ loadError: error.message });
+      }
     }
   },
 
@@ -54,10 +48,8 @@ Page({
     this.setData({
       project,
       joined,
-      pillClass: PILL_CLASS[project.status] || 'pill-seeking',
-      percent: project.target_households
-        ? Math.min(100, Math.round((project.signups_count / project.target_households) * 100))
-        : 0,
+      pillClass: pillClass(project.status),
+      percent: signupPercent(project),
     });
     wx.setNavigationBarTitle({ title: project.title });
   },
@@ -102,20 +94,10 @@ Page({
     wx.showActionSheet({
       itemList: options.map((status) => `流转为「${status.label}」`),
       success: async ({ tapIndex }) => {
-        const { project } = this.data;
         try {
-          await request(`/projects/${this.data.id}`, {
+          await request(`/projects/${this.data.id}/status`, {
             method: 'PUT',
-            data: {
-              category: project.category,
-              title: project.title,
-              status: options[tapIndex].value,
-              target_households: project.target_households,
-              pitch: project.pitch,
-              perk: project.perk,
-              terms: project.terms,
-              glossary: project.glossary,
-            },
+            data: { status: options[tapIndex].value },
           });
           wx.showToast({ title: '状态已更新', icon: 'success' });
           this.loadProject();

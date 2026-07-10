@@ -11,6 +11,7 @@ use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
 {
@@ -91,13 +92,29 @@ class ProjectController extends Controller
     }
 
     /**
-     * 只有发起人本人可以编辑/流转状态。
+     * 只有发起人本人可以编辑。
      */
     public function update(StoreProjectRequest $request, Project $project): JsonResponse
     {
         abort_unless($project->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
 
         $project->update($request->payload());
+
+        return response()->json(['data' => ProjectResource::make($project)]);
+    }
+
+    /**
+     * 单独流转状态（发起人操作），避免为改一个字段回传整份表单。
+     */
+    public function updateStatus(Request $request, Project $project): JsonResponse
+    {
+        abort_unless($project->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
+
+        $validated = $request->validate([
+            'status' => ['required', Rule::enum(ProjectStatus::class)],
+        ]);
+
+        $project->update($validated);
 
         return response()->json(['data' => ProjectResource::make($project)]);
     }

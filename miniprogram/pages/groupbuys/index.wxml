@@ -1,30 +1,35 @@
 <view class="page-body tabbed">
-  <view wx:if="{{loading}}" class="hint">加载中…</view>
-  <view wx:elif="{{loadError}}" class="hint">{{loadError}}（下拉或重进页面重试）</view>
+  <block wx:if="{{loaded}}">
+    <block wx:for="{{projects}}" wx:key="id">
+      <view class="card gcard {{item.status === 'done' ? 'gcard-done' : ''}}" bind:tap="goDetail" data-id="{{item.id}}">
+        <view class="gcard-row">
+          <view class="gcard-cat">{{item.category}}</view>
+          <view class="gcard-title">{{item.title}}</view>
+          <view class="pill {{item.pillClass}}">{{item.status_label}}</view>
+        </view>
+        <view wx:if="{{item.perk}}" class="gcard-perk">{{item.perk}}</view>
+        <view wx:if="{{item.status === 'open' && item.target_households}}" class="meter gcard-meter">
+          <view class="meter-fill" style="width: {{item.percent}}%"></view>
+        </view>
+        <view class="gcard-foot">
+          <text><text class="gcard-num">{{item.signups_count}}</text>{{item.target_households ? ' / ' + item.target_households : ''}} 户{{item.status === 'seeking' ? '感兴趣' : '已报名'}}</text>
+          <text class="muted">查看详情 ›</text>
+        </view>
+      </view>
+    </block>
 
-  <block wx:for="{{projects}}" wx:key="id">
-    <view class="card gcard {{item.status === 'done' ? 'gcard-done' : ''}}" bindtap="goDetail" data-id="{{item.id}}">
-      <view class="gcard-row">
-        <view class="gcard-cat">{{item.category}}</view>
-        <view class="gcard-title">{{item.title}}</view>
-        <view class="pill {{item.pillClass}}">{{item.status_label}}</view>
-      </view>
-      <view wx:if="{{item.perk}}" class="gcard-perk">{{item.perk}}</view>
-      <view wx:if="{{item.status === 'open' && item.target_households}}" class="meter gcard-meter">
-        <view class="meter-fill" style="width: {{item.percent}}%"></view>
-      </view>
-      <view class="gcard-foot">
-        <text><text class="gcard-num">{{item.signups_count}}</text>{{item.target_households ? ' / ' + item.target_households : ''}} 户{{item.status === 'seeking' ? '感兴趣' : '已报名'}}</text>
-        <text class="muted">查看详情 ›</text>
-      </view>
+    <view wx:if="{{!projects.length}}" class="hint">还没有团购项目，发起第一个吧</view>
+
+    <view class="card initiate-card" wx:if="{{!isMerchant}}">
+      <view class="initiate-title">想团的东西没人组织？</view>
+      <view class="initiate-sub">你来发起，你就是这个团购的团长 · 管理员审核后对全小区展示</view>
+      <t-button theme="primary" block size="medium" bind:tap="goCreate">发起团购</t-button>
     </view>
   </block>
 
-  <view wx:if="{{!loading && !projects.length && !loadError}}" class="hint">还没有团购项目，发起第一个吧</view>
-
-  <view class="card initiate-card" wx:if="{{!isMerchant}}">
-    <view class="initiate-title">想团的东西没人组织？</view>
-    <view class="initiate-sub">你来发起，你就是这个团购的团长 · 管理员审核后对全小区展示</view>
-    <t-button theme="primary" block size="medium" bind:tap="goCreate">发起团购</t-button>
+  <view wx:elif="{{loadError}}" class="hint" bind:tap="loadProjects">
+    {{loadError}}
+    <view class="hint-retry">点击重试</view>
   </view>
+  <view wx:else class="hint">加载中…</view>
 </view>

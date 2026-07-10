@@ -5,11 +5,11 @@
 .hero-sub {
   font-size: 26rpx;
   font-weight: 400;
-  color: #9b978c;
+  color: var(--text-muted);
 }
 .hero-cap {
   font-size: 24rpx;
-  color: #6e6b63;
+  color: var(--text-secondary);
   margin: 6rpx 0 20rpx;
 }
 
@@ -26,19 +26,19 @@
 .bar-label {
   width: 190rpx;
   text-align: right;
-  color: #6e6b63;
+  color: var(--text-secondary);
   flex-shrink: 0;
 }
 .bar-track {
   flex: 1;
   height: 24rpx;
   border-radius: 8rpx;
-  background: #f6f6f3;
+  background: var(--bg-page);
   overflow: hidden;
 }
 .bar-fill {
   height: 100%;
-  background: #06ae56;
+  background: var(--brand);
   border-radius: 0 8rpx 8rpx 0;
 }
 .bar-value {
@@ -49,6 +49,6 @@
 .map-foot {
   text-align: center;
   font-size: 22rpx;
-  color: #9b978c;
+  color: var(--text-muted);
   padding-top: 24rpx;
 }

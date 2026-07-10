@@ -34,6 +34,7 @@ test('merchants can browse projects and stats but cannot act like residents', fu
         'layout' => config('homepilot.layouts')[0],
         'decoration_mode' => config('homepilot.decoration_modes')[0],
         'interests' => [config('homepilot.categories')[0]],
+        'unit_label' => '1栋',
         'wechat_id' => 'shop-1',
     ])->assertForbidden();
     $this->postJson('/api/projects', [

@@ -22,7 +22,7 @@
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/groupbuys/index", "text": "团购" },
-      { "pagePath": "pages/map/index", "text": "小区进度" },
+      { "pagePath": "pages/map/index", "text": "小区意向" },
       { "pagePath": "pages/my/index", "text": "我的" }
     ]
   },

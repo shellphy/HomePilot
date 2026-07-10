@@ -36,13 +36,14 @@ class RegistrationController extends Controller
         abort_if($resident->isMerchant(), 403, '商家账号不能填写业主登记');
 
         $resident->update([
+            'unit_label' => $request->validated('unit_label'),
             'wechat_id' => $request->validated('wechat_id'),
             'phone' => $request->validated('phone') ?? $resident->phone,
         ]);
 
         $registration = Registration::updateOrCreate(
             ['resident_id' => $resident->id],
-            $request->safe()->except(['phone', 'wechat_id']),
+            $request->safe()->except(['phone', 'wechat_id', 'unit_label']),
         );
 
         return response()->json([

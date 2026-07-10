@@ -10,6 +10,7 @@ function validRegistrationPayload(array $overrides = []): array
         'layout' => config('homepilot.layouts')[0],
         'decoration_mode' => config('homepilot.decoration_modes')[0],
         'interests' => [config('homepilot.categories')[0]],
+        'unit_label' => '3栋',
         'wechat_id' => 'laoK-2026',
     ], $overrides);
 }
@@ -35,14 +36,17 @@ test('resubmitting updates the existing registration instead of creating a secon
         ->and($resident->registration()->first()->layout)->toBe(config('homepilot.layouts')[1]);
 });
 
-test('the wechat id is required and saved on the resident, phone stays optional', function () {
-    $resident = Resident::factory()->create(['wechat_id' => '', 'phone' => '']);
+test('contact fields are required and saved on the resident, phone stays optional', function () {
+    $resident = Resident::factory()->create(['unit_label' => '', 'wechat_id' => '', 'phone' => '']);
     Sanctum::actingAs($resident);
 
-    $this->putJson('/api/registration', validRegistrationPayload(['wechat_id' => 'my-wechat']))
-        ->assertCreated();
+    $this->putJson('/api/registration', validRegistrationPayload([
+        'unit_label' => '7栋',
+        'wechat_id' => 'my-wechat',
+    ]))->assertCreated();
 
     expect($resident->refresh()->wechat_id)->toBe('my-wechat')
+        ->and($resident->unit_label)->toBe('7栋')
         ->and($resident->phone)->toBe('');
 
     $this->putJson('/api/registration', validRegistrationPayload([
@@ -64,6 +68,7 @@ test('registration rejects values outside the configured options', function (arr
     '未知装修方式' => [['decoration_mode' => '意念装修'], 'decoration_mode'],
     '空的品类' => [['interests' => []], 'interests'],
     '未知品类' => [['interests' => ['买飞机']], 'interests.0'],
+    '缺楼栋号' => [['unit_label' => ''], 'unit_label'],
     '缺微信号' => [['wechat_id' => ''], 'wechat_id'],
     '错误手机号' => [['phone' => '123'], 'phone'],
 ]);

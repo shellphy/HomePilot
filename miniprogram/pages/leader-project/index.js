@@ -1,16 +1,10 @@
 const { request } = require('../../utils/request');
-
-const STATUSES = [
-  { value: 'seeking', label: '意向征集' },
-  { value: 'negotiating', label: '谈判中' },
-  { value: 'open', label: '接龙中' },
-  { value: 'done', label: '已成团' },
-];
+const { STATUS_FLOW } = require('../../utils/constants');
 
 Page({
   data: {
     id: null,
-    statuses: STATUSES,
+    statuses: STATUS_FLOW,
     categories: [],
     category: '',
     customCategory: '',
@@ -22,23 +16,29 @@ Page({
     terms: [],
     glossary: [],
     submitting: false,
+    loaded: false,
+    loadError: '',
   },
 
-  async onLoad(query) {
+  onLoad(query) {
     const id = query.id ? Number(query.id) : null;
     this.setData({ id });
     wx.setNavigationBarTitle({ title: id ? '编辑团购' : '发起团购' });
+    this.loadForm();
+  },
 
+  async loadForm() {
     try {
       const options = await request('/options');
       this.setData({ categories: options.categories });
 
-      if (id) {
-        const res = await request(`/projects/${id}`);
+      if (this.data.id) {
+        const res = await request(`/projects/${this.data.id}`);
         const project = res.data;
+        const isPreset = options.categories.includes(project.category);
         this.setData({
-          category: this.data.categories.includes(project.category) ? project.category : '',
-          customCategory: this.data.categories.includes(project.category) ? '' : project.category,
+          category: isPreset ? project.category : '',
+          customCategory: isPreset ? '' : project.category,
           title: project.title,
           status: project.status,
           targetHouseholds: String(project.target_households),
@@ -48,8 +48,9 @@ Page({
           glossary: project.glossary || [],
         });
       }
+      this.setData({ loaded: true, loadError: '' });
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      this.setData({ loadError: error.message });
     }
   },
 

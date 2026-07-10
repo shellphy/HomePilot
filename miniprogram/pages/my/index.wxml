@@ -1,91 +1,99 @@
-<view class="page-body tabbed" wx:if="{{me}}">
-  <view class="card profile-card">
-    <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-      <image wx:if="{{me.avatar}}" class="avatar-img" src="{{me.avatar}}" mode="aspectFill" />
-      <view wx:else class="avatar-fallback">{{me.nickname ? me.nickname[0] : '+'}}</view>
-    </button>
-    <view class="profile-main">
-      <input
-        class="nickname-input"
-        type="nickname"
-        placeholder="点击填昵称（键盘上方可一键用微信昵称）"
-        placeholder-style="font-size: 24rpx; font-weight: 400;"
-        value="{{me.nickname}}"
-        bindblur="onNicknameBlur"
-      />
-      <view class="profile-sub">
-        <text wx:if="{{me.role === 'merchant'}}" class="pill pill-negotiating">商家 · {{me.merchant_name}}</text>
-        <text wx:else>{{me.unit_label ? me.unit_label + ' 业主' : '楼栋待完善'}}</text>
+<view class="page-body tabbed">
+  <block wx:if="{{me}}">
+    <view class="card profile-card">
+      <button class="avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <image wx:if="{{me.avatar}}" class="avatar-img" src="{{me.avatar}}" mode="aspectFill" />
+        <view wx:else class="avatar-fallback">{{me.nickname ? me.nickname[0] : '+'}}</view>
+      </button>
+      <view class="profile-main">
+        <input
+          class="nickname-input"
+          type="nickname"
+          placeholder="点击填昵称（键盘上方可一键用微信昵称）"
+          placeholder-style="font-size: 24rpx; font-weight: 400;"
+          value="{{me.nickname}}"
+          bind:blur="onNicknameBlur"
+        />
+        <view class="profile-sub">
+          <text wx:if="{{me.role === 'merchant'}}" class="pill pill-negotiating">商家 · {{me.merchant_name}}</text>
+          <text wx:else>{{me.unit_label ? me.unit_label + ' 业主' : '楼栋待完善'}}</text>
+        </view>
       </view>
     </view>
+
+    <block wx:if="{{me.role !== 'merchant'}}">
+      <view class="card">
+        <view class="kicker">我的装修登记</view>
+        <block wx:if="{{registration}}">
+          <view class="reg-row"><text class="reg-label">户型</text><text>{{registration.layout}}</text></view>
+          <view class="reg-row"><text class="reg-label">装修方式</text><text>{{registration.decoration_mode}}</text></view>
+          <view class="reg-row reg-row-tags">
+            <text class="reg-label">感兴趣</text>
+            <view class="reg-tags">
+              <t-tag wx:for="{{registration.interests}}" wx:key="*this" size="small" variant="light" theme="success">{{item}}</t-tag>
+            </view>
+          </view>
+          <view class="reg-actions">
+            <t-button theme="light" block class="reg-btn" bind:tap="goRegistration">修改登记</t-button>
+            <t-button theme="{{registration.answered ? 'light' : 'primary'}}" block class="reg-btn" bind:tap="goSurvey">
+              {{registration.answered ? '进阶问卷（已答 ' + registration.answered + ' 题，可修改）' : '填进阶问卷（3 分钟）'}}
+            </t-button>
+          </view>
+        </block>
+        <block wx:else>
+          <view class="reg-empty">还没登记装修意向。登记后能看到同户型邻居都在准备什么，也是团购和商家谈价的筹码。</view>
+          <t-button theme="primary" block bind:tap="goRegistration">2 分钟完成登记</t-button>
+        </block>
+      </view>
+
+      <view class="card">
+        <view class="kicker">我发起的团购</view>
+        <block wx:if="{{myProjects.length}}">
+          <view class="mine-row" wx:for="{{myProjects}}" wx:key="id" data-id="{{item.id}}" bind:tap="goProject">
+            <view class="mine-main">
+              <view class="mine-title">{{item.title}}</view>
+              <view class="mine-sub">{{item.status_label}} · {{item.signups_count}} 户</view>
+            </view>
+            <view class="pill {{item.is_approved ? 'pill-open' : 'pill-negotiating'}}">{{item.is_approved ? '已上架' : '待审核'}}</view>
+          </view>
+        </block>
+        <view wx:else class="mine-empty">想团的东西没人组织？你来发起，你就是团长。</view>
+        <t-button theme="light" block class="mine-btn" bind:tap="goPublish">发起新团购</t-button>
+      </view>
+
+      <view class="card">
+        <view class="kicker">商家入驻</view>
+        <block wx:if="{{!showMerchantForm}}">
+          <view class="merchant-intro">群里的商家朋友可以切换为商家身份：能看到团购动态和全小区的意向统计，但不参与报名和登记。</view>
+          <t-button theme="light" block bind:tap="toggleMerchantForm">我是商家</t-button>
+        </block>
+        <block wx:else>
+          <view class="f-label">商家名称</view>
+          <input class="fin" placeholder="如：青城中央空调" value="{{merchantName}}" data-field="merchantName" bind:input="onMerchantInput" />
+          <view class="f-label">主营品类</view>
+          <input class="fin" placeholder="如：中央空调 / 门窗 / 全屋定制" value="{{merchantCategory}}" data-field="merchantCategory" bind:input="onMerchantInput" />
+          <view class="merchant-note">切换后将不能报名接龙、填业主登记；可随时切回。</view>
+          <t-button theme="primary" block bind:tap="applyMerchant">确认切换为商家</t-button>
+        </block>
+      </view>
+    </block>
+
+    <block wx:else>
+      <view class="card">
+        <view class="kicker">商家信息</view>
+        <view class="reg-row"><text class="reg-label">名称</text><text>{{me.merchant_name}}</text></view>
+        <view class="reg-row"><text class="reg-label">主营</text><text>{{me.merchant_category}}</text></view>
+        <view class="merchant-intro">你可以浏览各团购的进展，以及「小区意向」里的匿名统计——有多少户对你的品类感兴趣，一目了然。想合作请联系管理员。</view>
+        <t-button theme="light" block bind:tap="backToResident">切回业主身份</t-button>
+      </view>
+    </block>
+
+    <view class="my-foot">本小程序不代收任何款项 · 签约付款请直接对商家</view>
+  </block>
+
+  <view wx:elif="{{loadError}}" class="hint" bind:tap="loadMe">
+    {{loadError}}
+    <view class="hint-retry">点击重试</view>
   </view>
-
-  <block wx:if="{{me.role !== 'merchant'}}">
-    <view class="card">
-      <view class="kicker">我的装修登记</view>
-      <block wx:if="{{registration}}">
-        <view class="reg-row"><text class="reg-label">户型</text><text>{{registration.layout}}</text></view>
-        <view class="reg-row"><text class="reg-label">装修方式</text><text>{{registration.decoration_mode}}</text></view>
-        <view class="reg-row reg-row-tags">
-          <text class="reg-label">感兴趣</text>
-          <view class="reg-tags">
-            <t-tag wx:for="{{registration.interests}}" wx:key="*this" size="small" variant="light" theme="success">{{item}}</t-tag>
-          </view>
-        </view>
-        <view class="reg-actions">
-          <t-button theme="light" block class="reg-btn" bind:tap="goRegistration">修改登记</t-button>
-          <t-button theme="{{registration.answered ? 'light' : 'primary'}}" block class="reg-btn" bind:tap="goSurvey">
-            {{registration.answered ? '进阶问卷（已答 ' + registration.answered + ' 题，可修改）' : '填进阶问卷（3 分钟）'}}
-          </t-button>
-        </view>
-      </block>
-      <block wx:else>
-        <view class="reg-empty">还没登记装修意向。登记后能看到同户型邻居都在准备什么，也是团购和商家谈价的筹码。</view>
-        <t-button theme="primary" block bind:tap="goRegistration">2 分钟完成登记</t-button>
-      </block>
-    </view>
-
-    <view class="card">
-      <view class="kicker">我发起的团购</view>
-      <block wx:if="{{myProjects.length}}">
-        <view class="mine-row" wx:for="{{myProjects}}" wx:key="id" data-id="{{item.id}}" bindtap="goProject">
-          <view class="mine-main">
-            <view class="mine-title">{{item.title}}</view>
-            <view class="mine-sub">{{item.status_label}} · {{item.signups_count}} 户</view>
-          </view>
-          <view class="pill {{item.is_approved ? 'pill-open' : 'pill-negotiating'}}">{{item.is_approved ? '已上架' : '待审核'}}</view>
-        </view>
-      </block>
-      <view wx:else class="mine-empty">想团的东西没人组织？你来发起，你就是团长。</view>
-      <t-button theme="light" block class="mine-btn" bind:tap="goPublish">发起新团购</t-button>
-    </view>
-
-    <view class="card">
-      <view class="kicker">商家入驻</view>
-      <block wx:if="{{!showMerchantForm}}">
-        <view class="merchant-intro">群里的商家朋友可以切换为商家身份：能看到团购动态和全小区的意向统计，但不参与报名和登记。</view>
-        <t-button theme="light" block bind:tap="toggleMerchantForm">我是商家</t-button>
-      </block>
-      <block wx:else>
-        <view class="f-label">商家名称</view>
-        <input class="fin" placeholder="如：青城中央空调" value="{{merchantName}}" data-field="merchantName" bindinput="onMerchantInput" />
-        <view class="f-label">主营品类</view>
-        <input class="fin" placeholder="如：中央空调 / 门窗 / 全屋定制" value="{{merchantCategory}}" data-field="merchantCategory" bindinput="onMerchantInput" />
-        <view class="merchant-note">切换后将不能报名接龙、填业主登记；可随时切回。</view>
-        <t-button theme="primary" block bind:tap="applyMerchant">确认切换为商家</t-button>
-      </block>
-    </view>
-  </block>
-
-  <block wx:else>
-    <view class="card">
-      <view class="kicker">商家信息</view>
-      <view class="reg-row"><text class="reg-label">名称</text><text>{{me.merchant_name}}</text></view>
-      <view class="reg-row"><text class="reg-label">主营</text><text>{{me.merchant_category}}</text></view>
-      <view class="merchant-intro">你可以浏览各团购的进展，以及「小区意向」里的匿名统计——有多少户对你的品类感兴趣，一目了然。想合作请联系管理员。</view>
-      <t-button theme="light" block bind:tap="backToResident">切回业主身份</t-button>
-    </view>
-  </block>
-
-  <view class="my-foot">本小程序不代收任何款项 · 签约付款请直接对商家</view>
+  <view wx:else class="hint">加载中…</view>
 </view>
