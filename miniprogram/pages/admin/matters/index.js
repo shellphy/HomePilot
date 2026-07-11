@@ -53,15 +53,25 @@ Page({
     wx.navigateTo({ url: `/pages/admin/matter-form/index?id=${event.currentTarget.dataset.id}` });
   },
 
-  async approve(event) {
+  // 通过即对全小区公示，且按钮在列表行上容易误触，先确认再执行
+  approve(event) {
     const id = event.currentTarget.dataset.id;
-    try {
-      await admin.approveMatter(id, true);
-      wx.showToast({ title: '已通过并公示', icon: 'success' });
-      this.reload();
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-    }
+    const matter = this.data.matters.find((item) => item.id === id);
+    wx.showModal({
+      title: '通过并公示？',
+      content: `「${matter.title}」将立即对全小区可见`,
+      confirmText: '通过',
+      success: async ({ confirm }) => {
+        if (!confirm) return;
+        try {
+          await admin.approveMatter(id, true);
+          wx.showToast({ title: '已通过并公示', icon: 'success' });
+          this.reload();
+        } catch (error) {
+          wx.showToast({ title: error.message, icon: 'none' });
+        }
+      },
+    });
   },
 
   // 管理员可发布任何类型（公告、征集这类业主不能自发的也在内）

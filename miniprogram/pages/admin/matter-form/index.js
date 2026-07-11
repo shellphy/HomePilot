@@ -65,26 +65,50 @@ Page({
     });
   },
 
+  // 有未保存的修改时，返回/退出前弹确认，防止编辑丢失
+  markDirty() {
+    if (this.dirty || !wx.enableAlertBeforeUnload) return;
+    this.dirty = true;
+    wx.enableAlertBeforeUnload({ message: '修改还没保存，确定要离开吗？' });
+  },
+
+  clearDirty() {
+    if (!this.dirty) return;
+    this.dirty = false;
+    wx.disableAlertBeforeUnload();
+  },
+
   onInput(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
   onSwitch(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
-  pickState(event) {
-    this.setData({ state: event.currentTarget.dataset.state });
+  chooseState() {
+    const { states, stateKeys } = this.data;
+    wx.showActionSheet({
+      itemList: stateKeys.map((key) => states[key]),
+      success: ({ tapIndex }) => {
+        this.markDirty();
+        this.setData({ state: stateKeys[tapIndex] });
+      },
+    });
   },
 
   // 条目列表（团购条件 / 买前必懂）的增删改
   addRow(event) {
+    this.markDirty();
     const list = event.currentTarget.dataset.list;
     const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '' };
     this.setData({ [list]: [...this.data[list], blank] });
   },
 
   removeRow(event) {
+    this.markDirty();
     const { list, index } = event.currentTarget.dataset;
     const rows = [...this.data[list]];
     rows.splice(index, 1);
@@ -92,6 +116,7 @@ Page({
   },
 
   onRowInput(event) {
+    this.markDirty();
     const { list, index, field } = event.currentTarget.dataset;
     this.setData({ [`${list}[${index}].${field}`]: event.detail.value });
   },
@@ -132,10 +157,12 @@ Page({
     try {
       if (data.id) {
         await admin.updateMatter(data.id, body);
+        this.clearDirty();
         wx.showToast({ title: '已保存', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
         const res = await admin.createMatter({ type: data.type, ...body });
+        this.clearDirty();
         // 新发布的征集顺路去配问卷，其余类型直接返回
         if (data.type === 'census') {
           wx.redirectTo({ url: `/pages/admin/census-schema/index?id=${res.data.id}` });
@@ -161,6 +188,7 @@ Page({
         if (!confirm) return;
         try {
           await admin.deleteMatter(this.data.id);
+          this.clearDirty();
           wx.showToast({ title: '已删除', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
         } catch (error) {

@@ -1,32 +1,66 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <view class="card">
-      <view class="q-title">标题</view>
-      <input class="fin" placeholder="一句话说清这件事" value="{{title}}" data-field="title" bind:input="onInput" />
+    <!-- 基本信息：短字段统一行式（标签左、值右） -->
+    <view class="card form-list">
+      <view class="frow">
+        <text class="frow-label">标题</text>
+        <input class="frow-input" placeholder="一句话说清这件事" value="{{title}}" data-field="title" bind:input="onInput" />
+      </view>
+
+      <!-- 团购专属短字段 -->
+      <block wx:if="{{type === 'groupbuy'}}">
+        <view class="frow">
+          <text class="frow-label">品类</text>
+          <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" data-field="category" bind:input="onInput" />
+        </view>
+        <view class="frow">
+          <text class="frow-label">阶梯优惠</text>
+          <input class="frow-input" placeholder="如：满 20 户赠全屋水电升级" value="{{perk}}" data-field="perk" bind:input="onInput" />
+        </view>
+      </block>
+
+      <!-- 目标数（团购/活动/互助/维权） -->
+      <view class="frow" wx:if="{{type !== 'notice' && type !== 'census'}}">
+        <text class="frow-label">目标数<text class="q-note">0 表示不设目标</text></text>
+        <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
+      </view>
+
+      <!-- 状态流转：单选走 action-sheet，与资料页「身份」同一套交互 -->
+      <view class="frow" wx:if="{{stateKeys.length}}" hover-class="frow-hover" bind:tap="chooseState">
+        <text class="frow-label">状态</text>
+        <text class="frow-value">{{states[state]}}</text>
+        <text class="frow-arrow">›</text>
+      </view>
+
+      <view class="frow" wx:if="{{type === 'census'}}">
+        <view class="frow-main">
+          <view class="row-title">征集联系方式</view>
+          <view class="row-sub">打开后，参与前需先在个人资料里完善楼栋号和微信号</view>
+        </view>
+        <switch checked="{{collectsContact}}" data-field="collectsContact" bind:change="onSwitch" color="#06ae56" />
+      </view>
+
+      <view class="frow">
+        <view class="frow-main">
+          <view class="row-title">公示到小区页</view>
+          <view class="row-sub">关闭则对业主隐藏（相当于撤下/待审核）</view>
+        </view>
+        <switch checked="{{isApproved}}" data-field="isApproved" bind:change="onSwitch" color="#06ae56" />
+      </view>
     </view>
 
-    <!-- 公告：正文 -->
+    <!-- 长文本：公告正文 / 说明 -->
     <view class="card" wx:if="{{type === 'notice'}}">
       <view class="q-title">公告正文</view>
       <textarea class="fin farea" auto-height maxlength="2000" placeholder="写给全小区看的内容" value="{{body}}" data-field="body" bind:input="onInput" />
     </view>
-
-    <!-- 其余类型：说明 -->
-    <view class="card" wx:if="{{type !== 'notice'}}">
+    <view class="card" wx:else>
       <view class="q-title">{{type === 'census' ? '征集说明（显示在数据页顶部）' : '把事情说清楚'}}</view>
       <textarea class="fin farea" auto-height maxlength="1000" value="{{pitch}}" data-field="pitch" bind:input="onInput" />
     </view>
 
-    <!-- 团购专属 -->
+    <!-- 团购专属条目列表 -->
     <block wx:if="{{type === 'groupbuy'}}">
-      <view class="card">
-        <view class="q-title">品类</view>
-        <input class="fin" placeholder="如：装修公司、门窗" value="{{category}}" data-field="category" bind:input="onInput" />
-      </view>
-      <view class="card">
-        <view class="q-title">阶梯优惠</view>
-        <input class="fin" placeholder="如：满 20 户赠全屋水电升级" value="{{perk}}" data-field="perk" bind:input="onInput" />
-      </view>
       <view class="card">
         <view class="q-title">团购条件</view>
         <view class="pair" wx:for="{{terms}}" wx:key="index">
@@ -49,66 +83,29 @@
       </view>
     </block>
 
-    <!-- 征集专属 -->
-    <block wx:if="{{type === 'census'}}">
-      <view class="card">
-        <view class="switch-row">
-          <view class="row-main">
-            <view class="row-title">征集联系方式</view>
-            <view class="row-sub">打开后，参与前需先在个人资料里完善楼栋号和微信号</view>
-          </view>
-          <switch checked="{{collectsContact}}" data-field="collectsContact" bind:change="onSwitch" color="#06ae56" />
-        </view>
-      </view>
-      <view class="card" wx:if="{{id}}">
-        <view class="row" hover-class="row-hover" bind:tap="goSchema">
-          <view class="row-main">
-            <view class="row-title">问卷题目</view>
-            <view class="row-sub">{{moduleCount}} 个模块 · 收到答案后只加题不改题</view>
-          </view>
-          <text class="row-arrow">›</text>
-        </view>
-        <view class="row" hover-class="row-hover" bind:tap="goRegistrations">
-          <view class="row-main">
-            <view class="row-title">登记明细</view>
-            <view class="row-sub">含楼栋、房号、联系方式，仅管理员可见</view>
-          </view>
-          <text class="row-arrow">›</text>
-        </view>
-      </view>
-    </block>
-
-    <!-- 目标数（团购/活动/互助/维权） -->
-    <view class="card" wx:if="{{type !== 'notice' && type !== 'census'}}">
-      <view class="q-title">目标数<text class="q-note">0 表示不设目标</text></view>
-      <input class="fin" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
-    </view>
-
-    <!-- 状态与公示 -->
-    <view class="card" wx:if="{{stateKeys.length}}">
-      <view class="q-title">状态</view>
-      <view class="chips">
-        <view
-          class="chip {{state === key ? 'chip-on' : ''}}"
-          wx:for="{{stateKeys}}"
-          wx:for-item="key"
-          wx:key="*this"
-          data-state="{{key}}"
-          bind:tap="pickState"
-        >{{states[key]}}</view>
-      </view>
-    </view>
-    <view class="card">
-      <view class="switch-row">
+    <!-- 征集专属：问卷与登记入口 -->
+    <view class="card" wx:if="{{type === 'census' && id}}">
+      <view class="row" hover-class="row-hover" bind:tap="goSchema">
         <view class="row-main">
-          <view class="row-title">公示到小区页</view>
-          <view class="row-sub">关闭则对业主隐藏（相当于撤下/待审核）</view>
+          <view class="row-title">问卷题目</view>
+          <view class="row-sub">{{moduleCount}} 个模块 · 收到答案后只加题不改题</view>
         </view>
-        <switch checked="{{isApproved}}" data-field="isApproved" bind:change="onSwitch" color="#06ae56" />
+        <text class="row-arrow">›</text>
+      </view>
+      <view class="row" hover-class="row-hover" bind:tap="goRegistrations">
+        <view class="row-main">
+          <view class="row-title">登记明细</view>
+          <view class="row-sub">含楼栋、房号、联系方式，仅管理员可见</view>
+        </view>
+        <text class="row-arrow">›</text>
       </view>
     </view>
 
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '发布'}}</t-button>
+    <!-- 危险操作与吸底的保存拉开距离，避免误触 -->
     <t-button wx:if="{{id}}" theme="danger" variant="text" block class="del-btn" bind:tap="remove">删除这件事项</t-button>
+
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '发布'}}</t-button>
+    </view>
   </page-status>
 </view>
