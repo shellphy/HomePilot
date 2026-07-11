@@ -6,85 +6,38 @@ use App\Models\Resident;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
-test('party admin routes reject ordinary members', function (string $method, string $uriTemplate) {
-    $resident = Resident::factory()->create();
+test('certifying a party is admin only', function () {
     $party = Party::factory()->create();
-    Sanctum::actingAs($resident);
+    Sanctum::actingAs(Resident::factory()->create());
 
-    $uri = str_replace(['{party}', '{resident}'], [$party->id, $resident->id], $uriTemplate);
-
-    $this->json($method, $uri)->assertForbidden();
-})->with([
-    ['POST', '/api/admin/parties'],
-    ['POST', '/api/admin/parties/{party}/members'],
-    ['DELETE', '/api/admin/parties/{party}/members/{resident}'],
-]);
-
-test('admins can create a governance party which is listed by default', function () {
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-
-    $this->postJson('/api/admin/parties', ['type' => 'property', 'name' => '天青府物业服务中心'])
-        ->assertCreated()
-        ->assertJsonPath('data.type_label', '物业')
-        ->assertJsonPath('data.is_listed', true);
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_listed' => true])->assertForbidden();
 });
 
-test('admins can bind members by phone or id and unbind them back to owners', function () {
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $party = Party::factory()->listed()->create(['type' => Party::TYPE_PROPERTY]);
-    $byPhone = Resident::factory()->create(['phone' => '13900139000']);
-    $byId = Resident::factory()->create();
-
-    $this->postJson("/api/admin/parties/{$party->id}/members", ['resident' => '13900139000'])
-        ->assertSuccessful()
-        ->assertJsonPath('data.members_count', 1);
-
-    $this->postJson("/api/admin/parties/{$party->id}/members", ['resident' => (string) $byId->id])
-        ->assertSuccessful()
-        ->assertJsonPath('data.members_count', 2);
-
-    expect($byPhone->refresh()->affiliated_party_id)->toBe($party->id)
-        ->and($byId->refresh()->affiliated_party_id)->toBe($party->id);
-
-    $this->deleteJson("/api/admin/parties/{$party->id}/members/{$byPhone->id}")
-        ->assertSuccessful()
-        ->assertJsonPath('data.members_count', 1);
-
-    expect($byPhone->refresh()->affiliated_party_id)->toBeNull();
-});
-
-test('a bound governance member can post official responses', function () {
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $party = Party::factory()->listed()->create(['type' => Party::TYPE_PROPERTY, 'name' => '天青府物业服务中心']);
+test('a self registered property member can post official responses once certified', function () {
+    // 物业和商家走同一条链路：自助亮明身份 → 管理员认证
     $member = Resident::factory()->create();
-
-    $this->postJson("/api/admin/parties/{$party->id}/members", ['resident' => (string) $member->id])
+    Sanctum::actingAs($member);
+    $this->postJson('/api/me/party', ['type' => 'property', 'name' => '天青府物业服务中心'])
         ->assertSuccessful();
 
     $matter = Matter::factory()->rights()->create();
-    Sanctum::actingAs($member->refresh());
 
+    // 认证前不能官方回应
+    $this->postJson("/api/matters/{$matter->id}/updates", [
+        'happened_on' => '2026-07-11',
+        'content' => '已收到联名诉求。',
+    ])->assertForbidden();
+
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+    $partyId = $member->refresh()->affiliated_party_id;
+    $this->putJson("/api/admin/parties/{$partyId}", ['is_listed' => true])->assertSuccessful();
+
+    // 用 fresh 实例重新登录，避免认证前缓存的 affiliatedParty 关系
+    Sanctum::actingAs($member->fresh());
     $this->postJson("/api/matters/{$matter->id}/updates", [
         'happened_on' => '2026-07-11',
         'content' => '已收到联名诉求，本周五前给出书面答复。',
     ])->assertCreated()->assertJsonPath('data.author', '物业 · 天青府物业服务中心');
-});
-
-test('binding an unknown member returns a validation error', function () {
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $party = Party::factory()->create();
-
-    $this->postJson("/api/admin/parties/{$party->id}/members", ['resident' => '13000000000'])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('resident');
-});
-
-test('unbinding a member who belongs to another party is a 404', function () {
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $party = Party::factory()->create();
-    $stranger = Resident::factory()->merchant()->create();
-
-    $this->deleteJson("/api/admin/parties/{$party->id}/members/{$stranger->id}")->assertNotFound();
 });
 
 test('the pending count tracks unlisted parties that have members', function () {
@@ -98,14 +51,14 @@ test('the pending count tracks unlisted parties that have members', function () 
         ->assertJsonPath('pending_count', 1);
 });
 
-test('the party list carries member details for the admin page', function () {
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $member = Resident::factory()->inUnit('5栋')->merchant()->create(['nickname' => '王老板']);
-
-    $this->getJson('/api/admin/parties')
-        ->assertJsonPath('data.0.members.0.id', $member->id)
-        ->assertJsonPath('data.0.members.0.nickname', '王老板')
-        ->assertJsonPath('data.0.members.0.unit_label', '5栋');
+test('options carry the per type form metadata for the registration page', function () {
+    $this->getJson('/api/options')
+        ->assertSuccessful()
+        ->assertJsonPath('party_types.0.key', 'merchant')
+        ->assertJsonPath('party_types.0.category_label', '主营')
+        ->assertJsonPath('party_types.1.key', 'property')
+        ->assertJsonPath('party_types.1.self_registrable', true)
+        ->assertJsonPath('party_types.1.category_label', '');
 });
 
 test('options expose the admin contact for the certification guide', function () {

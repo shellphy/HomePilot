@@ -16,11 +16,13 @@ class PartyController extends Controller
     use ResolvesResident;
 
     /**
-     * 已认证相关方名录（面向全小区）：商家带发起事项数、成团数与评价沉淀。
+     * 已认证商家名录（面向全小区）：带发起事项数、成团数与评价沉淀。
+     * 只收商家——物业/业委会等治理身份的公开面是事项时间线里的官方回应署名，不进名录。
      */
     public function index(): JsonResponse
     {
         $parties = Party::where('is_listed', true)
+            ->where('type', Party::TYPE_MERCHANT)
             ->withCount(['initiatedMatters as matter_count' => fn ($query) => $query->where('is_approved', true)])
             ->withCount(['initiatedMatters as deal_count' => fn ($query) => $query->where('type', 'groupbuy')->where('state', 'done')])
             ->orderByDesc('deal_count')
@@ -56,7 +58,7 @@ class PartyController extends Controller
 
     /**
      * 相关方入驻：创建一个相关方并绑定到当前成员（管理员认证后 is_listed 才为真）。
-     * 可自助入驻的类型由 Party::TYPES 声明，前端入驻页自动跟随。
+     * 商家/物业/业委会等全部走这一条链路，可选类型由 Party::TYPES 声明，前端入驻页自动跟随。
      */
     public function store(Request $request): ResidentResource
     {
@@ -76,18 +78,23 @@ class PartyController extends Controller
             'name.required' => '请填写名称',
         ]);
 
+        // 补充字段只对声明了 category_label 的类型有意义（商家的主营），其余类型忽略提交值
+        $category = Party::TYPES[$validated['type']]['category_label'] === ''
+            ? ''
+            : ($validated['category'] ?? '');
+
         // 已是同类型身份：更新现有相关方档案，而不是每次保存都新建一个
         $party = $resident->affiliatedParty;
         if ($party && $party->type === $validated['type']) {
             $party->update([
                 'name' => $validated['name'],
-                'category' => $validated['category'] ?? '',
+                'category' => $category,
             ]);
         } else {
             $party = Party::create([
                 'type' => $validated['type'],
                 'name' => $validated['name'],
-                'category' => $validated['category'] ?? '',
+                'category' => $category,
             ]);
             $resident->update(['affiliated_party_id' => $party->id]);
         }

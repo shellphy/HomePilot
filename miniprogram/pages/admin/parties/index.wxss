@@ -1,60 +1,6 @@
 .filter-chips {
   margin-bottom: 24rpx;
 }
-.create-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.create-title {
-  font-size: 27rpx;
-  font-weight: 600;
-}
-.create-toggle {
-  font-size: 25rpx;
-  color: var(--brand-deep);
-}
-.create-hint {
-  margin: 16rpx 0;
-}
-.create-input {
-  margin: 16rpx 0;
-}
-.members {
-  margin: 0 0 16rpx;
-  padding: 8rpx 20rpx;
-  background: var(--bg-page);
-  border-radius: 16rpx;
-}
-.member-row {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 16rpx 0;
-  border-bottom: 1rpx solid var(--line);
-}
-.member-row:last-child {
-  border-bottom: none;
-}
-.member-name {
-  font-size: 25rpx;
-  font-weight: 600;
-}
-.member-unbind {
-  flex-shrink: 0;
-  font-size: 24rpx;
-  color: var(--danger);
-  padding: 8rpx 12rpx;
-}
-.bind-row {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  padding: 16rpx 0;
-}
-.bind-input {
-  flex: 1;
-}
 .row {
   display: flex;
   align-items: center;

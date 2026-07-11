@@ -31,16 +31,17 @@ class Party extends Model
 
     /**
      * 相关方类型注册表：加一种类型改这里即可，API 与小程序入驻页自动跟随。
-     * self_registrable = 可从小程序自助亮明身份（业委会等治理身份由管理员认定）。
+     * 所有类型统一走「自助亮明身份 → 管理员认证」一条链路。
+     * name_hint = 入驻表单名称栏的提示；category_label = 档案补充字段的标签
+     * （空 = 该类型没有补充字段，主营品类只对商家有意义）。
      *
-     * @var array<string, array{label: string, self_registrable: bool}>
+     * @var array<string, array{label: string, self_registrable: bool, name_hint: string, category_label: string}>
      */
     public const TYPES = [
-        self::TYPE_MERCHANT => ['label' => '商家', 'self_registrable' => true],
-        // 物业/开发商暂不开放自助入驻（需要时把开关打开即可，前端身份选项自动跟随）
-        self::TYPE_PROPERTY => ['label' => '物业', 'self_registrable' => false],
-        self::TYPE_DEVELOPER => ['label' => '开发商', 'self_registrable' => false],
-        self::TYPE_COMMITTEE => ['label' => '业委会', 'self_registrable' => false],
+        self::TYPE_MERCHANT => ['label' => '商家', 'self_registrable' => true, 'name_hint' => '店名/公司名，如：青城中央空调', 'category_label' => '主营'],
+        self::TYPE_PROPERTY => ['label' => '物业', 'self_registrable' => true, 'name_hint' => '如：天青府物业服务中心', 'category_label' => ''],
+        self::TYPE_DEVELOPER => ['label' => '开发商', 'self_registrable' => true, 'name_hint' => '如：青城置业', 'category_label' => ''],
+        self::TYPE_COMMITTEE => ['label' => '业委会', 'self_registrable' => true, 'name_hint' => '如：天青府业主委员会', 'category_label' => ''],
     ];
 
     public function typeLabel(): string

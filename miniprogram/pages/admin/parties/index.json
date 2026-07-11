@@ -1,7 +1,6 @@
 {
   "navigationBarTitleText": "相关方认证",
   "usingComponents": {
-    "page-status": "/components/page-status/index",
-    "t-button": "tdesign-miniprogram/button/button"
+    "page-status": "/components/page-status/index"
   }
 }

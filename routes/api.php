@@ -59,10 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/matters/{matter}', [MatterAdminController::class, 'destroy']);
         Route::get('/matters/{matter}/registrations', [MatterAdminController::class, 'registrations']);
         Route::get('/parties', [PartyAdminController::class, 'index']);
-        Route::post('/parties', [PartyAdminController::class, 'store']);
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
-        Route::post('/parties/{party}/members', [PartyAdminController::class, 'storeMember']);
-        Route::delete('/parties/{party}/members/{resident}', [PartyAdminController::class, 'destroyMember']);
         Route::get('/settings', [SettingAdminController::class, 'show']);
         Route::put('/settings', [SettingAdminController::class, 'update']);
     });

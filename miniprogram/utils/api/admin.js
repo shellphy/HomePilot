@@ -34,22 +34,8 @@ function listParties() {
   return request('/admin/parties');
 }
 
-// 建档相关方：物业/业委会等不自助入驻的身份由管理员建档（默认直接认证）
-function createParty(data) {
-  return request('/admin/parties', { method: 'POST', data });
-}
-
 function certifyParty(id, listed) {
   return request(`/admin/parties/${id}`, { method: 'PUT', data: { is_listed: listed } });
-}
-
-// 绑定成员到相关方（成员 ID 或授权手机号），重复绑定即改挂
-function bindPartyMember(id, residentKey) {
-  return request(`/admin/parties/${id}/members`, { method: 'POST', data: { resident: residentKey } });
-}
-
-function unbindPartyMember(id, residentId) {
-  return request(`/admin/parties/${id}/members/${residentId}`, { method: 'DELETE' });
 }
 
 function getSettings() {
@@ -69,10 +55,7 @@ module.exports = {
   deleteMatter,
   listRegistrations,
   listParties,
-  createParty,
   certifyParty,
-  bindPartyMember,
-  unbindPartyMember,
   getSettings,
   saveSettings,
 };
