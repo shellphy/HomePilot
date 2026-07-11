@@ -55,6 +55,10 @@
   background: var(--warn-bg);
   line-height: 1.7;
 }
+.pending-tip-reject {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
 
 .leader-ops {
   border: 2rpx dashed var(--brand);

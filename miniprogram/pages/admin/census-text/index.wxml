@@ -72,8 +72,9 @@
         style="width: 100%; margin-bottom: 12rpx"
         bind:tap="publish"
       >{{published ? '更新公示内容' : '发布到公示面'}}</t-button>
+      <!-- 已发布时这是把内容从公示面撤下的动作，按钮外观就用红色预告后果 -->
       <t-button
-        theme="default"
+        theme="{{published ? 'danger' : 'default'}}"
         variant="outline"
         block
         size="large"

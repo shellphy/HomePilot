@@ -1,4 +1,4 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="form-hint">成交公示是团购的最后一步：把最终谈成的条件、返点让利的去向摊开给全小区看。透明是下一个团的信任来源。</view>
 
@@ -24,6 +24,8 @@
       />
     </view>
 
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">发布成交公示</t-button>
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">发布成交公示</t-button>
+    </view>
   </page-status>
 </view>

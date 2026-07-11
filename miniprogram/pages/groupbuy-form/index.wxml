@@ -19,7 +19,7 @@
 
       <view class="frow">
         <text class="frow-label">目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text>
-        <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
+        <input class="frow-input" type="number" value="{{targetCount}}" placeholder="如 20" data-field="targetCount" bind:input="onInput" />
       </view>
 
       <!-- 状态流转：单选走 action-sheet，与管理端表单同一套交互 -->

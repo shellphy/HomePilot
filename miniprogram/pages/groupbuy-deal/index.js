@@ -63,9 +63,14 @@ Page({
     try {
       await matters.publishDeal(id, finalTerms, finalNote.trim());
       this.clearDirty();
-      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
-      wx.showToast({ title: '成交公示已发布', icon: 'success' });
-      setTimeout(() => wx.navigateBack(), 800);
+      // 团购的收尾时刻，用 modal 把「发生了什么」讲清楚，分量对齐发起时的反馈（modal 也挡住了二次提交）
+      wx.showModal({
+        title: '成交公示已发布',
+        content: '最终条件已对全小区公开，这次团购就此收尾。你的透明，是下一个团的信任来源。',
+        showCancel: false,
+        confirmText: '好的',
+        success: () => wx.navigateBack(),
+      });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
       this.setData({ submitting: false });

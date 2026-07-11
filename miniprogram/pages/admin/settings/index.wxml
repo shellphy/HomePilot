@@ -1,5 +1,6 @@
 <view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="form-hint">这里的内容保存后立刻对全小区生效：名称、口号、楼栋清单等都会直接换成新的。</view>
     <block wx:for="{{groups}}" wx:for-item="group" wx:key="title">
       <view class="kicker">{{group.title}}</view>
       <view class="card form-list">

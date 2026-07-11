@@ -33,6 +33,7 @@ Page({
       const question = this.data.qi >= 0 ? modules[this.data.mi].questions[this.data.qi] : null;
       this.setData({
         matterTitle: res.data.title,
+        moduleTitle: (modules[this.data.mi] && modules[this.data.mi].title) || '',
         modules,
         text: question ? question.text : '',
         note: (question && question.note) || '',

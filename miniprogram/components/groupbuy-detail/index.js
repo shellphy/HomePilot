@@ -204,12 +204,14 @@ Component({
       if (!nextState) return;
 
       wx.showModal({
-        title: `流转为「${nextState.label}」？`,
+        title: `进入「${nextState.label}」？`,
         content: nextIsFinal
-          ? `确认后将与同意共享的参团者互通手机号、开放评价，状态不可再回退（纠错需联系管理员）。`
-          : `状态将从「${this.data.matter.state_label}」推进为「${nextState.label}」，此后不能退回上一步。`,
-        confirmText: '确认流转',
+          ? `「${nextState.label}」是最后一步：确认后与同意共享的参团者互通手机号、开放评价，且不能再改回来（弄错了需要联系管理员）。`
+          : `团购将从「${this.data.matter.state_label}」进入「${nextState.label}」，之后不能退回上一步。`,
+        confirmText: '确认推进',
         cancelText: '再想想',
+        // 不可逆的最后一步用红色确认，让分量在弹窗上就能感知
+        ...(nextIsFinal ? { confirmColor: '#e34d59' } : {}),
         success: async ({ confirm }) => {
           if (!confirm) return;
           try {

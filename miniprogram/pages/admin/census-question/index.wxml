@@ -1,5 +1,7 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <!-- 面包屑：三层编辑里随时知道自己在哪个征集的哪个模块下 -->
+    <view class="kicker">{{matterTitle}}{{moduleTitle ? ' › ' + moduleTitle : ''}}</view>
     <view class="card">
       <view class="q-title">题目<text class="f-required">*</text></view>
       <input class="fin" placeholder="如：打算怎么装？" value="{{text}}" data-field="text" bind:input="onInput" />
@@ -27,6 +29,7 @@
     </view>
 
     <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存题目</t-button>
-    <t-button wx:if="{{qi >= 0}}" theme="danger" variant="text" block bind:tap="remove">删除这道题</t-button>
+    <!-- 危险操作与保存拉开距离，避免误触（与事项表单同一约定） -->
+    <t-button wx:if="{{qi >= 0}}" theme="danger" variant="text" block style="margin-top: 40rpx" bind:tap="remove">删除这道题</t-button>
   </page-status>
 </view>

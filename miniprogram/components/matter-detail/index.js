@@ -148,12 +148,14 @@ Component({
       if (!nextState) return;
 
       wx.showModal({
-        title: `流转为「${nextState.label}」？`,
+        title: `进入「${nextState.label}」？`,
         content: nextIsFinal
-          ? `「${nextState.label}」是最终状态，确认后不能再回退，评价等事后环节将开启（纠错需联系管理员）。`
-          : `状态将从「${matter.state_label}」推进为「${nextState.label}」，此后不能退回上一步。`,
-        confirmText: '确认流转',
+          ? `「${nextState.label}」是最后一步，确认后不能再改回来，评价等事后环节将开启（弄错了需要联系管理员）。`
+          : `这件事将从「${matter.state_label}」进入「${nextState.label}」，之后不能退回上一步。`,
+        confirmText: '确认推进',
         cancelText: '再想想',
+        // 不可逆的最后一步用红色确认，让分量在弹窗上就能感知
+        ...(nextIsFinal ? { confirmColor: '#e34d59' } : {}),
         success: async ({ confirm }) => {
           if (!confirm) return;
           try {

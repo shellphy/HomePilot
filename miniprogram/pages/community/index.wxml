@@ -37,6 +37,12 @@
       <census-card wx:elif="{{item.type === 'census'}}" matter="{{item}}" />
       <matter-card wx:else matter="{{item}}" />
     </block>
-    <view wx:if="{{!doings.length}}" class="hint">还没有人牵头张罗。第一个张罗的人，就是这件事的牵头人。</view>
+    <!-- 空态：号召和行动放在同一处，别让人读完还得回头找顶部入口 -->
+    <view wx:if="{{!doings.length}}" class="hint">
+      还没有人牵头张罗。第一个张罗的人，就是这件事的牵头人。
+      <view class="empty-cta" wx:if="{{initiatableTypes.length || merchantUnlisted}}">
+        <t-button theme="primary" size="medium" bind:tap="goCreate">我来张罗第一件事</t-button>
+      </view>
+    </view>
   </page-status>
 </view>

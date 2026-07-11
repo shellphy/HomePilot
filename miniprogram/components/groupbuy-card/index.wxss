@@ -22,7 +22,7 @@
 }
 .gcard-perk {
   font-size: 25rpx;
-  color: var(--warn);
+  color: var(--brand-deep);
   margin-top: 14rpx;
   display: -webkit-box;
   -webkit-box-orient: vertical;

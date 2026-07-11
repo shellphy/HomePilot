@@ -44,7 +44,20 @@ Page({
   toggle(event) {
     const { id, index } = event.currentTarget.dataset;
     const listed = event.detail.value;
-    if (listed) return this.certify(id, true);
+    // 认证是把「已认证」身份推给全小区的对外动作，和撤下一样先确认；取消时把开关拨回去
+    if (listed) {
+      const party = this.data.parties[index] || {};
+      wx.showModal({
+        title: '认证这个相关方？',
+        content: `认证后「${party.name || 'TA'}」将以「已认证」身份对全小区公示`,
+        confirmText: '认证',
+        success: ({ confirm }) => {
+          if (confirm) this.certify(id, true);
+          else this.setData({ [`parties[${index}].is_listed`]: false });
+        },
+      });
+      return;
+    }
     // 撤下会失去公示身份，先确认；取消时重设 checked 把开关拨回去
     wx.showModal({
       title: '撤下这个相关方？',

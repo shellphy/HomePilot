@@ -1,5 +1,7 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <!-- 面包屑：三层编辑里随时知道自己在哪个征集下 -->
+    <view class="kicker">{{matterTitle}}</view>
     <view class="card">
       <view class="q-title">模块标题<text class="f-required">*</text></view>
       <input class="fin" placeholder="如：基础登记、家庭与居住" value="{{title}}" data-field="title" bind:input="onInput" />
@@ -23,6 +25,7 @@
     </block>
 
     <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存模块</t-button>
-    <t-button wx:if="{{mi >= 0}}" theme="danger" variant="text" block bind:tap="remove">删除这个模块</t-button>
+    <!-- 危险操作与保存拉开距离，避免误触（与事项表单同一约定） -->
+    <t-button wx:if="{{mi >= 0}}" theme="danger" variant="text" block style="margin-top: 40rpx" bind:tap="remove">删除这个模块</t-button>
   </page-status>
 </view>
