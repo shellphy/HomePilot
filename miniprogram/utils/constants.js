@@ -12,9 +12,10 @@ const PILL_CLASS = {
 };
 
 // 各事项类型的参与文案（团购/公告有专属组件，不走这份配置）
+// shareText：加入前共享开关的说明（维权不互通联系方式，没有这一项）
 const TYPE_META = {
-  activity: { joinCta: '报名参加', joinedCta: '已报名 ✓（点击取消）', foot: '人已报名', roster: '报名名单' },
-  aid: { joinCta: '算我一个', joinedCta: '已加入 ✓（点击退出）', foot: '人已加入', roster: '参与名单' },
+  activity: { joinCta: '报名参加', joinedCta: '已报名 ✓（点击取消）', foot: '人已报名', roster: '报名名单', shareText: '与发起人互通手机号，方便拉群约时间（仅双方可见）' },
+  aid: { joinCta: '算我一个', joinedCta: '已加入 ✓（点击退出）', foot: '人已加入', roster: '参与名单', shareText: '与发起人互通手机号，方便对接（仅双方可见）' },
   rights: { joinCta: '参与联名', joinedCta: '已联名 ✓（点击撤回）', foot: '人已联名', roster: '联名名单' },
 };
 
