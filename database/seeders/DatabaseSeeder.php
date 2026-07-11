@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 真机登录后 php artisan admin:grant 你的手机号或成员 ID 即可接管
-        $this->leader = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true]);
+        $this->leader = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true, 'layout_label' => '130㎡']);
 
         $parties = $this->parties();
         $this->hvacGroupbuy();

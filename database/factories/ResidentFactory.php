@@ -22,6 +22,7 @@ class ResidentFactory extends Factory
             'openid' => fake()->unique()->md5(),
             'nickname' => fake()->firstName(),
             'unit_label' => fake()->numberBetween(1, 8).'栋',
+            'layout_label' => fake()->randomElement(['107㎡', '130㎡', '154㎡']),
             'phone' => fake()->numerify('138########'),
         ];
     }

@@ -10,7 +10,7 @@
         <view class="row" hover-class="row-hover" data-id="{{item.id}}" bind:tap="toggle">
           <view class="row-main">
             <view class="row-title">{{item.unit_label || '未填楼栋'}}{{item.room_label ? ' ' + item.room_label : ''}} · {{item.nickname}}</view>
-            <view class="row-sub">手机 {{item.phone || '未授权'}} · {{item.created_at}}</view>
+            <view class="row-sub">{{item.layout_label ? item.layout_label + ' · ' : ''}}手机 {{item.phone || '未授权'}} · {{item.created_at}}</view>
           </view>
           <text class="row-arrow">{{openId === item.id ? '︿' : '﹀'}}</text>
         </view>

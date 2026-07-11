@@ -29,15 +29,17 @@ class UpdateProfileRequest extends FormRequest
         // 业主必须有楼栋号（名单公示按它展示），且只能选社区设置里的楼栋；相关方账号没有楼栋概念，允许空
         $user = $this->user();
         $isOwner = ! $user instanceof Resident || $user->affiliated_party_id === null;
-        $buildings = app(CommunitySettings::class)->buildings;
+        $settings = app(CommunitySettings::class);
 
         return [
             'nickname' => ['sometimes', 'nullable', 'string', 'max:30'],
             'avatar' => ['sometimes', 'url', 'max:255'],
             'unit_label' => $isOwner
-                ? ['sometimes', 'required', Rule::in($buildings)]
-                : ['sometimes', 'nullable', Rule::in($buildings)],
+                ? ['sometimes', 'required', Rule::in($settings->buildings)]
+                : ['sometimes', 'nullable', Rule::in($settings->buildings)],
             'room_label' => ['sometimes', 'nullable', 'string', 'max:30'],
+            // 户型选填：AI 答疑按它理解「我家」，管理端登记明细也带上
+            'layout_label' => ['sometimes', 'nullable', Rule::in($settings->layouts)],
         ];
     }
 
@@ -49,6 +51,7 @@ class UpdateProfileRequest extends FormRequest
         return [
             'unit_label.required' => '业主需要选择楼栋号',
             'unit_label.in' => '请从楼栋列表里选择',
+            'layout_label.in' => '请从户型列表里选择',
         ];
     }
 }

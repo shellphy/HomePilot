@@ -45,9 +45,11 @@ test('the agent instructions carry the matter terms, glossary and community cons
         ],
     ]);
 
-    $instructions = (string) (new MatterExplainer($matter))->instructions();
+    $asker = Resident::factory()->create(['layout_label' => '130㎡']);
+    $instructions = (string) (new MatterExplainer($matter, $asker))->instructions();
 
     expect($instructions)
+        ->toContain('130㎡') // 提问业主的户型，答疑按「我家」的实际情况
         ->toContain('中央空调团购')
         ->toContain('一拖四')
         ->toContain('3.2 万')

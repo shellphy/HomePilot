@@ -26,6 +26,7 @@ class ResidentResource extends JsonResource
             'avatar' => $this->avatar,
             'unit_label' => $this->unit_label,
             'room_label' => $this->room_label,
+            'layout_label' => $this->layout_label,
             'phone' => $this->phone,
             'is_admin' => $this->is_admin,
             // 「我的」页红点：我牵头的/我参与的有没有我没看过的新动态（POST /me/seen 标记已读）

@@ -40,6 +40,7 @@ class SettingAdminController extends Controller
             'title' => '选项清单',
             'fields' => [
                 ['key' => 'buildings', 'label' => '楼栋', 'kind' => 'list'],
+                ['key' => 'layouts', 'label' => '户型', 'kind' => 'list'],
             ],
         ],
     ];
@@ -63,6 +64,8 @@ class SettingAdminController extends Controller
             'ai_context' => ['nullable', 'string', 'max:500'],
             'buildings' => ['required', 'array', 'min:1'],
             'buildings.*' => ['required', 'string', 'max:10'],
+            'layouts' => ['required', 'array', 'min:1'],
+            'layouts.*' => ['required', 'string', 'max:10'],
         ]);
 
         // 唯一可留空的设置项：空字符串会被全局中间件转成 null，回填空串再存

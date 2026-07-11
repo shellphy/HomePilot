@@ -25,6 +25,7 @@ class OptionController extends Controller
                 'admin_contact' => $settings->admin_contact,
             ],
             'buildings' => $settings->buildings,
+            'layouts' => $settings->layouts,
             'party_types' => collect(Party::TYPES)
                 ->map(fn (array $meta, string $key): array => [
                     'key' => $key,

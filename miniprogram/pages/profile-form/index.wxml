@@ -44,6 +44,13 @@
             <text class="frow-arrow">›</text>
           </view>
         </picker>
+        <picker mode="selector" range="{{layouts}}" value="{{layoutIndex < 0 ? 0 : layoutIndex}}" bind:change="onPickLayout">
+          <view class="frow" hover-class="frow-hover">
+            <text class="frow-label">户型</text>
+            <text class="frow-value">{{layoutLabel || '请选择'}}</text>
+            <text class="frow-arrow">›</text>
+          </view>
+        </picker>
         <view class="frow">
           <text class="frow-label">房号</text>
           <input class="frow-input" value="{{roomLabel}}" data-field="roomLabel" bind:input="onInput" />

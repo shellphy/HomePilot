@@ -27,6 +27,9 @@ class CommunitySettings extends Settings
     /** @var array<int, string> */
     public array $buildings;
 
+    /** @var array<int, string> 户型清单（个人资料按此选择，AI 答疑按它理解「我家」） */
+    public array $layouts;
+
     public static function group(): string
     {
         return 'community';
