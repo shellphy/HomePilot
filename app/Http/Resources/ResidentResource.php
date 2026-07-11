@@ -44,7 +44,7 @@ class ResidentResource extends JsonResource
                 ->get()
                 ->map(fn (Stance $stance): array => [
                     'matter_id' => $stance->matter_id,
-                    'title' => $stance->matter?->title ?? '',
+                    'title' => $stance->matter->title,
                     'answered' => count($stance->payload['answers'] ?? []),
                 ])
                 ->values(),

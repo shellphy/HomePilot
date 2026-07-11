@@ -58,6 +58,18 @@ class Matter extends Model
         return $this->payload[$key] ?? $default;
     }
 
+    /**
+     * payload 中的列表字段（modules/terms 等），缺失或非法时按空列表处理。
+     *
+     * @return array<array-key, mixed>
+     */
+    public function payloadList(string $key): array
+    {
+        $value = $this->payloadValue($key);
+
+        return is_array($value) ? $value : [];
+    }
+
     /** @return BelongsTo<Resident, $this> */
     public function initiator(): BelongsTo
     {
@@ -70,13 +82,21 @@ class Matter extends Model
         return $this->hasMany(Stance::class);
     }
 
-    /** 接龙表态。@return HasMany<Stance, $this> */
+    /**
+     * 接龙表态。
+     *
+     * @return HasMany<Stance, $this>
+     */
     public function joins(): HasMany
     {
         return $this->stances()->where('mode', Stance::MODE_JOIN);
     }
 
-    /** 评价表态。@return HasMany<Stance, $this> */
+    /**
+     * 评价表态。
+     *
+     * @return HasMany<Stance, $this>
+     */
     public function reviews(): HasMany
     {
         return $this->stances()->where('mode', Stance::MODE_REVIEW);

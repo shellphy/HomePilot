@@ -102,18 +102,18 @@ class CensusController extends Controller
     /**
      * schema 摊平成 key => question 的映射。
      *
-     * @return Collection<string, array{key: string, text: string, type: string, options: array<int, string>, required?: bool}>
+     * @return Collection<array-key, array{key: string, text: string, type: string, options: array<int, string>, required?: bool}>
      */
     private function questions(Matter $matter): Collection
     {
-        return collect($matter->payloadValue('modules', []))
+        return collect($matter->payloadList('modules'))
             ->flatMap(fn (array $module): array => $module['questions'] ?? [])
             ->keyBy('key');
     }
 
     /**
      * @param  array<string, mixed>  $answers
-     * @param  Collection<string, array{key: string, text: string, type: string, options: array<int, string>}>  $questions
+     * @param  Collection<array-key, array{key: string, text: string, type: string, options: array<int, string>, required?: bool}>  $questions
      */
     private function validateAnswers(array $answers, Collection $questions): void
     {
@@ -146,22 +146,26 @@ class CensusController extends Controller
             ->get()
             ->map(fn (Stance $stance): array => $stance->payload['answers'] ?? []);
 
-        return collect($matter->payloadValue('modules', []))
-            ->map(fn (array $module): array => [
-                'title' => $module['title'] ?? '',
-                'questions' => collect($module['questions'] ?? [])->map(function (array $question) use ($allAnswers): array {
-                    $values = $allAnswers
-                        ->map(fn (array $answers) => $answers[$question['key']] ?? null)
-                        ->filter()
-                        ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
+        return collect($matter->payloadList('modules'))
+            ->map(function (array $module) use ($allAnswers): array {
+                $questions = $module['questions'] ?? [];
 
-                    return [
-                        'key' => $question['key'],
-                        'text' => $question['text'],
-                        'counts' => $values->countBy()->sortDesc(),
-                    ];
-                })->values()->all(),
-            ])
+                return [
+                    'title' => $module['title'] ?? '',
+                    'questions' => collect(is_array($questions) ? $questions : [])->map(function (array $question) use ($allAnswers): array {
+                        $values = $allAnswers
+                            ->map(fn (array $answers) => $answers[$question['key']] ?? null)
+                            ->filter()
+                            ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
+
+                        return [
+                            'key' => $question['key'],
+                            'text' => $question['text'],
+                            'counts' => $values->countBy()->sortDesc(),
+                        ];
+                    })->values()->all(),
+                ];
+            })
             ->values()
             ->all();
     }

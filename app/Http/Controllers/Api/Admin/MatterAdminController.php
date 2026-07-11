@@ -111,7 +111,7 @@ class MatterAdminController extends Controller
      */
     public function registrations(Matter $matter): JsonResponse
     {
-        $questions = collect($matter->payloadValue('modules', []))
+        $questions = collect($matter->payloadList('modules'))
             ->flatMap(fn (array $module): array => $module['questions'] ?? [])
             ->keyBy('key');
 
@@ -120,21 +120,25 @@ class MatterAdminController extends Controller
             ->with('resident')
             ->latest()
             ->get()
-            ->map(fn (Stance $stance): array => [
-                'id' => $stance->id,
-                'unit_label' => $stance->resident?->unit_label ?? '',
-                'room_label' => $stance->resident?->room_label ?? '',
-                'nickname' => $stance->resident?->nickname ?? '',
-                'wechat_id' => $stance->resident?->wechat_id ?? '',
-                'phone' => $stance->resident?->phone ?? '',
-                'created_at' => $stance->created_at?->format('Y-m-d H:i'),
-                'answers' => collect($stance->payload['answers'] ?? [])
-                    ->map(fn (mixed $value, string $key): array => [
-                        'question' => $questions[$key]['text'] ?? $key,
-                        'answer' => is_array($value) ? implode('、', $value) : (string) $value,
-                    ])
-                    ->values(),
-            ]);
+            ->map(function (Stance $stance) use ($questions): array {
+                $answers = $stance->payload['answers'] ?? [];
+
+                return [
+                    'id' => $stance->id,
+                    'unit_label' => $stance->resident->unit_label,
+                    'room_label' => $stance->resident->room_label,
+                    'nickname' => $stance->resident->nickname,
+                    'wechat_id' => $stance->resident->wechat_id,
+                    'phone' => $stance->resident->phone,
+                    'created_at' => $stance->created_at?->format('Y-m-d H:i'),
+                    'answers' => collect(is_array($answers) ? $answers : [])
+                        ->map(fn (mixed $value, int|string $key): array => [
+                            'question' => $questions[$key]['text'] ?? $key,
+                            'answer' => is_array($value) ? implode('、', $value) : (string) $value,
+                        ])
+                        ->values(),
+                ];
+            });
 
         return response()->json(['data' => $registrations]);
     }
@@ -225,11 +229,12 @@ class MatterAdminController extends Controller
     {
         $payload = $validated['payload'] ?? [];
 
-        if ($typeKey === 'census' && isset($payload['modules'])) {
+        if ($typeKey === 'census' && is_array($payload) && isset($payload['modules']) && is_array($payload['modules'])) {
             $payload['modules'] = collect($payload['modules'])
                 ->map(function (array $module): array {
                     $module['key'] = $module['key'] ?? 'm_'.Str::lower(Str::random(6));
-                    $module['questions'] = collect($module['questions'] ?? [])
+                    $questions = $module['questions'] ?? [];
+                    $module['questions'] = collect(is_array($questions) ? $questions : [])
                         ->map(function (array $question): array {
                             $question['key'] = $question['key'] ?? 'q_'.Str::lower(Str::random(6));
 

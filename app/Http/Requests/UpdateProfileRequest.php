@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Resident;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,8 @@ class UpdateProfileRequest extends FormRequest
     public function rules(): array
     {
         // 业主必须有楼栋号（名单公示按它展示）；相关方账号没有楼栋概念，允许空
-        $isOwner = $this->user()?->affiliated_party_id === null;
+        $user = $this->user();
+        $isOwner = ! $user instanceof Resident || $user->affiliated_party_id === null;
 
         return [
             'nickname' => ['sometimes', 'nullable', 'string', 'max:30'],
