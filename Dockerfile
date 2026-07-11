@@ -19,7 +19,7 @@ RUN npm run build
 # ---- PHP-FPM 应用镜像 ----
 FROM php:8.5-fpm-alpine AS app
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions pdo_mysql bcmath intl zip pcntl opcache
+RUN install-php-extensions pdo_sqlite bcmath intl zip pcntl opcache
 
 WORKDIR /var/www/html
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
