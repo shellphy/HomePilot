@@ -2,6 +2,7 @@
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
+const { guardProfileError } = require('../../utils/profile-guard');
 
 Page({
   behaviors: [load],
@@ -145,7 +146,9 @@ Page({
         });
       }
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      if (!guardProfileError(error, '你发起后就是本团团长，也会以「楼栋 + 昵称」出现在公示名单里，请先在个人资料里选好楼栋号。')) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      }
     } finally {
       this.setData({ submitting: false });
     }

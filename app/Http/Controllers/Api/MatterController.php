@@ -15,6 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class MatterController extends Controller
 {
@@ -162,6 +163,13 @@ class MatterController extends Controller
             abort_unless($type->merchantInitiatable(), 403, '商家可以发起团购和活动');
         }
 
+        // 牵头人自己也要上「楼栋 + 昵称」的公示名单，和报名一样先选楼栋号
+        if ($party === null && $resident->unit_label === '') {
+            throw ValidationException::withMessages([
+                'profile' => '发起前请先在「我的 · 个人资料」里选好楼栋号',
+            ]);
+        }
+
         $validated = $request->validate($this->rulesFor($typeKey));
 
         $matter = Matter::create([
@@ -192,6 +200,10 @@ class MatterController extends Controller
             'state' => ['sometimes', Rule::in(array_keys($type->states()))],
         ]));
 
+        if (($validated['state'] ?? $matter->state) !== $matter->state) {
+            $this->guardFinalState($matter);
+        }
+
         $previousState = $matter->state;
 
         $matter->update([
@@ -220,6 +232,10 @@ class MatterController extends Controller
         $validated = $request->validate([
             'state' => ['required', Rule::in(array_keys($matter->typeDef()->states()))],
         ]);
+
+        if ($validated['state'] !== $matter->state) {
+            $this->guardFinalState($matter);
+        }
 
         $previousState = $matter->state;
         $matter->update($validated);
@@ -257,6 +273,21 @@ class MatterController extends Controller
         ]);
 
         return response()->json(['data' => MatterResource::make($matter)]);
+    }
+
+    /**
+     * 终态锁：已进入终态（如已成团/已有结果）后，联系方式已互通、评价已开放，
+     * 发起人不能再把状态改回去；确需纠错找管理员（管理端编辑不受此限）。
+     */
+    private function guardFinalState(Matter $matter): void
+    {
+        $type = $matter->typeDef();
+
+        abort_if(
+            $type->isFinalState($matter->state),
+            422,
+            '已进入「'.$type->stateLabel($matter->state).'」，状态不能再回退；如需纠错请联系管理员',
+        );
     }
 
     /**

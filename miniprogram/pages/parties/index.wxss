@@ -37,3 +37,7 @@
   font-size: 24rpx;
   color: #9b978c;
 }
+
+.card-hover {
+  opacity: 0.85;
+}

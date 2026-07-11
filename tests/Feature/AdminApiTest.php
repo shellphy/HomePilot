@@ -206,7 +206,9 @@ test('admin deletes a matter', function () {
 
     $this->deleteJson("/api/admin/matters/{$matter->id}")->assertSuccessful();
 
-    expect(Matter::find($matter->id))->toBeNull();
+    // 软删除：对外消失，但库里可恢复
+    expect(Matter::find($matter->id))->toBeNull()
+        ->and(Matter::withTrashed()->find($matter->id))->not->toBeNull();
 });
 
 test('census schema accepts text questions without options and keeps question notes', function () {

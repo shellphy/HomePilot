@@ -22,6 +22,10 @@ Page({
     wx.makePhoneCall({ phoneNumber: event.currentTarget.dataset.phone });
   },
 
+  goDetail(event) {
+    wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
+  },
+
   reload() {
     return this.runLoad(async () => {
       const res = await profile.listParties();

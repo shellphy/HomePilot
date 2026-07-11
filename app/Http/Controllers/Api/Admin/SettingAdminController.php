@@ -33,6 +33,7 @@ class SettingAdminController extends Controller
             'fields' => [
                 ['key' => 'initiator_note', 'label' => '牵头人须知（发起页展示）', 'kind' => 'textarea'],
                 ['key' => 'data_footnote', 'label' => '数据页脚注', 'kind' => 'textarea'],
+                ['key' => 'admin_contact', 'label' => '管理员联系方式（认证引导展示）', 'kind' => 'textarea'],
             ],
         ],
         [
@@ -59,6 +60,7 @@ class SettingAdminController extends Controller
             'sub_slogan' => ['required', 'string', 'max:50'],
             'initiator_note' => ['required', 'string', 'max:500'],
             'data_footnote' => ['required', 'string', 'max:200'],
+            'admin_contact' => ['required', 'string', 'max:200'],
             'buildings' => ['required', 'array', 'min:1'],
             'buildings.*' => ['required', 'string', 'max:10'],
         ]);

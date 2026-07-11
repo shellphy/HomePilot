@@ -35,8 +35,9 @@ async function authPhone(code) {
 }
 
 // 相关方入驻：创建并绑定相关方（可入驻类型由 /options 的 party_types 下发）
-async function bindParty(type, name, category) {
-  const res = await request('/me/party', { method: 'POST', data: { type, name, category } });
+// profile = { name, category, intro, description, images }
+async function bindParty(type, profile) {
+  const res = await request('/me/party', { method: 'POST', data: { type, ...profile } });
   cached = Promise.resolve(res.data);
   return res.data;
 }

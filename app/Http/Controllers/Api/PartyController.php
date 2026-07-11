@@ -17,11 +17,13 @@ class PartyController extends Controller
     use ResolvesResident;
 
     /**
-     * 已认证相关方名录（面向全小区）：商家带发起事项数、成团数与评价沉淀。
+     * 已认证商家名录（面向全小区）：带发起事项数、成团数与评价沉淀。
+     * 只收商家——物业/业委会等治理身份的公开面是事项时间线里的官方回应署名，不进名录。
      */
     public function index(): JsonResponse
     {
         $parties = Party::where('is_listed', true)
+            ->where('type', Party::TYPE_MERCHANT)
             ->withCount(['initiatedMatters as matter_count' => fn ($query) => $query->where('is_approved', true)])
             ->withCount(['initiatedMatters as deal_count' => fn ($query) => $query->where('type', 'groupbuy')->where('state', 'done')])
             ->orderByDesc('deal_count')
@@ -55,6 +57,7 @@ class PartyController extends Controller
                     'label' => $party->typeLabel(),
                     'name' => $party->name,
                     'category' => $party->category,
+                    'intro' => $party->intro,
                     // 已认证相关方公开联系电话——入驻本身就是求曝光，电话是最直接的转化
                     'phone' => $owner?->phone,
                     'matter_count' => (int) $party->getAttribute('matter_count'),
@@ -69,8 +72,53 @@ class PartyController extends Controller
     }
 
     /**
+     * 相关方详情页：名录点入（已认证对全小区可见）；
+     * 未认证的档案只有管理员（审核前看资料）和归属人自己（预览）能看。
+     */
+    public function show(Request $request, Party $party): JsonResponse
+    {
+        $resident = $this->resident($request);
+
+        $isOwner = $resident->affiliated_party_id === $party->id || $resident->last_party_id === $party->id;
+        abort_unless($party->is_listed || $resident->is_admin || $isOwner, 404);
+
+        $owner = Resident::query()
+            ->where('phone', '!=', '')
+            ->where(fn ($query) => $query
+                ->where('last_party_id', $party->id)
+                ->orWhere('affiliated_party_id', $party->id))
+            ->first();
+
+        $reviews = Stance::where('mode', Stance::MODE_REVIEW)
+            ->whereHas('matter', fn ($query) => $query->where('initiator_party_id', $party->id))
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'id' => $party->id,
+                'type' => $party->type,
+                'label' => $party->typeLabel(),
+                'name' => $party->name,
+                'category' => $party->category,
+                'intro' => $party->intro,
+                'description' => $party->description ?? '',
+                'images' => $party->images ?? [],
+                'is_listed' => $party->is_listed,
+                'phone' => $owner?->phone,
+                'matter_count' => $party->initiatedMatters()->where('is_approved', true)->count(),
+                'deal_count' => $party->initiatedMatters()->where('type', 'groupbuy')->where('state', 'done')->count(),
+                'review_count' => $reviews->count(),
+                'rating' => $reviews->isEmpty()
+                    ? null
+                    : round($reviews->avg(fn (Stance $review) => (int) ($review->payload['rating'] ?? 0)), 1),
+                'created_at' => $party->created_at?->format('Y-m-d'),
+            ],
+        ]);
+    }
+
+    /**
      * 相关方入驻：创建一个相关方并绑定到当前成员（管理员认证后 is_listed 才为真）。
-     * 可自助入驻的类型由 Party::TYPES 声明，前端入驻页自动跟随。
+     * 商家/物业/业委会等全部走这一条链路，可选类型由 Party::TYPES 声明，前端入驻页自动跟随。
      */
     public function store(Request $request): ResidentResource
     {
@@ -85,10 +133,28 @@ class PartyController extends Controller
             'type' => ['required', Rule::in($selfRegistrable)],
             'name' => ['required', 'string', 'max:50'],
             'category' => ['sometimes', 'nullable', 'string', 'max:30'],
+            // 自我介绍（各类型统一，内容自由发挥）：简介上名录列表行，详细介绍和照片进详情页
+            'intro' => ['sometimes', 'nullable', 'string', 'max:60'],
+            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'images' => ['sometimes', 'nullable', 'array', 'max:9'],
+            'images.*' => ['required', 'string', 'max:300'],
         ], [
             'type.required' => '请选择身份类型',
             'name.required' => '请填写名称',
         ]);
+
+        // 补充字段只对声明了 category_label 的类型有意义（商家的主营），其余类型忽略提交值
+        $category = Party::TYPES[$validated['type']]['category_label'] === ''
+            ? ''
+            : ($validated['category'] ?? '');
+
+        $profile = [
+            'name' => $validated['name'],
+            'category' => $category,
+            'intro' => $validated['intro'] ?? '',
+            'description' => $validated['description'] ?? '',
+            'images' => $validated['images'] ?? [],
+        ];
 
         // 档案跟人走：当前绑定的、或上次切走时留下的同类型档案都直接复用
         // （资料和认证状态原样保留），只有真正第一次入驻才新建
@@ -99,16 +165,9 @@ class PartyController extends Controller
         }
 
         if ($party) {
-            $party->update([
-                'name' => $validated['name'],
-                'category' => $validated['category'] ?? '',
-            ]);
+            $party->update($profile);
         } else {
-            $party = Party::create([
-                'type' => $validated['type'],
-                'name' => $validated['name'],
-                'category' => $validated['category'] ?? '',
-            ]);
+            $party = Party::create(['type' => $validated['type'], ...$profile]);
         }
         $resident->update(['affiliated_party_id' => $party->id, 'last_party_id' => $party->id]);
 

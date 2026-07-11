@@ -109,7 +109,7 @@
   </view>
 </view>
 
-<view class="card" wx:if="{{matter.state === 'done' && (reviews.length || joined)}}">
+<view class="card" wx:if="{{matter.review_open && (reviews.length || joined)}}">
   <view class="kicker">参团邻居的评价{{reviews.length ? '（' + reviews.length + '）' : ''}}</view>
 
   <block wx:if="{{joined}}">
@@ -140,7 +140,11 @@
   </view>
 </view>
 
-<view class="cta-dock" wx:if="{{matter.state !== 'done' && !isParty}}">
+<view class="cta-dock" wx:if="{{matter.join_open && !isParty}}">
+  <view class="cta-share" wx:if="{{!joined}}">
+    <text class="cta-share-text">成团后与团长互通手机号（仅双方可见）</text>
+    <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
+  </view>
   <t-button
     theme="{{joined ? 'light' : 'primary'}}"
     block

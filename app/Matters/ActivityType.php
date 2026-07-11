@@ -57,6 +57,12 @@ class ActivityType extends MatterType
         return $matter->state === 'open';
     }
 
+    /** 活动结束后开放评价：口碑沉淀不只属于团购（商家办的活动也计入其档案）。 */
+    public function reviewOpen(Matter $matter): bool
+    {
+        return $matter->state === 'done';
+    }
+
     public function sortWeight(Matter $matter): int
     {
         return $matter->state === 'open' ? 1 : 9;

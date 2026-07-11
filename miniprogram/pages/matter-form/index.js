@@ -1,6 +1,7 @@
 // 通用张罗表单：活动 / 互助 / 维权（团购有专属表单 groupbuy-form）
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
+const { guardProfileError } = require('../../utils/profile-guard');
 
 const TYPE_COPY = {
   activity: {
@@ -108,7 +109,9 @@ Page({
         });
       }
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
+      if (!guardProfileError(error, '你发起后就是这件事的牵头人，也会以「楼栋 + 昵称」出现在公示名单里，请先在个人资料里选好楼栋号。')) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      }
     } finally {
       this.setData({ submitting: false });
     }

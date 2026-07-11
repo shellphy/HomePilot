@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 /**
  * 管理端 · 相关方：查看入驻档案、认证进公示名单（is_listed）。
+ * 商家/物业/业委会全部自助入驻（/me/party），这里只负责认证。
  */
 class PartyAdminController extends Controller
 {
@@ -34,13 +35,21 @@ class PartyAdminController extends Controller
                 'type_label' => $party->typeLabel(),
                 'name' => $party->name,
                 'category' => $party->category,
+                'intro' => $party->intro,
                 'phone' => $owner?->phone,
                 'is_listed' => $party->is_listed,
                 'created_at' => $party->created_at?->format('Y-m-d H:i'),
             ];
         });
 
-        return response()->json(['data' => $data]);
+        // 待认证 = 有归属人亮明了身份但还没被认证的（空壳档案不算待办），喂给「我的」页角标
+        $pendingCount = $parties
+            ->filter(fn (Party $party): bool => ! $party->is_listed
+                && ($owners->firstWhere('last_party_id', $party->id)
+                    ?? $owners->firstWhere('affiliated_party_id', $party->id)) !== null)
+            ->count();
+
+        return response()->json(['data' => $data, 'pending_count' => $pendingCount]);
     }
 
     public function update(Request $request, Party $party): JsonResponse

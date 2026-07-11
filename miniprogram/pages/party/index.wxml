@@ -1,0 +1,38 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <block wx:if="{{party}}">
+      <view class="card">
+        <view class="party-row">
+          <view class="party-name">{{party.name}}</view>
+          <view class="party-badge {{party.is_listed ? '' : 'party-badge-pending'}}">{{party.is_listed ? '✓ 已认证' + party.label : '⏳ ' + party.label + ' · 待认证'}}</view>
+        </view>
+        <view class="party-intro" wx:if="{{party.intro}}">{{party.intro}}</view>
+        <view class="party-sub" wx:if="{{party.category}}">主营：{{party.category}}</view>
+        <view class="party-sub party-phone" wx:if="{{party.phone}}" bind:tap="callParty">电话：{{party.phone}}（点击拨打）</view>
+        <view class="party-sub" wx:if="{{note}}">{{note}}</view>
+      </view>
+
+      <view class="card" wx:if="{{party.description}}">
+        <view class="kicker">详细介绍</view>
+        <view class="party-desc">{{party.description}}</view>
+      </view>
+
+      <view class="card" wx:if="{{party.images.length}}">
+        <view class="kicker">照片</view>
+        <view class="gallery">
+          <image
+            wx:for="{{party.images}}"
+            wx:key="*this"
+            class="gallery-shot"
+            src="{{item}}"
+            mode="aspectFill"
+            data-url="{{item}}"
+            bind:tap="previewImage"
+          />
+        </view>
+      </view>
+
+      <view class="hint" wx:if="{{!party.is_listed}}">这份档案还未经管理员认证，仅管理员和归属人可见。</view>
+    </block>
+  </page-status>
+</view>

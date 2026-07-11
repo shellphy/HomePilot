@@ -76,6 +76,15 @@ abstract class MatterType
         return array_key_first($this->states());
     }
 
+    /**
+     * 终态（状态机最后一个状态，如已成团/已有结果）：进入后发起人不能再回退——
+     * 联系方式互通、评价等事后能力都以终态为闸门，回退会撕裂数据语义。管理端不受限，作为纠错通道。
+     */
+    public function isFinalState(string $state): bool
+    {
+        return $state === array_key_last($this->states());
+    }
+
     public function stateLabel(string $state): string
     {
         return $this->states()[$state] ?? $state;

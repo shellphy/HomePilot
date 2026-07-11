@@ -1,4 +1,4 @@
-// 管理端 · 相关方认证：入驻档案一览，认证后进入公示名单
+// 管理端 · 相关方认证：入驻档案一览（商家/物业等都自助入驻），认证后进入公示身份
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 
@@ -36,14 +36,19 @@ Page({
     this.applyFilter();
   },
 
+  // 审核前先看完整档案（详情页与名录共用，管理员可看未认证的）
+  goDetail(event) {
+    wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
+  },
+
   toggle(event) {
     const { id, index } = event.currentTarget.dataset;
     const listed = event.detail.value;
     if (listed) return this.certify(id, index, true);
-    // 撤下会从公示名单消失，先确认；取消时重设 checked 把开关拨回去
+    // 撤下会失去公示身份，先确认；取消时重设 checked 把开关拨回去
     wx.showModal({
       title: '撤下这个相关方？',
-      content: '撤下后将从小区公示名单消失',
+      content: '撤下后将失去「已认证」公示身份',
       confirmText: '撤下',
       confirmColor: '#e34d59',
       success: ({ confirm }) => {

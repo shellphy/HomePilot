@@ -23,6 +23,7 @@ class OptionController extends Controller
                 'sub_slogan' => $settings->sub_slogan,
                 'initiator_note' => $settings->initiator_note,
                 'data_footnote' => $settings->data_footnote,
+                'admin_contact' => $settings->admin_contact,
             ],
             'buildings' => $settings->buildings,
             'party_types' => collect(Party::TYPES)
@@ -30,6 +31,10 @@ class OptionController extends Controller
                     'key' => $key,
                     'label' => $meta['label'],
                     'self_registrable' => $meta['self_registrable'],
+                    'name_hint' => $meta['name_hint'],
+                    // 空 = 该类型没有档案补充字段（主营品类只对商家有意义）
+                    'category_label' => $meta['category_label'],
+                    'description_hint' => $meta['description_hint'],
                 ])
                 ->values(),
             'matter_types' => collect(MatterTypeRegistry::keys())

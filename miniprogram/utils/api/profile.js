@@ -28,9 +28,15 @@ function listParties() {
   return request('/parties');
 }
 
+// 相关方详情（已认证对全小区可见；未认证仅管理员与归属人可见）
+function getParty(id) {
+  return request(`/parties/${id}`);
+}
+
 module.exports = {
   getOptions,
   invalidateOptions,
   getStats,
   listParties,
+  getParty,
 };

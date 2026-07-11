@@ -36,13 +36,27 @@ test('resubmitting merchant info updates the same party instead of creating anot
     expect(Party::count())->toBe(1);
 });
 
-test('types that are not open for self registration are rejected', function (string $type) {
+test('governance identities self register the same way and carry no category', function (string $type, string $label) {
     Sanctum::actingAs(Resident::factory()->create());
 
-    $this->postJson('/api/me/party', ['type' => $type, 'name' => '某组织'])
+    // 主营是商家专属的补充字段：其他类型即使提交也会被忽略
+    $this->postJson('/api/me/party', ['type' => $type, 'name' => '某组织', 'category' => '物业服务'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.party.label', $label)
+        ->assertJsonPath('data.party.category', '');
+})->with([
+    ['property', '物业'],
+    ['developer', '开发商'],
+    ['committee', '业委会'],
+]);
+
+test('unknown party types are rejected', function () {
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson('/api/me/party', ['type' => 'union', 'name' => '某组织'])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('type');
-})->with(['property', 'developer', 'committee']);
+});
 
 test('switching away and back restores the same party with profile and certification intact', function () {
     $merchant = Resident::factory()->merchant()->create();
@@ -148,6 +162,7 @@ test('merchant initiated matters keep the merchant byline after identity switche
 test('the certified party directory ships deal counts and review ratings', function () {
     $listed = Party::factory()->listed()->merchant()->create(['name' => '青城门窗', 'category' => '门窗']);
     Party::factory()->merchant()->create(); // 未认证：不进名录
+    Party::factory()->listed()->create(['type' => Party::TYPE_PROPERTY]); // 治理身份：认证了也不进商家名录
 
     $initiator = Resident::factory()->create(['affiliated_party_id' => $listed->id]);
     $deal = Matter::factory()->done()->for($initiator, 'initiator')->create(['initiator_party_id' => $listed->id]);

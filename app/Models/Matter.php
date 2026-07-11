@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * 事项：社区正在处理的一件事（系统的中心运行时对象）。
@@ -31,6 +32,9 @@ class Matter extends Model
 {
     /** @use HasFactory<MatterFactory> */
     use HasFactory;
+
+    /** 管理员删除为软删除：误删可恢复，表态/评价/时间线一并保留。 */
+    use SoftDeletes;
 
     protected $fillable = [
         'type',

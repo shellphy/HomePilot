@@ -2,14 +2,15 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="hint intro">名录里的商家均经管理员认证。评价来自参团业主，商家不能修改。</view>
 
-    <view class="card party" wx:for="{{parties}}" wx:key="id">
+    <view class="card party" hover-class="card-hover" wx:for="{{parties}}" wx:key="id" data-id="{{item.id}}" bind:tap="goDetail">
       <view class="party-row">
         <view class="party-name">{{item.name}}</view>
         <view class="party-badge">✓ 已认证{{item.label}}</view>
       </view>
+      <view class="party-sub" wx:if="{{item.intro}}">{{item.intro}}</view>
       <view class="party-sub" wx:if="{{item.category}}">主营：{{item.category}}</view>
-      <view class="party-sub party-phone" wx:if="{{item.phone}}" data-phone="{{item.phone}}" bind:tap="callParty">电话：{{item.phone}}</view>
-      <view class="party-note">{{item.note}}</view>
+      <view class="party-sub party-phone" wx:if="{{item.phone}}" data-phone="{{item.phone}}" catch:tap="callParty">电话：{{item.phone}}</view>
+      <view class="party-note">{{item.note}} · 点击看详情</view>
     </view>
 
     <view wx:if="{{!parties.length}}" class="hint">还没有商家通过认证</view>
