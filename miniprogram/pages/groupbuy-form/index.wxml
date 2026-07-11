@@ -79,7 +79,7 @@
     <view class="privacy">{{initiatorNote}}</view>
 
     <view class="footer-bar">
-      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '提交审核'}}</t-button>
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '提交审核'}}</t-button>
     </view>
   </page-status>
 </view>

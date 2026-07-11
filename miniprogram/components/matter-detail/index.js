@@ -45,7 +45,7 @@ Component({
       const nextState = stateIndex >= 0 ? states[stateIndex + 1] || null : null;
       this.setData({
         pillClass: pillClass(matter.state),
-        meta: TYPE_META[matter.type] || { joinCta: '参与', joinedCta: '已参与（点击取消）', foot: '人已参与', roster: '参与名单' },
+        meta: TYPE_META[matter.type] || { joinCta: '参与', joinedCta: '取消参与', foot: '人已参与', roster: '参与名单' },
         nextState,
         nextIsFinal: !!nextState && stateIndex + 2 === states.length,
         reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),

@@ -20,7 +20,7 @@
     <view class="privacy">发起即成为这件事的牵头人，负责更新进展。参与名单以「楼栋 + 昵称」对全小区公示。</view>
 
     <view class="footer-bar">
-      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '提交审核'}}</t-button>
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '提交审核'}}</t-button>
     </view>
   </page-status>
 </view>

@@ -45,7 +45,7 @@
     </view>
 
     <view class="footer-bar">
-      <t-button theme="primary" block size="large" bind:tap="goCreate">发布新事项</t-button>
+      <t-button theme="primary" block size="large" style="width: 100%" bind:tap="goCreate">发布新事项</t-button>
     </view>
   </page-status>
 </view>
