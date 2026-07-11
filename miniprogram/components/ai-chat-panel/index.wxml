@@ -1,0 +1,39 @@
+<view class="chat-panel">
+  <view class="chat-head">
+    <view class="chat-title">{{matterTitle || 'AI 帮你看懂'}}</view>
+    <view class="chat-tip">
+      <text>由 DeepSeek 大模型回答，仅供参考</text>
+      <text wx:if="{{messages.length}}" class="chat-clear" bind:tap="resetChat">清空对话</text>
+    </view>
+  </view>
+
+  <scroll-view class="chat-body" scroll-y scroll-into-view="{{scrollTo}}" scroll-with-animation>
+    <view wx:for="{{messages}}" wx:key="index" class="bubble-row {{item.role === 'user' ? 'bubble-row-me' : ''}}">
+      <view class="bubble {{item.role === 'user' ? 'bubble-me' : 'bubble-ai'}}">{{item.text}}</view>
+    </view>
+
+    <view wx:if="{{sending}}" class="bubble-row">
+      <view class="bubble bubble-ai bubble-typing">正在想，可能要等上一会儿…</view>
+    </view>
+
+    <view wx:if="{{remaining !== null && remaining <= 5}}" class="chat-quota">今天还能问 {{remaining}} 次</view>
+    <view id="chat-bottom" class="chat-anchor"></view>
+  </scroll-view>
+
+  <view class="chat-input-bar">
+    <textarea
+      class="chat-input"
+      auto-height
+      maxlength="300"
+      value="{{input}}"
+      confirm-type="send"
+      adjust-position
+      bind:input="onInput"
+      bind:confirm="send"
+    />
+    <view class="chat-send {{input || sending ? '' : 'chat-send-off'}}" bind:tap="send">
+      <text wx:if="{{!sending}}">发送</text>
+      <text wx:else>…</text>
+    </view>
+  </view>
+</view>

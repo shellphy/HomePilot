@@ -26,6 +26,25 @@ test('the unit label must come from the community building list', function () {
     expect($resident->refresh()->unit_label)->toBe('5栋');
 });
 
+test('the layout label must come from the community layout list and is optional', function () {
+    $resident = Resident::factory()->inUnit('5栋')->create(['layout_label' => '']);
+    Sanctum::actingAs($resident);
+
+    $this->putJson('/api/me', ['layout_label' => '130㎡'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.layout_label', '130㎡');
+    expect($resident->refresh()->layout_label)->toBe('130㎡');
+
+    $this->putJson('/api/me', ['layout_label' => '999㎡'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('layout_label');
+
+    // 选填，可清空
+    $this->putJson('/api/me', ['layout_label' => ''])
+        ->assertSuccessful()
+        ->assertJsonPath('data.layout_label', '');
+});
+
 test('the room label is a separate private field and optional fields can be cleared', function () {
     $resident = Resident::factory()->inUnit('5栋')->create(['room_label' => '']);
     Sanctum::actingAs($resident);

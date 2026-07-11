@@ -1,0 +1,105 @@
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-page);
+}
+.chat-head {
+  padding: 28rpx 24rpx 16rpx;
+  background: #fff;
+  border-bottom: 1rpx solid var(--line);
+}
+.chat-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: center;
+}
+.chat-tip {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-top: 8rpx;
+}
+.chat-clear {
+  color: var(--info);
+}
+.chat-body {
+  flex: 1;
+  min-height: 0;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+.bubble-row {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+.bubble-row-me {
+  justify-content: flex-end;
+}
+.bubble {
+  max-width: 82%;
+  padding: 20rpx 26rpx;
+  border-radius: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.7;
+  word-break: break-all;
+}
+.bubble-ai {
+  background: #fff;
+  color: var(--text-primary);
+  border-top-left-radius: 6rpx;
+}
+.bubble-me {
+  background: var(--brand);
+  color: #fff;
+  border-top-right-radius: 6rpx;
+}
+.bubble-typing {
+  color: var(--text-muted);
+}
+.chat-quota {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--warn);
+  padding: 8rpx 0;
+}
+.chat-anchor {
+  height: 2rpx;
+}
+/* 输入区：多行输入 + 圆形感发送键，未输入时置灰 */
+.chat-input-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 16rpx;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  border-top: 1rpx solid var(--line);
+}
+.chat-input {
+  flex: 1;
+  background: var(--bg-page);
+  border-radius: 24rpx;
+  padding: 20rpx 26rpx;
+  font-size: 28rpx;
+  line-height: 1.5;
+  min-height: 44rpx;
+  max-height: 240rpx;
+  box-sizing: content-box;
+}
+.chat-send {
+  flex-shrink: 0;
+  width: 108rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 38rpx;
+  background: var(--brand);
+  color: #fff;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.chat-send-off {
+  background: var(--line-dark);
+}

@@ -24,7 +24,6 @@ Page({
     openCards: [], // 进行中的征集大卡
     pastItems: [], // 已结束的往期列表
     communityName: '',
-    dataFootnote: '',
   },
 
   onShow() {
@@ -89,7 +88,6 @@ Page({
         openCards,
         pastItems,
         communityName: (options.community && options.community.name) || '',
-        dataFootnote: (options.community && options.community.data_footnote) || '',
       });
     });
   },

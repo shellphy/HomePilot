@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "AI 帮你看懂",
-  "usingComponents": {
-    "t-button": "tdesign-miniprogram/button/button"
-  }
-}

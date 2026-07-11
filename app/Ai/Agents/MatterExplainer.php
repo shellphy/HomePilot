@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Models\Matter;
+use App\Models\Resident;
 use App\Settings\CommunitySettings;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -21,7 +22,7 @@ class MatterExplainer implements Agent, Conversational
 {
     use Promptable, RemembersConversations;
 
-    public function __construct(public Matter $matter) {}
+    public function __construct(public Matter $matter, public ?Resident $asker = null) {}
 
     /**
      * Get the instructions that the agent should follow.
@@ -58,6 +59,12 @@ PROMPT.$this->matterContext();
 
         if ($settings->ai_context !== '') {
             $lines[] = "小区硬条件：{$settings->ai_context}";
+        }
+
+        // 业主填过户型的话，「我家该怎么选」就能按他家的实际情况答
+        $layout = $this->asker?->layout_label;
+        if ($layout !== null && $layout !== '') {
+            $lines[] = "提问业主的户型：{$layout}";
         }
 
         $lines[] = "事项：{$type->label()}「{$this->matter->title}」"

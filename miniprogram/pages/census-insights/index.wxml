@@ -32,6 +32,13 @@
         </view>
       </block>
 
+      <!-- AI 快捷提问放在主按钮上方：主操作永远压轴在底部 -->
+      <ai-quick-ask
+        matter-id="{{censusId}}"
+        matter-title="{{block.title}}"
+        questions="{{quickQuestions}}"
+      />
+
       <!-- 宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
            外部 class 在 virtualHost 渲染下不一定作用到按钮盒子 -->
       <t-button
@@ -43,15 +50,6 @@
         bind:tap="goCensusForm"
       >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
 
-      <!-- 业主侧 AI 答疑：题目里的概念不懂可以问，带着这次征集的说明 -->
-      <view class="card ask-ai" hover-class="frow-hover" bind:tap="goAskAi">
-        <view class="ask-ai-main">
-          <view class="ask-ai-title">题目里有不懂的概念？问问 AI</view>
-          <view class="ask-ai-sub">它了解这次征集和小区情况，可以连续追问</view>
-        </view>
-        <text class="frow-arrow">›</text>
-      </view>
-
       <view class="card admin-entry" wx:if="{{showTextAdmin}}" hover-class="frow-hover" bind:tap="goTextAdmin">
         <view>
           <view class="admin-entry-title">文本题明细与归纳</view>
@@ -61,6 +59,17 @@
       </view>
     </block>
 
-    <view class="map-foot">{{dataFootnote}}</view>
   </page-status>
+
+  <!-- AI 答疑半屏面板：page-container 原生支持返回手势关闭 -->
+  <page-container
+    show="{{aiChatShow}}"
+    position="bottom"
+    round
+    custom-style="height: 82vh;"
+    bind:beforeleave="onAiChatLeave"
+    bind:leave="onAiChatLeave"
+  >
+    <ai-chat-panel id="aiChat" />
+  </page-container>
 </view>

@@ -30,7 +30,6 @@
           class="fin farea"
           auto-height
           maxlength="500"
-          placeholder="写下你的情况或看法"
           value="{{answers[question.key]}}"
           data-qkey="{{question.key}}"
           bind:input="onText"

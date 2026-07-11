@@ -41,6 +41,7 @@ class Resident extends Authenticatable
         'phone',
         'unit_label',
         'room_label',
+        'layout_label',
         'affiliated_party_id',
         'last_party_id',
     ];

@@ -40,7 +40,7 @@ class MatterAiChatController extends Controller
         }
         RateLimiter::hit($rateKey, 86400);
 
-        $agent = new MatterExplainer($matter);
+        $agent = new MatterExplainer($matter, $resident);
         $conversationId = $validated['conversation_id'] ?? null;
 
         try {

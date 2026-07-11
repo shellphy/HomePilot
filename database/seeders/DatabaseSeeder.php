@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 真机登录后 php artisan admin:grant 你的手机号或成员 ID 即可接管
-        $this->leader = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true]);
+        $this->leader = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true, 'layout_label' => '130㎡']);
 
         $parties = $this->parties();
         $this->hvacGroupbuy();
@@ -361,12 +361,6 @@ class DatabaseSeeder extends Seeder
     /** 公告：小区消息的权威沉淀。 */
     private function notices(): void
     {
-        Matter::factory()->notice()->create([
-            'title' => '本小程序公益运营说明',
-            'payload' => [
-                'body' => '本小程序由小区业主公益运营：不代收任何款项，签约付款由业主直接对商家；商家给到的任何返点，全部转为参团业主让利，并在成团后随成交公示摊开。',
-            ],
-        ]);
         Matter::factory()->notice()->create([
             'title' => '学区消息：片区小学分校规划已公示',
             'payload' => [

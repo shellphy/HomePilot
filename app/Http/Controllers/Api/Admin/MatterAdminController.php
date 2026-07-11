@@ -174,6 +174,7 @@ class MatterAdminController extends Controller
                     'id' => $stance->id,
                     'unit_label' => $stance->resident->unit_label,
                     'room_label' => $stance->resident->room_label,
+                    'layout_label' => $stance->resident->layout_label,
                     'nickname' => $stance->resident->nickname,
                     'phone' => $stance->resident->phone,
                     'created_at' => $stance->created_at?->format('Y-m-d H:i'),

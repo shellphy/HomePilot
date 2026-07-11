@@ -18,8 +18,6 @@ class CommunitySettings extends Settings
 
     public string $initiator_note;
 
-    public string $data_footnote;
-
     /** 管理员联系方式（商家认证引导等处展示，给"请联系管理员"一个具体的落点）。 */
     public string $admin_contact;
 
@@ -28,6 +26,9 @@ class CommunitySettings extends Settings
 
     /** @var array<int, string> */
     public array $buildings;
+
+    /** @var array<int, string> 户型清单（个人资料按此选择，AI 答疑按它理解「我家」） */
+    public array $layouts;
 
     public static function group(): string
     {

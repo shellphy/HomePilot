@@ -14,7 +14,6 @@
     "pages/profile-form/index",
     "pages/parties/index",
     "pages/party/index",
-    "pages/ai-chat/index",
     "pages/admin/matters/index",
     "pages/admin/matter-form/index",
     "pages/admin/census-schema/index",

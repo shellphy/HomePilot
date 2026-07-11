@@ -68,6 +68,5 @@
       </view>
     </block>
 
-    <view class="map-foot">{{dataFootnote}}</view>
   </page-status>
 </view>

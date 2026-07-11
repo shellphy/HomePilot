@@ -20,7 +20,7 @@
       <view class="card">
         <view class="kicker">{{questions[qi].text}}（{{questions[qi].answers.length}} 条）</view>
         <view class="search-line">
-          <input class="fin" placeholder="搜关键词数条数，如：渗水" value="{{keyword}}" bind:input="onSearch" />
+          <input class="fin" value="{{keyword}}" bind:input="onSearch" />
           <view class="hit" wx:if="{{keyword}}">命中 {{hitCount}} 条</view>
         </view>
         <view class="answer" wx:for="{{shownAnswers}}" wx:key="index">{{item}}</view>
@@ -34,7 +34,6 @@
           <view class="theme-line">
             <input
               class="fin theme-title-input"
-              placeholder="主题，如：渗水漏水"
               value="{{item.title}}"
               data-index="{{index}}"
               data-field="title"
@@ -43,7 +42,6 @@
             <input
               class="fin theme-count-input"
               type="number"
-              placeholder="条数"
               value="{{item.count}}"
               data-index="{{index}}"
               data-field="count"
@@ -53,7 +51,6 @@
           </view>
           <input
             class="fin"
-            placeholder="一句话概括（选填），如：飘窗、卫生间为主"
             value="{{item.note}}"
             data-index="{{index}}"
             data-field="note"

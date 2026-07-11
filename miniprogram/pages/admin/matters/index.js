@@ -81,7 +81,6 @@ Page({
     wx.showModal({
       title: `驳回「${matter.title}」`,
       editable: true,
-      placeholderText: '写一句驳回理由（发起人会看到）',
       confirmText: '驳回',
       success: async ({ confirm, content }) => {
         if (!confirm) return;

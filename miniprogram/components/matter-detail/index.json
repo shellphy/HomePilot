@@ -2,6 +2,7 @@
   "component": true,
   "usingComponents": {
     "t-button": "tdesign-miniprogram/button/button",
-    "t-rate": "tdesign-miniprogram/rate/rate"
+    "t-rate": "tdesign-miniprogram/rate/rate",
+    "ai-quick-ask": "/components/ai-quick-ask/index"
   }
 }

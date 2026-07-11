@@ -25,6 +25,9 @@ Page({
     buildingIndex: -1,
     unitLabel: '',
     roomLabel: '',
+    layouts: [],          // 户型清单（社区设置下发），选填
+    layoutIndex: -1,
+    layoutLabel: '',
     // 相关方字段（简介/详细介绍/照片各类型统一，内容自由发挥）
     partyName: '',
     partyCategory: '',
@@ -47,6 +50,7 @@ Page({
       const identities = [{ key: 'resident', label: '业主' }, ...partyTypes];
       const current = identities.find((item) => item.key === identity);
       const buildings = options.buildings || [];
+      const layouts = options.layouts || [];
       this.setData({
         avatar: me.avatar || '',
         nickname: me.nickname || '',
@@ -59,6 +63,9 @@ Page({
         buildingIndex: buildings.indexOf(me.unit_label),
         unitLabel: me.unit_label || '',
         roomLabel: me.room_label || '',
+        layouts,
+        layoutIndex: layouts.indexOf(me.layout_label),
+        layoutLabel: me.layout_label || '',
         // 没有在用的相关方身份时，按上次的档案预填（切走再切回来不用重填）
         partyName: (me.party && me.party.name) || (me.last_party && me.last_party.name) || '',
         partyCategory: (me.party && me.party.category) || (me.last_party && me.last_party.category) || '',
@@ -115,6 +122,12 @@ Page({
     this.setData({ buildingIndex: index, unitLabel: this.data.buildings[index] });
   },
 
+  onPickLayout(event) {
+    this.markDirty();
+    const index = Number(event.detail.value);
+    this.setData({ layoutIndex: index, layoutLabel: this.data.layouts[index] });
+  },
+
   onInput(event) {
     this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
@@ -157,7 +170,7 @@ Page({
 
   async submit() {
     const {
-      identity, identityMeta, nickname, unitLabel, roomLabel,
+      identity, identityMeta, nickname, unitLabel, roomLabel, layoutLabel,
       partyName, partyCategory, partyIntro, partyDescription, partyImages,
       submitting, uploading,
     } = this.data;
@@ -179,6 +192,7 @@ Page({
           nickname: nickname.trim(),
           unit_label: unitLabel,
           room_label: roomLabel.trim(),
+          layout_label: layoutLabel,
         });
       } else {
         // 入驻提交顺手收一次订阅授权：认证结果的通知才有额度可推
