@@ -161,11 +161,14 @@ test('admin reads census records with contact details and resolved question text
 
 test('admin certifies parties onto the public list', function () {
     $party = Party::factory()->merchant()->create();
+    $owner = Resident::factory()->create(['affiliated_party_id' => $party->id]);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
+    // 认证前要能联系上入驻方核实，列表带归属人的授权手机号
     $this->getJson('/api/admin/parties')
         ->assertSuccessful()
-        ->assertJsonPath('data.0.is_listed', false);
+        ->assertJsonPath('data.0.is_listed', false)
+        ->assertJsonPath('data.0.phone', $owner->phone);
 
     $this->putJson("/api/admin/parties/{$party->id}", ['is_listed' => true])
         ->assertSuccessful();
@@ -187,14 +190,14 @@ test('admin reads and updates community settings which flow through to options',
 
     $settings = $response->json('data');
     $settings['slogan'] = '新口号';
-    $settings['categories'] = ['门窗', '地暖'];
+    $settings['buildings'] = ['1栋', '2栋'];
 
     $this->putJson('/api/admin/settings', $settings)->assertSuccessful();
 
     expect(app(CommunitySettings::class)->refresh()->slogan)->toBe('新口号');
     $this->getJson('/api/options')
         ->assertJsonPath('community.slogan', '新口号')
-        ->assertJsonPath('categories', ['门窗', '地暖']);
+        ->assertJsonPath('buildings', ['1栋', '2栋']);
 });
 
 test('admin deletes a matter', function () {

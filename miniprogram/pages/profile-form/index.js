@@ -51,8 +51,9 @@ Page({
         buildingIndex: buildings.indexOf(me.unit_label),
         unitLabel: me.unit_label || '',
         roomLabel: me.room_label || '',
-        partyName: (me.party && me.party.name) || '',
-        partyCategory: (me.party && me.party.category) || '',
+        // 没有在用的相关方身份时，按上次的档案预填（切走再切回来不用重填）
+        partyName: (me.party && me.party.name) || (me.last_party && me.last_party.name) || '',
+        partyCategory: (me.party && me.party.category) || (me.last_party && me.last_party.category) || '',
       });
     });
   },

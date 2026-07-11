@@ -9,7 +9,7 @@
       <view class="row" wx:for="{{parties}}" wx:key="id">
         <view class="row-main">
           <view class="row-title">{{item.name || '未填名称'}}</view>
-          <view class="row-sub">{{item.type_label}}{{item.category ? ' · ' + item.category : ''}} · {{item.members_count}} 个账号 · {{item.created_at}}</view>
+          <view class="row-sub">{{item.type_label}}{{item.category ? ' · ' + item.category : ''}}{{item.phone ? ' · ' + item.phone : ''}} · {{item.created_at}}</view>
         </view>
         <switch checked="{{item.is_listed}}" data-id="{{item.id}}" data-index="{{index}}" bind:change="toggle" color="#06ae56" />
       </view>

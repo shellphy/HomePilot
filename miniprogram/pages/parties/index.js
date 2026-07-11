@@ -18,6 +18,10 @@ Page({
     wx.stopPullDownRefresh();
   },
 
+  callParty(event) {
+    wx.makePhoneCall({ phoneNumber: event.currentTarget.dataset.phone });
+  },
+
   reload() {
     return this.runLoad(async () => {
       const res = await profile.listParties();

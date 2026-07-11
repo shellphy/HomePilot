@@ -35,6 +35,12 @@ class ResidentResource extends JsonResource
                 'category' => $this->affiliatedParty->category,
                 'is_listed' => $this->affiliatedParty->is_listed,
             ] : null,
+            // 上次绑定的相关方档案：切回业主后再进资料页，商家资料按它预填
+            'last_party' => (! $this->affiliatedParty && $this->lastParty) ? [
+                'type' => $this->lastParty->type,
+                'name' => $this->lastParty->name,
+                'category' => $this->lastParty->category,
+            ] : null,
             // 我参与过的征集（通用：装修摸底、将来的收房/车位摸底都在这里）
             'censuses' => $this->stances()
                 ->where('mode', Stance::MODE_REGISTER)
