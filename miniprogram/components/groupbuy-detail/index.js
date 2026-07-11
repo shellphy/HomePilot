@@ -219,15 +219,17 @@ Component({
       }
     },
 
-    // 术语弹层里的追问：带着这个词自动向 AI 提问，业主不用打字
+    // 术语弹层里的追问：带着这个词自动向 AI 提问（宿主页面的半屏面板），业主不用打字
     askTermAi() {
       const { matter, activeTerm } = this.data;
       if (!activeTerm) return;
       const question = `「${activeTerm.term}」按我家的情况该怎么选？`;
       this.setData({ activeTerm: null });
-      wx.navigateTo({
-        url: `/pages/ai-chat/index?id=${matter.id}&title=${encodeURIComponent(matter.title)}&q=${encodeURIComponent(question)}`,
-      });
+      const pages = getCurrentPages();
+      const page = pages[pages.length - 1];
+      if (page && page.openAiChat) {
+        page.openAiChat({ matterId: matter.id, matterTitle: matter.title, question });
+      }
     },
 
     // 配套摸底问卷入口：进入征集公示面（答题/看聚合结果都在那里）

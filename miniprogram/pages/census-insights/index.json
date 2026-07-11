@@ -4,6 +4,7 @@
   "backgroundTextStyle": "dark",
   "usingComponents": {
     "page-status": "/components/page-status/index",
-    "ai-quick-ask": "/components/ai-quick-ask/index"
+    "ai-quick-ask": "/components/ai-quick-ask/index",
+    "ai-chat-panel": "/components/ai-chat-panel/index"
   }
 }

@@ -20,10 +20,17 @@ Component({
       this.go('');
     },
 
+    // 宿主页面持有半屏 AI 面板（page-container），这里只负责把问题递过去
     go(question) {
-      const query = `id=${this.data.matterId}&title=${encodeURIComponent(this.data.matterTitle || '')}`
-        + (question ? `&q=${encodeURIComponent(question)}` : '');
-      wx.navigateTo({ url: `/pages/ai-chat/index?${query}` });
+      const pages = getCurrentPages();
+      const page = pages[pages.length - 1];
+      if (page && page.openAiChat) {
+        page.openAiChat({
+          matterId: this.data.matterId,
+          matterTitle: this.data.matterTitle,
+          question,
+        });
+      }
     },
   },
 });

@@ -1,13 +1,18 @@
-.chat-page {
+.chat-panel {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: var(--bg-page);
 }
-.chat-body {
-  flex: 1;
-  padding: 24rpx;
-  box-sizing: border-box;
+.chat-head {
+  padding: 28rpx 24rpx 16rpx;
+  background: #fff;
+  border-bottom: 1rpx solid var(--line);
+}
+.chat-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: center;
 }
 .chat-tip {
   display: flex;
@@ -15,10 +20,16 @@
   gap: 24rpx;
   font-size: 22rpx;
   color: var(--text-muted);
-  padding: 4rpx 0 24rpx;
+  margin-top: 8rpx;
 }
 .chat-clear {
   color: var(--info);
+}
+.chat-body {
+  flex: 1;
+  min-height: 0;
+  padding: 24rpx;
+  box-sizing: border-box;
 }
 .bubble-row {
   display: flex;
