@@ -1,0 +1,74 @@
+# 一键部署（php-fpm + nginx + mysql）
+#
+# 首次部署：
+#   1. cp .env.example .env
+#   2. 编辑 .env：
+#        APP_ENV=production、APP_DEBUG=false、APP_URL=https://你的域名
+#        DB_PASSWORD=<数据库密码>（必填，本文件用它初始化 MySQL）
+#        WECHAT_APPID / WECHAT_SECRET / DEEPSEEK_API_KEY
+#   3. 生成并填入 APP_KEY：
+#        docker compose run --rm --no-deps app php artisan key:generate --show
+#   4. docker compose up -d --build
+#      启动时自动执行数据库迁移，完成后访问 http://服务器IP:8080
+#
+# 更新版本：git pull && docker compose up -d --build
+#
+# 如果服务器上已有宿主机 nginx 负责 80/443 与 HTTPS，保持 HTTP_PORT=8080，
+# 在宿主机 nginx 里对该端口做反向代理即可：
+#   location / { proxy_pass http://127.0.0.1:8080; proxy_set_header Host $host;
+#                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#                proxy_set_header X-Forwarded-Proto $scheme; }
+
+services:
+  app:
+    build:
+      context: .
+      target: app
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-homepilot}
+      DB_USERNAME: ${DB_USERNAME:-homepilot}
+      DB_PASSWORD: ${DB_PASSWORD:?请在 .env 中设置 DB_PASSWORD}
+      # 日志输出到容器 stderr，方便 docker compose logs 查看
+      LOG_CHANNEL: stderr
+    volumes:
+      - storage-uploads:/var/www/html/storage/app/public
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - storage-uploads:/var/www/html/storage/app/public:ro
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-homepilot}
+      MYSQL_USER: ${DB_USERNAME:-homepilot}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?请在 .env 中设置 DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?请在 .env 中设置 DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  storage-uploads:
+  mysql-data:

@@ -170,6 +170,17 @@ test('an authenticated resident can upload a progress photo', function () {
     expect($response->json('url'))->toContain('/storage/uploads/');
 });
 
+test('an upload over 10MB is rejected', function () {
+    Storage::fake('public');
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->post('/api/uploads', [
+        'image' => UploadedFile::fake()->image('site.jpg')->size(10241),
+    ], ['Accept' => 'application/json'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.image.0', '图片不能超过 10MB');
+});
+
 test('matter validation rejects a bad state and an unknown type', function () {
     $initiator = Resident::factory()->create();
     $matter = Matter::factory()->for($initiator, 'initiator')->create();
