@@ -26,6 +26,9 @@ return new class extends Migration
             $table->foreignId('last_party_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->boolean('is_admin')->default(false);
             $table->string('room_label', 30)->default('');
+            // 「我牵头的 / 我参与的」两类列表的已读时间：与事项的 last_activity_at 比对出红点
+            $table->timestamp('mine_seen_at')->nullable();
+            $table->timestamp('joined_seen_at')->nullable();
             $table->timestamps();
         });
     }
