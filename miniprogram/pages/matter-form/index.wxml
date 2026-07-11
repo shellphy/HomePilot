@@ -4,7 +4,7 @@
     <view class="card form-list">
       <view class="frow">
         <text class="frow-label">标题<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="{{copy.titlePlaceholder}}" value="{{title}}" data-field="title" bind:input="onInput" />
+        <input class="frow-input" placeholder="{{copy.titlePlaceholder}}" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
       </view>
       <view class="frow">
         <text class="frow-label">目标数<text class="q-note">{{copy.targetHint}}</text></text>

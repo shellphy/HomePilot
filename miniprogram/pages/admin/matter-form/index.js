@@ -127,6 +127,16 @@ Page({
     const { data } = this;
     if (data.submitting) return;
     if (!data.title.trim()) return wx.showToast({ title: '先填标题', icon: 'none' });
+    // 与后端规则（业主端同一份）对齐，别等 422 才发现
+    if (data.type === 'notice' && !data.body.trim()) {
+      return wx.showToast({ title: '公告得有正文', icon: 'none' });
+    }
+    if (data.type === 'groupbuy') {
+      if (!data.category.trim()) return wx.showToast({ title: '请填写品类', icon: 'none' });
+      if (!data.targetCount || Number(data.targetCount) < 1) {
+        return wx.showToast({ title: '请填写目标人数', icon: 'none' });
+      }
+    }
 
     const payload = {};
     if (data.type === 'notice') payload.body = data.body.trim();
