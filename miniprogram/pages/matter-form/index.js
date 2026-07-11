@@ -67,10 +67,13 @@ Page({
   },
 
   async submit() {
-    const { id, type, title, pitch, targetCount, submitting } = this.data;
+    const { id, type, copy, title, pitch, targetCount, submitting } = this.data;
     if (submitting) return;
     if (!title.trim()) return wx.showToast({ title: '先起个一句话标题', icon: 'none' });
     if (!pitch.trim()) return wx.showToast({ title: '把事情说清楚，邻居才敢跟', icon: 'none' });
+    if (targetCount && Number(targetCount) < 1) {
+      return wx.showToast({ title: `${copy.targetHint}至少是 1`, icon: 'none' });
+    }
 
     const payload = {
       title: title.trim(),
@@ -100,7 +103,7 @@ Page({
       if (!guardProfileError(error, '你发起后就是这件事的牵头人，也会以「楼栋 + 昵称」出现在公示名单里，请先在个人资料里选好楼栋号。')) {
         wx.showToast({ title: error.message, icon: 'none' });
       }
-    } finally {
+      // 只在失败时复位：成功分支保持 loading 直到返回，堵住 toast 800ms 里的二次提交
       this.setData({ submitting: false });
     }
   },

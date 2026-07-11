@@ -1,9 +1,10 @@
 // 管理端 · 题目编辑：题干 / 注释 / 单选多选填空 / 必答 / 选项（一行一个）
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
+const dirty = require('../../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     id: null,
@@ -32,6 +33,7 @@ Page({
       const question = this.data.qi >= 0 ? modules[this.data.mi].questions[this.data.qi] : null;
       this.setData({
         matterTitle: res.data.title,
+        moduleTitle: (modules[this.data.mi] && modules[this.data.mi].title) || '',
         modules,
         text: question ? question.text : '',
         note: (question && question.note) || '',
@@ -43,14 +45,17 @@ Page({
   },
 
   onInput(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
   pickType(event) {
+    this.markDirty();
     this.setData({ type: event.currentTarget.dataset.type });
   },
 
   onRequired(event) {
+    this.markDirty();
     this.setData({ required: event.detail.value });
   },
 
@@ -76,11 +81,12 @@ Page({
     this.setData({ submitting: true });
     try {
       await admin.updateMatter(id, { title: this.data.matterTitle, payload: { modules: next } });
+      this.clearDirty();
+      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
       wx.showToast({ title: '已保存', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
       this.setData({ submitting: false });
     }
   },
@@ -101,6 +107,7 @@ Page({
             title: this.data.matterTitle,
             payload: { modules: next },
           });
+          this.clearDirty(); // 题目已删，未保存的编辑不必再拦返回
           wx.showToast({ title: '已删除', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
         } catch (error) {

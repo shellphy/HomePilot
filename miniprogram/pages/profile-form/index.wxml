@@ -1,4 +1,4 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="card form-list">
       <!-- 头像行：整行是 chooseAvatar 按钮，头像靠右贴箭头 -->
@@ -47,7 +47,7 @@
         </picker>
         <view class="frow">
           <text class="frow-label">房号</text>
-          <input class="frow-input" value="{{roomLabel}}" placeholder="仅管理员可见" data-field="roomLabel" bind:input="onInput" />
+          <input class="frow-input" value="{{roomLabel}}" placeholder="如 1802" data-field="roomLabel" bind:input="onInput" />
         </view>
       </block>
 
@@ -59,7 +59,7 @@
         </view>
         <view class="frow" wx:if="{{identityMeta.category_label}}">
           <text class="frow-label">{{identityMeta.category_label}}</text>
-          <input class="frow-input" value="{{partyCategory}}" data-field="partyCategory" bind:input="onInput" />
+          <input class="frow-input" value="{{partyCategory}}" placeholder="如 门窗、全屋定制" data-field="partyCategory" bind:input="onInput" />
         </view>
         <view class="frow">
           <text class="frow-label">简介</text>
@@ -86,10 +86,12 @@
       </view>
     </block>
 
-    <view class="privacy">手机号仅管理员可见，用于必要时联系；不会出现在任何公示名单里。</view>
+    <view class="privacy">手机号和房号仅管理员可见，用于必要时联系；不会出现在任何公示名单里。</view>
     <view class="privacy" wx:if="{{identity === 'merchant'}}">相关方身份对全小区公开。商家经管理员认证后可发起团购和活动（带「已认证」标识）并进入商家名录；相关方不参与业主接龙，可随时切回业主身份。</view>
     <view class="privacy" wx:elif="{{identity !== 'resident'}}">相关方身份对全小区公开。物业/开发商/业委会经管理员认证后，可在事项进展里发布官方回应；相关方不参与业主接龙，可随时切回业主身份。</view>
 
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">保存</t-button>
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">保存</t-button>
+    </view>
   </page-status>
 </view>

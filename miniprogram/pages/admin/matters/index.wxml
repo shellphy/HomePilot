@@ -21,7 +21,7 @@
         <view class="row-main">
           <view class="row-title">{{item.title}}</view>
           <view class="row-sub">{{item.type_label}} · {{item.state_label}} · {{item.initiator}}</view>
-          <view class="row-sub">{{item.join_count ? item.join_count + ' 人参与' : ''}}{{item.join_count && item.register_count ? ' · ' : ''}}{{item.register_count ? item.register_count + ' 人登记' : ''}}</view>
+          <view class="row-sub" wx:if="{{item.join_count || item.register_count}}">{{item.join_count ? item.join_count + ' 人参与' : ''}}{{item.join_count && item.register_count ? ' · ' : ''}}{{item.register_count ? item.register_count + ' 人登记' : ''}}</view>
         </view>
         <block wx:if="{{!item.is_approved}}">
           <view

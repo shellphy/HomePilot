@@ -1,8 +1,14 @@
-<view class="page-body">
+<view class="page-body has-footer">
+  <view class="form-hint">进度会显示在事项详情的时间线里，全小区都能看到。常更新，参与的邻居才放心。</view>
+
   <view class="card">
     <view class="q-title">日期</view>
-    <picker mode="date" value="{{date}}" bind:change="onDateChange">
-      <view class="fin">{{date}}</view>
+    <picker mode="date" value="{{date}}" end="{{today}}" bind:change="onDateChange">
+      <!-- 带箭头，别让日期长得像个点不动的输入框 -->
+      <view class="fin picker-line">
+        <text>{{date}}</text>
+        <text class="picker-arrow">›</text>
+      </view>
     </picker>
   </view>
 
@@ -22,5 +28,7 @@
     </view>
   </view>
 
-  <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">发布进度</t-button>
+  <view class="footer-bar">
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">发布进度</t-button>
+  </view>
 </view>

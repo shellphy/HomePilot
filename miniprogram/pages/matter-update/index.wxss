@@ -1,3 +1,16 @@
+/* 日期选择行：右侧箭头提示可点 */
+.picker-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.picker-arrow {
+  flex-shrink: 0;
+  font-size: 36rpx;
+  line-height: 1;
+  color: var(--line-dark);
+}
+
 .shots {
   display: flex;
   flex-wrap: wrap;

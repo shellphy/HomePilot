@@ -75,3 +75,10 @@
   font-size: 26rpx;
   color: #9b978c;
 }
+
+/* 空态下的行动按钮：跟在号召文案下方，视线落点即入口 */
+.empty-cta {
+  margin-top: 24rpx;
+  display: flex;
+  justify-content: center;
+}

@@ -12,10 +12,11 @@ module.exports = Behavior({
         await loader();
         this.setData({ loaded: true, loadError: '' });
       } catch (error) {
+        const message = error.message || '加载失败，请稍后重试';
         if (this.data.loaded) {
-          wx.showToast({ title: error.message, icon: 'none' });
+          wx.showToast({ title: message, icon: 'none' });
         } else {
-          this.setData({ loadError: error.message });
+          this.setData({ loadError: message });
         }
       }
     },

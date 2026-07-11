@@ -4,22 +4,22 @@
     <view class="card form-list">
       <view class="frow">
         <text class="frow-label">标题<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="如：门窗团购（断桥铝）" value="{{title}}" data-field="title" bind:input="onInput" />
+        <input class="frow-input" placeholder="如：门窗团购（断桥铝）" value="{{title}}" maxlength="30" data-field="title" bind:input="onInput" />
       </view>
 
       <view class="frow">
         <text class="frow-label">品类<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" data-field="category" bind:input="onInput" />
+        <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" maxlength="12" data-field="category" bind:input="onInput" />
       </view>
 
       <view class="frow">
         <text class="frow-label">阶梯优惠</text>
-        <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" data-field="perk" bind:input="onInput" />
+        <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" maxlength="50" data-field="perk" bind:input="onInput" />
       </view>
 
       <view class="frow">
         <text class="frow-label">目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text>
-        <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
+        <input class="frow-input" type="number" value="{{targetCount}}" placeholder="如 20" data-field="targetCount" bind:input="onInput" />
       </view>
 
       <!-- 状态流转：单选走 action-sheet，与管理端表单同一套交互 -->

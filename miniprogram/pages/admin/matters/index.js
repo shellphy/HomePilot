@@ -85,8 +85,11 @@ Page({
       confirmText: '驳回',
       success: async ({ confirm, content }) => {
         if (!confirm) return;
+        const reason = (content || '').trim();
+        // 没有理由的驳回会让发起人不知道怎么改，重新提交的闭环就断了
+        if (!reason) return wx.showToast({ title: '请写一句驳回理由', icon: 'none' });
         try {
-          await admin.approveMatter(id, false, (content || '').trim());
+          await admin.approveMatter(id, false, reason);
           wx.showToast({ title: '已驳回', icon: 'none' });
           this.reload();
         } catch (error) {

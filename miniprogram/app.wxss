@@ -16,7 +16,9 @@ page {
   --info: #33639f;
   --info-bg: #e7eef7;
   --done-bg: #efeeea;
-  --danger: #b4501e;
+  /* 危险语义全端只此一个红：与 TDesign danger 按钮、各处 confirmColor 同值 */
+  --danger: #e34d59;
+  --danger-bg: #fdecee;
 
   --td-brand-color: var(--brand);
   --td-brand-color-active: var(--brand-active);
@@ -41,6 +43,10 @@ page {
   border-radius: 24rpx;
   padding: 28rpx;
   margin-bottom: 20rpx;
+}
+/* 整卡可点的统一按压反馈：所有 bind:tap 跳转的卡片都挂这个 hover-class */
+.card-hover {
+  opacity: 0.85;
 }
 
 .kicker {
@@ -67,6 +73,13 @@ page {
   color: var(--brand-deep);
   font-weight: 600;
   margin-top: 8rpx;
+}
+/* 加载失败态：与「暂无内容」的中性空态在结构与颜色上区分开 */
+.load-error-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 4rpx;
 }
 
 /* 状态胶囊 */

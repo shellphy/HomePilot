@@ -15,11 +15,12 @@
 .head-meter {
   margin-top: 20rpx;
 }
+/* 福利是正向激励，用品牌绿系；橙色留给「谈判中」这类需要注意的语义 */
 .head-perk {
   margin-top: 18rpx;
   font-size: 24rpx;
-  color: var(--warn);
-  background: var(--warn-bg);
+  color: var(--brand-deep);
+  background: var(--brand-bg);
   border-radius: 16rpx;
   padding: 14rpx 20rpx;
 }
@@ -39,6 +40,10 @@
   color: var(--warn);
   background: var(--warn-bg);
   line-height: 1.7;
+}
+.pending-tip-reject {
+  color: var(--danger);
+  background: var(--danger-bg);
 }
 
 .term-row {

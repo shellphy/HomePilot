@@ -1,9 +1,10 @@
 // 管理端 · 问卷模块：标题/引言 + 该模块的题目列表
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
+const dirty = require('../../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     id: null,
@@ -33,14 +34,16 @@ Page({
       this.setData({
         matterTitle: res.data.title,
         modules,
-        title: current ? current.title : this.data.title,
-        intro: current ? (current.intro || '') : this.data.intro,
+        // 从题目页返回会触发 onShow 重拉：标题/引言有未保存的本地编辑时保留，别被服务端值冲掉
+        title: current && !this.dirty ? current.title : this.data.title,
+        intro: current && !this.dirty ? (current.intro || '') : this.data.intro,
         questions: current ? current.questions : [],
       });
     });
   },
 
   onInput(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
@@ -74,19 +77,20 @@ Page({
         title: this.data.matterTitle,
         payload: { modules: next },
       });
+      this.clearDirty();
       if (mi < 0) {
         // 落位到刚建好的模块，继续加题
-        this.setData({ mi: next.length - 1 });
+        this.setData({ mi: next.length - 1, submitting: false });
         wx.setNavigationBarTitle({ title: '编辑模块' });
         wx.showToast({ title: '模块已建好，加题目吧', icon: 'none' });
         this.reload();
       } else {
+        // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
         wx.showToast({ title: '已保存', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 800);
       }
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
       this.setData({ submitting: false });
     }
   },
@@ -107,6 +111,7 @@ Page({
             title: this.data.matterTitle,
             payload: { modules: next },
           });
+          this.clearDirty(); // 模块已删，未保存的编辑不必再拦返回
           wx.showToast({ title: '已删除', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
         } catch (error) {

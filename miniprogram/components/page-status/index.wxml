@@ -1,6 +1,8 @@
 <view wx:if="{{loaded}}"><slot /></view>
 
-<view wx:elif="{{error}}" class="hint" bind:tap="onRetry">
+<!-- 错误态结构上区别于灰色空态：加深的标题行，让人一眼知道是「出错了」不是「没内容」 -->
+<view wx:elif="{{error}}" class="hint load-error" bind:tap="onRetry">
+  <view class="load-error-title">没能加载出来</view>
   {{error}}
   <view class="hint-retry">点击重试</view>
 </view>

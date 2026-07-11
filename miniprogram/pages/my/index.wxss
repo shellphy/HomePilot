@@ -123,6 +123,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* 待办计数（待审核/待认证）：区别于中性统计的强调态 */
+.row-note-todo {
+  color: var(--warn);
+  font-weight: 600;
+}
 .row-arrow {
   font-size: 36rpx;
   line-height: 1;

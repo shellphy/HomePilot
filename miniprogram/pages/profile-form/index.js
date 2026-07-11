@@ -6,9 +6,10 @@ const { uploadImage } = require('../../utils/request');
 const profile = require('../../utils/api/profile');
 const { getMe, updateMe, authPhone, bindParty, unbindParty } = require('../../utils/me');
 const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     avatar: '',
@@ -67,12 +68,13 @@ Page({
     });
   },
 
-  // 微信原生头像选择，选完即保存
+  // 微信原生头像选择，选完即保存（即时落库要给反馈，别让用户误以为整页都自动存了）
   async onChooseAvatar(event) {
     try {
       const url = await uploadImage(event.detail.avatarUrl);
       await updateMe({ avatar: url });
       this.setData({ avatar: url });
+      wx.showToast({ title: '头像已更新', icon: 'success' });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
     }
@@ -100,17 +102,20 @@ Page({
       itemList: identities.map((item) => item.label),
       success: ({ tapIndex }) => {
         const item = identities[tapIndex];
+        this.markDirty();
         this.setData({ identity: item.key, identityLabel: item.label, identityMeta: item });
       },
     });
   },
 
   onPickBuilding(event) {
+    this.markDirty();
     const index = Number(event.detail.value);
     this.setData({ buildingIndex: index, unitLabel: this.data.buildings[index] });
   },
 
   onInput(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
@@ -128,6 +133,7 @@ Page({
         this.setData({ uploading: true });
         try {
           const urls = await Promise.all(tempFiles.map((file) => uploadImage(file.tempFilePath)));
+          this.markDirty();
           this.setData({ partyImages: [...this.data.partyImages, ...urls] });
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
@@ -139,6 +145,7 @@ Page({
   },
 
   removeImage(event) {
+    this.markDirty();
     const partyImages = this.data.partyImages.filter((_, i) => i !== event.currentTarget.dataset.index);
     this.setData({ partyImages });
   },
@@ -183,11 +190,12 @@ Page({
           images: partyImages,
         });
       }
+      this.clearDirty();
+      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
       wx.showToast({ title: '已保存', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
       this.setData({ submitting: false });
     }
   },

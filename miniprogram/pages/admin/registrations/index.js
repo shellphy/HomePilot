@@ -9,6 +9,7 @@ Page({
     id: null,
     all: [],
     registrations: [],
+    phoneCount: 0, // 留了手机号的登记数（授权率概览）
     keyword: '',
     openId: null, // 展开答案的登记
   },
@@ -21,7 +22,10 @@ Page({
   reload() {
     return this.runLoad(async () => {
       const res = await admin.listRegistrations(this.data.id);
-      this.setData({ all: res.data });
+      this.setData({
+        all: res.data,
+        phoneCount: res.data.filter((registration) => registration.phone).length,
+      });
       this.applyFilter();
     });
   },

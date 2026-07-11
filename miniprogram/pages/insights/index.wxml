@@ -10,6 +10,7 @@
       <view class="feed-head">正在征集</view>
       <view
         class="card fcard"
+        hover-class="card-hover"
         wx:for="{{openCards}}"
         wx:key="id"
         data-id="{{item.id}}"

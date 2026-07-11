@@ -117,6 +117,10 @@ Page({
     wx.navigateTo({ url: `/pages/admin/registrations/index?id=${this.data.id}` });
   },
 
+  goCensusText() {
+    wx.navigateTo({ url: `/pages/admin/census-text/index?id=${this.data.id}` });
+  },
+
   async submit() {
     const { data } = this;
     if (data.submitting) return;

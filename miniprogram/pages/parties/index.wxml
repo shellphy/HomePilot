@@ -9,7 +9,7 @@
       </view>
       <view class="party-sub" wx:if="{{item.intro}}">{{item.intro}}</view>
       <view class="party-sub" wx:if="{{item.category}}">主营：{{item.category}}</view>
-      <view class="party-sub party-phone" wx:if="{{item.phone}}" data-phone="{{item.phone}}" catch:tap="callParty">电话：{{item.phone}}</view>
+      <view class="party-sub party-phone" wx:if="{{item.phone}}" data-phone="{{item.phone}}" catch:tap="callParty">电话：{{item.phone}}（点击拨打）</view>
       <view class="party-note">{{item.note}} · 点击看详情</view>
     </view>
 
