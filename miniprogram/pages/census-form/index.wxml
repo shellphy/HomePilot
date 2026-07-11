@@ -35,6 +35,22 @@
           data-qkey="{{question.key}}"
           bind:input="onText"
         />
+        <!-- 带选项解释的题：竖排选项行，解释写在选项下方（答题的过程就是建概念） -->
+        <view wx:elif="{{question.hasNotes}}" class="opts">
+          <view
+            wx:for="{{question.optionRows}}"
+            wx:for-item="option"
+            wx:key="label"
+            class="opt {{picked[question.key + '::' + option.label] ? 'opt-on' : ''}}"
+            data-qkey="{{question.key}}"
+            data-qtype="{{question.type}}"
+            data-value="{{option.label}}"
+            bind:tap="pick"
+          >
+            <view class="opt-label">{{option.label}}</view>
+            <view class="opt-note" wx:if="{{option.note}}">{{option.note}}</view>
+          </view>
+        </view>
         <view wx:else class="chips">
           <view
             wx:for="{{question.options}}"

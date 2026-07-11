@@ -4,6 +4,7 @@
     "page-status": "/components/page-status/index",
     "groupbuy-detail": "/components/groupbuy-detail/index",
     "notice-detail": "/components/notice-detail/index",
-    "matter-detail": "/components/matter-detail/index"
+    "matter-detail": "/components/matter-detail/index",
+    "qa-panel": "/components/qa-panel/index"
   }
 }

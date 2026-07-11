@@ -4,6 +4,7 @@ const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { draftGlossaryRow } = require('../../utils/glossary-draft');
 const { requestSubscribe } = require('../../utils/subscribe');
 
 Page({
@@ -69,7 +70,7 @@ Page({
   addRow(event) {
     this.markDirty();
     const { list } = event.currentTarget.dataset;
-    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '' };
+    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '', judge: '', caution: '' };
     this.setData({ [list]: [...this.data[list], blank] });
   },
 
@@ -85,6 +86,10 @@ Page({
     this.markDirty();
     const { list, index, field } = event.currentTarget.dataset;
     this.setData({ [`${list}[${index}].${field}`]: event.detail.value });
+  },
+
+  aiDraft(event) {
+    draftGlossaryRow(this, event.currentTarget.dataset.index);
   },
 
   async submit() {

@@ -30,6 +30,13 @@
         my-share-contact="{{myShareContact}}"
         bind:refresh="reload"
       />
+
+      <!-- 大家都在问：疑问沉淀给后来的人（团购/活动开放；公告没疑问场景，维权容易变质） -->
+      <qa-panel
+        wx:if="{{matter.type === 'groupbuy' || matter.type === 'activity'}}"
+        matter="{{matter}}"
+        bind:refresh="reload"
+      />
     </block>
   </page-status>
 </view>

@@ -3,7 +3,10 @@
     <block wx:if="{{block}}">
       <view class="card">
         <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
+        <!-- 署名调研三不变量之二：亮明发起方、结果对全小区公开（第三个是管理员审核） -->
+        <view class="hero-sign" wx:if="{{block.initiatorParty}}">由 {{block.initiatorParty.label}} · {{block.initiatorParty.name}} 发起，聚合结果对全小区公开</view>
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
+        <view class="related-link" wx:if="{{block.relatedMatter}}" hover-class="frow-hover" bind:tap="goRelatedMatter">配套于团购「{{block.relatedMatter.title}}」，结果帮团长谈判 ›</view>
       </view>
 
       <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
@@ -39,6 +42,15 @@
         style="width: 100%; margin-bottom: 12rpx"
         bind:tap="goCensusForm"
       >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
+
+      <!-- 业主侧 AI 答疑：题目里的概念不懂可以问，带着这次征集的说明 -->
+      <view class="card ask-ai" hover-class="frow-hover" bind:tap="goAskAi">
+        <view class="ask-ai-main">
+          <view class="ask-ai-title">题目里有不懂的概念？问问 AI</view>
+          <view class="ask-ai-sub">它了解这次征集和小区情况，可以连续追问</view>
+        </view>
+        <text class="frow-arrow">›</text>
+      </view>
 
       <view class="card admin-entry" wx:if="{{showTextAdmin}}" hover-class="frow-hover" bind:tap="goTextAdmin">
         <view>

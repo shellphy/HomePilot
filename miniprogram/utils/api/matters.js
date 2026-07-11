@@ -71,6 +71,40 @@ function saveCensus(id, data) {
   return request(`/matters/${id}/census`, { method: 'PUT', data });
 }
 
+// 「买前必懂」AI 起草：返回三段草稿（是什么/怎么选/避坑），由填表人校订后提交
+function draftGlossary(term, category) {
+  return request('/glossary/draft', { method: 'POST', data: { term, category } });
+}
+
+// 业主侧 AI 答疑：带事项上下文的多轮对话，conversation_id 续聊
+function aiChat(id, question, conversationId) {
+  return request(`/matters/${id}/ai-chat`, {
+    method: 'POST',
+    data: { question, conversation_id: conversationId || null },
+  });
+}
+
+// 「大家都在问」：公开问答（提问/同问/负责方回答/沉淀为买前必懂）
+function getQuestions(id) {
+  return request(`/matters/${id}/questions`);
+}
+
+function askQuestion(id, content) {
+  return request(`/matters/${id}/questions`, { method: 'POST', data: { content } });
+}
+
+function echoQuestion(questionId) {
+  return request(`/questions/${questionId}/echo`, { method: 'POST' });
+}
+
+function answerQuestion(questionId, content) {
+  return request(`/questions/${questionId}/answer`, { method: 'PUT', data: { content } });
+}
+
+function promoteQuestion(questionId, term) {
+  return request(`/questions/${questionId}/promote`, { method: 'POST', data: { term } });
+}
+
 module.exports = {
   listMatters,
   listMine,
@@ -88,4 +122,11 @@ module.exports = {
   postUpdate,
   getCensus,
   saveCensus,
+  draftGlossary,
+  aiChat,
+  getQuestions,
+  askQuestion,
+  echoQuestion,
+  answerQuestion,
+  promoteQuestion,
 };

@@ -48,6 +48,26 @@
         <switch checked="{{collectsContact}}" data-field="collectsContact" bind:change="onSwitch" color="#06ae56" />
       </view>
 
+      <!-- 配套问卷：挂到团购上，团购详情页展示问卷入口，结果给团长当谈判依据 -->
+      <view class="frow" wx:if="{{type === 'census'}}" hover-class="frow-hover" bind:tap="chooseRelatedMatter">
+        <view class="frow-main">
+          <view class="row-title">挂到团购</view>
+          <view class="row-sub">挂上后，那个团购的详情页会出现这份问卷的入口</view>
+        </view>
+        <text class="frow-value">{{relatedMatterTitle || '不挂靠'}}</text>
+        <text class="frow-arrow">›</text>
+      </view>
+
+      <!-- 署名发起：物业/业委会/商家想做的调研，代建后亮明发起方，结果对全小区公开 -->
+      <view class="frow" wx:if="{{type === 'census'}}" hover-class="frow-hover" bind:tap="chooseInitiatorParty">
+        <view class="frow-main">
+          <view class="row-title">署名发起方</view>
+          <view class="row-sub">物业/业委会/商家的调研在此署名，业主看得到是谁想了解什么</view>
+        </view>
+        <text class="frow-value">{{initiatorPartyLabel || '小区官方'}}</text>
+        <text class="frow-arrow">›</text>
+      </view>
+
       <view class="frow">
         <view class="frow-main">
           <view class="row-title">公示到小区页</view>
@@ -79,13 +99,16 @@
         <view class="add-row" data-list="terms" bind:tap="addRow">＋ 添加一条</view>
       </view>
       <view class="card">
-        <view class="q-title">买前必懂<text class="q-note">大白话解释术语，3~5 条</text></view>
+        <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，3~5 条</text></view>
         <view class="pair pair-col" wx:for="{{glossary}}" wx:key="index">
           <view class="pair-head">
             <input class="fin pair-a" placeholder="术语" value="{{item.term}}" maxlength="30" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
+            <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 起草</view>
             <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
           </view>
-          <textarea class="fin farea" auto-height placeholder="大白话解释 + 对决策的影响" value="{{item.explain}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" />
+          <textarea class="fin farea" auto-height placeholder="是什么（必填）：一句大白话" value="{{item.explain}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" />
+          <textarea class="fin farea" auto-height placeholder="怎么选（选填）：换算到自家的判断标准" value="{{item.judge}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="judge" bind:input="onRowInput" />
+          <textarea class="fin farea" auto-height placeholder="避坑/怎么问（选填）：噱头预警、该问商家什么" value="{{item.caution}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="caution" bind:input="onRowInput" />
         </view>
         <view class="add-row" data-list="glossary" bind:tap="addRow">＋ 添加一条</view>
       </view>

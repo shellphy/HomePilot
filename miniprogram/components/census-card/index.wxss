@@ -17,6 +17,12 @@
   font-size: 29rpx;
   font-weight: 600;
 }
+/* 署名发起的调研：发起方 + 结果公开承诺 */
+.ccard-sign {
+  font-size: 22rpx;
+  color: var(--info);
+  margin-top: 10rpx;
+}
 .ccard-pitch {
   font-size: 24rpx;
   color: var(--text-secondary);
