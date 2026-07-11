@@ -84,7 +84,7 @@ Page({
   async onGetPhone(event) {
     if (!event.detail.code) {
       // 用户点了拒绝：给一句反馈说明用途与可见范围，而不是无声无息
-      wx.showToast({ title: '未授权。手机号仅管理员和成团对接可见，不会公示', icon: 'none' });
+      wx.showToast({ title: '未授权。手机号只有管理员和对接的团长能看到，不会公示', icon: 'none' });
       return;
     }
     try {

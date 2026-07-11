@@ -35,7 +35,7 @@
 <!-- 互通阶段没共享联系方式的参与者：解释互通是双向对等的，给补开入口 -->
 <view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
   <view class="kicker">联系发起人 · 拉群与对接</view>
-  <view class="share-note">你加入时没有开启联系方式共享，所以你和发起人互相看不到对方电话（互通是双向的）。</view>
+  <view class="share-note">你加入时没有开启联系方式共享，你和发起人现在互相看不到对方电话。</view>
   <t-button theme="light" size="medium" block style="width: 100%" bind:tap="enableShare">开启共享，与发起人互通</t-button>
 </view>
 

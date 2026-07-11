@@ -68,7 +68,7 @@ Page({
       // 团购的收尾时刻，用 modal 把「发生了什么」讲清楚，分量对齐发起时的反馈（modal 也挡住了二次提交）
       wx.showModal({
         title: '成交公示已发布',
-        content: '最终条件已对全小区公开，这次团购就此收尾。你的透明，是下一个团的信任来源。',
+        content: '最终条件已对全小区公开，这次团购就此收尾。辛苦了，团长。',
         showCancel: false,
         confirmText: '好的',
         success: () => wx.navigateBack(),
