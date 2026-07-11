@@ -1,6 +1,7 @@
 // 征集详情页：单期征集的完整聚合公示面（从征集卡片、小区数据 tab、答完题跳转进来）。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
+const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 function toBars(counts) {
@@ -20,6 +21,7 @@ Page({
     censusId: null,
     block: null,
     dataFootnote: '',
+    showTextAdmin: false, // 管理员且问卷含填空题：露出「文本题明细与归纳」入口
   },
 
   onLoad(query) {
@@ -50,11 +52,14 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [census, options] = await Promise.all([
+      const [census, options, me] = await Promise.all([
         matters.getCensus(this.data.censusId),
         profile.getOptions(),
+        getMe(),
       ]);
       wx.setNavigationBarTitle({ title: census.title });
+      const hasTextQuestions = (census.modules || [])
+        .some((module) => (module.questions || []).some((question) => question.type === 'text'));
       this.setData({
         block: {
           title: census.title,
@@ -65,13 +70,22 @@ Page({
           sections: census.aggregates.map((module) => ({
             title: module.title,
             questions: module.questions
-              .map((question) => ({ text: question.text, bars: toBars(question.counts) }))
-              .filter((question) => question.bars.length),
+              .map((question) => ({
+                text: question.text,
+                bars: question.counts ? toBars(question.counts) : [],
+                themes: question.themes || [],
+              }))
+              .filter((question) => question.bars.length || question.themes.length),
           })),
         },
+        showTextAdmin: !!me.is_admin && hasTextQuestions,
         dataFootnote: (options.community && options.community.data_footnote) || '',
       });
     });
+  },
+
+  goTextAdmin() {
+    wx.navigateTo({ url: `/pages/admin/census-text/index?id=${this.data.censusId}` });
   },
 
   goCensusForm() {

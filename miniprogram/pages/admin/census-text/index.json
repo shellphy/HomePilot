@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "文本题明细与归纳",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

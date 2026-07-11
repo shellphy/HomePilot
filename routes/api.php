@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\CensusSummaryAdminController;
 use App\Http\Controllers\Api\Admin\MatterAdminController;
 use App\Http\Controllers\Api\Admin\PartyAdminController;
 use App\Http\Controllers\Api\Admin\SettingAdminController;
@@ -59,6 +60,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/matters/{matter}/approve', [MatterAdminController::class, 'approve']);
         Route::delete('/matters/{matter}', [MatterAdminController::class, 'destroy']);
         Route::get('/matters/{matter}/registrations', [MatterAdminController::class, 'registrations']);
+        Route::get('/matters/{matter}/census-text', [CensusSummaryAdminController::class, 'show']);
+        Route::put('/matters/{matter}/census-summary', [CensusSummaryAdminController::class, 'update']);
         Route::get('/parties', [PartyAdminController::class, 'index']);
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
         Route::get('/settings', [SettingAdminController::class, 'show']);

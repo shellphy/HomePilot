@@ -30,6 +30,16 @@ function listRegistrations(matterId) {
   return request(`/admin/matters/${matterId}/registrations`);
 }
 
+// 征集文本题：匿名明细 + 已有归纳
+function getCensusText(matterId) {
+  return request(`/admin/matters/${matterId}/census-text`);
+}
+
+// 保存某道文本题的归纳（published=false 草稿 / true 公示）
+function saveCensusSummary(matterId, data) {
+  return request(`/admin/matters/${matterId}/census-summary`, { method: 'PUT', data });
+}
+
 function listParties() {
   return request('/admin/parties');
 }
@@ -54,6 +64,8 @@ module.exports = {
   approveMatter,
   deleteMatter,
   listRegistrations,
+  getCensusText,
+  saveCensusSummary,
   listParties,
   certifyParty,
   getSettings,

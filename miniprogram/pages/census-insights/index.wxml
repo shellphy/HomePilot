@@ -16,6 +16,15 @@
               <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
               <view class="bar-value">{{item.count}}</view>
             </view>
+            <!-- 填空题：管理员归纳后的匿名主题（原文永不公示） -->
+            <view class="theme" wx:for="{{question.themes}}" wx:for-item="theme" wx:key="title">
+              <view class="theme-head">
+                <text class="theme-title">{{theme.title}}</text>
+                <text class="theme-count">{{theme.count}} 条</text>
+              </view>
+              <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
+            </view>
+            <view class="theme-foot" wx:if="{{question.themes.length}}">由管理员归纳自 {{block.registered}} 份登记的文字反馈</view>
           </view>
         </view>
       </block>
@@ -30,6 +39,14 @@
         style="width: 100%; margin-bottom: 12rpx"
         bind:tap="goCensusForm"
       >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
+
+      <view class="card admin-entry" wx:if="{{showTextAdmin}}" hover-class="frow-hover" bind:tap="goTextAdmin">
+        <view>
+          <view class="admin-entry-title">文本题明细与归纳</view>
+          <view class="admin-entry-sub">仅管理员可见 · 浏览文字反馈，归纳后可发布到本页</view>
+        </view>
+        <text class="frow-arrow">›</text>
+      </view>
     </block>
 
     <view class="map-foot">{{dataFootnote}}</view>
