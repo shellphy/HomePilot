@@ -61,7 +61,9 @@ class CensusController extends Controller
         /** @var array<string, mixed> $answers */
         $answers = $request->validate(['answers' => ['required', 'array']]);
 
-        $questions = $this->questions($matter);
+        $questions = collect($matter->payloadList('modules'))
+            ->flatMap(fn (array $module): array => $module['questions'] ?? [])
+            ->keyBy('key');
         $this->validateAnswers($answers['answers'], $questions);
 
         $stance = $this->stanceOf($matter, $request);
@@ -97,18 +99,6 @@ class CensusController extends Controller
             ->where('mode', Stance::MODE_REGISTER)
             ->where('resident_id', $this->resident($request)->id)
             ->first();
-    }
-
-    /**
-     * schema 摊平成 key => question 的映射。
-     *
-     * @return Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>, required?: bool}>
-     */
-    private function questions(Matter $matter): Collection
-    {
-        return collect($matter->payloadList('modules'))
-            ->flatMap(fn (array $module): array => $module['questions'] ?? [])
-            ->keyBy('key');
     }
 
     /**

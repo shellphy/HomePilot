@@ -6,7 +6,6 @@ use App\Models\Matter;
 
 /**
  * 维权行动：对开发商/物业的集体发声——联名即力量。
- * 这是"登记→接龙→公示"三件套的正赛预演。
  */
 class RightsType extends MatterType
 {

@@ -55,7 +55,7 @@ Page({
 
   // 通过即对全小区公示，且按钮在列表行上容易误触，先确认再执行
   approve(event) {
-    const id = event.currentTarget.dataset.id;
+    const { id } = event.currentTarget.dataset;
     const matter = this.data.matters.find((item) => item.id === id);
     wx.showModal({
       title: '通过并公示？',
@@ -76,7 +76,7 @@ Page({
 
   // 驳回不删除：附一句理由，发起人在详情页看到，修改后即重新提交
   reject(event) {
-    const id = event.currentTarget.dataset.id;
+    const { id } = event.currentTarget.dataset;
     const matter = this.data.matters.find((item) => item.id === id);
     wx.showModal({
       title: `驳回「${matter.title}」`,

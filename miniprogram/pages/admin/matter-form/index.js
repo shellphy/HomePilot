@@ -1,9 +1,10 @@
 // 管理端 · 事项发布/编辑：所有类型共用，按类型显示对应字段
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
+const dirty = require('../../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     id: null,
@@ -65,19 +66,6 @@ Page({
     });
   },
 
-  // 有未保存的修改时，返回/退出前弹确认，防止编辑丢失
-  markDirty() {
-    if (this.dirty || !wx.enableAlertBeforeUnload) return;
-    this.dirty = true;
-    wx.enableAlertBeforeUnload({ message: '修改还没保存，确定要离开吗？' });
-  },
-
-  clearDirty() {
-    if (!this.dirty) return;
-    this.dirty = false;
-    wx.disableAlertBeforeUnload();
-  },
-
   onInput(event) {
     this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
@@ -102,7 +90,7 @@ Page({
   // 条目列表（团购条件 / 买前必懂）的增删改
   addRow(event) {
     this.markDirty();
-    const list = event.currentTarget.dataset.list;
+    const { list } = event.currentTarget.dataset;
     const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '' };
     this.setData({ [list]: [...this.data[list], blank] });
   },
@@ -130,7 +118,7 @@ Page({
   },
 
   async submit() {
-    const data = this.data;
+    const { data } = this;
     if (data.submitting) return;
     if (!data.title.trim()) return wx.showToast({ title: '先填标题', icon: 'none' });
 

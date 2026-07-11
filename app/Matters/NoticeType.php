@@ -5,8 +5,7 @@ namespace App\Matters;
 use App\Models\Matter;
 
 /**
- * 公告：最简单的事项类型（单向公示），
- * 存在的意义是证明"新场景 = 一个类型类"这条内核承诺成立。
+ * 公告：最简单的事项类型（单向公示）。
  */
 class NoticeType extends MatterType
 {

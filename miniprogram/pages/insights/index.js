@@ -1,22 +1,19 @@
 // 小区数据 tab：全部征集的总览。
 // 进行中的征集渲染成带进度与头牌数据的大卡，已结束的收进「往期数据」列表；
-// 单期完整聚合在 pages/census-insights。新增一期征集，这里自动多一张卡，无需任何改动。
+// 单期完整聚合在 pages/census-insights。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 
 /** @returns {{question: string, label: string, count: number}|null} 第一道已有答案的题里票数最高的选项 */
 function topAnswer(aggregates) {
-  for (const module of aggregates || []) {
-    for (const question of module.questions || []) {
-      const entries = Object.entries(question.counts || {});
-      if (entries.length) {
-        entries.sort((a, b) => b[1] - a[1]);
-        return { question: question.text, label: entries[0][0], count: entries[0][1] };
-      }
-    }
-  }
-  return null;
+  const question = (aggregates || [])
+    .flatMap((module) => module.questions || [])
+    .find((item) => Object.keys(item.counts || {}).length);
+  if (!question) return null;
+
+  const [label, count] = Object.entries(question.counts).sort((a, b) => b[1] - a[1])[0];
+  return { question: question.text, label, count };
 }
 
 Page({

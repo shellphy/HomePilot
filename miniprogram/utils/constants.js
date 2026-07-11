@@ -33,4 +33,9 @@ function stateOptions(states) {
   return Object.keys(states || {}).map((value) => ({ value, label: states[value] }));
 }
 
-module.exports = { PILL_CLASS, TYPE_META, pillClass, joinPercent, stateOptions };
+// 评分转星串（WXML 不能循环画星，预先拼好）
+function starsOf(rating) {
+  return '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
+}
+
+module.exports = { PILL_CLASS, TYPE_META, pillClass, joinPercent, stateOptions, starsOf };

@@ -3,9 +3,10 @@
 const admin = require('../../../utils/api/admin');
 const { invalidateOptions } = require('../../../utils/api/profile');
 const load = require('../../../behaviors/load');
+const dirty = require('../../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     groups: [],
@@ -29,13 +30,6 @@ Page({
     });
   },
 
-  // 有未保存的修改时，返回/退出前弹确认，防止编辑丢失
-  markDirty() {
-    if (this.dirty || !wx.enableAlertBeforeUnload) return;
-    this.dirty = true;
-    wx.enableAlertBeforeUnload({ message: '修改还没保存，确定要离开吗？' });
-  },
-
   onInput(event) {
     this.markDirty();
     this.setData({ [`values.${event.currentTarget.dataset.key}`]: event.detail.value });
@@ -55,10 +49,7 @@ Page({
     try {
       await admin.saveSettings(values);
       invalidateOptions(); // 全端文案来自 /options，立即让缓存失效
-      if (this.dirty) {
-        this.dirty = false;
-        wx.disableAlertBeforeUnload();
-      }
+      this.clearDirty();
       wx.showToast({ title: '已保存', icon: 'success' });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });

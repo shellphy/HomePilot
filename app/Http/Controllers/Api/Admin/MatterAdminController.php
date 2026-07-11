@@ -92,7 +92,7 @@ class MatterAdminController extends Controller
             MatterStateChanged::dispatch($matter, $previousState);
         }
 
-        return response()->json(['data' => $this->present($matter->refresh())]);
+        return response()->json(['data' => $this->present($matter)]);
     }
 
     /**
