@@ -1,7 +1,7 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="card">
-      <view class="q-title">题目</view>
+      <view class="q-title">题目<text class="f-required">*</text></view>
       <input class="fin" placeholder="如：打算怎么装？" value="{{text}}" data-field="text" bind:input="onInput" />
 
       <view class="q-title">题型</view>
@@ -10,7 +10,7 @@
         <view class="chip {{type === 'multi' ? 'chip-on' : ''}}" data-type="multi" bind:tap="pickType">多选</view>
       </view>
 
-      <view class="q-title">选项<text class="q-note">一行一个，至少两个</text></view>
+      <view class="q-title">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个</text></view>
       <textarea class="fin farea" auto-height placeholder="全包&#10;半包&#10;清包" value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
 
       <view class="switch-row">

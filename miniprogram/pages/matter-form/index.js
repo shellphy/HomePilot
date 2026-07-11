@@ -7,19 +7,19 @@ const TYPE_COPY = {
     title: '发起邻里活动',
     titlePlaceholder: '如：周六建材市场组团踩点',
     pitchPlaceholder: '时间、地点、怎么集合、大概安排……写清楚邻居才敢报名',
-    targetHint: '选填：满多少人成行',
+    targetHint: '满多少人成行',
   },
   aid: {
     title: '发起互助',
     titlePlaceholder: '如：拼车去工地看进度（周日上午）',
     pitchPlaceholder: '要互助的事、时间、你能提供什么、需要几个人……',
-    targetHint: '选填：需要几个人',
+    targetHint: '需要几个人',
   },
   rights: {
     title: '发起维权联名',
     titlePlaceholder: '如：地下车位定价过高，联名要求公开成本',
     pitchPlaceholder: '事情的来龙去脉、诉求是什么、联名后打算怎么递交……写清楚才有人跟',
-    targetHint: '选填：目标联名人数',
+    targetHint: '目标联名人数',
   },
 };
 

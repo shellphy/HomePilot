@@ -1,9 +1,9 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="card">
-      <view class="q-title">模块标题</view>
+      <view class="q-title">模块标题<text class="f-required">*</text></view>
       <input class="fin" placeholder="如：基础登记、家庭与居住" value="{{title}}" data-field="title" bind:input="onInput" />
-      <view class="q-title">模块引言<text class="q-note">选填，显示在这组题目上方</text></view>
+      <view class="q-title">模块引言<text class="q-note">显示在这组题目上方</text></view>
       <input class="fin" placeholder="如：约 2 分钟 · 明细仅管理员可见" value="{{intro}}" data-field="intro" bind:input="onInput" />
     </view>
 
