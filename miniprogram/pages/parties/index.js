@@ -1,6 +1,7 @@
 // 已认证商家名录：管理员认证过的相关方 + 各家的成团数与评价沉淀
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
+const { contactPhone } = require('../../utils/phone');
 
 Page({
   behaviors: [load],
@@ -19,7 +20,7 @@ Page({
   },
 
   callParty(event) {
-    wx.makePhoneCall({ phoneNumber: event.currentTarget.dataset.phone });
+    contactPhone(event.currentTarget.dataset.phone);
   },
 
   goDetail(event) {

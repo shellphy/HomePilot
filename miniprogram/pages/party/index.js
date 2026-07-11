@@ -2,6 +2,7 @@
 // 已认证对全小区可见；未认证的档案只有管理员（审核前看资料）和归属人自己（预览）能看到。
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
+const { contactPhone } = require('../../utils/phone');
 
 Page({
   behaviors: [load],
@@ -35,7 +36,7 @@ Page({
   },
 
   callParty() {
-    wx.makePhoneCall({ phoneNumber: this.data.party.phone });
+    contactPhone(this.data.party.phone);
   },
 
   previewImage(event) {

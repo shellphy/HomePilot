@@ -8,7 +8,7 @@
         </view>
         <view class="party-intro" wx:if="{{party.intro}}">{{party.intro}}</view>
         <view class="party-sub" wx:if="{{party.category}}">主营：{{party.category}}</view>
-        <view class="party-sub party-phone" wx:if="{{party.phone}}" bind:tap="callParty">电话：{{party.phone}}（点击拨打）</view>
+        <view class="party-sub party-phone" wx:if="{{party.phone}}" bind:tap="callParty">电话：{{party.phone}}（点击拨打 / 复制）</view>
         <view class="party-sub" wx:if="{{note}}">{{note}}</view>
       </view>
 
