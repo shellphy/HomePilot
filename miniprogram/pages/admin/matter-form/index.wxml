@@ -17,6 +17,13 @@
           <text class="frow-label">阶梯优惠</text>
           <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" data-field="perk" bind:input="onInput" />
         </view>
+        <view class="frow">
+          <view class="frow-main">
+            <view class="row-title">按户出方案</view>
+            <view class="row-sub">中央空调、全屋定制这类非标品：商家逐户沟通需求（如上门量房）单独报价，报名者手机号从「谈判中」起与团长互通。业主端发起后不可改，这里是纠错通道——中途翻转会改变联系互通的隐私承诺，慎改</view>
+          </view>
+          <switch checked="{{needsSurvey}}" data-field="needsSurvey" bind:change="onSwitch" color="#06ae56" />
+        </view>
       </block>
 
       <!-- 目标数（团购/活动/互助/维权） -->

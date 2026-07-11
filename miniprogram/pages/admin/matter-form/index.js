@@ -21,6 +21,7 @@ Page({
     body: '',
     pitch: '',
     perk: '',
+    needsSurvey: false, // 团购：按户出方案（业主端发起时锁定，管理端作为纠错通道可改）
     collectsContact: false,
     terms: [],
     glossary: [],
@@ -57,6 +58,7 @@ Page({
         body: payload.body || '',
         pitch: payload.pitch || '',
         perk: payload.perk || '',
+        needsSurvey: !!payload.needs_survey,
         collectsContact: !!payload.collects_contact,
         terms: payload.terms || [],
         glossary: payload.glossary || [],
@@ -131,6 +133,7 @@ Page({
     if (data.type !== 'notice') payload.pitch = data.pitch.trim();
     if (data.type === 'groupbuy') {
       payload.perk = data.perk.trim();
+      payload.needs_survey = data.needsSurvey;
       payload.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
       payload.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
     }
