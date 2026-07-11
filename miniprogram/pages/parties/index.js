@@ -1,0 +1,34 @@
+// 已认证商家名录：管理员认证过的相关方 + 各家的成团数与评价沉淀
+const profile = require('../../utils/api/profile');
+const load = require('../../behaviors/load');
+
+Page({
+  behaviors: [load],
+
+  data: {
+    parties: [],
+  },
+
+  onShow() {
+    this.reload();
+  },
+
+  async onPullDownRefresh() {
+    await this.reload();
+    wx.stopPullDownRefresh();
+  },
+
+  reload() {
+    return this.runLoad(async () => {
+      const res = await profile.listParties();
+      this.setData({
+        parties: res.data.map((party) => ({
+          ...party,
+          note: party.deal_count
+            ? `成团 ${party.deal_count} 单${party.rating ? ` · ★${party.rating}（${party.review_count} 条评价）` : ''}`
+            : '还没有成团记录',
+        })),
+      });
+    });
+  },
+});

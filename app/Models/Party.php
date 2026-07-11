@@ -48,6 +48,15 @@ class Party extends Model
         return self::TYPES[$this->type]['label'] ?? $this->type;
     }
 
+    /**
+     * 治理类相关方（物业/开发商/业委会）：被管理员认证（is_listed）后，
+     * 其成员可在事项时间线里以官方身份回应。
+     */
+    public function isGovernance(): bool
+    {
+        return in_array($this->type, [self::TYPE_PROPERTY, self::TYPE_DEVELOPER, self::TYPE_COMMITTEE], true);
+    }
+
     protected $fillable = ['type', 'name', 'category', 'is_listed'];
 
     protected function casts(): array
@@ -61,5 +70,15 @@ class Party extends Model
     public function members(): HasMany
     {
         return $this->hasMany(Resident::class, 'affiliated_party_id');
+    }
+
+    /**
+     * 以该相关方身份发起的事项（身份快照，成员切换身份不影响）。
+     *
+     * @return HasMany<Matter, $this>
+     */
+    public function initiatedMatters(): HasMany
+    {
+        return $this->hasMany(Matter::class, 'initiator_party_id');
     }
 }

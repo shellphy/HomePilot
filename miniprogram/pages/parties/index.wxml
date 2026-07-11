@@ -1,0 +1,16 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="hint intro">名录里的商家均经管理员认证。评价来自参团业主，商家不能修改。</view>
+
+    <view class="card party" wx:for="{{parties}}" wx:key="id">
+      <view class="party-row">
+        <view class="party-name">{{item.name}}</view>
+        <view class="party-badge">✓ 已认证{{item.label}}</view>
+      </view>
+      <view class="party-sub" wx:if="{{item.category}}">主营：{{item.category}}</view>
+      <view class="party-note">{{item.note}}</view>
+    </view>
+
+    <view wx:if="{{!parties.length}}" class="hint">还没有商家通过认证</view>
+  </page-status>
+</view>

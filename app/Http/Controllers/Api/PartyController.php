@@ -6,12 +6,53 @@ use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentResource;
 use App\Models\Party;
+use App\Models\Stance;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class PartyController extends Controller
 {
     use ResolvesResident;
+
+    /**
+     * 已认证相关方名录（面向全小区）：商家带发起事项数、成团数与评价沉淀。
+     */
+    public function index(): JsonResponse
+    {
+        $parties = Party::where('is_listed', true)
+            ->withCount(['initiatedMatters as matter_count' => fn ($query) => $query->where('is_approved', true)])
+            ->withCount(['initiatedMatters as deal_count' => fn ($query) => $query->where('type', 'groupbuy')->where('state', 'done')])
+            ->orderByDesc('deal_count')
+            ->get();
+
+        // 评价挂在事项上，按发起方聚合出每家的均分（小区体量小，PHP 侧聚合即可）
+        $reviews = Stance::where('mode', Stance::MODE_REVIEW)
+            ->whereHas('matter', fn ($query) => $query->whereIn('initiator_party_id', $parties->pluck('id')))
+            ->with('matter')
+            ->get()
+            ->groupBy(fn (Stance $review): int => (int) $review->matter->initiator_party_id);
+
+        return response()->json([
+            'data' => $parties->map(function (Party $party) use ($reviews): array {
+                $partyReviews = $reviews->get($party->id, collect());
+
+                return [
+                    'id' => $party->id,
+                    'type' => $party->type,
+                    'label' => $party->typeLabel(),
+                    'name' => $party->name,
+                    'category' => $party->category,
+                    'matter_count' => (int) $party->getAttribute('matter_count'),
+                    'deal_count' => (int) $party->getAttribute('deal_count'),
+                    'review_count' => $partyReviews->count(),
+                    'rating' => $partyReviews->isEmpty()
+                        ? null
+                        : round($partyReviews->avg(fn (Stance $review) => (int) ($review->payload['rating'] ?? 0)), 1),
+                ];
+            }),
+        ]);
+    }
 
     /**
      * 相关方入驻：创建一个相关方并绑定到当前成员（管理员认证后 is_listed 才为真）。

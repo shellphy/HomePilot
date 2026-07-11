@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/me/phone', [ProfileController::class, 'updatePhone']);
     Route::post('/me/party', [PartyController::class, 'store']);
     Route::delete('/me/party', [PartyController::class, 'destroy']);
+    Route::get('/parties', [PartyController::class, 'index']);
 
     // 小区概况（户数、入驻数）
     Route::get('/stats', [StatsController::class, 'index']);

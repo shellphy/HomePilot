@@ -15,11 +15,16 @@ class MatterUpdateController extends Controller
     use ResolvesResident;
 
     /**
-     * 发布事项时间线（进度）：只有发起人可以。
+     * 发布事项时间线：发起人发进展；被认证的治理类相关方（物业/开发商/业委会）发官方回应。
      */
     public function store(Request $request, Matter $matter): JsonResponse
     {
-        abort_unless($matter->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
+        $resident = $this->resident($request);
+        $isInitiator = $matter->initiator_id === $resident->id;
+        $party = $resident->affiliatedParty;
+        $isOfficial = $party !== null && $party->is_listed && $party->isGovernance();
+
+        abort_unless($isInitiator || $isOfficial, 403, '只有发起人或被认证的相关方可以操作');
 
         $validated = $request->validate([
             'happened_on' => ['required', 'date'],
@@ -30,7 +35,10 @@ class MatterUpdateController extends Controller
             'content.required' => '写一句进度内容吧',
         ]);
 
-        $update = $matter->updates()->create($validated);
+        // 发起人身份优先：牵头人恰好也是相关方成员时，发的是进展不是官方回应
+        $update = $matter->updates()->create($validated + [
+            'author_party_id' => $isInitiator ? null : $party->id,
+        ]);
 
         MatterUpdatePosted::dispatch($update);
 

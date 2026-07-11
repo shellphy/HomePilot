@@ -74,6 +74,28 @@ Page({
     });
   },
 
+  // 驳回不删除：附一句理由，发起人在详情页看到，修改后即重新提交
+  reject(event) {
+    const id = event.currentTarget.dataset.id;
+    const matter = this.data.matters.find((item) => item.id === id);
+    wx.showModal({
+      title: `驳回「${matter.title}」`,
+      editable: true,
+      placeholderText: '写一句驳回理由（发起人会看到）',
+      confirmText: '驳回',
+      success: async ({ confirm, content }) => {
+        if (!confirm) return;
+        try {
+          await admin.approveMatter(id, false, (content || '').trim());
+          wx.showToast({ title: '已驳回', icon: 'none' });
+          this.reload();
+        } catch (error) {
+          wx.showToast({ title: error.message, icon: 'none' });
+        }
+      },
+    });
+  },
+
   // 管理员可发布任何类型（公告、征集这类业主不能自发的也在内）
   goCreate() {
     const types = this.data.matterTypes;

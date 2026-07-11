@@ -16,6 +16,8 @@ return new class extends Migration
             $table->id();
             $table->string('type', 20); // groupbuy / notice / ...
             $table->foreignId('initiator_id')->nullable()->constrained('residents')->nullOnDelete();
+            // 发起时的相关方身份快照（已认证商家发起的团带商家署名；成员之后切换身份不影响历史事项）
+            $table->foreignId('initiator_party_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->string('title', 60);
             $table->string('category', 30)->default('');
             $table->string('state', 20); // 类型内状态机，由 MatterType 定义

@@ -22,6 +22,8 @@ class MatterUpdateResource extends JsonResource
             'happened_on' => $this->happened_on->format('m-d'),
             'content' => $this->content,
             'images' => $this->images ?? [],
+            // 官方回应的署名（如 "物业 · 天青府物业服务中心"）；牵头人进展为 null
+            'author' => $this->authorParty ? $this->authorParty->typeLabel().' · '.$this->authorParty->name : null,
         ];
     }
 }
