@@ -12,6 +12,7 @@ Component({
     matter: Object,
     joined: Boolean,
     isInitiator: Boolean,
+    canRespond: Boolean, // 被认证的治理类相关方成员：可发官方回应
   },
 
   data: {
@@ -35,20 +36,54 @@ Component({
       this.triggerEvent('refresh');
     },
 
-    async toggleJoin() {
+    toggleJoin() {
       if (this.data.submitting) return;
+
+      if (this.data.joined) {
+        // 一键误触就退出太伤，取消前确认
+        wx.showModal({
+          title: '确定退出？',
+          content: '你会从名单里移除，之后可以随时再加入。',
+          confirmText: '退出',
+          cancelText: '再想想',
+          success: ({ confirm }) => {
+            if (confirm) this.doToggle(true);
+          },
+        });
+        return;
+      }
+      this.doToggle(false);
+    },
+
+    async doToggle(leaving) {
       this.setData({ submitting: true });
       try {
-        const res = this.data.joined
+        const res = leaving
           ? await matters.leave(this.data.matter.id)
           : await matters.join(this.data.matter.id);
         wx.showToast({ title: res.joined ? '已加入，名单里见' : '已退出', icon: 'none' });
         this.refresh();
       } catch (error) {
-        wx.showToast({ title: error.message, icon: 'none' });
+        this.handleJoinError(error);
       } finally {
         this.setData({ submitting: false });
       }
+    },
+
+    // 业主没选楼栋号会被后端拦下：引导去个人资料补全，回来即可加入
+    handleJoinError(error) {
+      if ((error.message || '').includes('楼栋号')) {
+        wx.showModal({
+          title: '先选好楼栋号',
+          content: '名单以「楼栋 + 昵称」记录，加入前请先在个人资料里选好楼栋号。',
+          confirmText: '去完善',
+          success: ({ confirm }) => {
+            if (confirm) wx.navigateTo({ url: '/pages/profile-form/index' });
+          },
+        });
+        return;
+      }
+      wx.showToast({ title: error.message, icon: 'none' });
     },
 
     previewImage(event) {

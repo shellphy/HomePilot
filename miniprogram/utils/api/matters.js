@@ -45,8 +45,9 @@ function publishDeal(id, finalTerms, finalNote) {
   });
 }
 
-function join(id) {
-  return request(`/matters/${id}/join`, { method: 'POST' });
+// shareContact = 成团等互通阶段愿意与牵头人互通手机号
+function join(id, shareContact = true) {
+  return request(`/matters/${id}/join`, { method: 'POST', data: { share_contact: shareContact } });
 }
 
 function leave(id) {

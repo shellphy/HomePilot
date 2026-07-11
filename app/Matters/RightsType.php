@@ -53,6 +53,12 @@ class RightsType extends MatterType
         return $matter->state !== 'resolved';
     }
 
+    /** 联名名单不对外公示（怕被针对是联名的最大心理门槛），对外只给计数，明细仅牵头人可见。 */
+    public function rosterPublic(Matter $matter): bool
+    {
+        return false;
+    }
+
     public function sortWeight(Matter $matter): int
     {
         return $matter->state === 'resolved' ? 9 : 1;

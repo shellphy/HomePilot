@@ -14,7 +14,7 @@ const PILL_CLASS = {
 const TYPE_META = {
   activity: { joinCta: '报名参加', joinedCta: '已报名 ✓（点击取消）', foot: '人已报名', roster: '报名名单' },
   aid: { joinCta: '算我一个', joinedCta: '已加入 ✓（点击退出）', foot: '人已加入', roster: '参与名单' },
-  rights: { joinCta: '参与联名', joinedCta: '已联名 ✓（点击撤回）', foot: '户已联名', roster: '联名名单' },
+  rights: { joinCta: '参与联名', joinedCta: '已联名 ✓（点击撤回）', foot: '人已联名', roster: '联名名单' },
 };
 
 // 状态机本身由后端下发（详情/列表数据里的 states 与 state_label），前端不重复维护；

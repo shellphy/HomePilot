@@ -73,6 +73,12 @@ class GroupbuyType extends MatterType
         return $matter->state === 'done';
     }
 
+    /** 成团后团长与同意共享的参团者互通手机号（建群、收款、量房都在此后发生）。 */
+    public function contactsOpen(Matter $matter): bool
+    {
+        return $matter->state === 'done';
+    }
+
     /** 接龙中 > 谈判中 > 意向征集，已成团垫底。 */
     public function sortWeight(Matter $matter): int
     {

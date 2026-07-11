@@ -18,7 +18,8 @@
 </view>
 
 <view class="card pending-tip" wx:if="{{!matter.is_approved}}">
-  ⏳ 待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）
+  <block wx:if="{{matter.reject_reason}}">❌ 已被驳回：{{matter.reject_reason}}（修改后保存即重新提交审核）</block>
+  <block wx:else>⏳ 待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）</block>
 </view>
 
 <view class="card leader-ops" wx:if="{{isInitiator}}">
@@ -30,12 +31,20 @@
   </view>
 </view>
 
+<!-- 被认证的治理类相关方（物业/开发商/业委会）：官方回应入口，进展时间线里带署名 -->
+<view class="card leader-ops" wx:if="{{canRespond && !isInitiator}}">
+  <view class="kicker">你以认证相关方身份出现，可对这件事正式回应</view>
+  <view class="leader-btns">
+    <t-button theme="light" size="medium" bind:tap="goProgress">发布官方回应</t-button>
+  </view>
+</view>
+
 <view class="card" wx:if="{{matter.updates.length}}">
   <view class="kicker">进展</view>
   <view class="tline" wx:for="{{matter.updates}}" wx:key="index">
     <view class="tline-dot {{index === 0 ? 'tline-dot-latest' : ''}}"></view>
     <view class="tline-main">
-      <view class="tline-date">{{item.happened_on}}</view>
+      <view class="tline-date">{{item.happened_on}}{{item.author ? ' · ' + item.author + '（官方回应）' : ''}}</view>
       <view class="tline-content">{{item.content}}</view>
       <view class="tline-shots" wx:if="{{item.images.length}}">
         <image
@@ -55,11 +64,17 @@
 </view>
 
 <view class="card" wx:if="{{matter.roster.length}}">
-  <view class="kicker">{{meta.roster}} · 楼栋 + 昵称对外可见</view>
+  <view class="kicker">{{meta.roster}} · {{matter.roster_hidden ? '不对外公示，仅你可见' : '楼栋 + 昵称对外可见'}}</view>
   <view class="roster-row" wx:for="{{matter.roster}}" wx:key="index">
     <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>
     <text>{{item}}</text>
   </view>
+</view>
+
+<!-- 名单不公示的类型（如维权联名）：对外只给计数，降低参与顾虑 -->
+<view class="card" wx:if="{{!matter.roster.length && matter.roster_hidden && matter.join_count}}">
+  <view class="kicker">{{meta.roster}}</view>
+  <view class="hint">已有 {{matter.join_count}} 人联名。名单不对外公示（仅牵头人可见），放心参与。</view>
 </view>
 
 <view class="cta-dock">
