@@ -119,7 +119,8 @@ class MatterController extends Controller
             'initiator_id' => $resident->id,
             'title' => $validated['title'],
             'category' => $validated['category'] ?? '',
-            'state' => $validated['state'] ?? $type->initialState(),
+            // 初始状态由类型的状态机决定，不接受客户端指定
+            'state' => $type->initialState(),
             'is_approved' => false,
             'target_count' => $validated['target_count'] ?? 0,
             'payload' => $type->payloadFrom($validated),
@@ -136,7 +137,9 @@ class MatterController extends Controller
         abort_unless($matter->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
 
         $type = $matter->typeDef();
-        $validated = $request->validate($this->rulesFor($matter->type));
+        $validated = $request->validate(array_merge($this->rulesFor($matter->type), [
+            'state' => ['sometimes', Rule::in(array_keys($type->states()))],
+        ]));
 
         $matter->update([
             'title' => $validated['title'],
@@ -196,6 +199,7 @@ class MatterController extends Controller
 
     /**
      * 组合该类型的完整校验规则：通用 + 列级 + payload。
+     * 状态不在其中：创建时由状态机给初始值，编辑/流转各自单独校验。
      *
      * @return array<string, mixed>
      */
@@ -204,10 +208,7 @@ class MatterController extends Controller
         $type = MatterTypeRegistry::for($typeKey);
 
         return array_merge(
-            [
-                'title' => ['required', 'string', 'max:60'],
-                'state' => ['sometimes', Rule::in(array_keys($type->states()))],
-            ],
+            ['title' => ['required', 'string', 'max:60']],
             $type->baseRules(),
             $type->payloadRules(),
         );
