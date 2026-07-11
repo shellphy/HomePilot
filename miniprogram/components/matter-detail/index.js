@@ -2,6 +2,11 @@
 // 该类事项的全部行为（参与/流转/进度/编辑入口）都在组件内，变更后向页面发 refresh。
 const matters = require('../../utils/api/matters');
 const { pillClass, TYPE_META, stateOptions } = require('../../utils/constants');
+const { guardProfileError } = require('../../utils/profile-guard');
+
+function starsOf(rating) {
+  return '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
+}
 
 Component({
   options: {
@@ -12,6 +17,7 @@ Component({
     matter: Object,
     joined: Boolean,
     isInitiator: Boolean,
+    myReview: Object,    // 我的评价（结束后可修改）
     canRespond: Boolean, // 被认证的治理类相关方成员：可发官方回应
     isParty: Boolean,    // 相关方身份不参与接龙，隐藏参与按钮
   },
@@ -20,6 +26,10 @@ Component({
     pillClass: '',
     meta: {},
     submitting: false,
+    reviews: [],
+    reviewRating: 0,
+    reviewContent: '',
+    submittingReview: false,
   },
 
   observers: {
@@ -28,6 +38,13 @@ Component({
       this.setData({
         pillClass: pillClass(matter.state),
         meta: TYPE_META[matter.type] || { joinCta: '参与', joinedCta: '已参与（点击取消）', foot: '人已参与', roster: '参与名单' },
+        reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
+      });
+    },
+    myReview(myReview) {
+      this.setData({
+        reviewRating: (myReview && myReview.rating) || 0,
+        reviewContent: (myReview && myReview.content) || '',
       });
     },
   },
@@ -73,24 +90,41 @@ Component({
 
     // 业主没选楼栋号会被后端拦下（errors.profile）：引导去个人资料补全，回来即可加入
     handleJoinError(error) {
-      const errors = (error.response && error.response.data && error.response.data.errors) || {};
-      if (errors.profile) {
-        wx.showModal({
-          title: '先选好楼栋号',
-          content: '名单以「楼栋 + 昵称」记录，加入前请先在个人资料里选好楼栋号。',
-          confirmText: '去完善',
-          success: ({ confirm }) => {
-            if (confirm) wx.navigateTo({ url: '/pages/profile-form/index' });
-          },
-        });
-        return;
+      if (!guardProfileError(error, '名单以「楼栋 + 昵称」记录，加入前请先在个人资料里选好楼栋号。')) {
+        wx.showToast({ title: error.message, icon: 'none' });
       }
-      wx.showToast({ title: error.message, icon: 'none' });
     },
 
     previewImage(event) {
       const { urls, current } = event.currentTarget.dataset;
       wx.previewImage({ urls, current });
+    },
+
+    // ---- 评价（仅参与过的业主，事项结束后）----
+
+    onRateChange(event) {
+      this.setData({ reviewRating: event.detail.value });
+    },
+
+    onReviewInput(event) {
+      this.setData({ reviewContent: event.detail.value });
+    },
+
+    async submitReview() {
+      const { reviewRating, reviewContent, submittingReview } = this.data;
+      if (submittingReview) return;
+      if (!reviewRating) return wx.showToast({ title: '请先打个分', icon: 'none' });
+
+      this.setData({ submittingReview: true });
+      try {
+        await matters.review(this.data.matter.id, reviewRating, reviewContent.trim());
+        wx.showToast({ title: '评价已发布', icon: 'success' });
+        this.refresh();
+      } catch (error) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      } finally {
+        this.setData({ submittingReview: false });
+      }
     },
 
     // ---- 以下仅发起人可见的操作 ----

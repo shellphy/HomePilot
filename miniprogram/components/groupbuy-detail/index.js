@@ -2,6 +2,7 @@
 // 数据变更后向页面发 refresh 事件，由页面重新拉取。
 const matters = require('../../utils/api/matters');
 const { pillClass, joinPercent, stateOptions } = require('../../utils/constants');
+const { guardProfileError } = require('../../utils/profile-guard');
 
 function starsOf(rating) {
   return '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
@@ -30,6 +31,8 @@ Component({
     reviewContent: '',
     submitting: false,
     submittingReview: false,
+    // 成团后与团长互通手机号的意愿：报名前用开关选择，默认同意
+    shareContact: true,
   },
 
   observers: {
@@ -71,14 +74,23 @@ Component({
         return;
       }
 
-      // 报名前确认联系方式共享意愿：成团后建群、收款、量房都靠它
+      // 共享意愿在页面开关里选好，弹窗只做最终确认，点「再想想」不会报名
+      const { matter, shareContact } = this.data;
       wx.showModal({
-        title: '报名接龙',
-        content: '成团后需要建群对接、安排上门，是否同意届时与团长互通手机号？手机号只在你和团长之间可见，不会公开展示。',
-        confirmText: '同意并报名',
-        cancelText: '仅报名',
-        success: ({ confirm }) => this.doJoin(confirm),
+        title: matter.state === 'seeking' ? '登记意向' : '报名接龙',
+        content: shareContact
+          ? '成团后你的手机号将与团长互通（只在你和团长之间可见，不会公开展示），方便建群对接、安排上门。'
+          : '你选择了不互通手机号，成团后建群、对接需要你主动联系团长。',
+        confirmText: matter.state === 'seeking' ? '登记' : '报名',
+        cancelText: '再想想',
+        success: ({ confirm }) => {
+          if (confirm) this.doJoin(shareContact);
+        },
       });
+    },
+
+    onShareContactChange(event) {
+      this.setData({ shareContact: event.detail.value });
     },
 
     async doJoin(shareContact) {
@@ -114,19 +126,9 @@ Component({
 
     // 业主没选楼栋号会被后端拦下（errors.profile）：引导去个人资料补全，回来即可报名
     handleJoinError(error) {
-      const errors = (error.response && error.response.data && error.response.data.errors) || {};
-      if (errors.profile) {
-        wx.showModal({
-          title: '先选好楼栋号',
-          content: '接龙名单以「楼栋 + 昵称」公示，报名前请先在个人资料里选好楼栋号。',
-          confirmText: '去完善',
-          success: ({ confirm }) => {
-            if (confirm) wx.navigateTo({ url: '/pages/profile-form/index' });
-          },
-        });
-        return;
+      if (!guardProfileError(error, '接龙名单以「楼栋 + 昵称」公示，报名前请先在个人资料里选好楼栋号。')) {
+        wx.showToast({ title: error.message, icon: 'none' });
       }
-      wx.showToast({ title: error.message, icon: 'none' });
     },
 
     copyPhone(event) {

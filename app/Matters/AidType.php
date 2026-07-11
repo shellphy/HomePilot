@@ -51,6 +51,12 @@ class AidType extends MatterType
         return $matter->state === 'open';
     }
 
+    /** 互助结束后开放评价，给后来搭伙的邻居留参考。 */
+    public function reviewOpen(Matter $matter): bool
+    {
+        return $matter->state === 'closed';
+    }
+
     public function sortWeight(Matter $matter): int
     {
         return $matter->state === 'open' ? 2 : 9;

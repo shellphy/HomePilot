@@ -17,6 +17,7 @@ return new class extends SettingsMigration
         $this->migrator->add('community.initiator_note', '发起即成为本团团长，负责对接商家和更新进度。小程序不代收任何款项，签约与付款由业主直接对商家；商家给到的任何返点，须全部转为参团业主让利，并在成团后随成交公示摊开。');
         $this->migrator->add('community.initiate_hint', '团购、活动、拼车互助、维权联名都可以 · 你来牵头，管理员审核后对全小区公示');
         $this->migrator->add('community.data_footnote', '收房、车位等主题的征集开始后，数据会出现在这里');
+        $this->migrator->add('community.admin_contact', '业主群里@管理员，或到物业前台找管理员');
         $this->migrator->add('community.total_households', 600);
         $this->migrator->add('community.buildings', ['1栋', '2栋', '3栋', '4栋', '5栋', '6栋', '7栋', '8栋']);
         $this->migrator->add('community.layouts', ['107㎡', '130㎡', '154㎡']);

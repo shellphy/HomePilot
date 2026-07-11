@@ -42,8 +42,9 @@ class JoinController extends Controller
             ['payload' => ['share_contact' => $shareContact]],
         );
 
-        if (! $stance->wasRecentlyCreated) {
-            $stance->update(['payload' => array_merge($stance->payload ?? [], ['share_contact' => $shareContact])]);
+        // 共享意愿的变更也是表态的一部分，同样走修订链——"只增不改"
+        if (! $stance->wasRecentlyCreated && (bool) ($stance->payload['share_contact'] ?? false) !== $shareContact) {
+            $stance->reviseTo(array_merge($stance->payload ?? [], ['share_contact' => $shareContact]));
         }
 
         return response()->json([

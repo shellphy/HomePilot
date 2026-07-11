@@ -25,6 +25,8 @@ return new class extends Migration
             $table->unsignedInteger('target_count')->default(0);
             $table->json('payload')->nullable(); // groupbuy: pitch/perk/terms/glossary/final_terms/final_note；notice: body
             $table->timestamps();
+            // 软删除：误删可从库里恢复，表态/动态一并保留（级联只在真删时发生）
+            $table->softDeletes();
 
             $table->index(['type', 'is_approved']);
         });

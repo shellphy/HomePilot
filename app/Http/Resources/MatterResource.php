@@ -42,6 +42,9 @@ class MatterResource extends JsonResource
             'states' => $type->states(),
             'is_approved' => $this->is_approved,
             'target_count' => $this->target_count,
+            // 表态阶段开关（由类型状态机决定），小程序端据此渲染报名/评价区，不自行推断状态
+            'join_open' => $type->allowsJoin($this->resource),
+            'review_open' => $type->reviewOpen($this->resource),
             'join_count' => $this->whenCounted('joins'),
             'register_count' => (int) ($this->register_count ?? 0),
             'registered_by_me' => (bool) ($this->registered_by_me ?? false),

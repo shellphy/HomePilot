@@ -1,4 +1,5 @@
 <view class="page-body tabbed">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
   <block wx:if="{{me}}">
     <!-- 头部：头像昵称直接融在淡渐变页面背景上（常规「我的」页结构） -->
     <view class="hero-bg"></view>
@@ -50,6 +51,7 @@
       <view class="row" hover-class="row-hover" bind:tap="goAdminParties">
         <text class="row-title">相关方认证</text>
         <view class="row-right">
+          <text class="row-note">{{partyPendingCount ? partyPendingCount + ' 家待认证' : ''}}</text>
           <text class="row-arrow">›</text>
         </view>
       </view>
@@ -62,10 +64,5 @@
     </view>
 
   </block>
-
-  <view wx:elif="{{loadError}}" class="hint" bind:tap="loadMe">
-    {{loadError}}
-    <view class="hint-retry">点击重试</view>
-  </view>
-  <view wx:else class="hint">加载中…</view>
+  </page-status>
 </view>

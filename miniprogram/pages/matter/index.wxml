@@ -18,6 +18,7 @@
         matter="{{matter}}"
         joined="{{joined}}"
         is-initiator="{{isInitiator}}"
+        my-review="{{myReview}}"
         can-respond="{{canRespond}}"
         is-party="{{isParty}}"
         bind:refresh="reload"

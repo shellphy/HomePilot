@@ -70,7 +70,11 @@ Page({
 
   // 微信手机号授权组件回调：拿 code 去后端换真实绑定号码，换到即保存
   async onGetPhone(event) {
-    if (!event.detail.code) return; // 用户点了拒绝，不打扰
+    if (!event.detail.code) {
+      // 用户点了拒绝：给一句反馈说明用途与可见范围，而不是无声无息
+      wx.showToast({ title: '未授权。手机号仅管理员和成团对接可见，不会公示', icon: 'none' });
+      return;
+    }
     try {
       const me = await authPhone(event.detail.code);
       this.setData({ phone: me.phone });

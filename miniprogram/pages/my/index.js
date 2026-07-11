@@ -2,32 +2,42 @@
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
 const { getMe } = require('../../utils/me');
+const load = require('../../behaviors/load');
 
 Page({
+  behaviors: [load],
+
   data: {
     me: null,
     joinedCount: 0,
     mineCount: 0,
     censusCount: 0,
     pendingCount: 0,
-    loadError: '',
+    partyPendingCount: 0, // 待认证相关方（有成员但未认证）
   },
 
   onShow() {
-    this.loadMe();
+    this.reload();
   },
 
-  async loadMe() {
-    try {
+  async onPullDownRefresh() {
+    await this.reload();
+    wx.stopPullDownRefresh();
+  },
+
+  reload() {
+    return this.runLoad(async () => {
       const [me, mineRes, joinedRes] = await Promise.all([
         getMe(),
         matters.listMine(),
         matters.listJoined(),
       ]);
-      const pendingCount = me.is_admin
-        ? (await admin.listMatters(true)).pending_count
-        : 0;
-
+      const [pendingCount, partyPendingCount] = me.is_admin
+        ? await Promise.all([
+          admin.listMatters(true).then((res) => res.pending_count),
+          admin.listParties().then((res) => res.pending_count),
+        ])
+        : [0, 0];
 
       // 身份行：业主 · 楼栋 · 房号（空项不显示）；相关方则是 类型 · 名称
       const identityLine = me.party
@@ -41,24 +51,32 @@ Page({
         mineCount: mineRes.data.length,
         joinedCount: joinedRes.data.length,
         pendingCount,
-        loadError: '',
+        partyPendingCount,
       });
-    } catch (error) {
-      if (this.data.me) {
-        wx.showToast({ title: error.message, icon: 'none' });
-      } else {
-        this.setData({ loadError: error.message });
-      }
-    }
+    });
   },
 
   goProfile() {
     wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 打开小区数据总览（各期征集都在里面）
+  // 我的答题：答过的直接落到那一期的聚合页，多期弹选择；没答过就去数据总览逛逛
   goCensus() {
-    wx.navigateTo({ url: '/pages/insights/index' });
+    const censuses = (this.data.me && this.data.me.censuses) || [];
+    if (!censuses.length) {
+      wx.navigateTo({ url: '/pages/insights/index' });
+      return;
+    }
+    if (censuses.length === 1) {
+      wx.navigateTo({ url: `/pages/insights/index?id=${censuses[0].matter_id}` });
+      return;
+    }
+    wx.showActionSheet({
+      itemList: censuses.map((census) => `${census.title}（已答 ${census.answered} 题）`),
+      success: ({ tapIndex }) => {
+        wx.navigateTo({ url: `/pages/insights/index?id=${censuses[tapIndex].matter_id}` });
+      },
+    });
   },
 
   goAdminMatters() {

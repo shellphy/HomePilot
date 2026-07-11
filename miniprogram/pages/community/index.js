@@ -84,9 +84,12 @@ Page({
   // 张罗点事：类型清单来自服务端，团购走专属表单，其余走通用表单
   goCreate() {
     if (this.data.merchantUnlisted) {
+      // 给「联系管理员」一个具体落点：联系方式由社区设置下发
+      const adminContact = this.data.community.admin_contact;
       wx.showModal({
         title: '先完成商家认证',
-        content: '认证后就能以商家身份发起团购和活动，并带「已认证」标识。请联系管理员认证。',
+        content: '认证后就能以商家身份发起团购和活动，并带「已认证」标识。'
+          + (adminContact ? `联系管理员认证：${adminContact}` : '请联系管理员认证。'),
         showCancel: false,
         confirmText: '好的',
       });
