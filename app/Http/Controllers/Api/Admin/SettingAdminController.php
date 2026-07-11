@@ -42,6 +42,7 @@ class SettingAdminController extends Controller
         [
             'title' => '选项清单（一行一项）',
             'fields' => [
+                ['key' => 'buildings', 'label' => '楼栋（个人资料按此选择）', 'kind' => 'list'],
                 ['key' => 'layouts', 'label' => '户型', 'kind' => 'list'],
                 ['key' => 'decoration_modes', 'label' => '装修方式', 'kind' => 'list'],
                 ['key' => 'categories', 'label' => '团购品类', 'kind' => 'list'],
@@ -69,6 +70,8 @@ class SettingAdminController extends Controller
             'initiate_hint' => ['required', 'string', 'max:500'],
             'data_footnote' => ['required', 'string', 'max:200'],
             'total_households' => ['required', 'integer', 'min:1'],
+            'buildings' => ['required', 'array', 'min:1'],
+            'buildings.*' => ['required', 'string', 'max:10'],
             'layouts' => ['required', 'array', 'min:1'],
             'layouts.*' => ['required', 'string', 'max:50'],
             'decoration_modes' => ['required', 'array', 'min:1'],

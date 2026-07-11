@@ -8,8 +8,8 @@ return new class extends Migration
 {
     /**
      * 成员：人通过与户的关系存在于社区中。
-     * unit_label/room_label 是户的自报标签（如 "3栋"/"1802"）——隐私决定只收楼栋，
-     * 将来验证体系上线、需要户级档案时再立表。
+     * unit_label 从社区设置的楼栋清单里选；room_label 是自报房号（仅管理员可见）。
+     * phone 只能通过微信手机号授权组件写入（服务端 code 换真实绑定号码），是唯一的联系字段。
      * affiliated_party_id = 以哪个相关方身份出现（如商家入驻绑定 merchant 相关方）；业主为 NULL。
      */
     public function up(): void
@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('openid')->unique();
             $table->string('nickname', 30)->default('');
             $table->string('avatar')->default('');
-            $table->string('wechat_id', 50)->default('');
             $table->string('phone', 20)->default('');
             $table->string('unit_label', 30)->default('');
             $table->foreignId('affiliated_party_id')->nullable()->constrained('parties')->nullOnDelete();

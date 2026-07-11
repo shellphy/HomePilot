@@ -7,6 +7,7 @@ test('options ship community identity, form choices and initiatable matter types
         ->assertSuccessful()
         ->assertJsonPath('community.name', app(CommunitySettings::class)->name)
         ->assertJsonPath('community.pledge', app(CommunitySettings::class)->pledge)
+        ->assertJsonPath('buildings', app(CommunitySettings::class)->buildings)
         ->assertJsonPath('layouts', app(CommunitySettings::class)->layouts);
 
     $types = collect($response->json('matter_types'));

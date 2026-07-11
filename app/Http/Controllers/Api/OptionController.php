@@ -27,6 +27,7 @@ class OptionController extends Controller
                 'initiate_hint' => $settings->initiate_hint,
                 'data_footnote' => $settings->data_footnote,
             ],
+            'buildings' => $settings->buildings,
             'layouts' => $settings->layouts,
             'decoration_modes' => $settings->decoration_modes,
             'categories' => $settings->categories,

@@ -29,6 +29,9 @@ class CommunitySettings extends Settings
     public int $total_households;
 
     /** @var array<int, string> */
+    public array $buildings;
+
+    /** @var array<int, string> */
     public array $layouts;
 
     /** @var array<int, string> */

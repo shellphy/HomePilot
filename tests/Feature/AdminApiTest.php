@@ -25,10 +25,10 @@ test('me exposes the admin flag', function () {
     $this->getJson('/api/me')->assertJsonPath('data.is_admin', true);
 });
 
-test('the admin:grant command grants and revokes by id or wechat id', function () {
-    $resident = Resident::factory()->create(['wechat_id' => 'laok_2026']);
+test('the admin:grant command grants and revokes by id or phone', function () {
+    $resident = Resident::factory()->create(['phone' => '13800138000']);
 
-    $this->artisan('admin:grant', ['resident' => 'laok_2026'])->assertSuccessful();
+    $this->artisan('admin:grant', ['resident' => '13800138000'])->assertSuccessful();
     expect($resident->refresh()->is_admin)->toBeTrue();
 
     $this->artisan('admin:grant', ['resident' => (string) $resident->id, '--revoke' => true])->assertSuccessful();
@@ -141,7 +141,7 @@ test('admin reads census records with contact details and resolved question text
             ]],
         ],
     ]);
-    $resident = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'wechat_id' => 'laok', 'room_label' => '1802']);
+    $resident = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'phone' => '13800138000', 'room_label' => '1802']);
     Stance::factory()->create([
         'matter_id' => $census->id,
         'resident_id' => $resident->id,
@@ -154,7 +154,7 @@ test('admin reads census records with contact details and resolved question text
         ->assertSuccessful()
         ->assertJsonPath('data.0.unit_label', '3栋')
         ->assertJsonPath('data.0.room_label', '1802')
-        ->assertJsonPath('data.0.wechat_id', 'laok')
+        ->assertJsonPath('data.0.phone', '13800138000')
         ->assertJsonPath('data.0.answers.0.question', '打算怎么装？')
         ->assertJsonPath('data.0.answers.0.answer', '半包');
 });

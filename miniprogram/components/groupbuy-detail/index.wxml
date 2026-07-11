@@ -3,8 +3,8 @@
     <view class="pill {{pillClass}}">{{matter.state_label}}</view>
     <view class="head-count">
       <text class="head-num">{{matter.join_count}}</text>
-      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 户</text>
-      <text wx:else> 户</text>
+      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 人</text>
+      <text wx:else> 人</text>
     </view>
   </view>
   <view wx:if="{{matter.state === 'open' && matter.target_count}}" class="meter head-meter">

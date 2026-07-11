@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // 成员与身份
     Route::get('/me', [ProfileController::class, 'show']);
     Route::put('/me', [ProfileController::class, 'update']);
+    Route::post('/me/phone', [ProfileController::class, 'updatePhone']);
     Route::post('/me/party', [PartyController::class, 'store']);
     Route::delete('/me/party', [PartyController::class, 'destroy']);
 

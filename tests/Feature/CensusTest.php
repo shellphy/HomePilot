@@ -3,6 +3,7 @@
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
+use App\Services\WeChat;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
@@ -63,22 +64,24 @@ test('the census ships its schema, my answers and aggregates', function () {
 
 test('a complete member profile is a precondition, not part of the form', function () {
     $census = renovationCensus();
-    $resident = Resident::factory()->withoutUnit()->create(['wechat_id' => '']);
+    $resident = Resident::factory()->withoutUnit()->create(['phone' => '']);
     Sanctum::actingAs($resident);
 
     // 档案不完整：拒绝参与，并且不接收任何联系字段（表单只管答案）
     $this->putJson("/api/matters/{$census->id}/census", [
         'answers' => basicAnswers(),
         'unit_label' => '7栋',
-        'wechat_id' => 'laoK-2026',
+        'phone' => '13800138000',
     ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('profile');
 
     expect($resident->refresh()->unit_label)->toBe('');
 
-    // 在「个人资料」完善档案后，同样的答卷可以提交
-    $this->putJson('/api/me', ['unit_label' => '7栋', 'wechat_id' => 'laoK-2026'])->assertSuccessful();
+    // 在「个人资料」选好楼栋、授权手机号后，同样的答卷可以提交
+    $this->putJson('/api/me', ['unit_label' => '7栋'])->assertSuccessful();
+    $this->mock(WeChat::class)->shouldReceive('phoneNumberFromCode')->andReturn('13800138000');
+    $this->postJson('/api/me/phone', ['code' => 'auth-code'])->assertSuccessful();
 
     $this->putJson("/api/matters/{$census->id}/census", ['answers' => basicAnswers()])
         ->assertCreated()

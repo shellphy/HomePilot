@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\ValidationException;
 
@@ -36,5 +37,64 @@ class WeChat
         }
 
         return $openid;
+    }
+
+    /**
+     * 用手机号授权组件（open-type="getPhoneNumber"）拿到的 code 换手机号。
+     *
+     * @throws ValidationException
+     */
+    public function phoneNumberFromCode(string $code): string
+    {
+        try {
+            $response = Http::timeout(5)
+                ->connectTimeout(3)
+                ->retry([100, 500], throw: false)
+                ->post(
+                    'https://api.weixin.qq.com/wxa/business/getuserphonenumber?access_token='.$this->accessToken(),
+                    ['code' => $code],
+                );
+        } catch (ConnectionException) {
+            throw ValidationException::withMessages(['code' => '微信服务超时，请重试']);
+        }
+
+        $phone = $response->json('phone_info.purePhoneNumber');
+
+        if (! $response->successful() || (int) $response->json('errcode') !== 0 || blank($phone)) {
+            throw ValidationException::withMessages(['code' => '手机号获取失败，请重新授权']);
+        }
+
+        return $phone;
+    }
+
+    /**
+     * 服务端接口调用凭证（stable_token，普通模式下重复获取返回同一个 token）。
+     *
+     * @throws ValidationException
+     */
+    private function accessToken(): string
+    {
+        return Cache::remember('wechat.access_token', now()->addMinutes(100), function (): string {
+            try {
+                $response = Http::timeout(5)
+                    ->connectTimeout(3)
+                    ->retry([100, 500], throw: false)
+                    ->post('https://api.weixin.qq.com/cgi-bin/stable_token', [
+                        'grant_type' => 'client_credential',
+                        'appid' => config('services.wechat.appid'),
+                        'secret' => config('services.wechat.secret'),
+                    ]);
+            } catch (ConnectionException) {
+                throw ValidationException::withMessages(['code' => '微信服务超时，请重试']);
+            }
+
+            $token = $response->json('access_token');
+
+            if (! $response->successful() || blank($token)) {
+                throw ValidationException::withMessages(['code' => '微信服务暂时不可用，请稍后再试']);
+            }
+
+            return $token;
+        });
     }
 }

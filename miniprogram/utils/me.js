@@ -26,6 +26,14 @@ function invalidateMe() {
   cached = null;
 }
 
+// 手机号授权：官方组件（open-type="getPhoneNumber"）拿到的 code 换微信绑定号码，
+// 这是手机号唯一的写入途径（不接受手填）
+async function authPhone(code) {
+  const res = await request('/me/phone', { method: 'POST', data: { code } });
+  cached = Promise.resolve(res.data);
+  return res.data;
+}
+
 // 相关方入驻：创建并绑定相关方（可入驻类型由 /options 的 party_types 下发）
 async function bindParty(type, name, category) {
   const res = await request('/me/party', { method: 'POST', data: { type, name, category } });
@@ -40,4 +48,4 @@ async function unbindParty() {
   return res.data;
 }
 
-module.exports = { getMe, updateMe, invalidateMe, bindParty, unbindParty };
+module.exports = { getMe, updateMe, invalidateMe, authPhone, bindParty, unbindParty };

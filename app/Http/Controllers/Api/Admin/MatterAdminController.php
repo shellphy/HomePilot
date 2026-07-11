@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Events\MatterApproved;
+use App\Events\MatterStateChanged;
 use App\Http\Controllers\Controller;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
@@ -75,6 +77,8 @@ class MatterAdminController extends Controller
     {
         $validated = $request->validate($this->rules($matter->type));
 
+        $previousState = $matter->state;
+
         $matter->update([
             'title' => $validated['title'],
             'category' => $validated['category'] ?? $matter->category,
@@ -83,6 +87,10 @@ class MatterAdminController extends Controller
             'target_count' => $validated['target_count'] ?? $matter->target_count,
             'payload' => array_merge($matter->payload ?? [], $this->payloadFrom($validated, $matter->type)),
         ]);
+
+        if ($matter->state !== $previousState) {
+            MatterStateChanged::dispatch($matter, $previousState);
+        }
 
         return response()->json(['data' => $this->present($matter->refresh())]);
     }
@@ -94,7 +102,12 @@ class MatterAdminController extends Controller
     {
         $validated = $request->validate(['is_approved' => ['required', 'boolean']]);
 
+        $wasApproved = $matter->is_approved;
         $matter->update($validated);
+
+        if ($matter->is_approved && ! $wasApproved) {
+            MatterApproved::dispatch($matter);
+        }
 
         return response()->json(['data' => $this->present($matter)]);
     }
@@ -107,7 +120,7 @@ class MatterAdminController extends Controller
     }
 
     /**
-     * 登记明细（含楼栋/房号/微信/手机等仅管理员可见字段），答案换算成题面文字。
+     * 登记明细（含楼栋/房号/手机等仅管理员可见字段），答案换算成题面文字。
      */
     public function registrations(Matter $matter): JsonResponse
     {
@@ -128,7 +141,6 @@ class MatterAdminController extends Controller
                     'unit_label' => $stance->resident->unit_label,
                     'room_label' => $stance->resident->room_label,
                     'nickname' => $stance->resident->nickname,
-                    'wechat_id' => $stance->resident->wechat_id,
                     'phone' => $stance->resident->phone,
                     'created_at' => $stance->created_at?->format('Y-m-d H:i'),
                     'answers' => collect(is_array($answers) ? $answers : [])

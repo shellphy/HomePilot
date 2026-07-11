@@ -15,7 +15,7 @@
         </view>
         <view class="frow">
           <text class="frow-label">阶梯优惠</text>
-          <input class="frow-input" placeholder="如：满 20 户赠全屋水电升级" value="{{perk}}" data-field="perk" bind:input="onInput" />
+          <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" data-field="perk" bind:input="onInput" />
         </view>
       </block>
 
@@ -35,7 +35,7 @@
       <view class="frow" wx:if="{{type === 'census'}}">
         <view class="frow-main">
           <view class="row-title">征集联系方式</view>
-          <view class="row-sub">打开后，参与前需先在个人资料里完善楼栋号和微信号</view>
+          <view class="row-sub">打开后，参与前需先在个人资料里选好楼栋号并授权手机号</view>
         </view>
         <switch checked="{{collectsContact}}" data-field="collectsContact" bind:change="onSwitch" color="#06ae56" />
       </view>

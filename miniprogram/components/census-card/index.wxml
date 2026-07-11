@@ -6,7 +6,7 @@
   </view>
   <view wx:if="{{matter.pitch}}" class="ccard-pitch">{{matter.pitch}}</view>
   <view class="ccard-foot">
-    <text><text class="ccard-num">{{matter.register_count}}</text> 户已登记</text>
+    <text><text class="ccard-num">{{matter.register_count}}</text> 人已登记</text>
     <text class="ccard-cta">{{matter.registered_by_me ? '看数据 / 改登记 ›' : '2 分钟完成登记 ›'}}</text>
   </view>
 </view>

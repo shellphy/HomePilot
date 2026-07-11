@@ -20,7 +20,7 @@ Page({
     perk: '',
     terms: [],
     glossary: [],
-    interestCount: {}, // {品类: 意向户数}，决策依据要贴着决策点出现
+    interestCount: {}, // {品类: 意向人数}，决策依据要贴着决策点出现
     initiatorNote: '',
     submitting: false,
   },
@@ -41,7 +41,7 @@ Page({
 
       this.setData({
         categories: options.categories,
-        // 品类意向户数由后端从征集答案聚合（/stats 的 category_interest），没有就不显示
+        // 品类意向人数由后端从征集答案聚合（/stats 的 category_interest），没有就不显示
         interestCount: stats.category_interest || {},
         initiatorNote: (options.community && options.community.initiator_note) || '',
       });
@@ -134,7 +134,7 @@ Page({
     if (!finalCategory) return wx.showToast({ title: '请选择或填写品类', icon: 'none' });
     if (!title.trim()) return wx.showToast({ title: '请填写标题', icon: 'none' });
     if (!targetCount || Number(targetCount) < 1) {
-      return wx.showToast({ title: '请填写目标户数', icon: 'none' });
+      return wx.showToast({ title: '请填写目标人数', icon: 'none' });
     }
 
     const payload = {

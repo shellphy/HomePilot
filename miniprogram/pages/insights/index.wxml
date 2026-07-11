@@ -31,7 +31,7 @@
     <!-- 详情模式：单期完整聚合 -->
     <block wx:for="{{blocks}}" wx:for-item="block" wx:key="id">
       <view class="card">
-        <view class="hero-num">{{block.registered}} <text class="hero-sub">户已登记</text></view>
+        <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
       </view>
 

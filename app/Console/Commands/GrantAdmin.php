@@ -7,7 +7,7 @@ use Illuminate\Console\Command;
 
 class GrantAdmin extends Command
 {
-    protected $signature = 'admin:grant {resident : 成员 ID 或微信号（昵称会重复，不支持）} {--revoke : 收回管理员权限}';
+    protected $signature = 'admin:grant {resident : 成员 ID 或手机号（昵称会重复，不支持）} {--revoke : 收回管理员权限}';
 
     protected $description = '把某个成员设为管理员（或收回），管理操作全部在小程序「我的」里完成';
 
@@ -16,10 +16,10 @@ class GrantAdmin extends Command
         $key = $this->argument('resident');
 
         $resident = Resident::find($key)
-            ?? Resident::where('wechat_id', $key)->where('wechat_id', '!=', '')->first();
+            ?? Resident::where('phone', $key)->where('phone', '!=', '')->first();
 
         if (! $resident) {
-            $this->error("找不到成员：{$key}（可用 ID 或微信号，微信号在小程序「个人资料」里填写）");
+            $this->error("找不到成员：{$key}（可用 ID 或手机号，手机号在小程序「个人资料」里授权）");
 
             return self::FAILURE;
         }

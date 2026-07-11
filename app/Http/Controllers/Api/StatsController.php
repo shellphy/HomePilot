@@ -26,8 +26,8 @@ class StatsController extends Controller
     }
 
     /**
-     * 品类 => 意向户数：来自征集问卷里 key 为约定值的多选题（见 CensusType）。
-     * 发起团购页据此在品类旁展示"已有 N 户想团"。
+     * 品类 => 意向人数：来自征集问卷里 key 为约定值的多选题（见 CensusType）。
+     * 发起团购页据此在品类旁展示"已有 N 人想团"。
      *
      * @return array<string, int>
      */
