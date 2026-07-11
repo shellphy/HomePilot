@@ -13,7 +13,7 @@ Page({
     joined: false,
     isInitiator: false,
     myReview: null,
-    appName: '邻里',
+    appName: '天青府家园',
   },
 
   onLoad(query) {

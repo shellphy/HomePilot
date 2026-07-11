@@ -57,9 +57,7 @@
         class="census-cta"
         data-id="{{block.id}}"
         bind:tap="goCensusForm"
-      >
-        {{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}
-      </t-button>
+      >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
     </block>
 
     <view class="map-foot">{{dataFootnote}}</view>

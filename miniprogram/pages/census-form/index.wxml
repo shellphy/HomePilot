@@ -40,9 +40,7 @@
 
       <view class="nav-btns">
         <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" class="nav-prev" bind:tap="prev">上一步</t-button>
-        <t-button theme="primary" size="large" class="nav-next" loading="{{submitting}}" bind:tap="next">
-          {{moduleIndex + 1 < modules.length ? '下一模块' : '完成'}}
-        </t-button>
+        <t-button theme="primary" size="large" class="nav-next" loading="{{submitting}}" bind:tap="next">{{moduleIndex + 1 < modules.length ? '下一模块' : '完成'}}</t-button>
       </view>
       <view class="skip-note">带「必答」的答完就行，其他题跳过也没关系</view>
     </block>
