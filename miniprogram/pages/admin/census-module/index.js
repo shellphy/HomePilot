@@ -45,7 +45,7 @@ Page({
   },
 
   goQuestion(event) {
-    const qi = event.currentTarget.dataset.qi;
+    const { qi } = event.currentTarget.dataset;
     wx.navigateTo({ url: `/pages/admin/census-question/index?id=${this.data.id}&mi=${this.data.mi}&qi=${qi}` });
   },
 

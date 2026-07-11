@@ -1,12 +1,8 @@
 // 团购详情体：该类型的全部行为（报名/评价/流转/成交公示入口）都在组件内，
 // 数据变更后向页面发 refresh 事件，由页面重新拉取。
 const matters = require('../../utils/api/matters');
-const { pillClass, joinPercent, stateOptions } = require('../../utils/constants');
+const { pillClass, joinPercent, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
-
-function starsOf(rating) {
-  return '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
-}
 
 Component({
   options: {

@@ -94,10 +94,9 @@ Page({
 
     // 必答题拦在客户端，给出具体是哪题（填空题只填空白也算没答）
     const answered = (value) => value !== undefined && (typeof value !== 'string' || value.trim() !== '');
-    for (const question of current.questions) {
-      if (question.required && !answered(answers[question.key])) {
-        return wx.showToast({ title: `「${question.text}」是必答题`, icon: 'none' });
-      }
+    const missing = current.questions.find((question) => question.required && !answered(answers[question.key]));
+    if (missing) {
+      return wx.showToast({ title: `「${missing.text}」是必答题`, icon: 'none' });
     }
 
     // 只提交当前模块已作答的题
