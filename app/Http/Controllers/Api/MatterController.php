@@ -193,7 +193,8 @@ class MatterController extends Controller
      */
     public function update(Request $request, Matter $matter): JsonResponse
     {
-        abort_unless($matter->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
+        $resident = $this->resident($request);
+        abort_unless($matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
 
         $type = $matter->typeDef();
         $validated = $request->validate(array_merge($this->rulesFor($matter->type), [
@@ -201,7 +202,7 @@ class MatterController extends Controller
         ]));
 
         if (($validated['state'] ?? $matter->state) !== $matter->state) {
-            $this->guardFinalState($matter);
+            $this->guardTransition($matter, $validated['state']);
         }
 
         $previousState = $matter->state;
@@ -216,6 +217,7 @@ class MatterController extends Controller
         ]);
 
         if ($matter->state !== $previousState) {
+            $matter->recordActivity($resident);
             MatterStateChanged::dispatch($matter, $previousState);
         }
 
@@ -227,20 +229,22 @@ class MatterController extends Controller
      */
     public function updateState(Request $request, Matter $matter): JsonResponse
     {
-        abort_unless($matter->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
+        $resident = $this->resident($request);
+        abort_unless($matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
 
         $validated = $request->validate([
             'state' => ['required', Rule::in(array_keys($matter->typeDef()->states()))],
         ]);
 
         if ($validated['state'] !== $matter->state) {
-            $this->guardFinalState($matter);
+            $this->guardTransition($matter, $validated['state']);
         }
 
         $previousState = $matter->state;
         $matter->update($validated);
 
         if ($matter->state !== $previousState) {
+            $matter->recordActivity($resident);
             MatterStateChanged::dispatch($matter, $previousState);
         }
 
@@ -252,7 +256,8 @@ class MatterController extends Controller
      */
     public function updateDeal(Request $request, Matter $matter): JsonResponse
     {
-        abort_unless($matter->initiator_id === $this->resident($request)->id, 403, '只有发起人可以操作');
+        $resident = $this->resident($request);
+        abort_unless($matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
         abort_unless($matter->type === 'groupbuy', 404);
         abort_unless($matter->state === 'done', 422, '流转到「已成团」后才能发布成交公示');
 
@@ -272,14 +277,17 @@ class MatterController extends Controller
             ]),
         ]);
 
+        $matter->recordActivity($resident);
+
         return response()->json(['data' => MatterResource::make($matter)]);
     }
 
     /**
-     * 终态锁：已进入终态（如已成团/已有结果）后，联系方式已互通、评价已开放，
-     * 发起人不能再把状态改回去；确需纠错找管理员（管理端编辑不受此限）。
+     * 状态流转守卫（发起人侧）：终态（如已成团/已有结果）后联系方式已互通、评价已开放，
+     * 不能再回退；非终态之间也只能沿状态机顺序推进一步，跳步/回退都不行。
+     * 确需纠错找管理员（管理端编辑不受此限）。
      */
-    private function guardFinalState(Matter $matter): void
+    private function guardTransition(Matter $matter, string $to): void
     {
         $type = $matter->typeDef();
 
@@ -287,6 +295,12 @@ class MatterController extends Controller
             $type->isFinalState($matter->state),
             422,
             '已进入「'.$type->stateLabel($matter->state).'」，状态不能再回退；如需纠错请联系管理员',
+        );
+
+        abort_unless(
+            $type->canAdvanceTo($matter->state, $to),
+            422,
+            '状态只能按「'.implode(' → ', $type->states()).'」逐步推进；如需纠错请联系管理员',
         );
     }
 

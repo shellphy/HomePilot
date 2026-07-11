@@ -28,17 +28,18 @@ Page({
     wx.stopPullDownRefresh();
   },
 
+  // 社区名称只认 /options 下发（社区设置里改），没取到时用中性兜底，不写死具体小区
   onShareAppMessage() {
     const { community, activeCount } = this.data;
     return {
-      title: `${community.name || '武汉招商天青府'} · ${activeCount} 件事正在张罗`,
+      title: `${community.name || '我们小区'} · ${activeCount} 件事正在张罗`,
       path: '/pages/community/index',
     };
   },
 
   onShareTimeline() {
     const { community } = this.data;
-    return { title: `${community.name || '武汉招商天青府'} · ${community.slogan || ''}` };
+    return { title: `${community.name || '我们小区'} · ${community.slogan || ''}` };
   },
 
   reload() {

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Party;
-use App\Models\Resident;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,16 +17,11 @@ class PartyAdminController extends Controller
     {
         $parties = Party::latest()->get();
 
-        // 入驻方的联系电话：档案归属人（last_party_id）优先，老数据兜底当前绑定人
-        $owners = Resident::query()
-            ->where(fn ($query) => $query
-                ->whereIn('last_party_id', $parties->pluck('id'))
-                ->orWhereIn('affiliated_party_id', $parties->pluck('id')))
-            ->get(['affiliated_party_id', 'last_party_id', 'phone']);
+        // 入驻方的联系电话：当前绑定成员优先，其次最近绑定过的成员（规则统一在 Party 模型）
+        $owners = Party::contactCandidatesFor($parties->pluck('id'));
 
         $data = $parties->map(function (Party $party) use ($owners): array {
-            $owner = $owners->firstWhere('last_party_id', $party->id)
-                ?? $owners->firstWhere('affiliated_party_id', $party->id);
+            $owner = $party->contactOwnerAmong($owners);
 
             return [
                 'id' => $party->id,
@@ -44,9 +38,7 @@ class PartyAdminController extends Controller
 
         // 待认证 = 有归属人亮明了身份但还没被认证的（空壳档案不算待办），喂给「我的」页角标
         $pendingCount = $parties
-            ->filter(fn (Party $party): bool => ! $party->is_listed
-                && ($owners->firstWhere('last_party_id', $party->id)
-                    ?? $owners->firstWhere('affiliated_party_id', $party->id)) !== null)
+            ->filter(fn (Party $party): bool => ! $party->is_listed && $party->contactOwnerAmong($owners) !== null)
             ->count();
 
         return response()->json(['data' => $data, 'pending_count' => $pendingCount]);

@@ -20,12 +20,16 @@ Component({
     myReview: Object,
     contacts: Array,          // 团长视角：同意共享的参团者联系方式（成团后）
     initiatorContact: Object, // 参团者视角：团长联系方式（成团后且自己同意过共享）
-    isParty: Boolean,         // 相关方身份不参与接龙，隐藏报名按钮
+    isParty: Boolean,         // 相关方身份不参与接龙，报名区改为解释 + 切回业主入口
+    partyLabel: String,       // 当前相关方身份的显示名（解释文案用）
+    myShareContact: Boolean,  // 我报名时的共享意愿：成团后没共享的看不到团长电话，给补开入口
   },
 
   data: {
     pillClass: '',
     percent: 0,
+    nextState: null,   // 状态机的下一站（终态时为 null）
+    nextIsFinal: false, // 下一站是否终态：终态不可回退，确认弹窗要说清后果
     reviews: [],
     reviewRating: 0,
     reviewContent: '',
@@ -38,9 +42,15 @@ Component({
   observers: {
     matter(matter) {
       if (!matter) return;
+      // 状态只能沿状态机推进一步（与后端守卫一致），算出下一站；终态时为 null（按钮隐藏）
+      const states = stateOptions(matter.states);
+      const stateIndex = states.findIndex((state) => state.value === matter.state);
+      const nextState = stateIndex >= 0 ? states[stateIndex + 1] || null : null;
       this.setData({
         pillClass: pillClass(matter.state),
         percent: joinPercent(matter),
+        nextState,
+        nextIsFinal: !!nextState && stateIndex + 2 === states.length,
         reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
       });
     },
@@ -181,15 +191,22 @@ Component({
       wx.navigateTo({ url: `/pages/groupbuy-deal/index?id=${this.data.matter.id}` });
     },
 
+    // 状态只能推进到下一站（跳步/回退后端会拦）；进终态是不可逆动作，确认时把后果讲清楚
     flipState() {
-      const { matter } = this.data;
-      const options = stateOptions(matter.states).filter((state) => state.value !== matter.state);
+      const { nextState, nextIsFinal } = this.data;
+      if (!nextState) return;
 
-      wx.showActionSheet({
-        itemList: options.map((state) => `流转为「${state.label}」`),
-        success: async ({ tapIndex }) => {
+      wx.showModal({
+        title: `流转为「${nextState.label}」？`,
+        content: nextIsFinal
+          ? `确认后将与同意共享的参团者互通手机号、开放评价，状态不可再回退（纠错需联系管理员）。`
+          : `状态将从「${this.data.matter.state_label}」推进为「${nextState.label}」，此后不能退回上一步。`,
+        confirmText: '确认流转',
+        cancelText: '再想想',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
           try {
-            await matters.flipState(this.data.matter.id, options[tapIndex].value);
+            await matters.flipState(this.data.matter.id, nextState.value);
             wx.showToast({ title: '状态已更新', icon: 'success' });
             this.refresh();
           } catch (error) {
@@ -197,6 +214,31 @@ Component({
           }
         },
       });
+    },
+
+    // 成团后没共享联系方式的参团者：补开共享，与团长互见电话（双向对等）
+    enableShare() {
+      wx.showModal({
+        title: '开启联系方式共享？',
+        content: '开启后你和团长可互见手机号（只在你们双方之间可见，不会公开展示），方便进群对接。',
+        confirmText: '开启共享',
+        cancelText: '再想想',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await matters.join(this.data.matter.id, true);
+            wx.showToast({ title: '已开启共享', icon: 'success' });
+            this.refresh();
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          }
+        },
+      });
+    },
+
+    // 相关方身份不参与接龙：去个人资料页切回业主身份
+    goSwitchIdentity() {
+      wx.navigateTo({ url: '/pages/profile-form/index' });
     },
   },
 });

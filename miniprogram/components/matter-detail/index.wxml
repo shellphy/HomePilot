@@ -26,7 +26,7 @@
   <view class="kicker">牵头人操作（这件事由你负责）</view>
   <view class="leader-btns">
     <t-button theme="light" size="medium" bind:tap="goProgress">发布进展</t-button>
-    <t-button theme="light" size="medium" bind:tap="flipState">流转状态</t-button>
+    <t-button wx:if="{{nextState}}" theme="light" size="medium" bind:tap="flipState">流转为「{{nextState.label}}」</t-button>
     <t-button theme="light" size="medium" bind:tap="goEdit">编辑</t-button>
   </view>
 </view>
@@ -116,4 +116,10 @@
     loading="{{submitting}}"
     bind:tap="toggleJoin"
   >{{joined ? meta.joinedCta : meta.joinCta}}</t-button>
+</view>
+
+<!-- 相关方身份：不进名单，但说清楚为什么、怎么参与 -->
+<view class="cta-dock" wx:if="{{matter.join_open && isParty}}">
+  <view class="party-note">你正以「{{partyLabel}}」身份浏览，{{meta.roster}}仅向业主开放</view>
+  <t-button theme="light" block size="large" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
 </view>

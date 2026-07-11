@@ -179,3 +179,11 @@
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
   background: linear-gradient(to top, #f6f6f3 75%, rgba(246, 246, 243, 0));
 }
+
+/* 相关方身份的参与区说明 */
+.party-note {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-bottom: 16rpx;
+}

@@ -27,8 +27,9 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
+      // /me 强制刷新：未读红点（has_mine_updates 等）要反映最新动态，不能吃会话缓存
       const [me, mineRes, joinedRes] = await Promise.all([
-        getMe(),
+        getMe(true),
         matters.listMine(),
         matters.listJoined(),
       ]);

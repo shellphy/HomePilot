@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Database\Factories\PartyFactory;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * 相关方：与社区发生关系的组织（商家/物业/开发商/业委会）。
@@ -76,6 +78,35 @@ class Party extends Model
     public function members(): HasMany
     {
         return $this->hasMany(Resident::class, 'affiliated_party_id');
+    }
+
+    /**
+     * 从候选成员里选出档案联系人：当前绑定的成员优先，其次最近绑定过它的成员（last_party_id）。
+     * 名录、详情、管理端共用这一条规则——档案先后被多人绑定过时，电话不能张冠李戴。
+     *
+     * @param  EloquentCollection<int, Resident>  $candidates  按最近活跃排序（contactCandidatesFor 的产物）
+     */
+    public function contactOwnerAmong(EloquentCollection $candidates): ?Resident
+    {
+        return $candidates->firstWhere('affiliated_party_id', $this->id)
+            ?? $candidates->firstWhere('last_party_id', $this->id);
+    }
+
+    /**
+     * 一批相关方的联系人候选（按最近活跃排序），配合 contactOwnerAmong 逐个选人。
+     *
+     * @param  Collection<array-key, int>  $partyIds
+     * @return EloquentCollection<int, Resident>
+     */
+    public static function contactCandidatesFor(Collection $partyIds, bool $withPhoneOnly = false): EloquentCollection
+    {
+        return Resident::query()
+            ->when($withPhoneOnly, fn ($query) => $query->where('phone', '!=', ''))
+            ->where(fn ($query) => $query
+                ->whereIn('last_party_id', $partyIds)
+                ->orWhereIn('affiliated_party_id', $partyIds))
+            ->orderByDesc('updated_at')
+            ->get(['id', 'affiliated_party_id', 'last_party_id', 'phone']);
     }
 
     /**

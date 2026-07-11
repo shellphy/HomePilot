@@ -1,3 +1,9 @@
 <t-tab-bar value="{{value}}" split="{{false}}" bind:change="handleChange">
-  <t-tab-bar-item wx:for="{{list}}" wx:key="value" icon="{{item.icon}}" value="{{item.value}}">{{item.label}}</t-tab-bar-item>
+  <t-tab-bar-item
+    wx:for="{{list}}"
+    wx:key="value"
+    icon="{{item.icon}}"
+    value="{{item.value}}"
+    badge-props="{{item.value === 'my' ? myBadge : null}}"
+  >{{item.label}}</t-tab-bar-item>
 </t-tab-bar>

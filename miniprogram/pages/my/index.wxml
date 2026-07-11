@@ -19,6 +19,7 @@
       <view class="row" hover-class="row-hover" bind:tap="goJoined">
         <text class="row-title">我参与的</text>
         <view class="row-right">
+          <view class="row-dot" wx:if="{{me.has_joined_updates}}"></view>
           <text class="row-note">{{joinedCount}} 件</text>
           <text class="row-arrow">›</text>
         </view>
@@ -26,6 +27,7 @@
       <view class="row" hover-class="row-hover" bind:tap="goMine">
         <text class="row-title">我牵头的</text>
         <view class="row-right">
+          <view class="row-dot" wx:if="{{me.has_mine_updates}}"></view>
           <text class="row-note">{{mineCount}} 件</text>
           <text class="row-arrow">›</text>
         </view>

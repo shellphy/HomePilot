@@ -62,6 +62,32 @@ test('a listed party detail is visible to everyone with profile and stats', func
         ->assertJsonPath('data.is_listed', true);
 });
 
+test('the directory phone belongs to the current binder not a stale past binder', function () {
+    $party = Party::factory()->listed()->merchant()->create();
+
+    // 老绑定人：曾绑定过该档案（last_party_id 还留着），updated_at 拨早一分钟以分出先后
+    $stale = Resident::factory()->create(['last_party_id' => $party->id, 'phone' => '13800000001']);
+    $this->travel(1)->minutes();
+    // 当前绑定人
+    $current = Resident::factory()->create([
+        'affiliated_party_id' => $party->id,
+        'last_party_id' => $party->id,
+        'phone' => '13800000002',
+    ]);
+
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->getJson('/api/parties')->assertJsonPath('data.0.phone', '13800000002');
+    $this->getJson("/api/parties/{$party->id}")->assertJsonPath('data.phone', '13800000002');
+
+    // 当前绑定人切回业主后，才轮到最近一位绑定过的成员
+    $current->update(['affiliated_party_id' => null]);
+    $this->getJson("/api/parties/{$party->id}")->assertJsonPath('data.phone', '13800000002');
+
+    $current->update(['last_party_id' => null]);
+    $this->getJson("/api/parties/{$party->id}")->assertJsonPath('data.phone', $stale->phone);
+});
+
 test('an unlisted party detail is hidden from ordinary members but visible to admins and its owner', function () {
     $party = Party::factory()->create(['type' => Party::TYPE_PROPERTY]);
     $owner = Resident::factory()->create(['affiliated_party_id' => $party->id, 'last_party_id' => $party->id]);

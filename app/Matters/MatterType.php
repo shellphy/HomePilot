@@ -90,6 +90,18 @@ abstract class MatterType
         return $this->states()[$state] ?? $state;
     }
 
+    /**
+     * 发起人侧的合法状态流转：只能沿状态机顺序推进一步。
+     * 跳步会绕过中间环节（如一步跳到已成团直接触发联系互通），回退会撕裂事后数据语义，
+     * 都不允许；确需纠错走管理端（不受此限）。
+     */
+    public function canAdvanceTo(string $from, string $to): bool
+    {
+        $states = array_keys($this->states());
+
+        return array_search($to, $states, true) === array_search($from, $states, true) + 1;
+    }
+
     /** 是否开放接龙表态。 */
     public function allowsJoin(Matter $matter): bool
     {

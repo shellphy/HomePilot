@@ -258,3 +258,20 @@ test('the admin queue signs matters with the initiator party snapshot', function
         ->assertSuccessful()
         ->assertJsonPath('data.0.initiator', '商家 · 青城中央空调（已认证）');
 });
+
+test('admin publishing a groupbuy requires the same category and target count as the member form', function () {
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    // 两条创建路径校验强度一致：管理员代发的团购同样必须有品类与目标人数
+    $this->postJson('/api/admin/matters', [
+        'type' => 'groupbuy',
+        'title' => '中央空调团购',
+    ])->assertUnprocessable()->assertJsonValidationErrors(['category', 'target_count']);
+
+    $this->postJson('/api/admin/matters', [
+        'type' => 'groupbuy',
+        'title' => '中央空调团购',
+        'category' => '中央空调',
+        'target_count' => 30,
+    ])->assertCreated();
+});

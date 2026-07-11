@@ -11,6 +11,8 @@
         contacts="{{contacts}}"
         initiator-contact="{{initiatorContact}}"
         is-party="{{isParty}}"
+        party-label="{{partyLabel}}"
+        my-share-contact="{{myShareContact}}"
         bind:refresh="reload"
       />
       <matter-detail
@@ -21,6 +23,7 @@
         my-review="{{myReview}}"
         can-respond="{{canRespond}}"
         is-party="{{isParty}}"
+        party-label="{{partyLabel}}"
         bind:refresh="reload"
       />
     </block>

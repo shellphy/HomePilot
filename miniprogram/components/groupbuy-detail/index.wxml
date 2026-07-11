@@ -58,6 +58,13 @@
   </view>
 </view>
 
+<!-- 成团后没共享联系方式的参团者：解释互通是双向对等的，给补开入口 -->
+<view class="card deal-card" wx:if="{{matter.state === 'done' && joined && !isInitiator && !myShareContact}}">
+  <view class="kicker">联系团长 · 建群与对接</view>
+  <view class="share-note">你报名时没有开启联系方式共享，所以你和团长互相看不到对方电话（互通是双向的）。</view>
+  <t-button theme="light" size="medium" block bind:tap="enableShare">开启共享，与团长互通</t-button>
+</view>
+
 <!-- 成团后的联系互通：团长见同意共享的参团者 -->
 <view class="card deal-card" wx:if="{{isInitiator && contacts.length}}">
   <view class="kicker">参团联系名单（{{contacts.length}}）· 仅你可见，用于建群对接</view>
@@ -71,7 +78,7 @@
   <view class="kicker">发起人操作（这个团购由你负责）</view>
   <view class="leader-btns">
     <t-button theme="light" size="medium" bind:tap="goProgress">发布进度</t-button>
-    <t-button theme="light" size="medium" bind:tap="flipState">流转状态</t-button>
+    <t-button wx:if="{{nextState}}" theme="light" size="medium" bind:tap="flipState">流转为「{{nextState.label}}」</t-button>
     <t-button theme="light" size="medium" bind:tap="goEdit">编辑团购</t-button>
     <t-button wx:if="{{matter.state === 'done'}}" theme="primary" size="medium" bind:tap="goDeal">成交公示</t-button>
   </view>
@@ -152,4 +159,10 @@
     loading="{{submitting}}"
     bind:tap="toggleJoin"
   >{{joined ? '已报名 ✓（点击取消）' : (matter.state === 'seeking' ? '我感兴趣，登记意向' : '报名接龙')}}</t-button>
+</view>
+
+<!-- 相关方身份：不进接龙名单，但说清楚为什么、怎么参与 -->
+<view class="cta-dock" wx:if="{{matter.join_open && isParty}}">
+  <view class="party-note">你正以「{{partyLabel}}」身份浏览，接龙名单仅向业主开放</view>
+  <t-button theme="light" block size="large" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
 </view>
