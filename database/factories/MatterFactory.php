@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Matter;
 use App\Models\Resident;
-use App\Settings\CommunitySettings;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,8 +21,8 @@ class MatterFactory extends Factory
         return [
             'type' => 'groupbuy',
             'initiator_id' => Resident::factory(),
-            'title' => fake()->randomElement(app(CommunitySettings::class)->categories).'团购',
-            'category' => fake()->randomElement(app(CommunitySettings::class)->categories),
+            'title' => fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗']).'团购',
+            'category' => fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗']),
             'state' => 'seeking',
             'is_approved' => true,
             'target_count' => fake()->numberBetween(10, 40),

@@ -20,8 +20,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $unit_label
  * @property string $room_label
  * @property int|null $affiliated_party_id
+ * @property int|null $last_party_id
  * @property bool $is_admin
  * @property-read Party|null $affiliatedParty
+ * @property-read Party|null $lastParty
  */
 class Resident extends Authenticatable
 {
@@ -36,6 +38,7 @@ class Resident extends Authenticatable
         'unit_label',
         'room_label',
         'affiliated_party_id',
+        'last_party_id',
     ];
 
     protected function casts(): array
@@ -53,6 +56,16 @@ class Resident extends Authenticatable
     public function affiliatedParty(): BelongsTo
     {
         return $this->belongsTo(Party::class, 'affiliated_party_id');
+    }
+
+    /**
+     * 上一次绑定的相关方（切回业主后仍记着），再次入驻时找回原档案。
+     *
+     * @return BelongsTo<Party, $this>
+     */
+    public function lastParty(): BelongsTo
+    {
+        return $this->belongsTo(Party::class, 'last_party_id');
     }
 
     /** @return HasMany<Stance, $this> */

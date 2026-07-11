@@ -19,19 +19,13 @@ class OptionController extends Controller
         return response()->json([
             'community' => [
                 'name' => $settings->name,
-                'app_name' => $settings->app_name,
                 'slogan' => $settings->slogan,
                 'sub_slogan' => $settings->sub_slogan,
-                'pledge' => $settings->pledge,
                 'initiator_note' => $settings->initiator_note,
-                'initiate_hint' => $settings->initiate_hint,
                 'data_footnote' => $settings->data_footnote,
                 'admin_contact' => $settings->admin_contact,
             ],
             'buildings' => $settings->buildings,
-            'layouts' => $settings->layouts,
-            'decoration_modes' => $settings->decoration_modes,
-            'categories' => $settings->categories,
             'party_types' => collect(Party::TYPES)
                 ->map(fn (array $meta, string $key): array => [
                     'key' => $key,

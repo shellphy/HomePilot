@@ -8,6 +8,7 @@
         <view class="party-badge">✓ 已认证{{item.label}}</view>
       </view>
       <view class="party-sub" wx:if="{{item.category}}">主营：{{item.category}}</view>
+      <view class="party-sub party-phone" wx:if="{{item.phone}}" data-phone="{{item.phone}}" bind:tap="callParty">电话：{{item.phone}}</view>
       <view class="party-note">{{item.note}}</view>
     </view>
 

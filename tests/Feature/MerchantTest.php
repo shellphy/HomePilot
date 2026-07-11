@@ -58,16 +58,35 @@ test('unknown party types are rejected', function () {
         ->assertJsonValidationErrors('type');
 });
 
-test('a party member can switch back to resident and the party record survives', function () {
+test('switching away and back restores the same party with profile and certification intact', function () {
     $merchant = Resident::factory()->merchant()->create();
+    $merchant->affiliatedParty->update(['is_listed' => true]);
     Sanctum::actingAs($merchant);
 
     $this->deleteJson('/api/me/party')
         ->assertSuccessful()
-        ->assertJsonPath('data.party', null);
+        ->assertJsonPath('data.party', null)
+        // 档案没删：上次的资料随 /me 下发，资料页据此预填
+        ->assertJsonPath('data.last_party.name', '青城中央空调');
 
-    expect($merchant->refresh()->affiliated_party_id)->toBeNull()
-        ->and(Party::count())->toBe(1); // 相关方档案保留，供管理端追溯
+    // 再次入驻同类型：找回原档案，认证状态原样保留，不产生新记录
+    $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城中央空调', 'category' => '中央空调'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.party.is_listed', true);
+
+    expect(Party::count())->toBe(1);
+});
+
+test('flip-flopping identities does not stack pending records in the queue', function () {
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城空调'])->assertSuccessful();
+    $this->deleteJson('/api/me/party')->assertSuccessful();
+    $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城空调'])->assertSuccessful();
+    $this->deleteJson('/api/me/party')->assertSuccessful();
+    $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城空调'])->assertSuccessful();
+
+    expect(Party::count())->toBe(1);
 });
 
 test('party members answer censuses but stay out of rosters', function () {
@@ -156,7 +175,14 @@ test('the certified party directory ships deal counts and review ratings', funct
         ->assertSuccessful()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('data.0.name', '青城门窗')
+        ->assertJsonPath('data.0.phone', $initiator->phone)
         ->assertJsonPath('data.0.deal_count', 1)
         ->assertJsonPath('data.0.review_count', 2)
         ->assertJsonPath('data.0.rating', 4.5);
+
+    // 归属人暂时切回业主，名录里的联系电话不受影响
+    Sanctum::actingAs($initiator);
+    $this->deleteJson('/api/me/party')->assertSuccessful();
+
+    $this->getJson('/api/parties')->assertJsonPath('data.0.phone', $initiator->phone);
 });

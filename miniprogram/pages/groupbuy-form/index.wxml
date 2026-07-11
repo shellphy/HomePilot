@@ -7,19 +7,9 @@
         <input class="frow-input" placeholder="如：门窗团购（断桥铝）" value="{{title}}" data-field="title" bind:input="onInput" />
       </view>
 
-      <!-- 品类带意向人数，是选择依据，所以用整块 chips 而不是行式输入 -->
-      <view class="fblock">
-        <view class="q-title">品类<text class="f-required">*</text><text class="q-note">数字是已登记想团这个品类的人数</text></view>
-        <view class="chips">
-          <view
-            wx:for="{{categories}}"
-            wx:key="*this"
-            class="chip {{category === item ? 'chip-on' : ''}}"
-            data-value="{{item}}"
-            bind:tap="pickCategory"
-          >{{item}}<text class="chip-count" wx:if="{{interestCount[item]}}"> · {{interestCount[item]}}人</text></view>
-        </view>
-        <input class="fin fin-top" placeholder="或自定义品类，如 智能家居" value="{{customCategory}}" data-field="customCategory" bind:input="onInput" />
+      <view class="frow">
+        <text class="frow-label">品类<text class="f-required">*</text></text>
+        <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" data-field="category" bind:input="onInput" />
       </view>
 
       <view class="frow">

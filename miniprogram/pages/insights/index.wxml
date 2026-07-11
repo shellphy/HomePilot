@@ -49,12 +49,14 @@
         </view>
       </block>
 
+      <!-- 宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
+           外部 class 在 virtualHost 渲染下不一定作用到按钮盒子（此前背景铺不满的根因） -->
       <t-button
         wx:if="{{block.state === 'open'}}"
         theme="primary"
         block
         size="large"
-        class="census-cta"
+        style="width: 100%; margin-bottom: 12rpx"
         data-id="{{block.id}}"
         bind:tap="goCensusForm"
       >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>

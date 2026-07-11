@@ -11,9 +11,7 @@ Page({
     id: null,
     states: {}, // {key: label}，编辑时来自后端下发的该事项状态机；新建不选状态（后端定初始态）
     stateKeys: [],
-    categories: [],
     category: '',
-    customCategory: '',
     title: '',
     state: '',
     targetCount: '',
@@ -21,7 +19,6 @@ Page({
     perk: '',
     terms: [],
     glossary: [],
-    interestCount: {}, // {品类: 意向人数}，决策依据要贴着决策点出现
     initiatorNote: '',
     submitting: false,
   },
@@ -35,25 +32,16 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [options, stats] = await Promise.all([
-        profile.getOptions(),
-        profile.getStats().catch(() => ({})), // 聚合拿不到不影响发起
-      ]);
-
+      const options = await profile.getOptions();
       this.setData({
-        categories: options.categories,
-        // 品类意向人数由后端从征集答案聚合（/stats 的 category_interest），没有就不显示
-        interestCount: stats.category_interest || {},
         initiatorNote: (options.community && options.community.initiator_note) || '',
       });
 
       if (this.data.id) {
         const res = await matters.getMatter(this.data.id);
         const matter = res.data;
-        const isPreset = options.categories.includes(matter.category);
         this.setData({
-          category: isPreset ? matter.category : '',
-          customCategory: isPreset ? '' : matter.category,
+          category: matter.category,
           title: matter.title,
           states: matter.states,
           stateKeys: Object.keys(matter.states),
@@ -81,11 +69,6 @@ Page({
     wx.disableAlertBeforeUnload();
   },
 
-  pickCategory(event) {
-    this.markDirty();
-    this.setData({ category: event.currentTarget.dataset.value, customCategory: '' });
-  },
-
   chooseState() {
     const { states, stateKeys } = this.data;
     wx.showActionSheet({
@@ -100,9 +83,6 @@ Page({
   onInput(event) {
     this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
-    if (event.currentTarget.dataset.field === 'customCategory' && event.detail.value) {
-      this.setData({ category: '' });
-    }
   },
 
   // 条目列表（团购条件 / 买前必懂）的增删改
@@ -128,18 +108,17 @@ Page({
   },
 
   async submit() {
-    const { id, category, customCategory, title, state, targetCount, pitch, perk, submitting } = this.data;
+    const { id, category, title, state, targetCount, pitch, perk, submitting } = this.data;
     if (submitting) return;
 
-    const finalCategory = customCategory.trim() || category;
-    if (!finalCategory) return wx.showToast({ title: '请选择或填写品类', icon: 'none' });
+    if (!category.trim()) return wx.showToast({ title: '请填写品类', icon: 'none' });
     if (!title.trim()) return wx.showToast({ title: '请填写标题', icon: 'none' });
     if (!targetCount || Number(targetCount) < 1) {
       return wx.showToast({ title: '请填写目标人数', icon: 'none' });
     }
 
     const payload = {
-      category: finalCategory,
+      category: category.trim(),
       title: title.trim(),
       target_count: Number(targetCount),
       pitch: pitch.trim(),

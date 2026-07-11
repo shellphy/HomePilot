@@ -4,7 +4,6 @@ use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
 use App\Services\WeChat;
-use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
 function renovationCensus(array $overrides = []): Matter
@@ -22,9 +21,9 @@ function renovationCensus(array $overrides = []): Matter
                 'key' => 'basic',
                 'title' => '基础登记',
                 'questions' => [
-                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => app(CommunitySettings::class)->layouts, 'required' => true],
-                    ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => app(CommunitySettings::class)->decoration_modes, 'required' => true],
-                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => app(CommunitySettings::class)->categories, 'required' => true],
+                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡'], 'required' => true],
+                    ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => ['全包（都交给装修公司）', '半包（主材自己买）'], 'required' => true],
+                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖'], 'required' => true],
                 ],
             ], [
                 'key' => 'family',
@@ -40,9 +39,9 @@ function renovationCensus(array $overrides = []): Matter
 function basicAnswers(array $overrides = []): array
 {
     return array_merge([
-        'layout' => app(CommunitySettings::class)->layouts[0],
-        'decoration_mode' => app(CommunitySettings::class)->decoration_modes[0],
-        'interests' => [app(CommunitySettings::class)->categories[0]],
+        'layout' => '107㎡',
+        'decoration_mode' => '全包（都交给装修公司）',
+        'interests' => ['装修公司'],
     ], $overrides);
 }
 
@@ -90,7 +89,7 @@ test('a complete member profile is a precondition, not part of the form', functi
     $stance = Stance::where('mode', Stance::MODE_REGISTER)->first();
 
     expect($stance->matter_id)->toBe($census->id)
-        ->and($stance->payload['answers']['layout'])->toBe(app(CommunitySettings::class)->layouts[0]);
+        ->and($stance->payload['answers']['layout'])->toBe('107㎡');
 });
 
 test('answers merge module by module and keep a revision trail', function () {

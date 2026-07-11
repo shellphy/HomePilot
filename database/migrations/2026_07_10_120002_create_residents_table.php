@@ -22,6 +22,8 @@ return new class extends Migration
             $table->string('phone', 20)->default('');
             $table->string('unit_label', 30)->default('');
             $table->foreignId('affiliated_party_id')->nullable()->constrained('parties')->nullOnDelete();
+            // last_party_id = 我的相关方档案（切回业主也记着，再入驻原样找回）
+            $table->foreignId('last_party_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->boolean('is_admin')->default(false);
             $table->string('room_label', 30)->default('');
             $table->timestamps();

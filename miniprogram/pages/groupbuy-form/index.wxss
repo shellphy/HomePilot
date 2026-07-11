@@ -1,12 +1,4 @@
 /* 表单体系（行式 frow、条目列表 pair、吸底 footer-bar）来自 app.wxss，这里只放页面专属 */
-.chip-count {
-  font-size: 21rpx;
-  color: var(--brand-deep);
-}
-
-.fin-top {
-  margin-top: 16rpx;
-}
 
 /* 状态行的标题 + 说明（与管理端表单 frow-main 内的用法一致） */
 .row-title {

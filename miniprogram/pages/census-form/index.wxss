@@ -30,16 +30,11 @@
   margin-top: 14rpx;
 }
 
+/* 按钮的 flex 占比走 style 直传（外部 class 在 virtualHost 组件上不可靠） */
 .nav-btns {
   display: flex;
   gap: 16rpx;
   margin-top: 8rpx;
-}
-.nav-prev {
-  flex: 1;
-}
-.nav-next {
-  flex: 2;
 }
 
 .skip-note {

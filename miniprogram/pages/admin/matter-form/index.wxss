@@ -30,6 +30,3 @@
   color: var(--line-dark);
   flex-shrink: 0;
 }
-.del-btn {
-  margin-top: 40rpx;
-}

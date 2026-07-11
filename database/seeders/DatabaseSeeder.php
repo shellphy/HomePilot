@@ -2,12 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Matters\CensusType;
 use App\Models\Matter;
 use App\Models\MatterUpdate;
 use App\Models\Resident;
 use App\Models\Stance;
-use App\Settings\CommunitySettings;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -21,8 +19,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $settings = app(CommunitySettings::class);
-
         // 管理员是被授权的成员（真机登录后 php artisan admin:grant 你的手机号或成员 ID）；种子里给老K
         $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true]);
 
@@ -79,7 +75,7 @@ class DatabaseSeeder extends Seeder
         Matter::factory()->notice()->create([
             'title' => '本小程序公益运营说明',
             'payload' => [
-                'body' => $settings->app_name.'由本小区业主公益运营：不代收任何款项，签约付款由业主直接对商家；商家给到的任何返点，全部转为参团业主让利，并在成团后随成交公示摊开。',
+                'body' => '本小程序由小区业主公益运营：不代收任何款项，签约付款由业主直接对商家；商家给到的任何返点，全部转为参团业主让利，并在成团后随成交公示摊开。',
             ],
         ]);
         Matter::factory()->notice()->create([
@@ -154,9 +150,9 @@ class DatabaseSeeder extends Seeder
                     'title' => '基础登记',
                     'intro' => '约 2 分钟 · 明细仅管理员可见，对外只展示汇总统计',
                     'questions' => [
-                        ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => $settings->layouts, 'required' => true],
-                        ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => $settings->decoration_modes, 'required' => true],
-                        ['key' => CensusType::CATEGORY_INTEREST_KEY, 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => $settings->categories, 'required' => true],
+                        ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡'], 'required' => true],
+                        ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => ['全包（都交给装修公司）', '半包（主材自己买）', '清包（只请工人）', '还没定'], 'required' => true],
+                        ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '中央空调', '地暖', '全屋定制', '门窗', '软装家具', '瓷砖'], 'required' => true],
                     ],
                 ]], $this->surveyModules()),
             ],
