@@ -1,7 +1,7 @@
 // 发起/编辑团购（groupbuy 类型的表单）
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
-const { STATE_FLOW } = require('../../utils/constants');
+const { stateOptions } = require('../../utils/constants');
 const load = require('../../behaviors/load');
 
 Page({
@@ -9,12 +9,12 @@ Page({
 
   data: {
     id: null,
-    states: STATE_FLOW,
+    states: [], // 编辑时来自后端下发的该事项状态机；新建不选状态（后端定初始态）
     categories: [],
     category: '',
     customCategory: '',
     title: '',
-    state: 'seeking',
+    state: '',
     targetCount: '',
     pitch: '',
     perk: '',
@@ -34,24 +34,15 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [options, feed] = await Promise.all([profile.getOptions(), matters.listMatters()]);
-
-      // 品类意向户数来自装修征集的聚合（按题目 key 软关联，没有就不显示）
-      let interestCount = {};
-      const census = feed.data.find((matter) => matter.type === 'census');
-      if (census) {
-        try {
-          const censusData = await matters.getCensus(census.id);
-          const question = (censusData.aggregates || [])
-            .flatMap((module) => module.questions)
-            .find((item) => item.key === 'interests');
-          interestCount = (question && question.counts) || {};
-        } catch (error) { /* 聚合拿不到不影响发起 */ }
-      }
+      const [options, stats] = await Promise.all([
+        profile.getOptions(),
+        profile.getStats().catch(() => ({})), // 聚合拿不到不影响发起
+      ]);
 
       this.setData({
         categories: options.categories,
-        interestCount,
+        // 品类意向户数由后端从征集答案聚合（/stats 的 category_interest），没有就不显示
+        interestCount: stats.category_interest || {},
         initiatorNote: (options.community && options.community.initiator_note) || '',
       });
 
@@ -63,6 +54,7 @@ Page({
           category: isPreset ? matter.category : '',
           customCategory: isPreset ? '' : matter.category,
           title: matter.title,
+          states: stateOptions(matter.states),
           state: matter.state,
           targetCount: String(matter.target_count),
           pitch: matter.pitch || '',

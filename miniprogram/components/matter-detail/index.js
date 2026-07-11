@@ -1,7 +1,7 @@
 // 通用事项详情体（活动/互助/维权等接龙型事项）：
 // 该类事项的全部行为（参与/流转/进度/编辑入口）都在组件内，变更后向页面发 refresh。
 const matters = require('../../utils/api/matters');
-const { pillClass, TYPE_META } = require('../../utils/constants');
+const { pillClass, TYPE_META, stateOptions } = require('../../utils/constants');
 
 Component({
   options: {
@@ -68,9 +68,7 @@ Component({
 
     flipState() {
       const { matter } = this.data;
-      const options = Object.keys(matter.states)
-        .filter((value) => value !== matter.state)
-        .map((value) => ({ value, label: matter.states[value] }));
+      const options = stateOptions(matter.states).filter((state) => state.value !== matter.state);
 
       wx.showActionSheet({
         itemList: options.map((state) => `流转为「${state.label}」`),

@@ -22,6 +22,20 @@ test('any resident can initiate a groupbuy which starts unapproved', function ()
     expect(Matter::find($response->json('data.id'))->is_approved)->toBeFalse();
 });
 
+test('the initial state comes from the state machine and ignores client input', function () {
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson('/api/matters', [
+        'type' => 'groupbuy',
+        'category' => '门窗',
+        'title' => '门窗团购（断桥铝）',
+        'target_count' => 15,
+        'state' => 'done',
+    ])
+        ->assertCreated()
+        ->assertJsonPath('data.state', 'seeking');
+});
+
 test('residents cannot initiate admin-only matter types like notices', function () {
     Sanctum::actingAs(Resident::factory()->create());
 
@@ -157,10 +171,11 @@ test('an authenticated resident can upload a progress photo', function () {
 });
 
 test('matter validation rejects a bad state and an unknown type', function () {
-    Sanctum::actingAs(Resident::factory()->create());
+    $initiator = Resident::factory()->create();
+    $matter = Matter::factory()->for($initiator, 'initiator')->create();
+    Sanctum::actingAs($initiator);
 
-    $this->postJson('/api/matters', [
-        'type' => 'groupbuy',
+    $this->putJson("/api/matters/{$matter->id}", [
         'category' => '门窗',
         'title' => '测试',
         'state' => 'flying',

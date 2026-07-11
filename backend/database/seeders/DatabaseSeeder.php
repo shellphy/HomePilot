@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Matters\CensusType;
 use App\Models\Matter;
 use App\Models\MatterUpdate;
 use App\Models\Resident;
@@ -155,7 +156,7 @@ class DatabaseSeeder extends Seeder
                     'questions' => [
                         ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => $settings->layouts, 'required' => true],
                         ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => $settings->decoration_modes, 'required' => true],
-                        ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => $settings->categories, 'required' => true],
+                        ['key' => CensusType::CATEGORY_INTEREST_KEY, 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => $settings->categories, 'required' => true],
                     ],
                 ]], $this->surveyModules()),
             ],

@@ -1,5 +1,6 @@
-// 个人资料：头像、昵称固定；身份（业主/商家…，选项由服务端下发）决定下方表单——
-// 业主填楼栋/房号/微信/手机，商家填名称/主营。保存时按身份落库（含身份切换）。
+// 个人资料：设置列表式行布局，头像、昵称固定；身份（业主/商家…，选项由服务端下发，
+// 点击行弹 action-sheet 切换）决定下方行——业主填楼栋/房号/微信/手机，商家填名称/主营。
+// 保存时按身份落库（含身份切换）。
 const { uploadImage } = require('../../utils/request');
 const profile = require('../../utils/api/profile');
 const { getMe, updateMe, bindParty, unbindParty } = require('../../utils/me');
@@ -12,6 +13,7 @@ Page({
     avatar: '',
     nickname: '',
     identity: 'resident', // 'resident' 或相关方类型 key
+    identityLabel: '业主',
     identities: [],       // [{key, label}]，业主 + 服务端下发的可自助入驻类型
     // 业主字段
     unitLabel: '',
@@ -32,11 +34,16 @@ Page({
     return this.runLoad(async () => {
       const [me, options] = await Promise.all([getMe(), profile.getOptions()]);
       const partyTypes = (options.party_types || []).filter((item) => item.self_registrable);
+      const identity = me.party ? me.party.type : 'resident';
+      const identities = [{ key: 'resident', label: '业主' }, ...partyTypes];
+      const current = identities.find((item) => item.key === identity);
       this.setData({
         avatar: me.avatar || '',
         nickname: me.nickname || '',
-        identity: me.party ? me.party.type : 'resident',
-        identities: [{ key: 'resident', label: '业主' }, ...partyTypes],
+        identity,
+        identities,
+        // 当前身份不在可自助入驻列表时（管理员认证的类型），显示服务端给的 label
+        identityLabel: current ? current.label : (me.party && me.party.label) || '业主',
         unitLabel: me.unit_label || '',
         roomLabel: me.room_label || '',
         wechatId: me.wechat_id || '',
@@ -58,8 +65,15 @@ Page({
     }
   },
 
-  pickIdentity(event) {
-    this.setData({ identity: event.currentTarget.dataset.value });
+  chooseIdentity() {
+    const { identities } = this.data;
+    wx.showActionSheet({
+      itemList: identities.map((item) => item.label),
+      success: ({ tapIndex }) => {
+        const item = identities[tapIndex];
+        this.setData({ identity: item.key, identityLabel: item.label });
+      },
+    });
   },
 
   onInput(event) {

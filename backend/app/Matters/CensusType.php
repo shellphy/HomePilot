@@ -11,6 +11,12 @@ use App\Models\Matter;
  */
 class CensusType extends MatterType
 {
+    /**
+     * 品类意向题的约定 key：答案选项与社区设置的团购品类对齐，
+     * 发起团购页据此展示"想团这个品类的户数"。改这里要同步问卷里该题的 key。
+     */
+    public const CATEGORY_INTEREST_KEY = 'interests';
+
     public function key(): string
     {
         return 'census';

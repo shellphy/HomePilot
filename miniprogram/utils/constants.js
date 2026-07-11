@@ -17,14 +17,8 @@ const TYPE_META = {
   rights: { joinCta: '参与联名', joinedCta: '已联名 ✓（点击撤回）', foot: '户已联名', roster: '联名名单' },
 };
 
-// 团购（groupbuy 类型）的状态机
-const STATE_FLOW = [
-  { value: 'seeking', label: '意向征集' },
-  { value: 'negotiating', label: '谈判中' },
-  { value: 'open', label: '接龙中' },
-  { value: 'done', label: '已成团' },
-];
-
+// 状态机本身由后端下发（详情/列表数据里的 states 与 state_label），前端不重复维护；
+// 这里只把状态值映射到展示样式，未知状态回退到默认。
 function pillClass(state) {
   return PILL_CLASS[state] || 'pill-seeking';
 }
@@ -34,4 +28,9 @@ function joinPercent(matter) {
   return Math.min(100, Math.round((matter.join_count / matter.target_count) * 100));
 }
 
-module.exports = { PILL_CLASS, STATE_FLOW, TYPE_META, pillClass, joinPercent };
+// 把后端下发的状态机（{value: label} 对象）转成模板好用的数组
+function stateOptions(states) {
+  return Object.keys(states || {}).map((value) => ({ value, label: states[value] }));
+}
+
+module.exports = { PILL_CLASS, TYPE_META, pillClass, joinPercent, stateOptions };

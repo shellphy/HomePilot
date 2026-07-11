@@ -176,7 +176,16 @@ test('admin certifies parties onto the public list', function () {
 test('admin reads and updates community settings which flow through to options', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $settings = $this->getJson('/api/admin/settings')->assertSuccessful()->json('data');
+    $response = $this->getJson('/api/admin/settings')->assertSuccessful();
+
+    // 表单结构随设置值一起下发，管理端据此渲染，字段清单不在前端维护
+    $groups = $response->json('groups');
+    expect($groups)->not->toBeEmpty();
+    $fieldKeys = collect($groups)->flatMap(fn (array $group) => collect($group['fields'])->pluck('key'));
+    expect($fieldKeys->sort()->values()->all())
+        ->toBe(collect($response->json('data'))->keys()->sort()->values()->all());
+
+    $settings = $response->json('data');
     $settings['slogan'] = '新口号';
     $settings['categories'] = ['门窗', '地暖'];
 
