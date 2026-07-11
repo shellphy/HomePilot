@@ -31,14 +31,14 @@ Page({
   onShareAppMessage() {
     const { community, activeCount } = this.data;
     return {
-      title: `${community.app_name || '邻里'} · ${activeCount} 件事正在张罗`,
+      title: `${community.app_name || '天青府家园'} · ${activeCount} 件事正在张罗`,
       path: '/pages/community/index',
     };
   },
 
   onShareTimeline() {
     const { community } = this.data;
-    return { title: `${community.app_name || '邻里'} · ${community.slogan || ''}` };
+    return { title: `${community.app_name || '天青府家园'} · ${community.slogan || ''}` };
   },
 
   reload() {

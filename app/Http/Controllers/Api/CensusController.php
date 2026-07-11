@@ -158,17 +158,17 @@ class CensusController extends Controller
                     'questions' => collect(is_array($questions) ? $questions : [])
                         ->reject(fn (array $question): bool => ($question['type'] ?? '') === 'text')
                         ->map(function (array $question) use ($allAnswers): array {
-                        $values = $allAnswers
-                            ->map(fn (array $answers) => $answers[$question['key']] ?? null)
-                            ->filter()
-                            ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
+                            $values = $allAnswers
+                                ->map(fn (array $answers) => $answers[$question['key']] ?? null)
+                                ->filter()
+                                ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
 
-                        return [
-                            'key' => $question['key'],
-                            'text' => $question['text'],
-                            'counts' => $values->countBy()->sortDesc(),
-                        ];
-                    })->values()->all(),
+                            return [
+                                'key' => $question['key'],
+                                'text' => $question['text'],
+                                'counts' => $values->countBy()->sortDesc(),
+                            ];
+                        })->values()->all(),
                 ];
             })
             ->values()

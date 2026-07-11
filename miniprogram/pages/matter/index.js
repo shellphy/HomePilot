@@ -17,7 +17,7 @@ Page({
     initiatorContact: null, // 参与者视角：牵头人联系方式（互通阶段且自己同意过共享）
     canRespond: false,      // 被认证的治理类相关方成员：可发官方回应
     isParty: false,         // 相关方身份不参与接龙，隐藏报名按钮
-    appName: '邻里',
+    appName: '天青府家园',
   },
 
   onLoad(query) {
