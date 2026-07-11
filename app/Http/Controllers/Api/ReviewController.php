@@ -15,7 +15,7 @@ class ReviewController extends Controller
     use ResolvesResident;
 
     /**
-     * 评价表态（一户一评，重复提交视为修改并留修订链）。
+     * 评价表态（一人一评，重复提交视为修改并留修订链）。
      */
     public function store(Request $request, Matter $matter): JsonResponse
     {

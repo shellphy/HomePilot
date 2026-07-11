@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MatterUpdatePosted;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MatterUpdateResource;
@@ -30,6 +31,8 @@ class MatterUpdateController extends Controller
         ]);
 
         $update = $matter->updates()->create($validated);
+
+        MatterUpdatePosted::dispatch($update);
 
         return response()->json(['data' => MatterUpdateResource::make($update)], 201);
     }

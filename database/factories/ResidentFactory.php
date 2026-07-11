@@ -21,9 +21,8 @@ class ResidentFactory extends Factory
         return [
             'openid' => fake()->unique()->md5(),
             'nickname' => fake()->firstName(),
-            'unit_label' => fake()->numberBetween(1, 20).'栋',
+            'unit_label' => fake()->numberBetween(1, 8).'栋',
             'phone' => fake()->numerify('138########'),
-            'wechat_id' => fake()->userName(),
         ];
     }
 

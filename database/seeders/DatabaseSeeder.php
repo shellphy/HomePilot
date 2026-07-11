@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
     {
         $settings = app(CommunitySettings::class);
 
-        // 管理员是被授权的成员（真机登录后 php artisan admin:grant 你的微信号或成员 ID）；种子里给老K
+        // 管理员是被授权的成员（真机登录后 php artisan admin:grant 你的手机号或成员 ID）；种子里给老K
         $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true]);
 
         $decoration = Matter::factory()->open()->for($initiator, 'initiator')->create([
@@ -31,8 +31,8 @@ class DatabaseSeeder extends Seeder
             'title' => '「城建装饰」整装团购',
             'target_count' => 20,
             'payload' => [
-                'pitch' => '我自己家就签的这家，合同、报价单、工地进度全部公开，大家随时来我家工地看。谈下来的条件对每一户一样。',
-                'perk' => '满 20 户赠全屋水电升级（点位不限量）',
+                'pitch' => '我自己家就签的这家，合同、报价单、工地进度全部公开，大家随时来我家工地看。谈下来的条件对每家一样。',
+                'perk' => '满 20 人赠全屋水电升级（点位不限量）',
                 'terms' => [
                     ['label' => '半包', 'value' => '618 元/㎡（门市 688）'],
                     ['label' => '全包', 'value' => '1150 元/㎡（门市 1280）'],
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
             'target_count' => 25,
             'payload' => [
                 'pitch' => '',
-                'perk' => '满 25 户总价再降 3%',
+                'perk' => '满 25 人总价再降 3%',
                 'terms' => [['label' => '方案', 'value' => '大金 / 美的两套方案对比中']],
                 'glossary' => [],
             ],
@@ -100,7 +100,7 @@ class DatabaseSeeder extends Seeder
             'title' => '地下车位定价过高，联名要求公开成本',
             'target_count' => 100,
             'payload' => [
-                'pitch' => '销售口径车位 15.8 万一个，周边同类小区普遍 10~12 万。凑满 100 户联名，正式向开发商递交问询函，要求公开车位定价依据并给出团购价。',
+                'pitch' => '销售口径车位 15.8 万一个，周边同类小区普遍 10~12 万。凑满 100 人联名，正式向开发商递交问询函，要求公开车位定价依据并给出团购价。',
             ],
         ]);
         Stance::factory()->count(47)->for($rights, 'matter')->create();
@@ -110,7 +110,7 @@ class DatabaseSeeder extends Seeder
             'title' => '精装交付标准与样板间不符，集体交涉中',
             'target_count' => 50,
             'payload' => [
-                'pitch' => '有邻居从工地照片发现门槛石、卫浴五金与样板间标注品牌不一致。已凑齐 50 户联名并递交开发商，等待书面答复，进展会更新在本页。',
+                'pitch' => '有邻居从工地照片发现门槛石、卫浴五金与样板间标注品牌不一致。已凑齐 50 人联名并递交开发商，等待书面答复，进展会更新在本页。',
             ],
         ]);
         Stance::factory()->count(52)->for($inspection, 'matter')->create();

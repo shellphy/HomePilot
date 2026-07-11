@@ -43,7 +43,7 @@ Page({
   onShareAppMessage() {
     const first = this.data.blocks[0];
     return {
-      title: first ? `${first.title}｜${first.registered} 户已登记` : `${this.data.communityName || '小区'} · 小区数据`,
+      title: first ? `${first.title}｜${first.registered} 人已登记` : `${this.data.communityName || '小区'} · 小区数据`,
       path: `/pages/insights/index${this.data.censusId ? '?id=' + this.data.censusId : ''}`,
     };
   },
@@ -87,7 +87,7 @@ Page({
           .map((matter) => ({
             id: matter.id,
             title: matter.title,
-            note: `${matter.state_label} · ${matter.register_count} 户已登记`,
+            note: `${matter.state_label} · ${matter.register_count} 人已登记`,
           }));
       }
 

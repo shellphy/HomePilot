@@ -28,7 +28,7 @@ Page({
   async onShow() {
     if (!this.data.loaded || !this.data.needProfile) return;
     const me = await getMe();
-    this.setData({ needProfile: !me.unit_label || !me.wechat_id });
+    this.setData({ needProfile: !me.unit_label || !me.phone });
   },
 
   reload() {
@@ -40,7 +40,7 @@ Page({
         modules: census.modules.filter((module) => (module.questions || []).length),
         answers,
         picked: this.buildPicked(answers),
-        needProfile: census.collects_contact && (!me.unit_label || !me.wechat_id),
+        needProfile: census.collects_contact && (!me.unit_label || !me.phone),
       });
       this.showModule(0);
     });

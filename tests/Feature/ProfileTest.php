@@ -1,30 +1,37 @@
 <?php
 
 use App\Models\Resident;
+use App\Services\WeChat;
 use Laravel\Sanctum\Sanctum;
 
-test('a resident can maintain their own contact profile independently of any census', function () {
-    $resident = Resident::factory()->withoutUnit()->create(['wechat_id' => '', 'phone' => '']);
+test('a resident can maintain their own profile independently of any census', function () {
+    $resident = Resident::factory()->withoutUnit()->create();
     Sanctum::actingAs($resident);
 
-    $this->putJson('/api/me', [
-        'unit_label' => '5栋',
-        'wechat_id' => 'laoK-2026',
-        'phone' => '13800138000',
-    ])
+    $this->putJson('/api/me', ['unit_label' => '5栋'])
         ->assertSuccessful()
-        ->assertJsonPath('data.unit_label', '5栋')
-        ->assertJsonPath('data.wechat_id', 'laoK-2026');
+        ->assertJsonPath('data.unit_label', '5栋');
 
     expect($resident->refresh()->unit_label)->toBe('5栋');
 
-    // 楼栋号会规整首尾空格
+    // 楼栋号会规整首尾空格后再校验
     $this->putJson('/api/me', ['unit_label' => ' 5栋 '])->assertSuccessful();
     expect($resident->refresh()->unit_label)->toBe('5栋');
 });
 
+test('the unit label must come from the community building list', function () {
+    $resident = Resident::factory()->inUnit('5栋')->create();
+    Sanctum::actingAs($resident);
+
+    $this->putJson('/api/me', ['unit_label' => '99栋'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('unit_label');
+
+    expect($resident->refresh()->unit_label)->toBe('5栋');
+});
+
 test('the room label is a separate private field and optional fields can be cleared', function () {
-    $resident = Resident::factory()->inUnit('5栋')->create(['room_label' => '', 'wechat_id' => 'old']);
+    $resident = Resident::factory()->inUnit('5栋')->create(['room_label' => '']);
     Sanctum::actingAs($resident);
 
     $this->putJson('/api/me', ['room_label' => '1801'])
@@ -32,14 +39,12 @@ test('the room label is a separate private field and optional fields can be clea
         ->assertJsonPath('data.room_label', '1801')
         ->assertJsonPath('data.unit_label', '5栋');
 
-    // 选填字段清空要真的清空（房号/微信号）
-    $this->putJson('/api/me', ['room_label' => '', 'wechat_id' => ''])
+    // 选填字段清空要真的清空
+    $this->putJson('/api/me', ['room_label' => ''])
         ->assertSuccessful()
         ->assertJsonPath('data.room_label', '');
 
-    $resident->refresh();
-    expect($resident->room_label)->toBe('')
-        ->and($resident->wechat_id)->toBe('');
+    expect($resident->refresh()->room_label)->toBe('');
 });
 
 test('an owner cannot clear the unit label but a party member has no such requirement', function () {
@@ -58,16 +63,31 @@ test('an owner cannot clear the unit label but a party member has no such requir
     $this->putJson('/api/me', ['unit_label' => ''])->assertSuccessful();
 });
 
-test('a wechat id can only belong to one resident but resubmitting your own is fine', function () {
-    Resident::factory()->create(['wechat_id' => 'laoK-2026']);
-    $resident = Resident::factory()->create(['wechat_id' => 'mine']);
+test('the phone is written through the wechat authorization exchange only', function () {
+    $resident = Resident::factory()->create(['phone' => '']);
     Sanctum::actingAs($resident);
 
-    $this->putJson('/api/me', ['wechat_id' => 'laoK-2026'])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('wechat_id');
+    $this->mock(WeChat::class)
+        ->shouldReceive('phoneNumberFromCode')
+        ->once()
+        ->with('auth-code')
+        ->andReturn('13800138000');
 
-    // 自己重复提交自己的微信号不算冲突；清空也不受唯一约束影响
-    $this->putJson('/api/me', ['wechat_id' => 'mine'])->assertSuccessful();
-    $this->putJson('/api/me', ['wechat_id' => ''])->assertSuccessful();
+    $this->postJson('/api/me/phone', ['code' => 'auth-code'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.phone', '13800138000');
+
+    expect($resident->refresh()->phone)->toBe('13800138000');
+
+    // 手机号不接受手填：/me 不认识 phone 字段，提交也不会写入
+    $this->putJson('/api/me', ['phone' => '13911112222'])->assertSuccessful();
+    expect($resident->refresh()->phone)->toBe('13800138000');
+});
+
+test('the phone exchange requires a code', function () {
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson('/api/me/phone', [])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('code');
 });

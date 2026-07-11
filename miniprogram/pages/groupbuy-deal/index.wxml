@@ -17,7 +17,7 @@
       <textarea
         class="fin farea"
         auto-height
-        placeholder="如：商家返点 2% 已全部转为参团业主让利，每户在结算时直减 300 元。"
+        placeholder="如：商家返点 2% 已全部转为参团业主让利，每家在结算时直减 300 元。"
         value="{{finalNote}}"
         bind:input="onNoteInput"
         maxlength="1000"

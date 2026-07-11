@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MatterResource;
@@ -141,6 +142,8 @@ class MatterController extends Controller
             'state' => ['sometimes', Rule::in(array_keys($type->states()))],
         ]));
 
+        $previousState = $matter->state;
+
         $matter->update([
             'title' => $validated['title'],
             'category' => $validated['category'] ?? $matter->category,
@@ -149,6 +152,10 @@ class MatterController extends Controller
             // 保留成交公示等不在编辑表单里的 payload 字段
             'payload' => array_merge($matter->payload ?? [], $type->payloadFrom($validated)),
         ]);
+
+        if ($matter->state !== $previousState) {
+            MatterStateChanged::dispatch($matter, $previousState);
+        }
 
         return response()->json(['data' => MatterResource::make($matter)]);
     }
@@ -164,7 +171,12 @@ class MatterController extends Controller
             'state' => ['required', Rule::in(array_keys($matter->typeDef()->states()))],
         ]);
 
+        $previousState = $matter->state;
         $matter->update($validated);
+
+        if ($matter->state !== $previousState) {
+            MatterStateChanged::dispatch($matter, $previousState);
+        }
 
         return response()->json(['data' => MatterResource::make($matter)]);
     }

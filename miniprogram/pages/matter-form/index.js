@@ -19,7 +19,7 @@ const TYPE_COPY = {
     title: '发起维权联名',
     titlePlaceholder: '如：地下车位定价过高，联名要求公开成本',
     pitchPlaceholder: '事情的来龙去脉、诉求是什么、联名后打算怎么递交……写清楚才有人跟',
-    targetHint: '选填：目标联名户数',
+    targetHint: '选填：目标联名人数',
   },
 };
 

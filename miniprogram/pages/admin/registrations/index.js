@@ -1,4 +1,4 @@
-// 管理端 · 登记明细：含楼栋/房号/联系方式（仅管理员可见），点击展开答案
+// 管理端 · 登记明细：含楼栋/房号/手机号（仅管理员可见），点击展开答案
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 
@@ -35,7 +35,7 @@ Page({
     const { all, keyword } = this.data;
     this.setData({
       registrations: keyword
-        ? all.filter((registration) => [registration.nickname, registration.unit_label, registration.room_label, registration.wechat_id, registration.phone]
+        ? all.filter((registration) => [registration.nickname, registration.unit_label, registration.room_label, registration.phone]
           .some((field) => field && field.includes(keyword)))
         : all,
     });

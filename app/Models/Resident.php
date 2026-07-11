@@ -16,7 +16,6 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $openid
  * @property string $nickname
  * @property string $avatar
- * @property string $wechat_id
  * @property string $phone
  * @property string $unit_label
  * @property string $room_label
@@ -33,7 +32,6 @@ class Resident extends Authenticatable
         'openid',
         'nickname',
         'avatar',
-        'wechat_id',
         'phone',
         'unit_label',
         'room_label',

@@ -23,6 +23,13 @@
         />
       </view>
 
+      <!-- 手机号只能微信授权获取（不接受手填），业主与相关方通用 -->
+      <button class="frow frow-btn" hover-class="frow-hover" open-type="getPhoneNumber" bind:getphonenumber="onGetPhone">
+        <text class="frow-label">手机号</text>
+        <text class="frow-value">{{phone || '点击授权微信手机号'}}</text>
+        <text class="frow-arrow">›</text>
+      </button>
+
       <view class="frow" hover-class="frow-hover" bind:tap="chooseIdentity">
         <text class="frow-label">身份</text>
         <text class="frow-value">{{identityLabel}}</text>
@@ -31,21 +38,16 @@
 
       <!-- 业主 -->
       <block wx:if="{{identity === 'resident'}}">
-        <view class="frow">
-          <text class="frow-label">楼栋号<text class="f-required">*</text></text>
-          <input class="frow-input" value="{{unitLabel}}" placeholder="必填" data-field="unitLabel" bind:input="onInput" />
-        </view>
+        <picker mode="selector" range="{{buildings}}" value="{{buildingIndex < 0 ? 0 : buildingIndex}}" bind:change="onPickBuilding">
+          <view class="frow" hover-class="frow-hover">
+            <text class="frow-label">楼栋号<text class="f-required">*</text></text>
+            <text class="frow-value">{{unitLabel || '请选择'}}</text>
+            <text class="frow-arrow">›</text>
+          </view>
+        </picker>
         <view class="frow">
           <text class="frow-label">房号</text>
-          <input class="frow-input" value="{{roomLabel}}" placeholder="选填" data-field="roomLabel" bind:input="onInput" />
-        </view>
-        <view class="frow">
-          <text class="frow-label">微信号</text>
-          <input class="frow-input" value="{{wechatId}}" placeholder="选填" data-field="wechatId" bind:input="onInput" />
-        </view>
-        <view class="frow">
-          <text class="frow-label">手机号</text>
-          <input class="frow-input" type="number" value="{{phone}}" placeholder="选填" data-field="phone" bind:input="onInput" />
+          <input class="frow-input" value="{{roomLabel}}" placeholder="选填，仅管理员可见" data-field="roomLabel" bind:input="onInput" />
         </view>
       </block>
 
@@ -62,6 +64,7 @@
       </block>
     </view>
 
+    <view class="privacy">手机号仅管理员可见，用于必要时联系；不会出现在任何公示名单里。</view>
     <view class="privacy" wx:if="{{identity !== 'resident'}}">相关方身份对全小区公开，报名、登记、发起都和业主一样，只是以这个身份出现；可随时切回业主。进入公示名单需管理员认证。</view>
 
     <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">保存</t-button>

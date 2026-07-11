@@ -52,9 +52,9 @@ class CensusController extends Controller
 
         $resident = $this->resident($request);
 
-        if ($matter->payloadValue('collects_contact') && ($resident->unit_label === '' || $resident->wechat_id === '')) {
+        if ($matter->payloadValue('collects_contact') && ($resident->unit_label === '' || $resident->phone === '')) {
             throw ValidationException::withMessages([
-                'profile' => '参与前请先在「我的 · 个人资料」里完善楼栋号和微信号',
+                'profile' => '参与前请先在「我的 · 个人资料」里选好楼栋号并授权手机号',
             ]);
         }
 
