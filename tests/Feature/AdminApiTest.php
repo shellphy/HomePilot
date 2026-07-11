@@ -205,3 +205,51 @@ test('admin deletes a matter', function () {
 
     expect(Matter::find($matter->id))->toBeNull();
 });
+
+test('census schema accepts text questions without options and keeps question notes', function () {
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    $this->postJson('/api/admin/matters', [
+        'type' => 'census',
+        'title' => '装修探店摸底',
+        'payload' => [
+            'modules' => [[
+                'title' => '探店情况',
+                'questions' => [
+                    ['text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司'], 'note' => '去过门店或约过量房都算'],
+                    ['text' => '踩过什么坑？', 'type' => 'text'],
+                ],
+            ]],
+        ],
+    ])
+        ->assertCreated()
+        ->assertJsonPath('data.payload.modules.0.questions.0.note', '去过门店或约过量房都算')
+        ->assertJsonPath('data.payload.modules.0.questions.1.type', 'text');
+
+    // 选择题仍必须带至少两个选项
+    $this->postJson('/api/admin/matters', [
+        'type' => 'census',
+        'title' => '坏问卷',
+        'payload' => [
+            'modules' => [[
+                'title' => '模块',
+                'questions' => [['text' => '单选没给选项', 'type' => 'single']],
+            ]],
+        ],
+    ])->assertUnprocessable();
+});
+
+test('the admin queue signs matters with the initiator party snapshot', function () {
+    $merchant = Resident::factory()->merchant('青城中央空调')->create();
+    $merchant->affiliatedParty->update(['is_listed' => true]);
+    Matter::factory()->create([
+        'initiator_id' => $merchant->id,
+        'initiator_party_id' => $merchant->affiliated_party_id,
+        'is_approved' => false,
+    ]);
+
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+    $this->getJson('/api/admin/matters?pending=1')
+        ->assertSuccessful()
+        ->assertJsonPath('data.0.initiator', '商家 · 青城中央空调（已认证）');
+});

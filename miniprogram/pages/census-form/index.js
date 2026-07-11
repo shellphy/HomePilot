@@ -72,6 +72,11 @@ Page({
     this.setData({ answers, picked: this.buildPicked(answers) });
   },
 
+  // 填空题：输入即记，空白视为未作答（提交时过滤）
+  onText(event) {
+    this.setData({ [`answers.${event.currentTarget.dataset.qkey}`]: event.detail.value });
+  },
+
   buildPicked(answers) {
     const picked = {};
     Object.keys(answers).forEach((qkey) => {
@@ -87,9 +92,10 @@ Page({
     const { id, current, answers, moduleIndex, modules, submitting } = this.data;
     if (submitting) return;
 
-    // 必答题拦在客户端，给出具体是哪题
+    // 必答题拦在客户端，给出具体是哪题（填空题只填空白也算没答）
+    const answered = (value) => value !== undefined && (typeof value !== 'string' || value.trim() !== '');
     for (const question of current.questions) {
-      if (question.required && answers[question.key] === undefined) {
+      if (question.required && !answered(answers[question.key])) {
         return wx.showToast({ title: `「${question.text}」是必答题`, icon: 'none' });
       }
     }
@@ -97,8 +103,9 @@ Page({
     // 只提交当前模块已作答的题
     const moduleAnswers = {};
     current.questions.forEach((question) => {
-      if (answers[question.key] !== undefined) {
-        moduleAnswers[question.key] = answers[question.key];
+      if (answered(answers[question.key])) {
+        const value = answers[question.key];
+        moduleAnswers[question.key] = typeof value === 'string' ? value.trim() : value;
       }
     });
 

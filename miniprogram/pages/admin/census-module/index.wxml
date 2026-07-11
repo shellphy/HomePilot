@@ -13,7 +13,7 @@
         <view class="row" hover-class="row-hover" wx:for="{{questions}}" wx:key="key" data-qi="{{index}}" bind:tap="goQuestion">
           <view class="row-main">
             <view class="row-title">{{item.text}}</view>
-            <view class="row-sub">{{item.type === 'multi' ? '多选' : '单选'}} · {{item.options.length}} 个选项{{item.required ? ' · 必答' : ''}}</view>
+            <view class="row-sub">{{item.type === 'text' ? '填空' : (item.type === 'multi' ? '多选' : '单选') + ' · ' + item.options.length + ' 个选项'}}{{item.required ? ' · 必答' : ''}}</view>
           </view>
           <text class="row-arrow">›</text>
         </view>

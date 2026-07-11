@@ -102,7 +102,7 @@ class CensusController extends Controller
     /**
      * schema 摊平成 key => question 的映射。
      *
-     * @return Collection<array-key, array{key: string, text: string, type: string, options: array<int, string>, required?: bool}>
+     * @return Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>, required?: bool}>
      */
     private function questions(Matter $matter): Collection
     {
@@ -113,7 +113,7 @@ class CensusController extends Controller
 
     /**
      * @param  array<string, mixed>  $answers
-     * @param  Collection<array-key, array{key: string, text: string, type: string, options: array<int, string>, required?: bool}>  $questions
+     * @param  Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>, required?: bool}>  $questions
      */
     private function validateAnswers(array $answers, Collection $questions): void
     {
@@ -124,9 +124,11 @@ class CensusController extends Controller
                 throw ValidationException::withMessages(['answers' => '包含未知的问题，请更新小程序后重试']);
             }
 
-            $valid = $question['type'] === 'multi'
-                ? is_array($value) && $value !== [] && array_diff($value, $question['options']) === []
-                : is_string($value) && in_array($value, $question['options'], true);
+            $valid = match ($question['type']) {
+                'text' => is_string($value) && trim($value) !== '' && mb_strlen($value) <= 500,
+                'multi' => is_array($value) && $value !== [] && array_diff($value, $question['options'] ?? []) === [],
+                default => is_string($value) && in_array($value, $question['options'] ?? [], true),
+            };
 
             if (! $valid) {
                 throw ValidationException::withMessages(['answers' => "「{$question['text']}」的答案无效"]);
@@ -152,18 +154,21 @@ class CensusController extends Controller
 
                 return [
                     'title' => $module['title'] ?? '',
-                    'questions' => collect(is_array($questions) ? $questions : [])->map(function (array $question) use ($allAnswers): array {
-                        $values = $allAnswers
-                            ->map(fn (array $answers) => $answers[$question['key']] ?? null)
-                            ->filter()
-                            ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
+                    // 填空题不进公示面：开放文字只作管理端明细（情报），聚合只统计选择题
+                    'questions' => collect(is_array($questions) ? $questions : [])
+                        ->reject(fn (array $question): bool => ($question['type'] ?? '') === 'text')
+                        ->map(function (array $question) use ($allAnswers): array {
+                            $values = $allAnswers
+                                ->map(fn (array $answers) => $answers[$question['key']] ?? null)
+                                ->filter()
+                                ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
 
-                        return [
-                            'key' => $question['key'],
-                            'text' => $question['text'],
-                            'counts' => $values->countBy()->sortDesc(),
-                        ];
-                    })->values()->all(),
+                            return [
+                                'key' => $question['key'],
+                                'text' => $question['text'],
+                                'counts' => $values->countBy()->sortDesc(),
+                            ];
+                        })->values()->all(),
                 ];
             })
             ->values()

@@ -1,4 +1,4 @@
-// 管理端 · 题目编辑：题干 / 单选多选 / 必答 / 选项（一行一个）
+// 管理端 · 题目编辑：题干 / 注释 / 单选多选填空 / 必答 / 选项（一行一个）
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 
@@ -12,6 +12,7 @@ Page({
     matterTitle: '',
     modules: [],
     text: '',
+    note: '',
     type: 'single',
     required: false,
     optionsText: '',
@@ -33,9 +34,10 @@ Page({
         matterTitle: res.data.title,
         modules,
         text: question ? question.text : '',
+        note: (question && question.note) || '',
         type: question ? question.type : 'single',
         required: question ? !!question.required : false,
-        optionsText: question ? question.options.join('\n') : '',
+        optionsText: question ? (question.options || []).join('\n') : '',
       });
     });
   },
@@ -53,18 +55,20 @@ Page({
   },
 
   async save() {
-    const { id, mi, qi, modules, text, type, required, optionsText, submitting } = this.data;
+    const { id, mi, qi, modules, text, note, type, required, optionsText, submitting } = this.data;
     if (submitting) return;
     if (!text.trim()) return wx.showToast({ title: '先填题目', icon: 'none' });
 
     const options = optionsText.split('\n').map((line) => line.trim()).filter(Boolean);
-    if (options.length < 2) return wx.showToast({ title: '至少两个选项，一行一个', icon: 'none' });
+    if (type !== 'text' && options.length < 2) return wx.showToast({ title: '至少两个选项，一行一个', icon: 'none' });
 
     const next = modules.map((module) => ({ ...module, questions: [...module.questions] }));
-    const question = { text: text.trim(), type, required, options };
+    const question = { text: text.trim(), note: note.trim(), type, required };
+    if (type !== 'text') question.options = options;
     if (qi >= 0) {
       // 保留原 key：答案按它存储，改题面不换 key
       next[mi].questions[qi] = { ...next[mi].questions[qi], ...question };
+      if (type === 'text') delete next[mi].questions[qi].options; // 选择题改填空：不留下过时选项
     } else {
       next[mi].questions.push(question); // key 由服务端生成
     }
