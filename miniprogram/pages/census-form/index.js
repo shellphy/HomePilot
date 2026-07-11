@@ -124,7 +124,7 @@ Page({
           content: '这些信息只做匿名统计，聚合结果对全小区公示。不想答的题以后随时可以补。',
           showCancel: false,
           confirmText: '好的',
-          success: () => wx.redirectTo({ url: `/pages/insights/index?id=${id}` }),
+          success: () => wx.redirectTo({ url: `/pages/census-insights/index?id=${id}` }),
         });
       }
     } catch (error) {

@@ -74,7 +74,7 @@ Page({
   },
 
   goInsights() {
-    wx.navigateTo({ url: '/pages/insights/index' });
+    wx.switchTab({ url: '/pages/insights/index' });
   },
 
   goParties() {

@@ -1,0 +1,37 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <block wx:if="{{block}}">
+      <view class="card">
+        <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
+        <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
+      </view>
+
+      <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
+        <view class="card" wx:if="{{section.questions.length}}">
+          <view class="kicker">{{section.title}}</view>
+          <view class="qa" wx:for="{{section.questions}}" wx:for-item="question" wx:key="text">
+            <view class="qa-text">{{question.text}}</view>
+            <view class="bar" wx:for="{{question.bars}}" wx:key="label">
+              <view class="bar-label">{{item.label}}</view>
+              <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
+              <view class="bar-value">{{item.count}}</view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
+           外部 class 在 virtualHost 渲染下不一定作用到按钮盒子（此前背景铺不满的根因） -->
+      <t-button
+        wx:if="{{block.state === 'open'}}"
+        theme="primary"
+        block
+        size="large"
+        style="width: 100%; margin-bottom: 12rpx"
+        bind:tap="goCensusForm"
+      >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
+    </block>
+
+    <view class="map-foot">{{dataFootnote}}</view>
+  </page-status>
+</view>

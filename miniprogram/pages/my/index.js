@@ -56,9 +56,9 @@ Page({
     wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 打开小区数据总览（各期征集都在里面）
+  // 打开小区数据 tab（各期征集都在里面）
   goCensus() {
-    wx.navigateTo({ url: '/pages/insights/index' });
+    wx.switchTab({ url: '/pages/insights/index' });
   },
 
   goAdminMatters() {

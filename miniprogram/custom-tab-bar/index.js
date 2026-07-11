@@ -3,6 +3,7 @@ Component({
     value: '',
     list: [
       { icon: 'home', value: 'community', label: '小区' },
+      { icon: 'chart-bar', value: 'insights', label: '数据' },
       { icon: 'user', value: 'my', label: '我的' },
     ],
   },
