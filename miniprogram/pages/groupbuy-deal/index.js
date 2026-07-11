@@ -10,6 +10,7 @@ Page({
     id: null,
     finalTerms: [],
     finalNote: '',
+    needsSurvey: false, // 方案型团每户成交价不同：公示的是成交规则与户数，不是统一价
     submitting: false,
   },
 
@@ -26,6 +27,7 @@ Page({
         // 默认把团购条件带进来，团长在此基础上改成最终成交版
         finalTerms: matter.final_terms.length ? matter.final_terms : (matter.terms || []),
         finalNote: matter.final_note || '',
+        needsSurvey: !!matter.needs_survey,
       });
     });
   },

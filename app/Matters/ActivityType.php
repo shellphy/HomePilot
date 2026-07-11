@@ -46,6 +46,12 @@ class ActivityType extends MatterType
         return ['pitch' => $validated['pitch'] ?? ''];
     }
 
+    /** 活动办不成的收场出口：与「已结束」分开，取消的活动不开放评价。 */
+    public function abortLabel(): ?string
+    {
+        return '已取消';
+    }
+
     /** 已认证商家可以发起探店、开放日类活动。 */
     public function merchantInitiatable(): bool
     {

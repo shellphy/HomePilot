@@ -69,6 +69,11 @@
   gap: 16rpx;
 }
 
+/* 收场是负向但正当的出口：红字点明分量，浅底不抢戏 */
+.abort-btn {
+  --td-button-light-color: var(--danger);
+}
+
 .tline {
   display: flex;
   gap: 20rpx;

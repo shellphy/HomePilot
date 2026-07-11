@@ -24,6 +24,25 @@
   border-radius: 16rpx;
   padding: 14rpx 20rpx;
 }
+/* 待确认的意向数：提醒而非警告，用橙色注意语义 */
+.head-intent {
+  margin-top: 18rpx;
+  font-size: 24rpx;
+  color: var(--warn);
+  background: var(--warn-bg);
+  border-radius: 16rpx;
+  padding: 14rpx 20rpx;
+}
+/* 方案型团购的玩法说明：信息语义，蓝色 */
+.head-survey {
+  margin-top: 18rpx;
+  font-size: 24rpx;
+  color: var(--info);
+  background: var(--info-bg);
+  border-radius: 16rpx;
+  padding: 14rpx 20rpx;
+  line-height: 1.6;
+}
 
 .pitch {
   font-size: 27rpx;
@@ -248,4 +267,14 @@
   font-size: 24rpx;
   color: var(--text-muted);
   margin-bottom: 16rpx;
+}
+
+/* 确认参团下方的次要出口（退出名单） */
+.cta-secondary {
+  margin-top: 16rpx;
+}
+
+/* 收场是负向但正当的出口：红字点明分量，浅底不抢戏 */
+.abort-btn {
+  --td-button-light-color: var(--danger);
 }

@@ -30,6 +30,12 @@ class Stance extends Model
 
     public const MODE_REVIEW = 'review';
 
+    /** 接龙承诺档位：登记意向（条款未定前的兴趣）。 */
+    public const JOIN_STAGE_INTENT = 'intent';
+
+    /** 接龙承诺档位：确认参团（进成交名单的承诺）。 */
+    public const JOIN_STAGE_CONFIRMED = 'confirmed';
+
     protected $fillable = [
         'matter_id',
         'resident_id',
@@ -53,6 +59,14 @@ class Stance extends Model
     {
         $this->revisions()->create(['payload' => $this->payload ?? []]);
         $this->update(['payload' => $payload]);
+    }
+
+    /** 接龙的承诺档位；两档机制上线前的老表态没有 stage，按确认参团算（当年报名即承诺）。 */
+    public function joinStageValue(): string
+    {
+        $stage = $this->payload['stage'] ?? null;
+
+        return is_string($stage) ? $stage : self::JOIN_STAGE_CONFIRMED;
     }
 
     /** @return BelongsTo<Matter, $this> */

@@ -1,4 +1,4 @@
-<view class="card gcard {{matter.state === 'done' ? 'gcard-done' : ''}}" hover-class="card-hover" bind:tap="goDetail">
+<view class="card gcard {{matter.state === 'done' || matter.state === 'aborted' ? 'gcard-done' : ''}}" hover-class="card-hover" bind:tap="goDetail">
   <view class="gcard-row">
     <view class="gcard-cat">{{matter.category}}</view>
     <view class="gcard-title">{{matter.title}}</view>
@@ -10,7 +10,7 @@
     <view class="meter-fill" style="width: {{percent}}%"></view>
   </view>
   <view class="gcard-foot">
-    <text><text class="gcard-num">{{matter.join_count}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} 人{{matter.state === 'seeking' ? '感兴趣' : '已报名'}}</text>
+    <text><text class="gcard-num">{{footCount}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} 人{{footNoun}}</text>
     <text class="muted">查看详情 ›</text>
   </view>
 </view>

@@ -19,6 +19,7 @@ Component({
     isParty: Boolean,         // 相关方身份不参与接龙，报名区改为解释 + 切回业主入口
     partyLabel: String,       // 当前相关方身份的显示名（解释文案用）
     myShareContact: Boolean,  // 我报名时的共享意愿：成团后没共享的看不到团长电话，给补开入口
+    myJoinStage: String,      // 我的承诺档位（intent=登记意向 / confirmed=确认参团）
   },
 
   data: {
@@ -26,6 +27,9 @@ Component({
     percent: 0,
     nextState: null,   // 状态机的下一站（终态时为 null）
     nextIsFinal: false, // 下一站是否终态：终态不可回退，确认弹窗要说清后果
+    intentPhase: false, // 意向阶段（意向征集/谈判中）：报名只是登记兴趣，量词用「感兴趣」
+    intentCount: 0,     // 登记过意向、还没确认参团的人数（接龙中提醒团长）
+    needConfirm: false, // 我登记过意向且已进入接龙中：给「确认参团」入口
     reviews: [],
     reviewRating: 0,
     reviewContent: '',
@@ -42,13 +46,28 @@ Component({
       const states = stateOptions(matter.states);
       const stateIndex = states.findIndex((state) => state.value === matter.state);
       const nextState = stateIndex >= 0 ? states[stateIndex + 1] || null : null;
+      // 头部计数口径跟着阶段走：意向期看兴趣热度，接龙后看确认人数，收场后是历史记录
+      const confirmedPhase = matter.state === 'open' || matter.state === 'done';
+      let headNoun = '感兴趣';
+      if (confirmedPhase) {
+        headNoun = '已确认参团';
+      } else if (matter.state === 'aborted') {
+        headNoun = '报名过';
+      }
       this.setData({
         pillClass: pillClass(matter.state),
         percent: joinPercent(matter),
         nextState,
         nextIsFinal: !!nextState && stateIndex + 2 === states.length,
+        intentPhase: matter.state === 'seeking' || matter.state === 'negotiating',
+        intentCount: Math.max(0, (matter.join_count || 0) - (matter.confirmed_count || 0)),
+        headCount: confirmedPhase && matter.confirmed_count != null ? matter.confirmed_count : matter.join_count,
+        headNoun,
         reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
       });
+    },
+    'matter.state, joined, myJoinStage': function (state, joined, myJoinStage) {
+      this.setData({ needConfirm: !!joined && myJoinStage === 'intent' && state === 'open' });
     },
     myReview(myReview) {
       this.setData({
@@ -81,16 +100,58 @@ Component({
       }
 
       // 共享意愿在页面开关里选好，弹窗只做最终确认，点「再想想」不会报名
-      const { matter, shareContact } = this.data;
-      wx.showModal({
-        title: matter.state === 'seeking' ? '登记意向' : '报名接龙',
-        content: shareContact
+      const { matter, intentPhase, shareContact } = this.data;
+      const survey = matter.needs_survey;
+      let content;
+      if (survey && intentPhase) {
+        // 方案型团：报名的意义是约商家单独出方案（量房只是最常见的沟通形式），联系互通从谈判中就开始
+        content = shareContact
+          ? '这是按户出方案的团购：进入谈判后，团长/商家会拿到你的手机号，联系你沟通需求（如上门量房），出你家的专属方案（手机号只在你们双方之间可见）。'
+          : '你选择了不互通手机号，商家没法主动联系你沟通需求、出方案，需要你主动联系团长对接。';
+      } else {
+        content = shareContact
           ? '成团后你的手机号将与团长互通（只在你和团长之间可见，不会公开展示），方便建群对接、安排上门。'
-          : '你选择了不互通手机号，成团后建群、对接需要你主动联系团长。',
-        confirmText: matter.state === 'seeking' ? '登记' : '报名',
+          : '你选择了不互通手机号，成团后建群、对接需要你主动联系团长。';
+      }
+      if (intentPhase && !survey) {
+        content += '\n现在登记的是意向，条件谈出来进入接龙后，需要你回来确认参团才算数。';
+      }
+      let title = '确认参团';
+      if (intentPhase) {
+        title = survey ? '约商家出方案' : '登记意向';
+      }
+      wx.showModal({
+        title,
+        content,
+        confirmText: intentPhase ? '登记' : '确认参团',
         cancelText: '再想想',
         success: ({ confirm }) => {
           if (confirm) this.doJoin(shareContact);
+        },
+      });
+    },
+
+    // 登记过意向的人在进入接龙后确认参团：升级承诺档位，计入成团人数
+    confirmJoin() {
+      if (this.data.submitting) return;
+      wx.showModal({
+        title: '确认参团？',
+        content: '确认后你将计入成团人数，成团即按公示条件执行。',
+        confirmText: '确认参团',
+        cancelText: '再想想',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          this.setData({ submitting: true });
+          try {
+            // 沿用我登记时的共享意愿，确认动作不悄悄改变隐私选择
+            await matters.join(this.data.matter.id, this.properties.myShareContact);
+            wx.showToast({ title: '已确认参团', icon: 'success' });
+            this.refresh();
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          } finally {
+            this.setData({ submitting: false });
+          }
         },
       });
     },
@@ -104,8 +165,10 @@ Component({
       try {
         await matters.join(this.data.matter.id, shareContact);
         wx.showModal({
-          title: '报名成功',
-          content: '你已经在接龙名单里了。谈判结果和进度都会更新在本页，有进展记得回来看看。',
+          title: this.data.intentPhase ? '已登记' : '已确认参团',
+          content: this.data.intentPhase
+            ? '你已经在名单里了。谈判结果和进度都会更新在本页，进入接龙后记得回来确认参团。'
+            : '你已经在接龙名单里了。成团进展会更新在本页，有动静记得回来看看。',
           showCancel: false,
           confirmText: '好的',
         });
@@ -203,11 +266,19 @@ Component({
       const { nextState, nextIsFinal } = this.data;
       if (!nextState) return;
 
+      let content;
+      if (nextIsFinal) {
+        content = `「${nextState.label}」是最后一步：确认后与同意共享的参团者互通手机号、开放评价，且不能再改回来（弄错了需要联系管理员）。`;
+      } else if (nextState.value === 'open') {
+        // 两段表态：进接龙后意向要本人确认才算数，推进前给团长打好预防针
+        content = `进入「${nextState.label}」后，登记过意向的邻居需要回来确认参团，确认的人数才计入成团目标。`;
+      } else {
+        content = `团购将从「${this.data.matter.state_label}」进入「${nextState.label}」，之后不能退回上一步。`;
+      }
+
       wx.showModal({
         title: `进入「${nextState.label}」？`,
-        content: nextIsFinal
-          ? `「${nextState.label}」是最后一步：确认后与同意共享的参团者互通手机号、开放评价，且不能再改回来（弄错了需要联系管理员）。`
-          : `团购将从「${this.data.matter.state_label}」进入「${nextState.label}」，之后不能退回上一步。`,
+        content,
         confirmText: '确认推进',
         cancelText: '再想想',
         // 不可逆的最后一步用红色确认，让分量在弹窗上就能感知
@@ -217,6 +288,30 @@ Component({
           try {
             await matters.flipState(this.data.matter.id, nextState.value);
             wx.showToast({ title: '状态已更新', icon: 'success' });
+            this.refresh();
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          }
+        },
+      });
+    },
+
+    // 团购没走到底的收场出口（人数不够/谈判没谈成）：不触发联系互通与评价，也不可再改
+    abortMatter() {
+      const { matter } = this.data;
+      if (!matter.abort_state) return;
+
+      wx.showModal({
+        title: `按「${matter.abort_state.label}」收场？`,
+        content: '这个团购将关闭报名、封存名单，不开放评价和联系方式互通，且不能再改回来（弄错了需要联系管理员）。没谈成不丢人，给邻居一个交代比挂着强。',
+        confirmText: '确认收场',
+        cancelText: '再想想',
+        confirmColor: '#e34d59',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await matters.flipState(matter.id, matter.abort_state.value);
+            wx.showToast({ title: '已收场', icon: 'none' });
             this.refresh();
           } catch (error) {
             wx.showToast({ title: error.message, icon: 'none' });

@@ -22,6 +22,22 @@
         <input class="frow-input" type="number" value="{{targetCount}}" placeholder="如 20" data-field="targetCount" bind:input="onInput" />
       </view>
 
+      <!-- 方案型开关只在发起时可选：中途翻转会改变联系互通的隐私承诺 -->
+      <view class="frow" wx:if="{{!id}}">
+        <view class="frow-main">
+          <view class="row-title">按户出方案</view>
+          <view class="row-sub">中央空调、全屋定制这类选它：商家逐户沟通需求（如上门量房）、单独出方案报价，报名邻居的手机号从谈判阶段起与你互通</view>
+        </view>
+        <switch checked="{{needsSurvey}}" bind:change="onSurveyChange" color="#06ae56" />
+      </view>
+      <view class="frow" wx:elif="{{needsSurvey}}">
+        <view class="frow-main">
+          <view class="row-title">按户出方案</view>
+          <view class="row-sub">发起时已选定，不可修改</view>
+        </view>
+        <text class="frow-value">已开启</text>
+      </view>
+
       <!-- 状态流转：单选走 action-sheet，与管理端表单同一套交互 -->
       <view class="frow" wx:if="{{stateKeys.length}}" hover-class="frow-hover" bind:tap="chooseState">
         <view class="frow-main">

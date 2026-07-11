@@ -13,6 +13,7 @@
         is-party="{{isParty}}"
         party-label="{{partyLabel}}"
         my-share-contact="{{myShareContact}}"
+        my-join-stage="{{myJoinStage}}"
         bind:refresh="reload"
       />
       <matter-detail

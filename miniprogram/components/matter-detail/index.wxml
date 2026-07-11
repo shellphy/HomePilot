@@ -30,6 +30,8 @@
     <t-button theme="primary" size="medium" bind:tap="goProgress">发布进展</t-button>
     <t-button wx:if="{{nextState}}" theme="light" size="medium" bind:tap="flipState">推进到「{{nextState.label}}」</t-button>
     <t-button theme="light" size="medium" bind:tap="goEdit">编辑</t-button>
+    <!-- 收场出口：办不成/不再推进时给个体面台阶，别让事项挂成僵尸 -->
+    <t-button wx:if="{{nextState && matter.abort_state}}" theme="light" size="medium" class="abort-btn" bind:tap="abortMatter">按「{{matter.abort_state.label}}」收场</t-button>
   </view>
 </view>
 

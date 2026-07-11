@@ -8,6 +8,7 @@ const PILL_CLASS = {
   done: 'pill-done',
   closed: 'pill-done',
   resolved: 'pill-done',
+  aborted: 'pill-aborted',
 };
 
 // 各事项类型的参与文案（团购/公告有专属组件，不走这份配置）
@@ -25,7 +26,9 @@ function pillClass(state) {
 
 function joinPercent(matter) {
   if (!matter.target_count) return 0;
-  return Math.min(100, Math.round((matter.join_count / matter.target_count) * 100));
+  // 目标进度按「确认参团」口径（团购两段表态）；老数据/其他类型没有该字段时退回总数
+  const count = matter.confirmed_count != null ? matter.confirmed_count : matter.join_count;
+  return Math.min(100, Math.round((count / matter.target_count) * 100));
 }
 
 // 把后端下发的状态机（{value: label} 对象）转成模板好用的数组
