@@ -35,6 +35,7 @@ class PartyAdminController extends Controller
                 'type_label' => $party->typeLabel(),
                 'name' => $party->name,
                 'category' => $party->category,
+                'intro' => $party->intro,
                 'phone' => $owner?->phone,
                 'is_listed' => $party->is_listed,
                 'created_at' => $party->created_at?->format('Y-m-d H:i'),

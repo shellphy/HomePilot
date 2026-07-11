@@ -29,10 +29,14 @@ class ResidentResource extends JsonResource
             'phone' => $this->phone,
             'is_admin' => $this->is_admin,
             'party' => $this->affiliatedParty ? [
+                'id' => $this->affiliatedParty->id,
                 'type' => $this->affiliatedParty->type,
                 'label' => $this->affiliatedParty->typeLabel(),
                 'name' => $this->affiliatedParty->name,
                 'category' => $this->affiliatedParty->category,
+                'intro' => $this->affiliatedParty->intro,
+                'description' => $this->affiliatedParty->description ?? '',
+                'images' => $this->affiliatedParty->images ?? [],
                 'is_listed' => $this->affiliatedParty->is_listed,
             ] : null,
             // 上次绑定的相关方档案：切回业主后再进资料页，商家资料按它预填
@@ -40,6 +44,9 @@ class ResidentResource extends JsonResource
                 'type' => $this->lastParty->type,
                 'name' => $this->lastParty->name,
                 'category' => $this->lastParty->category,
+                'intro' => $this->lastParty->intro,
+                'description' => $this->lastParty->description ?? '',
+                'images' => $this->lastParty->images ?? [],
             ] : null,
             // 我参与过的征集（通用：装修摸底、将来的收房/车位摸底都在这里）
             'censuses' => $this->stances()

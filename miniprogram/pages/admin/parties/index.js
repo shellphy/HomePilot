@@ -36,6 +36,11 @@ Page({
     this.applyFilter();
   },
 
+  // 审核前先看完整档案（详情页与名录共用，管理员可看未认证的）
+  goDetail(event) {
+    wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
+  },
+
   toggle(event) {
     const { id, index } = event.currentTarget.dataset;
     const listed = event.detail.value;

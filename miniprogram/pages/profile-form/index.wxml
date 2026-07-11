@@ -61,8 +61,30 @@
           <text class="frow-label">{{identityMeta.category_label}}</text>
           <input class="frow-input" value="{{partyCategory}}" data-field="partyCategory" bind:input="onInput" />
         </view>
+        <view class="frow">
+          <text class="frow-label">简介</text>
+          <input class="frow-input" value="{{partyIntro}}" placeholder="一句话介绍，显示在名录和详情页" data-field="partyIntro" bind:input="onInput" maxlength="60" />
+        </view>
       </block>
     </view>
+
+    <!-- 相关方详情页素材：详细介绍 + 照片，各类型统一字段、内容自由发挥 -->
+    <block wx:if="{{identity !== 'resident'}}">
+      <view class="card">
+        <view class="q-title">详细介绍</view>
+        <textarea class="fin farea" placeholder="{{identityMeta.description_hint || '想让邻居知道的都可以写在这里'}}" value="{{partyDescription}}" data-field="partyDescription" bind:input="onInput" maxlength="2000" />
+      </view>
+      <view class="card">
+        <view class="q-title">照片<text class="q-note">门头、资质、服务现场…最多 9 张</text></view>
+        <view class="shots">
+          <view class="shot-wrap" wx:for="{{partyImages}}" wx:key="*this">
+            <image class="shot" src="{{item}}" mode="aspectFill" data-url="{{item}}" bind:tap="previewImage" />
+            <view class="shot-del" data-index="{{index}}" catch:tap="removeImage">✕</view>
+          </view>
+          <view class="shot-add" bind:tap="chooseImages">{{uploading ? '上传中…' : '+'}}</view>
+        </view>
+      </view>
+    </block>
 
     <view class="privacy">手机号仅管理员可见，用于必要时联系；不会出现在任何公示名单里。</view>
     <view class="privacy" wx:if="{{identity === 'merchant'}}">相关方身份对全小区公开。商家经管理员认证后可发起团购和活动（带「已认证」标识）并进入商家名录；相关方不参与业主接龙，可随时切回业主身份。</view>

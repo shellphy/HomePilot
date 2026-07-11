@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "相关方详情",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

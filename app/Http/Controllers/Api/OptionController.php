@@ -34,6 +34,7 @@ class OptionController extends Controller
                     'name_hint' => $meta['name_hint'],
                     // 空 = 该类型没有档案补充字段（主营品类只对商家有意义）
                     'category_label' => $meta['category_label'],
+                    'description_hint' => $meta['description_hint'],
                 ])
                 ->values(),
             'matter_types' => collect(MatterTypeRegistry::keys())

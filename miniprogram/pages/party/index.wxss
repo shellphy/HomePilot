@@ -1,0 +1,51 @@
+.party-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+.party-name {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.party-badge {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+  border-radius: 8rpx;
+  padding: 6rpx 14rpx;
+}
+.party-badge-pending {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+.party-intro {
+  font-size: 27rpx;
+  line-height: 1.7;
+  margin-top: 16rpx;
+}
+.party-sub {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-top: 12rpx;
+}
+.party-phone {
+  color: var(--brand-deep);
+}
+.party-desc {
+  font-size: 26rpx;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.gallery-shot {
+  width: 200rpx;
+  height: 150rpx;
+  border-radius: 12rpx;
+  background: var(--line);
+}
