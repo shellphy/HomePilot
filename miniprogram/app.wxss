@@ -75,10 +75,6 @@ page {
   margin-top: 8rpx;
 }
 /* 加载失败态：与「暂无内容」的中性空态在结构与颜色上区分开 */
-.load-error-icon {
-  font-size: 48rpx;
-  margin-bottom: 8rpx;
-}
 .load-error-title {
   font-size: 28rpx;
   font-weight: 600;
