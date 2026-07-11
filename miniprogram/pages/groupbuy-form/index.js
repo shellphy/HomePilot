@@ -1,7 +1,6 @@
-// 发起/编辑团购（groupbuy 类型的表单）
+// 发起/编辑团购（groupbuy 类型的表单），格式与交互对齐管理端事项表单
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
-const { stateOptions } = require('../../utils/constants');
 const load = require('../../behaviors/load');
 
 Page({
@@ -9,7 +8,8 @@ Page({
 
   data: {
     id: null,
-    states: [], // 编辑时来自后端下发的该事项状态机；新建不选状态（后端定初始态）
+    states: {}, // {key: label}，编辑时来自后端下发的该事项状态机；新建不选状态（后端定初始态）
+    stateKeys: [],
     categories: [],
     category: '',
     customCategory: '',
@@ -54,7 +54,8 @@ Page({
           category: isPreset ? matter.category : '',
           customCategory: isPreset ? '' : matter.category,
           title: matter.title,
-          states: stateOptions(matter.states),
+          states: matter.states,
+          stateKeys: Object.keys(matter.states),
           state: matter.state,
           targetCount: String(matter.target_count),
           pitch: matter.pitch || '',
@@ -66,42 +67,63 @@ Page({
     });
   },
 
+  // 有未保存的修改时，返回/退出前弹确认，防止编辑丢失（与管理端表单同一套交互）
+  markDirty() {
+    if (this.dirty || !wx.enableAlertBeforeUnload) return;
+    this.dirty = true;
+    wx.enableAlertBeforeUnload({ message: '修改还没保存，确定要离开吗？' });
+  },
+
+  clearDirty() {
+    if (!this.dirty) return;
+    this.dirty = false;
+    wx.disableAlertBeforeUnload();
+  },
+
   pickCategory(event) {
+    this.markDirty();
     this.setData({ category: event.currentTarget.dataset.value, customCategory: '' });
   },
 
-  pickState(event) {
-    this.setData({ state: event.currentTarget.dataset.value });
+  chooseState() {
+    const { states, stateKeys } = this.data;
+    wx.showActionSheet({
+      itemList: stateKeys.map((key) => states[key]),
+      success: ({ tapIndex }) => {
+        this.markDirty();
+        this.setData({ state: stateKeys[tapIndex] });
+      },
+    });
   },
 
   onInput(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
     if (event.currentTarget.dataset.field === 'customCategory' && event.detail.value) {
       this.setData({ category: '' });
     }
   },
 
+  // 条目列表（团购条件 / 买前必懂）的增删改
+  addRow(event) {
+    this.markDirty();
+    const list = event.currentTarget.dataset.list;
+    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '' };
+    this.setData({ [list]: [...this.data[list], blank] });
+  },
+
+  removeRow(event) {
+    this.markDirty();
+    const { list, index } = event.currentTarget.dataset;
+    const rows = [...this.data[list]];
+    rows.splice(index, 1);
+    this.setData({ [list]: rows });
+  },
+
   onRowInput(event) {
-    const { list, index, key } = event.currentTarget.dataset;
-    this.setData({ [`${list}[${index}].${key}`]: event.detail.value });
-  },
-
-  addTerm() {
-    this.setData({ terms: [...this.data.terms, { label: '', value: '' }] });
-  },
-
-  removeTerm(event) {
-    const terms = this.data.terms.filter((_, i) => i !== event.currentTarget.dataset.index);
-    this.setData({ terms });
-  },
-
-  addGlossary() {
-    this.setData({ glossary: [...this.data.glossary, { term: '', explain: '' }] });
-  },
-
-  removeGlossary(event) {
-    const glossary = this.data.glossary.filter((_, i) => i !== event.currentTarget.dataset.index);
-    this.setData({ glossary });
+    this.markDirty();
+    const { list, index, field } = event.currentTarget.dataset;
+    this.setData({ [`${list}[${index}].${field}`]: event.detail.value });
   },
 
   async submit() {
@@ -129,10 +151,12 @@ Page({
     try {
       if (id) {
         await matters.updateGroupbuy(id, { ...payload, state });
+        this.clearDirty();
         wx.showToast({ title: '已保存', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
         await matters.createGroupbuy(payload);
+        this.clearDirty();
         wx.showModal({
           title: '已提交',
           content: '管理员通常会在 24 小时内完成审核，通过后就会出现在小区页里。你是这个团购的团长，可以在「我的」里随时查看和管理它。',

@@ -1,38 +1,4 @@
-.pair {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-bottom: 16rpx;
-}
-.pair-col {
-  flex-direction: column;
-  align-items: stretch;
-}
-.pair-head {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-.pair-a {
-  flex: 1;
-}
-.pair-b {
-  flex: 2;
-}
-.pair-del {
-  flex-shrink: 0;
-  width: 48rpx;
-  height: 48rpx;
-  line-height: 48rpx;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 26rpx;
-}
-.add-row {
-  padding: 16rpx 0 4rpx;
-  font-size: 25rpx;
-  color: var(--brand-deep);
-}
+/* .pair / .add-row 条目列表样式已上移 app.wxss（与用户端团购表单共用） */
 .row {
   display: flex;
   align-items: center;

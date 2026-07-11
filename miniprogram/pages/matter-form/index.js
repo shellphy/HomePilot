@@ -59,7 +59,21 @@ Page({
     });
   },
 
+  // 有未保存的修改时，返回/退出前弹确认，防止编辑丢失（与管理端表单同一套交互）
+  markDirty() {
+    if (this.dirty || !wx.enableAlertBeforeUnload) return;
+    this.dirty = true;
+    wx.enableAlertBeforeUnload({ message: '修改还没保存，确定要离开吗？' });
+  },
+
+  clearDirty() {
+    if (!this.dirty) return;
+    this.dirty = false;
+    wx.disableAlertBeforeUnload();
+  },
+
   onInput(event) {
+    this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
@@ -79,10 +93,12 @@ Page({
     try {
       if (id) {
         await matters.updateMatter(id, payload);
+        this.clearDirty();
         wx.showToast({ title: '已保存', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
         await matters.createMatter(type, payload);
+        this.clearDirty();
         wx.showModal({
           title: '已提交',
           content: '管理员通常会在 24 小时内完成审核，通过后就会出现在小区页里。这件事由你牵头，可以在「我的」里随时查看和管理它。',
