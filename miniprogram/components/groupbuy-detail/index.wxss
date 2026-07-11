@@ -101,6 +101,67 @@
   color: var(--text-secondary);
   line-height: 1.65;
 }
+/* 决策卡的「怎么选 / 避坑」行：小标签 + 正文，标签配色走语义色 */
+.gl-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  margin-top: 10rpx;
+}
+.gl-tag {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  line-height: 1.5;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  color: var(--info);
+  background: var(--info-bg);
+}
+.gl-tag-caution {
+  color: var(--warn);
+  background: var(--warn-bg);
+}
+.gl-line-text {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+/* 文案里命中「买前必懂」术语的段：可点，虚线下划线示意可展开 */
+.term-hit {
+  color: var(--info);
+  text-decoration: underline dashed;
+  text-underline-offset: 6rpx;
+}
+/* 就地解释弹层 */
+.term-pop {
+  padding: 40rpx 32rpx calc(48rpx + env(safe-area-inset-bottom));
+  border-radius: 24rpx 24rpx 0 0;
+  background: #fff;
+}
+.term-pop-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+.term-pop-source {
+  margin-top: 24rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.term-pop-ask {
+  margin-top: 24rpx;
+}
+/* 配套摸底问卷入口卡 */
+.census-attach-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 6rpx;
+}
+.census-attach-sub {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
 
 .tline {
   display: flex;

@@ -38,7 +38,23 @@ Page({
       const answers = census.answers || {};
       this.setData({
         // 空模块是管理端「先建模块再逐题添加」的中间态，作答时跳过
-        modules: census.modules.filter((module) => (module.questions || []).length),
+        modules: census.modules
+          .filter((module) => (module.questions || []).length)
+          .map((module) => ({
+            ...module,
+            // 带选项解释的题渲染成竖排选项行（答题即建概念），没有解释的保持横排 chips
+            questions: module.questions.map((question) => {
+              const notes = question.option_notes || [];
+              const hasNotes = notes.some((note) => note && note.trim());
+              return {
+                ...question,
+                hasNotes,
+                optionRows: hasNotes
+                  ? (question.options || []).map((label, i) => ({ label, note: (notes[i] || '').trim() }))
+                  : [],
+              };
+            }),
+          })),
         answers,
         picked: this.buildPicked(answers),
         needProfile: census.collects_contact && (!me.unit_label || !me.phone),

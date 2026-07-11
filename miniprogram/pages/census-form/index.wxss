@@ -43,3 +43,33 @@
   color: var(--text-muted);
   padding-top: 20rpx;
 }
+
+/* 带解释的选项：竖排行，配色语义与 chip 一致 */
+.opts {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+.opt {
+  border: 1rpx solid var(--line);
+  background: var(--bg-page);
+  border-radius: 16rpx;
+  padding: 18rpx 26rpx;
+}
+.opt-on {
+  background: var(--brand-bg);
+  border-color: var(--brand);
+}
+.opt-label {
+  font-size: 26rpx;
+}
+.opt-on .opt-label {
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+.opt-note {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+  line-height: 1.6;
+}

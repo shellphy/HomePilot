@@ -3,6 +3,7 @@
 const matters = require('../../utils/api/matters');
 const { pillClass, joinPercent, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { splitByTerms } = require('../../utils/term-match');
 
 Component({
   options: {
@@ -37,6 +38,11 @@ Component({
     submittingReview: false,
     // 成团后与团长互通手机号的意愿：报名前用开关选择，默认同意
     shareContact: true,
+    // 「买前必懂」的就地解释：文案里命中术语的段可点，弹出对应决策卡
+    pitchSegments: [],
+    termRows: [],
+    finalRows: [],
+    activeTerm: null,
   },
 
   observers: {
@@ -54,9 +60,13 @@ Component({
       } else if (matter.state === 'aborted') {
         headNoun = '报名过';
       }
+      const glossaryTerms = (matter.glossary || []).map((entry) => entry.term);
       this.setData({
         pillClass: pillClass(matter.state),
         percent: joinPercent(matter),
+        pitchSegments: splitByTerms(matter.pitch, glossaryTerms),
+        termRows: (matter.terms || []).map((row) => ({ label: row.label, segments: splitByTerms(row.value, glossaryTerms) })),
+        finalRows: (matter.final_terms || []).map((row) => ({ label: row.label, segments: splitByTerms(row.value, glossaryTerms) })),
         nextState,
         nextIsFinal: !!nextState && stateIndex + 2 === states.length,
         intentPhase: matter.state === 'seeking' || matter.state === 'negotiating',
@@ -198,6 +208,31 @@ Component({
       if (!guardProfileError(error, '接龙名单以「楼栋 + 昵称」公示，报名前请先在个人资料里选好楼栋号。')) {
         wx.showToast({ title: error.message, icon: 'none' });
       }
+    },
+
+    // 业主侧 AI 答疑：带事项上下文的多轮对话页
+    goAskAi() {
+      const { matter } = this.data;
+      this.setData({ activeTerm: null });
+      wx.navigateTo({ url: `/pages/ai-chat/index?id=${matter.id}&title=${encodeURIComponent(matter.title)}` });
+    },
+
+    // 配套摸底问卷入口：进入征集公示面（答题/看聚合结果都在那里）
+    goAttachedCensus() {
+      const census = this.data.matter.attached_census;
+      if (census) wx.navigateTo({ url: `/pages/census-insights/index?id=${census.id}` });
+    },
+
+    // 就地解释：点中文案里的术语，弹出「买前必懂」对应的决策卡
+    showGlossary(event) {
+      const { term } = event.currentTarget.dataset;
+      if (!term) return;
+      const entry = (this.data.matter.glossary || []).find((row) => row.term === term);
+      if (entry) this.setData({ activeTerm: entry });
+    },
+
+    onTermPopupChange(event) {
+      if (!event.detail.visible) this.setData({ activeTerm: null });
     },
 
     // 联系电话点击给两个动作：拨打（对齐商家名录的一键拨号）或复制（建群粘贴用）

@@ -1,0 +1,73 @@
+.qa {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.qa:last-of-type {
+  border-bottom: none;
+}
+.qa-q-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+.qa-q {
+  flex: 1;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.qa-echo {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  border: 1rpx solid var(--line-dark);
+  border-radius: 24rpx;
+  padding: 4rpx 18rpx;
+}
+.qa-echo-on {
+  color: var(--brand-deep);
+  border-color: var(--brand);
+  background: var(--brand-bg);
+}
+.qa-echo-mine {
+  border: none;
+  padding-right: 0;
+  color: var(--text-muted);
+}
+.qa-asker {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.qa-a {
+  margin-top: 14rpx;
+  background: var(--bg-page);
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+}
+.qa-a-text {
+  font-size: 25rpx;
+  line-height: 1.7;
+}
+.qa-a-sign {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.qa-pending {
+  margin-top: 12rpx;
+  font-size: 23rpx;
+  color: var(--warn);
+}
+.qa-ops {
+  margin-top: 12rpx;
+  display: flex;
+  gap: 32rpx;
+}
+.qa-op {
+  font-size: 24rpx;
+  color: var(--brand-deep);
+}
+.qa-ask-btn {
+  margin-top: 16rpx;
+}

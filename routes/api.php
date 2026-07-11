@@ -6,8 +6,11 @@ use App\Http\Controllers\Api\Admin\PartyAdminController;
 use App\Http\Controllers\Api\Admin\SettingAdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CensusController;
+use App\Http\Controllers\Api\GlossaryDraftController;
 use App\Http\Controllers\Api\JoinController;
+use App\Http\Controllers\Api\MatterAiChatController;
 use App\Http\Controllers\Api\MatterController;
+use App\Http\Controllers\Api\MatterQuestionController;
 use App\Http\Controllers\Api\MatterUpdateController;
 use App\Http\Controllers\Api\OptionController;
 use App\Http\Controllers\Api\PartyController;
@@ -49,6 +52,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/matters/{matter}/updates', [MatterUpdateController::class, 'store']);
     Route::get('/matters/{matter}/census', [CensusController::class, 'show']);
     Route::put('/matters/{matter}/census', [CensusController::class, 'store']);
+
+    // 「买前必懂」AI 起草（发起/编辑团购表单用，草稿经人工校订后随事项提交）
+    Route::post('/glossary/draft', [GlossaryDraftController::class, 'store']);
+
+    // 业主侧 AI 答疑：带事项上下文的多轮对话
+    Route::post('/matters/{matter}/ai-chat', [MatterAiChatController::class, 'store']);
+
+    // 「大家都在问」：公开问答（提问/同问/负责方回答/沉淀为买前必懂）
+    Route::get('/matters/{matter}/questions', [MatterQuestionController::class, 'index']);
+    Route::post('/matters/{matter}/questions', [MatterQuestionController::class, 'store']);
+    Route::post('/questions/{question}/echo', [MatterQuestionController::class, 'echo']);
+    Route::put('/questions/{question}/answer', [MatterQuestionController::class, 'answer']);
+    Route::post('/questions/{question}/promote', [MatterQuestionController::class, 'promote']);
 
     Route::post('/uploads', [UploadController::class, 'store']);
 

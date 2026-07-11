@@ -56,9 +56,12 @@ class GroupbuyType extends MatterType
             'terms' => ['nullable', 'array'],
             'terms.*.label' => ['required', 'string', 'max:30'],
             'terms.*.value' => ['required', 'string', 'max:100'],
+            // 买前必懂（术语决策卡）：explain=是什么，judge=你家怎么判断，caution=避坑/怎么问商家
             'glossary' => ['nullable', 'array'],
             'glossary.*.term' => ['required', 'string', 'max:30'],
             'glossary.*.explain' => ['required', 'string', 'max:300'],
+            'glossary.*.judge' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'glossary.*.caution' => ['sometimes', 'nullable', 'string', 'max:300'],
         ];
     }
 

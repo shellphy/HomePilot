@@ -3,6 +3,33 @@ const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
 
+// 选项行语法：「选项｜解释」（半角 | 也认）。解释显示在答题页选项下方——
+// 答题的过程就是建概念，选项即术语卡。答案只存选项本身，解释可随时改。
+function parseOptionLines(optionsText) {
+  const options = [];
+  const optionNotes = [];
+  optionsText.split('\n').forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const splitIndex = trimmed.search(/[｜|]/);
+    if (splitIndex === -1) {
+      options.push(trimmed);
+      optionNotes.push('');
+    } else {
+      options.push(trimmed.slice(0, splitIndex).trim());
+      optionNotes.push(trimmed.slice(splitIndex + 1).trim());
+    }
+  });
+  return { options, optionNotes };
+}
+
+function formatOptionLines(question) {
+  const notes = question.option_notes || [];
+  return (question.options || [])
+    .map((option, index) => (notes[index] ? `${option}｜${notes[index]}` : option))
+    .join('\n');
+}
+
 Page({
   behaviors: [load, dirty],
 
@@ -39,7 +66,7 @@ Page({
         note: (question && question.note) || '',
         type: question ? question.type : 'single',
         required: question ? !!question.required : false,
-        optionsText: question ? (question.options || []).join('\n') : '',
+        optionsText: question ? formatOptionLines(question) : '',
       });
     });
   },
@@ -64,16 +91,22 @@ Page({
     if (submitting) return;
     if (!text.trim()) return wx.showToast({ title: '先填题目', icon: 'none' });
 
-    const options = optionsText.split('\n').map((line) => line.trim()).filter(Boolean);
+    const { options, optionNotes } = parseOptionLines(optionsText);
     if (type !== 'text' && options.length < 2) return wx.showToast({ title: '至少两个选项，一行一个', icon: 'none' });
 
     const next = modules.map((module) => ({ ...module, questions: [...module.questions] }));
     const question = { text: text.trim(), note: note.trim(), type, required };
-    if (type !== 'text') question.options = options;
+    if (type !== 'text') {
+      question.options = options;
+      question.option_notes = optionNotes;
+    }
     if (qi >= 0) {
       // 保留原 key：答案按它存储，改题面不换 key
       next[mi].questions[qi] = { ...next[mi].questions[qi], ...question };
-      if (type === 'text') delete next[mi].questions[qi].options; // 选择题改填空：不留下过时选项
+      if (type === 'text') {
+        delete next[mi].questions[qi].options; // 选择题改填空：不留下过时选项
+        delete next[mi].questions[qi].option_notes;
+      }
     } else {
       next[mi].questions.push(question); // key 由服务端生成
     }

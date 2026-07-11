@@ -132,6 +132,12 @@ Component({
       }
     },
 
+    // 业主侧 AI 答疑：带事项上下文的多轮对话页
+    goAskAi() {
+      const { matter } = this.data;
+      wx.navigateTo({ url: `/pages/ai-chat/index?id=${matter.id}&title=${encodeURIComponent(matter.title)}` });
+    },
+
     // ---- 以下仅发起人可见的操作 ----
 
     goEdit() {

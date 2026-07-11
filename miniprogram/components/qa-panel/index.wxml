@@ -1,0 +1,33 @@
+<view class="card" wx:if="{{loaded && (questions.length || canAsk)}}">
+  <view class="kicker">大家都在问{{questions.length ? '（' + questions.length + '）' : ''}} · 回答由负责方公示</view>
+
+  <view class="qa" wx:for="{{questions}}" wx:key="id">
+    <view class="qa-q-row">
+      <view class="qa-q">{{item.content}}</view>
+      <!-- 同问：聚合热度，替代重复提问；自己的问题不显示按钮 -->
+      <view
+        wx:if="{{!item.is_mine}}"
+        class="qa-echo {{item.echoed_by_me ? 'qa-echo-on' : ''}}"
+        data-id="{{item.id}}"
+        bind:tap="echo"
+      >同问{{item.echo_count ? ' ' + item.echo_count : ''}}</view>
+      <view wx:else class="qa-echo qa-echo-mine">{{item.echo_count ? item.echo_count + ' 人同问' : '我问的'}}</view>
+    </view>
+    <view class="qa-asker">{{item.asker}} 提问</view>
+
+    <view wx:if="{{item.answer}}" class="qa-a">
+      <view class="qa-a-text">{{item.answer}}</view>
+      <view class="qa-a-sign">{{item.answered_by}} 答 · {{item.answered_on}}</view>
+    </view>
+    <view wx:else class="qa-pending">等负责方回答</view>
+
+    <view class="qa-ops" wx:if="{{canAnswer || (canPromote && item.answer)}}">
+      <text wx:if="{{canAnswer}}" class="qa-op" data-id="{{item.id}}" data-answered="{{!!item.answer}}" bind:tap="answer">{{item.answer ? '修改回答' : '回答'}}</text>
+      <text wx:if="{{canPromote && item.answer}}" class="qa-op" data-id="{{item.id}}" bind:tap="promote">沉淀为买前必懂</text>
+    </view>
+  </view>
+
+  <t-button wx:if="{{canAsk}}" theme="light" size="medium" block class="qa-ask-btn" bind:tap="ask">
+    我要提问（AI 答不准的商家承诺，在这里问最稳）
+  </t-button>
+</view>

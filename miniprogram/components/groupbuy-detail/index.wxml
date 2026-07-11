@@ -19,8 +19,15 @@
 
 <view class="card" wx:if="{{matter.pitch}}">
   <view class="kicker">发起人的话</view>
-  <view class="pitch">“{{matter.pitch}}”</view>
+  <view class="pitch">“<text wx:for="{{pitchSegments}}" wx:for-item="seg" wx:key="index" class="{{seg.term ? 'term-hit' : ''}}" data-term="{{seg.term}}" bind:tap="showGlossary">{{seg.text}}</text>”</view>
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人' : '本团发起人'}}</view>
+</view>
+
+<!-- 配套摸底问卷：答几道选择题就能建立概念，聚合结果给团长当谈判依据 -->
+<view class="card census-attach" wx:if="{{matter.attached_census}}" hover-class="frow-hover" bind:tap="goAttachedCensus">
+  <view class="kicker">配套摸底 · {{matter.attached_census.state === 'open' ? '顺手答几题' : '已结束'}}</view>
+  <view class="census-attach-title">{{matter.attached_census.title}}</view>
+  <view class="census-attach-sub">{{matter.attached_census.register_count ? matter.attached_census.register_count + ' 位邻居已参与 · ' : ''}}{{matter.attached_census.state === 'open' ? '答完看全小区匿名结果，也帮团长摸清大家的需求去谈判' : '看看邻居们怎么选的'}} ›</view>
 </view>
 
 <view class="card" wx:if="{{matter.glossary.length}}">
@@ -28,22 +35,43 @@
   <view class="gl" wx:for="{{matter.glossary}}" wx:key="term">
     <view class="gl-term">{{item.term}}</view>
     <view class="gl-explain">{{item.explain}}</view>
+    <view class="gl-line" wx:if="{{item.judge}}">
+      <text class="gl-tag">怎么选</text>
+      <text class="gl-line-text">{{item.judge}}</text>
+    </view>
+    <view class="gl-line gl-line-caution" wx:if="{{item.caution}}">
+      <text class="gl-tag gl-tag-caution">避坑</text>
+      <text class="gl-line-text">{{item.caution}}</text>
+    </view>
   </view>
 </view>
 
-<view class="card" wx:if="{{matter.terms.length}}">
+<!-- 业主侧 AI 答疑：带着本团购的条款/买前必懂/小区硬条件，支持追问 -->
+<view class="card ask-ai" hover-class="frow-hover" bind:tap="goAskAi">
+  <view class="ask-ai-main">
+    <view class="ask-ai-title">看不懂的地方，问问 AI</view>
+    <view class="ask-ai-sub">它了解这个团购的条款和小区情况，可以连续追问</view>
+  </view>
+  <text class="frow-arrow">›</text>
+</view>
+
+<view class="card" wx:if="{{termRows.length}}">
   <view class="kicker">团购条件</view>
-  <view class="term-row" wx:for="{{matter.terms}}" wx:key="label">
+  <view class="term-row" wx:for="{{termRows}}" wx:key="label">
     <text class="term-label">{{item.label}}</text>
-    <text class="term-value">{{item.value}}</text>
+    <view class="term-value">
+      <text wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index" class="{{seg.term ? 'term-hit' : ''}}" data-term="{{seg.term}}" bind:tap="showGlossary">{{seg.text}}</text>
+    </view>
   </view>
 </view>
 
-<view class="card deal-card" wx:if="{{matter.final_terms.length}}">
+<view class="card deal-card" wx:if="{{finalRows.length}}">
   <view class="kicker">成交公示 · 最终条件</view>
-  <view class="term-row" wx:for="{{matter.final_terms}}" wx:key="label">
+  <view class="term-row" wx:for="{{finalRows}}" wx:key="label">
     <text class="term-label">{{item.label}}</text>
-    <text class="term-value">{{item.value}}</text>
+    <view class="term-value">
+      <text wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index" class="{{seg.term ? 'term-hit' : ''}}" data-term="{{seg.term}}" bind:tap="showGlossary">{{seg.text}}</text>
+    </view>
   </view>
   <view class="deal-note" wx:if="{{matter.final_note}}">{{matter.final_note}}</view>
 </view>
@@ -184,3 +212,21 @@
   <view class="party-note">你正以「{{partyLabel}}」身份浏览，接龙名单仅向业主开放</view>
   <t-button theme="light" block size="large" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
 </view>
+
+<!-- 就地解释弹层：点中文案里的术语时弹出对应的「买前必懂」决策卡 -->
+<t-popup visible="{{!!activeTerm}}" placement="bottom" bind:visible-change="onTermPopupChange">
+  <view class="term-pop" wx:if="{{activeTerm}}">
+    <view class="term-pop-title">{{activeTerm.term}}</view>
+    <view class="gl-explain">{{activeTerm.explain}}</view>
+    <view class="gl-line" wx:if="{{activeTerm.judge}}">
+      <text class="gl-tag">怎么选</text>
+      <text class="gl-line-text">{{activeTerm.judge}}</text>
+    </view>
+    <view class="gl-line" wx:if="{{activeTerm.caution}}">
+      <text class="gl-tag gl-tag-caution">避坑</text>
+      <text class="gl-line-text">{{activeTerm.caution}}</text>
+    </view>
+    <view class="term-pop-source">来自本团购的「买前必懂」，由发起人整理</view>
+    <t-button theme="light" size="medium" block class="term-pop-ask" bind:tap="goAskAi">还有疑问？问问 AI（它了解这个团购）</t-button>
+  </view>
+</t-popup>

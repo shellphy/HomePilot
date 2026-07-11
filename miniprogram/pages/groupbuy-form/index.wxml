@@ -65,13 +65,16 @@
     </view>
 
     <view class="card">
-      <view class="q-title">买前必懂<text class="q-note">大白话解释术语，3~5 条</text></view>
+      <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，3~5 条</text></view>
       <view class="pair pair-col" wx:for="{{glossary}}" wx:key="index">
         <view class="pair-head">
-          <input class="fin pair-a" placeholder="术语，如 断桥铝" value="{{item.term}}" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
+          <input class="fin pair-a" placeholder="术语，如 1 拖 5、双转子压缩机" value="{{item.term}}" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
+          <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 起草</view>
           <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
         </view>
-        <textarea class="fin farea" auto-height placeholder="大白话解释 + 对决策的影响" value="{{item.explain}}" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" maxlength="300" />
+        <textarea class="fin farea" auto-height placeholder="是什么（必填）：一句大白话，如「一台外机带 5 个室内机」" value="{{item.explain}}" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" maxlength="300" />
+        <textarea class="fin farea" auto-height placeholder="怎么选（选填）：换算到自家，如「三房两厅通常 1 拖 4 就够，多一个内机外机功率也要跟上」" value="{{item.judge}}" data-list="glossary" data-index="{{index}}" data-field="judge" bind:input="onRowInput" maxlength="300" />
+        <textarea class="fin farea" auto-height placeholder="避坑/怎么问（选填）：如「问清压缩机具体型号，答不上来的要警惕」" value="{{item.caution}}" data-list="glossary" data-index="{{index}}" data-field="caution" bind:input="onRowInput" maxlength="300" />
       </view>
       <view class="add-row" data-list="glossary" bind:tap="addRow">＋ 添加一条</view>
     </view>

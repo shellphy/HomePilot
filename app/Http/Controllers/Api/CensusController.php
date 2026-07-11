@@ -37,6 +37,16 @@ class CensusController extends Controller
             'answers' => $stance?->payload['answers'] ?? (object) [],
             'registered_count' => $matter->stances()->where('mode', Stance::MODE_REGISTER)->count(),
             'aggregates' => $this->aggregates($matter),
+            // 配套征集的回链：从问卷页能跳回它服务的那个团购
+            'related_matter' => $matter->relatedMatter?->is_approved ? [
+                'id' => $matter->relatedMatter->id,
+                'title' => $matter->relatedMatter->title,
+            ] : null,
+            // 署名发起（物业/业委会/商家的调研）：亮明身份是开放发起权的前提
+            'initiator_party' => $matter->initiatorParty ? [
+                'label' => $matter->initiatorParty->typeLabel(),
+                'name' => $matter->initiatorParty->name,
+            ] : null,
         ]);
     }
 

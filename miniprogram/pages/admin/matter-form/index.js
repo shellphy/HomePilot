@@ -2,6 +2,7 @@
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
+const { draftGlossaryRow } = require('../../../utils/glossary-draft');
 
 Page({
   behaviors: [load, dirty],
@@ -25,6 +26,12 @@ Page({
     terms: [],
     glossary: [],
     moduleCount: 0,
+    // 配套问卷（仅征集）：挂到哪个团购上
+    relatedMatterId: null,
+    relatedMatterTitle: '',
+    // 署名发起方（仅征集）：物业/业委会/商家的调研亮明身份
+    initiatorPartyId: null,
+    initiatorPartyLabel: '',
     submitting: false,
   },
 
@@ -61,8 +68,96 @@ Page({
         terms: payload.terms || [],
         glossary: payload.glossary || [],
         moduleCount: (payload.modules || []).length,
+        relatedMatterId: matter.related_matter_id || null,
+        initiatorPartyId: matter.initiator_party_id || null,
       });
       wx.setNavigationBarTitle({ title: `编辑${matter.type_label}` });
+      if (matter.type === 'census' && matter.related_matter_id) {
+        await this.resolveRelatedTitle(matter.related_matter_id);
+      }
+      if (matter.type === 'census' && matter.initiator_party_id) {
+        await this.resolveInitiatorPartyLabel(matter.initiator_party_id);
+      }
+    });
+  },
+
+  async resolveInitiatorPartyLabel(partyId) {
+    const parties = await this.loadParties();
+    const hit = parties.find((row) => row.id === partyId);
+    this.setData({ initiatorPartyLabel: hit ? `${hit.type_label} · ${hit.name}` : `相关方 #${partyId}` });
+  },
+
+  async loadParties() {
+    if (!this._parties) {
+      const res = await admin.listParties();
+      // 署名的常客是治理方（物业/业委会/开发商），排前面；商家随后
+      this._parties = [...res.data].sort((a, b) => (a.type === 'merchant') - (b.type === 'merchant'));
+    }
+    return this._parties;
+  },
+
+  // 署名发起方：action-sheet 单选（小区官方 + 最多 5 个相关方）
+  async chooseInitiatorParty() {
+    let parties;
+    try {
+      parties = (await this.loadParties()).slice(0, 5);
+    } catch (error) {
+      return wx.showToast({ title: error.message, icon: 'none' });
+    }
+    if (!parties.length) {
+      return wx.showToast({ title: '还没有相关方可署名', icon: 'none' });
+    }
+    wx.showActionSheet({
+      itemList: ['小区官方（不署名）', ...parties.map((row) => `${row.type_label} · ${row.name}`)],
+      success: ({ tapIndex }) => {
+        this.markDirty();
+        if (tapIndex === 0) {
+          this.setData({ initiatorPartyId: null, initiatorPartyLabel: '' });
+        } else {
+          const hit = parties[tapIndex - 1];
+          this.setData({ initiatorPartyId: hit.id, initiatorPartyLabel: `${hit.type_label} · ${hit.name}` });
+        }
+      },
+    });
+  },
+
+  // 已挂靠团购的标题回显（列表里找不到时退化为编号）
+  async resolveRelatedTitle(relatedId) {
+    const groupbuys = await this.loadGroupbuys();
+    const hit = groupbuys.find((row) => row.id === relatedId);
+    this.setData({ relatedMatterTitle: hit ? hit.title : `事项 #${relatedId}` });
+  },
+
+  async loadGroupbuys() {
+    if (!this._groupbuys) {
+      const res = await admin.listMatters();
+      this._groupbuys = res.data.filter((row) => row.type === 'groupbuy');
+    }
+    return this._groupbuys;
+  },
+
+  // 挂到团购：action-sheet 单选（最多列最近 5 个团购 + 不挂靠）
+  async chooseRelatedMatter() {
+    let groupbuys;
+    try {
+      groupbuys = (await this.loadGroupbuys()).slice(0, 5);
+    } catch (error) {
+      return wx.showToast({ title: error.message, icon: 'none' });
+    }
+    if (!groupbuys.length) {
+      return wx.showToast({ title: '还没有团购可挂靠', icon: 'none' });
+    }
+    wx.showActionSheet({
+      itemList: ['不挂靠', ...groupbuys.map((row) => row.title)],
+      success: ({ tapIndex }) => {
+        this.markDirty();
+        if (tapIndex === 0) {
+          this.setData({ relatedMatterId: null, relatedMatterTitle: '' });
+        } else {
+          const hit = groupbuys[tapIndex - 1];
+          this.setData({ relatedMatterId: hit.id, relatedMatterTitle: hit.title });
+        }
+      },
     });
   },
 
@@ -91,7 +186,7 @@ Page({
   addRow(event) {
     this.markDirty();
     const { list } = event.currentTarget.dataset;
-    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '' };
+    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '', judge: '', caution: '' };
     this.setData({ [list]: [...this.data[list], blank] });
   },
 
@@ -107,6 +202,10 @@ Page({
     this.markDirty();
     const { list, index, field } = event.currentTarget.dataset;
     this.setData({ [`${list}[${index}].${field}`]: event.detail.value });
+  },
+
+  aiDraft(event) {
+    draftGlossaryRow(this, event.currentTarget.dataset.index);
   },
 
   goSchema() {
@@ -142,6 +241,8 @@ Page({
       is_approved: data.isApproved,
       ...(data.state ? { state: data.state } : {}),
       ...(data.targetCount ? { target_count: Number(data.targetCount) } : { target_count: 0 }),
+      // 显式传 null 表示解除挂靠/去署名（后端按键是否存在区分）
+      ...(data.type === 'census' ? { related_matter_id: data.relatedMatterId, initiator_party_id: data.initiatorPartyId } : {}),
       payload,
     };
 
