@@ -5,7 +5,7 @@ namespace App\Matters;
 use App\Models\Matter;
 
 /**
- * 集体采购（装修团购）：第一个事项类型，也是产品的引擎。
+ * 集体采购（装修团购）。
  */
 class GroupbuyType extends MatterType
 {
