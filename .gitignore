@@ -6,13 +6,36 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+/.fleet
+/.nova
+/.zed
+.phpactor.json
 
-# 依赖（各子项目自身的 .gitignore 为准，这里兜底）
+# 依赖
 node_modules/
+/vendor
+
+# Laravel
+/.phpunit.cache
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+/auth.json
 
 # 日志与临时文件
 *.log
 *.tmp
+npm-debug.log
+yarn-error.log
 
 # 微信开发者工具的个人本地配置（每台机器不同，不入库）
 project.private.config.json
