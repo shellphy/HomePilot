@@ -1,7 +1,4 @@
 .list-card {
-  margin-top: 8rpx;
-}
-.filter-chips {
   margin-top: 24rpx;
 }
 .filter-chips + .filter-chips {
@@ -17,6 +14,9 @@
 }
 .row:last-child {
   border-bottom: none;
+}
+.row-hover {
+  opacity: 0.55;
 }
 .row-main {
   flex: 1;

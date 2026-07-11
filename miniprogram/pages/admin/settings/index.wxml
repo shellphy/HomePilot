@@ -1,30 +1,38 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <block wx:for="{{groups}}" wx:for-item="group" wx:key="title">
       <view class="kicker">{{group.title}}</view>
-      <view class="card">
+      <view class="card form-list">
         <block wx:for="{{group.fields}}" wx:for-item="field" wx:key="key">
-          <view class="q-title">{{field.label}}</view>
-          <input
-            wx:if="{{field.kind === 'input' || field.kind === 'number'}}"
-            class="fin"
-            type="{{field.kind === 'number' ? 'number' : 'text'}}"
-            value="{{values[field.key]}}"
-            data-key="{{field.key}}"
-            bind:input="onInput"
-          />
-          <textarea
-            wx:else
-            class="fin farea"
-            auto-height
-            value="{{values[field.key]}}"
-            data-key="{{field.key}}"
-            bind:input="onInput"
-          />
+          <!-- 短字段：行式，标签左值右 -->
+          <view wx:if="{{field.kind === 'input' || field.kind === 'number'}}" class="frow">
+            <text class="frow-label">{{field.label}}</text>
+            <input
+              class="frow-input"
+              type="{{field.kind === 'number' ? 'number' : 'text'}}"
+              value="{{values[field.key]}}"
+              data-key="{{field.key}}"
+              bind:input="onInput"
+            />
+          </view>
+          <!-- 长文本 / 清单：整块，清单按行拆分所以要提示填法 -->
+          <view wx:else class="fblock">
+            <view class="q-title">{{field.label}}<text wx:if="{{field.kind === 'list'}}" class="q-note">每行一条</text></view>
+            <textarea
+              class="fin farea"
+              auto-height
+              placeholder="{{field.kind === 'list' ? '每行一条' : ''}}"
+              value="{{values[field.key]}}"
+              data-key="{{field.key}}"
+              bind:input="onInput"
+            />
+          </view>
         </block>
       </view>
     </block>
 
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存</t-button>
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存</t-button>
+    </view>
   </page-status>
 </view>
