@@ -29,15 +29,19 @@
           <text><text class="fcard-num">{{item.registered}}</text> 人已登记</text>
           <text class="fcard-cta">看完整数据 ›</text>
         </view>
-        <!-- 原生 view 截断冒泡（virtualHost 组件上的 catch 不可靠）；
+        <!-- tap 必须绑在 t-button 本身：TDesign 内部原生 button 用 catch:tap 截断后
+             以 triggerEvent 重发（不冒泡），绑在外层 view 上收不到；
+             重发的 tap 也不会冒泡到卡片，因此不会误触 goDetail。
              宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
              外部 class 在 virtualHost 渲染下不一定作用到按钮盒子 -->
-        <view class="fcard-btn" data-id="{{item.id}}" catch:tap="goCensusForm">
+        <view class="fcard-btn">
           <t-button
             theme="primary"
             block
             size="large"
             style="width: 100%"
+            data-id="{{item.id}}"
+            bind:tap="goCensusForm"
           >{{item.myAnswered ? '更新我的登记（已答 ' + item.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
         </view>
       </view>
