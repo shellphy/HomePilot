@@ -47,7 +47,7 @@
         </picker>
         <view class="frow">
           <text class="frow-label">房号</text>
-          <input class="frow-input" value="{{roomLabel}}" placeholder="选填，仅管理员可见" data-field="roomLabel" bind:input="onInput" />
+          <input class="frow-input" value="{{roomLabel}}" placeholder="仅管理员可见" data-field="roomLabel" bind:input="onInput" />
         </view>
       </block>
 
@@ -55,11 +55,11 @@
       <block wx:else>
         <view class="frow">
           <text class="frow-label">名称<text class="f-required">*</text></text>
-          <input class="frow-input" value="{{partyName}}" placeholder="必填" data-field="partyName" bind:input="onInput" />
+          <input class="frow-input" value="{{partyName}}" placeholder="请填写" data-field="partyName" bind:input="onInput" />
         </view>
         <view class="frow">
           <text class="frow-label">主营</text>
-          <input class="frow-input" value="{{partyCategory}}" placeholder="选填" data-field="partyCategory" bind:input="onInput" />
+          <input class="frow-input" value="{{partyCategory}}" data-field="partyCategory" bind:input="onInput" />
         </view>
       </block>
     </view>

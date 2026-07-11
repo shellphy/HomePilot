@@ -3,7 +3,7 @@
     <!-- 基本信息：短字段统一行式（标签左、值右） -->
     <view class="card form-list">
       <view class="frow">
-        <text class="frow-label">标题</text>
+        <text class="frow-label">标题<text class="f-required">*</text></text>
         <input class="frow-input" placeholder="一句话说清这件事" value="{{title}}" data-field="title" bind:input="onInput" />
       </view>
 

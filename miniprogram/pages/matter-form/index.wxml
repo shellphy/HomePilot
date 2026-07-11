@@ -3,7 +3,7 @@
     <!-- 短字段统一行式（标签左、值右），与管理端表单同一套格式 -->
     <view class="card form-list">
       <view class="frow">
-        <text class="frow-label">标题</text>
+        <text class="frow-label">标题<text class="f-required">*</text></text>
         <input class="frow-input" placeholder="{{copy.titlePlaceholder}}" value="{{title}}" data-field="title" bind:input="onInput" />
       </view>
       <view class="frow">
@@ -13,7 +13,7 @@
     </view>
 
     <view class="card">
-      <view class="q-title">把事情说清楚</view>
+      <view class="q-title">把事情说清楚<text class="f-required">*</text></view>
       <textarea class="fin farea" auto-height placeholder="{{copy.pitchPlaceholder}}" value="{{pitch}}" data-field="pitch" bind:input="onInput" maxlength="1000" />
     </view>
 
