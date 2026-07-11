@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Events\MatterApproved;
+use App\Events\MatterRejected;
 use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
@@ -92,8 +93,9 @@ class MatterAdminController extends Controller
         ]);
 
         if ($matter->state !== $previousState) {
-            $matter->recordActivity($this->resident($request));
-            MatterStateChanged::dispatch($matter, $previousState);
+            $admin = $this->resident($request);
+            $matter->recordActivity($admin);
+            MatterStateChanged::dispatch($matter, $previousState, $admin);
         }
 
         return response()->json(['data' => $this->present($matter)]);
@@ -125,6 +127,11 @@ class MatterAdminController extends Controller
 
         if ($matter->is_approved && ! $wasApproved) {
             MatterApproved::dispatch($matter);
+        }
+
+        // 每次驳回都通知（理由可能更新），与上面红点的口径一致
+        if (! $matter->is_approved) {
+            MatterRejected::dispatch($matter);
         }
 
         return response()->json(['data' => $this->present($matter)]);

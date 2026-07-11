@@ -68,6 +68,41 @@ class WeChat
     }
 
     /**
+     * 下发订阅消息（「活动状态提醒」模板）。微信的规则是一次授权一次下发：
+     * 额度不足、用户拒收、模板未配置等一律静默返回 false——通知是锦上添花，
+     * 失败不打扰主流程，站内红点兜底。
+     *
+     * @param  array<string, array{value: string}>  $data
+     */
+    public function sendSubscribeMessage(string $openid, string $page, array $data): bool
+    {
+        $templateId = config('services.wechat.subscribe_template_id');
+
+        if (blank($templateId) || blank($openid)) {
+            return false;
+        }
+
+        try {
+            $response = Http::timeout(5)
+                ->connectTimeout(3)
+                ->retry([100, 500], throw: false)
+                ->post(
+                    'https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token='.$this->accessToken(),
+                    [
+                        'touser' => $openid,
+                        'template_id' => $templateId,
+                        'page' => $page,
+                        'data' => $data,
+                    ],
+                );
+        } catch (ConnectionException|ValidationException) {
+            return false;
+        }
+
+        return $response->successful() && (int) $response->json('errcode') === 0;
+    }
+
+    /**
      * 服务端接口调用凭证（stable_token，普通模式下重复获取返回同一个 token）。
      *
      * @throws ValidationException

@@ -3,6 +3,7 @@
 const matters = require('../../utils/api/matters');
 const { pillClass, joinPercent, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { requestSubscribe } = require('../../utils/subscribe');
 
 Component({
   options: {
@@ -143,6 +144,7 @@ Component({
           if (!confirm) return;
           this.setData({ submitting: true });
           try {
+            await requestSubscribe();
             // 沿用我登记时的共享意愿，确认动作不悄悄改变隐私选择
             await matters.join(this.data.matter.id, this.properties.myShareContact);
             wx.showToast({ title: '已确认参团', icon: 'success' });
@@ -163,6 +165,8 @@ Component({
     async doJoin(shareContact) {
       this.setData({ submitting: true });
       try {
+        // 报名的这一下顺手收一次订阅授权：之后谈判/成团/公示的动静才有额度可推
+        await requestSubscribe();
         await matters.join(this.data.matter.id, shareContact);
         wx.showModal({
           title: this.data.intentPhase ? '已登记' : '已确认参团',
@@ -237,6 +241,7 @@ Component({
 
       this.setData({ submittingReview: true });
       try {
+        await requestSubscribe();
         await matters.review(this.data.matter.id, reviewRating, reviewContent.trim());
         wx.showToast({ title: '评价已发布', icon: 'success' });
         this.refresh();

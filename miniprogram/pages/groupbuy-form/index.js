@@ -4,6 +4,7 @@ const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { requestSubscribe } = require('../../utils/subscribe');
 
 Page({
   behaviors: [load, dirty],
@@ -127,6 +128,8 @@ Page({
 
     this.setData({ submitting: true });
     try {
+      // 提交的这一下顺手收一次订阅授权：审核结果/新报名的通知才有额度可推
+      await requestSubscribe();
       if (id) {
         await matters.updateGroupbuy(id, { ...payload, state });
         this.clearDirty();
