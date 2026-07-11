@@ -28,6 +28,12 @@ Page({
     });
     if (matterTitle) wx.setNavigationBarTitle({ title: `AI · ${matterTitle}` });
     this.scrollToBottom();
+
+    // 快捷提问入口带来的问题：填入即发，业主不用打一个字
+    if (query.q) {
+      this.setData({ input: decodeURIComponent(query.q) });
+      this.send();
+    }
   },
 
   cacheKey(matterId) {

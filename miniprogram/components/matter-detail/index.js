@@ -45,6 +45,7 @@ Component({
       const stateIndex = states.findIndex((state) => state.value === matter.state);
       const nextState = stateIndex >= 0 ? states[stateIndex + 1] || null : null;
       this.setData({
+        quickQuestions: ['这个活动的安排帮我讲讲？', '参加前要准备什么？'],
         pillClass: pillClass(matter.state),
         meta: TYPE_META[matter.type] || { joinCta: '参与', joinedCta: '取消参与', foot: '人已参与', roster: '参与名单' },
         nextState,
@@ -195,12 +196,6 @@ Component({
       } finally {
         this.setData({ submittingReview: false });
       }
-    },
-
-    // 业主侧 AI 答疑：带事项上下文的多轮对话页
-    goAskAi() {
-      const { matter } = this.data;
-      wx.navigateTo({ url: `/pages/ai-chat/index?id=${matter.id}&title=${encodeURIComponent(matter.title)}` });
     },
 
     // ---- 以下仅发起人可见的操作 ----

@@ -46,15 +46,6 @@
   </view>
 </view>
 
-<!-- 业主侧 AI 答疑：带着本团购的条款/买前必懂/小区硬条件，支持追问 -->
-<view class="card ask-ai" hover-class="frow-hover" bind:tap="goAskAi">
-  <view class="ask-ai-main">
-    <view class="ask-ai-title">看不懂的地方，问问 AI</view>
-    <view class="ask-ai-sub">它了解这个团购的条款和小区情况，可以连续追问</view>
-  </view>
-  <text class="frow-arrow">›</text>
-</view>
-
 <view class="card" wx:if="{{termRows.length}}">
   <view class="kicker">团购条件</view>
   <view class="term-row" wx:for="{{termRows}}" wx:key="label">
@@ -64,6 +55,9 @@
     </view>
   </view>
 </view>
+
+<!-- AI 快捷提问：点预设问题直接把问题连同本团购的上下文提交给 AI -->
+<ai-quick-ask wx:if="{{matter.is_approved}}" matter-id="{{matter.id}}" matter-title="{{matter.title}}" questions="{{quickQuestions}}" />
 
 <view class="card deal-card" wx:if="{{finalRows.length}}">
   <view class="kicker">成交公示 · 最终条件</view>
@@ -162,7 +156,6 @@
       <textarea
         class="fin review-input"
         auto-height
-        placeholder="一句话真实感受：价格、手艺、售后…（后来装修的邻居就靠它了）"
         value="{{reviewContent}}"
         bind:input="onReviewInput"
         maxlength="500"
@@ -231,6 +224,6 @@
       <text class="gl-line-text">{{activeTerm.caution}}</text>
     </view>
     <view class="term-pop-source">来自本团购的「买前必懂」，由发起人整理</view>
-    <t-button theme="light" size="medium" block class="term-pop-ask" bind:tap="goAskAi">还有疑问？问问 AI（它了解这个团购）</t-button>
+    <t-button theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi">问 AI：我家该怎么选</t-button>
   </view>
 </t-popup>

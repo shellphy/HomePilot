@@ -22,12 +22,33 @@
     <view wx:else class="qa-pending">等负责方回答</view>
 
     <view class="qa-ops" wx:if="{{canAnswer || (canPromote && item.answer)}}">
-      <text wx:if="{{canAnswer}}" class="qa-op" data-id="{{item.id}}" data-answered="{{!!item.answer}}" bind:tap="answer">{{item.answer ? '修改回答' : '回答'}}</text>
+      <text wx:if="{{canAnswer}}" class="qa-op" data-id="{{item.id}}" bind:tap="answer">{{item.answer ? '修改回答' : '回答'}}</text>
       <text wx:if="{{canPromote && item.answer}}" class="qa-op" data-id="{{item.id}}" bind:tap="promote">沉淀为买前必懂</text>
     </view>
   </view>
 
-  <t-button wx:if="{{canAsk}}" theme="light" size="medium" block class="qa-ask-btn" bind:tap="ask">
-    我要提问（AI 答不准的商家承诺，在这里问最稳）
-  </t-button>
+  <t-button wx:if="{{canAsk}}" theme="light" size="medium" block style="width: 100%" class="qa-ask-btn" bind:tap="ask">我要提问</t-button>
 </view>
+
+<!-- 提问/回答的输入弹层：大输入区，问题和回答都会公示 -->
+<t-popup visible="{{editorVisible}}" placement="bottom" bind:visible-change="onEditorVisible">
+  <view class="qa-editor">
+    <view class="qa-editor-title">{{editorMode === 'ask' ? '向负责方提问' : '公开回答'}}</view>
+    <view class="qa-editor-note">{{editorMode === 'ask' ? '问题和回答都会公示，也帮到后面的邻居' : '回答对全小区可见'}}</view>
+    <textarea
+      class="qa-editor-input"
+      auto-height
+      maxlength="{{editorMode === 'ask' ? 300 : 1000}}"
+      value="{{editorText}}"
+      bind:input="onEditorInput"
+    />
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      style="width: 100%"
+      loading="{{editorSubmitting}}"
+      bind:tap="submitEditor"
+    >{{editorMode === 'ask' ? '提问' : '发布回答'}}</t-button>
+  </view>
+</t-popup>

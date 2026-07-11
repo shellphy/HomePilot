@@ -1,7 +1,7 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="card search-card">
-      <input class="fin" placeholder="搜昵称 / 楼栋 / 手机号" value="{{keyword}}" bind:input="onSearch" />
+      <input class="fin" value="{{keyword}}" bind:input="onSearch" />
     </view>
     <view class="card">
       <!-- 总量概览：团长最常问的「到底登记了多少人」放在最显眼处 -->

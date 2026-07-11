@@ -62,7 +62,12 @@ Component({
         headNoun = '报名过';
       }
       const glossaryTerms = (matter.glossary || []).map((entry) => entry.term);
+      // AI 快捷提问的预设：贴着「刚看完条款在犹豫」的那一刻出
+      const quickQuestions = matter.needs_survey
+        ? ['我家的情况该怎么选配置？', '商家来沟通时该问什么？', '现在登记还是再等等？']
+        : ['条款里哪条最影响总价？', '我家的情况适合参加吗？', '现在参加还是再等等？'];
       this.setData({
+        quickQuestions,
         pillClass: pillClass(matter.state),
         percent: joinPercent(matter),
         pitchSegments: splitByTerms(matter.pitch, glossaryTerms),
@@ -214,11 +219,15 @@ Component({
       }
     },
 
-    // 业主侧 AI 答疑：带事项上下文的多轮对话页
-    goAskAi() {
-      const { matter } = this.data;
+    // 术语弹层里的追问：带着这个词自动向 AI 提问，业主不用打字
+    askTermAi() {
+      const { matter, activeTerm } = this.data;
+      if (!activeTerm) return;
+      const question = `「${activeTerm.term}」按我家的情况该怎么选？`;
       this.setData({ activeTerm: null });
-      wx.navigateTo({ url: `/pages/ai-chat/index?id=${matter.id}&title=${encodeURIComponent(matter.title)}` });
+      wx.navigateTo({
+        url: `/pages/ai-chat/index?id=${matter.id}&title=${encodeURIComponent(matter.title)}&q=${encodeURIComponent(question)}`,
+      });
     },
 
     // 配套摸底问卷入口：进入征集公示面（答题/看聚合结果都在那里）

@@ -12,9 +12,8 @@ return new class extends SettingsMigration
     {
         $this->migrator->add('community.name', '武汉招商天青府');
         $this->migrator->add('community.slogan', '咱们小区自己的公共空间');
-        $this->migrator->add('community.sub_slogan', '公益运营 · 不代收任何款项');
-        $this->migrator->add('community.initiator_note', '发起即成为本团团长，负责对接商家和更新进度。小程序不代收任何款项，签约与付款由业主直接对商家；商家给到的任何返点，须全部转为参团业主让利，并在成团后随成交公示摊开。');
-        $this->migrator->add('community.data_footnote', '收房、车位等主题的征集开始后，数据会出现在这里');
+        $this->migrator->add('community.sub_slogan', '业主公益运营');
+        $this->migrator->add('community.initiator_note', '发起即成为本团团长，负责对接商家和更新进度。签约与付款由业主直接对商家，商家给到的返点全部转为参团业主让利，随成交公示摊开。');
         $this->migrator->add('community.admin_contact', '业主群里@管理员，或到物业前台找管理员');
         // 小区硬条件（AI 答疑的背景知识）：外机位、层高这类只有本小区才知道的约束，
         // 消费方是 MatterExplainer（业主侧 AI 答疑）的上下文注入

@@ -22,7 +22,6 @@
             <textarea
               class="fin farea"
               auto-height
-              placeholder="{{field.kind === 'list' ? '每行一条' : ''}}"
               value="{{values[field.key]}}"
               data-key="{{field.key}}"
               bind:input="onInput"

@@ -18,8 +18,6 @@ class CommunitySettings extends Settings
 
     public string $initiator_note;
 
-    public string $data_footnote;
-
     /** 管理员联系方式（商家认证引导等处展示，给"请联系管理员"一个具体的落点）。 */
     public string $admin_contact;
 

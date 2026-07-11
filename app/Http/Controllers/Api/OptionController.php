@@ -22,7 +22,6 @@ class OptionController extends Controller
                 'slogan' => $settings->slogan,
                 'sub_slogan' => $settings->sub_slogan,
                 'initiator_note' => $settings->initiator_note,
-                'data_footnote' => $settings->data_footnote,
                 'admin_contact' => $settings->admin_contact,
             ],
             'buildings' => $settings->buildings,

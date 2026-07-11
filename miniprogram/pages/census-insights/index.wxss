@@ -117,9 +117,3 @@
   margin-top: 4rpx;
 }
 
-.map-foot {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--text-muted);
-  padding-top: 24rpx;
-}

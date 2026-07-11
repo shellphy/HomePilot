@@ -19,6 +19,12 @@ Component({
     canAnswer: false,
     canPromote: false,
     loaded: false,
+    // 提问/回答共用的底部输入弹层
+    editorVisible: false,
+    editorMode: 'ask', // ask | answer
+    editorId: null,
+    editorText: '',
+    editorSubmitting: false,
   },
 
   observers: {
@@ -45,25 +51,45 @@ Component({
     },
 
     ask() {
-      wx.showModal({
-        title: '向团长/商家提问',
-        editable: true,
-        placeholderText: '问题和回答都会公示，帮到后面的邻居',
-        confirmText: '提问',
-        cancelText: '再想想',
-        success: async ({ confirm, content }) => {
-          if (!confirm || !(content || '').trim()) return;
-          try {
-            await matters.askQuestion(this.data.matter.id, content.trim());
-            wx.showToast({ title: '已提问，等负责方回答', icon: 'none' });
-            this.fetchQuestions();
-          } catch (error) {
-            if (!guardProfileError(error, '提问会以「楼栋 + 昵称」公示，请先在个人资料里选好楼栋号。')) {
-              wx.showToast({ title: error.message, icon: 'none' });
-            }
-          }
-        },
-      });
+      this.setData({ editorVisible: true, editorMode: 'ask', editorId: null, editorText: '' });
+    },
+
+    answer(event) {
+      const { id } = event.currentTarget.dataset;
+      this.setData({ editorVisible: true, editorMode: 'answer', editorId: id, editorText: '' });
+    },
+
+    onEditorVisible(event) {
+      if (!event.detail.visible) this.setData({ editorVisible: false });
+    },
+
+    onEditorInput(event) {
+      this.setData({ editorText: event.detail.value });
+    },
+
+    async submitEditor() {
+      const { editorMode, editorId, editorText, editorSubmitting } = this.data;
+      const content = editorText.trim();
+      if (!content || editorSubmitting) return;
+
+      this.setData({ editorSubmitting: true });
+      try {
+        if (editorMode === 'ask') {
+          await matters.askQuestion(this.data.matter.id, content);
+          wx.showToast({ title: '已提问，等负责方回答', icon: 'none' });
+        } else {
+          await matters.answerQuestion(editorId, content);
+          wx.showToast({ title: '已回答', icon: 'success' });
+        }
+        this.setData({ editorVisible: false, editorText: '' });
+        this.fetchQuestions();
+      } catch (error) {
+        if (!guardProfileError(error, '提问会以「楼栋 + 昵称」公示，请先在个人资料里选好楼栋号。')) {
+          wx.showToast({ title: error.message, icon: 'none' });
+        }
+      } finally {
+        this.setData({ editorSubmitting: false });
+      }
     },
 
     async echo(event) {
@@ -76,34 +102,12 @@ Component({
       }
     },
 
-    answer(event) {
-      const { id, answered } = event.currentTarget.dataset;
-      wx.showModal({
-        title: answered ? '修改回答' : '回答这个问题',
-        editable: true,
-        placeholderText: '回答会公示；拿不准的写「以书面确认为准」',
-        confirmText: '发布回答',
-        cancelText: '再想想',
-        success: async ({ confirm, content }) => {
-          if (!confirm || !(content || '').trim()) return;
-          try {
-            await matters.answerQuestion(id, content.trim());
-            wx.showToast({ title: '已回答', icon: 'success' });
-            this.fetchQuestions();
-          } catch (error) {
-            wx.showToast({ title: error.message, icon: 'none' });
-          }
-        },
-      });
-    },
-
     // 沉淀：答过的问题变成「买前必懂」词条，后来的业主不用再问
     promote(event) {
       const { id } = event.currentTarget.dataset;
       wx.showModal({
-        title: '沉淀为「买前必懂」',
+        title: '给词条起个名',
         editable: true,
-        placeholderText: '给这条词条起个名，如：整机保修',
         confirmText: '沉淀',
         cancelText: '再想想',
         success: async ({ confirm, content }) => {

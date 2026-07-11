@@ -296,8 +296,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, #f6f6f3 75%, rgba(246, 246, 243, 0));
+  padding: 36rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #f6f6f3 72%, rgba(246, 246, 243, 0));
 }
 .cta-share {
   display: flex;

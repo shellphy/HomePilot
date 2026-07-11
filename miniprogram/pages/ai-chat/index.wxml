@@ -1,37 +1,35 @@
 <view class="chat-page">
   <scroll-view class="chat-body" scroll-y scroll-into-view="{{scrollTo}}" scroll-with-animation>
-    <!-- 开场说明：能答什么、不能答什么，一次讲清 -->
     <view class="chat-tip">
-      它了解{{matterTitle ? '「' + matterTitle + '」' : '这件事'}}的条款、买前必懂和小区硬条件，可以连续追问。回答只是解释概念，涉及商家的保修、售后、最终价格等承诺，请以商家书面确认为准。
-    </view>
-
-    <view wx:if="{{!messages.length}}" class="chat-empty">
-      比如问它：这个团购的条款里哪条最影响价格？我家三房该选什么配置？
+      <text>由 DeepSeek 大模型回答，仅供参考</text>
+      <text wx:if="{{messages.length}}" class="chat-clear" bind:tap="resetChat">清空对话</text>
     </view>
 
     <view wx:for="{{messages}}" wx:key="index" class="bubble-row {{item.role === 'user' ? 'bubble-row-me' : ''}}">
       <view class="bubble {{item.role === 'user' ? 'bubble-me' : 'bubble-ai'}}">{{item.text}}</view>
     </view>
 
-    <!-- 推理模型想得慢但想得深，等待文案把预期管理好 -->
     <view wx:if="{{sending}}" class="bubble-row">
-      <view class="bubble bubble-ai bubble-typing">正在认真想，推理模型可能要等上几十秒…</view>
+      <view class="bubble bubble-ai bubble-typing">正在想，可能要等上一会儿…</view>
     </view>
 
-    <view wx:if="{{remaining !== null && remaining <= 5}}" class="chat-quota">今天还可以问 {{remaining}} 次</view>
+    <view wx:if="{{remaining !== null && remaining <= 5}}" class="chat-quota">今天还能问 {{remaining}} 次</view>
     <view id="chat-bottom" class="chat-anchor"></view>
   </scroll-view>
 
   <view class="chat-input-bar">
-    <view class="chat-reset" wx:if="{{messages.length}}" bind:tap="resetChat">重新开始</view>
-    <input
+    <textarea
       class="chat-input"
-      placeholder="有什么不懂的，问它"
+      auto-height
+      maxlength="300"
       value="{{input}}"
       confirm-type="send"
       bind:input="onInput"
       bind:confirm="send"
     />
-    <t-button theme="primary" size="medium" loading="{{sending}}" bind:tap="send">发送</t-button>
+    <view class="chat-send {{input || sending ? '' : 'chat-send-off'}}" bind:tap="send">
+      <text wx:if="{{!sending}}">发送</text>
+      <text wx:else>…</text>
+    </view>
   </view>
 </view>

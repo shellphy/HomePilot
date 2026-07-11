@@ -17,14 +17,13 @@
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 牵头人' : '牵头人'}}</view>
 </view>
 
-<!-- 业主侧 AI 答疑（仅活动类开放）：带着这件事的说明与小区情况，支持追问 -->
-<view class="card ask-ai" wx:if="{{matter.type === 'activity' && matter.is_approved}}" hover-class="frow-hover" bind:tap="goAskAi">
-  <view class="ask-ai-main">
-    <view class="ask-ai-title">有不清楚的，问问 AI</view>
-    <view class="ask-ai-sub">它了解这个活动的说明和小区情况，可以连续追问</view>
-  </view>
-  <text class="frow-arrow">›</text>
-</view>
+<!-- AI 快捷提问（仅活动类开放）：点预设问题直接连同活动上下文提交 -->
+<ai-quick-ask
+  wx:if="{{matter.type === 'activity' && matter.is_approved}}"
+  matter-id="{{matter.id}}"
+  matter-title="{{matter.title}}"
+  questions="{{quickQuestions}}"
+/>
 
 <!-- 驳回是「需要你处理」的负面结果，用红系；排队等待保持橙色中性 -->
 <view class="card pending-tip {{matter.reject_reason ? 'pending-tip-reject' : ''}}" wx:if="{{!matter.is_approved}}">
@@ -125,7 +124,6 @@
       <textarea
         class="fin review-input"
         auto-height
-        placeholder="一句话真实感受，给后来的邻居留个参考"
         value="{{reviewContent}}"
         bind:input="onReviewInput"
         maxlength="500"

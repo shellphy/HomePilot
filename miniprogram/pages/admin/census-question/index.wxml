@@ -4,10 +4,10 @@
     <view class="kicker">{{matterTitle}}{{moduleTitle ? ' › ' + moduleTitle : ''}}</view>
     <view class="card">
       <view class="q-title">题目<text class="f-required">*</text></view>
-      <input class="fin" placeholder="如：打算怎么装？" value="{{text}}" data-field="text" bind:input="onInput" />
+      <input class="fin" value="{{text}}" data-field="text" bind:input="onInput" />
 
       <view class="q-title">注释<text class="q-note">选填，显示在题干下方，给不熟悉的邻居解释概念</text></view>
-      <textarea class="fin farea" auto-height placeholder="如：全包=材料和人工都由装修公司负责" value="{{note}}" data-field="note" bind:input="onInput" />
+      <textarea class="fin farea" auto-height value="{{note}}" data-field="note" bind:input="onInput" />
 
       <view class="q-title">题型</view>
       <view class="chips">
@@ -18,7 +18,7 @@
 
       <block wx:if="{{type !== 'text'}}">
         <view class="q-title">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个；「｜」后可给选项写解释</text></view>
-        <textarea class="fin farea" auto-height placeholder="全包｜材料和人工都交给装修公司&#10;半包｜主材自己买，辅材人工归装修公司&#10;还没概念" value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
+        <textarea class="fin farea" auto-height value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
       </block>
       <view wx:else class="q-explain">填空题的回答不直接公示；可在公示页的「文本题明细与归纳」里归纳成主题后发布</view>
 

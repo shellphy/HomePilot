@@ -4,17 +4,17 @@
     <view class="card form-list">
       <view class="frow">
         <text class="frow-label">标题<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="{{copy.titlePlaceholder}}" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
+        <input class="frow-input" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
       </view>
       <view class="frow">
         <text class="frow-label">目标数<text class="q-note">{{copy.targetHint}}</text></text>
-        <input class="frow-input" type="number" placeholder="不填则不设目标" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
+        <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
       </view>
     </view>
 
     <view class="card">
       <view class="q-title">把事情说清楚<text class="f-required">*</text></view>
-      <textarea class="fin farea" auto-height placeholder="{{copy.pitchPlaceholder}}" value="{{pitch}}" data-field="pitch" bind:input="onInput" maxlength="1000" />
+      <textarea class="fin farea" auto-height value="{{pitch}}" data-field="pitch" bind:input="onInput" maxlength="1000" />
     </view>
 
     <view class="privacy">发起即成为这件事的牵头人，负责更新进展。参与名单以「楼栋 + 昵称」对全小区公示。</view>

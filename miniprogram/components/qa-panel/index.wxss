@@ -71,3 +71,30 @@
 .qa-ask-btn {
   margin-top: 16rpx;
 }
+
+/* 提问/回答输入弹层 */
+.qa-editor {
+  padding: 40rpx 32rpx calc(40rpx + env(safe-area-inset-bottom));
+  border-radius: 24rpx 24rpx 0 0;
+  background: #fff;
+}
+.qa-editor-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+.qa-editor-note {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.qa-editor-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 24rpx 0;
+  padding: 22rpx 26rpx;
+  background: var(--bg-page);
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+  min-height: 160rpx;
+}

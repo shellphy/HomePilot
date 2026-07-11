@@ -287,22 +287,6 @@ page {
   color: var(--text-muted);
   font-size: 26rpx;
 }
-/* AI 答疑入口卡：团购/活动详情共用（组件 apply-shared 生效） */
-.ask-ai {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.ask-ai-title {
-  font-size: 27rpx;
-  font-weight: 600;
-}
-.ask-ai-sub {
-  margin-top: 4rpx;
-  font-size: 23rpx;
-  color: var(--text-secondary);
-}
-
 /* 「买前必懂」行内的 AI 起草入口：草稿回填后仍由填表人把关 */
 .pair-ai {
   flex-shrink: 0;

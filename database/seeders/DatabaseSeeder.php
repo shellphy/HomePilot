@@ -362,12 +362,6 @@ class DatabaseSeeder extends Seeder
     private function notices(): void
     {
         Matter::factory()->notice()->create([
-            'title' => '本小程序公益运营说明',
-            'payload' => [
-                'body' => '本小程序由小区业主公益运营：不代收任何款项，签约付款由业主直接对商家；商家给到的任何返点，全部转为参团业主让利，并在成团后随成交公示摊开。',
-            ],
-        ]);
-        Matter::factory()->notice()->create([
             'title' => '学区消息：片区小学分校规划已公示',
             'payload' => [
                 'body' => '区教育局官网已挂出片区小学分校的规划公示，选址在小区东侧地块，办学规模 36 个班。公示期到月底，原文链接已发业主群。是否划入我们小区学区以教育局最终文件为准，有新消息会更新在这里。',

@@ -13,12 +13,6 @@
   margin: 6rpx 0 20rpx;
 }
 
-.map-foot {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--text-muted);
-  padding-top: 24rpx;
-}
 
 .feed-head {
   font-size: 26rpx;

@@ -14,7 +14,7 @@
 
   <view class="card">
     <view class="q-title">进度内容</view>
-    <textarea class="fin farea" placeholder="如：水电开槽完成，横平竖直验收通过" value="{{content}}" bind:input="onInput" maxlength="500" />
+    <textarea class="fin farea" value="{{content}}" bind:input="onInput" maxlength="500" />
   </view>
 
   <view class="card">

@@ -4,18 +4,18 @@
     <view class="card form-list">
       <view class="frow">
         <text class="frow-label">标题<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="一句话说清这件事" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
+        <input class="frow-input" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
       </view>
 
       <!-- 团购专属短字段 -->
       <block wx:if="{{type === 'groupbuy'}}">
         <view class="frow">
           <text class="frow-label">品类<text class="f-required">*</text></text>
-          <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" maxlength="30" data-field="category" bind:input="onInput" />
+          <input class="frow-input" value="{{category}}" maxlength="30" data-field="category" bind:input="onInput" />
         </view>
         <view class="frow">
           <text class="frow-label">阶梯优惠</text>
-          <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" maxlength="100" data-field="perk" bind:input="onInput" />
+          <input class="frow-input" value="{{perk}}" maxlength="100" data-field="perk" bind:input="onInput" />
         </view>
         <view class="frow">
           <view class="frow-main">
@@ -30,7 +30,7 @@
       <view class="frow" wx:if="{{type !== 'notice' && type !== 'census'}}">
         <text class="frow-label" wx:if="{{type === 'groupbuy'}}">目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text>
         <text class="frow-label" wx:else>目标数<text class="q-note">0 表示不设目标</text></text>
-        <input class="frow-input" type="number" value="{{targetCount}}" placeholder="{{type === 'groupbuy' ? '如 20' : ''}}" data-field="targetCount" bind:input="onInput" />
+        <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
       </view>
 
       <!-- 状态流转：单选走 action-sheet，与资料页「身份」同一套交互 -->
@@ -80,11 +80,11 @@
     <!-- 长文本：公告正文 / 说明 -->
     <view class="card" wx:if="{{type === 'notice'}}">
       <view class="q-title">公告正文<text class="f-required">*</text></view>
-      <textarea class="fin farea" auto-height maxlength="2000" placeholder="写给全小区看的内容" value="{{body}}" data-field="body" bind:input="onInput" />
+      <textarea class="fin farea" auto-height maxlength="2000" value="{{body}}" data-field="body" bind:input="onInput" />
     </view>
     <view class="card" wx:else>
       <view class="q-title">{{type === 'census' ? '征集说明' : '把事情说清楚'}}</view>
-      <textarea class="fin farea" auto-height maxlength="1000" placeholder="{{type === 'census' ? '这次征集想了解什么、为什么值得大家花 2 分钟' : '时间、地点、来龙去脉……写清楚业主才敢参与'}}" value="{{pitch}}" data-field="pitch" bind:input="onInput" />
+      <textarea class="fin farea" auto-height maxlength="1000" value="{{pitch}}" data-field="pitch" bind:input="onInput" />
     </view>
 
     <!-- 团购专属条目列表 -->
@@ -92,8 +92,8 @@
       <view class="card">
         <view class="q-title">团购条件</view>
         <view class="pair" wx:for="{{terms}}" wx:key="index">
-          <input class="fin pair-a" placeholder="名目" value="{{item.label}}" maxlength="30" data-list="terms" data-index="{{index}}" data-field="label" bind:input="onRowInput" />
-          <input class="fin pair-b" placeholder="内容" value="{{item.value}}" maxlength="100" data-list="terms" data-index="{{index}}" data-field="value" bind:input="onRowInput" />
+          <input class="fin pair-a" value="{{item.label}}" maxlength="30" data-list="terms" data-index="{{index}}" data-field="label" bind:input="onRowInput" />
+          <input class="fin pair-b" value="{{item.value}}" maxlength="100" data-list="terms" data-index="{{index}}" data-field="value" bind:input="onRowInput" />
           <view class="pair-del" data-list="terms" data-index="{{index}}" bind:tap="removeRow">✕</view>
         </view>
         <view class="add-row" data-list="terms" bind:tap="addRow">＋ 添加一条</view>
@@ -102,13 +102,13 @@
         <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，3~5 条</text></view>
         <view class="pair pair-col" wx:for="{{glossary}}" wx:key="index">
           <view class="pair-head">
-            <input class="fin pair-a" placeholder="术语" value="{{item.term}}" maxlength="30" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
+            <input class="fin pair-a" value="{{item.term}}" maxlength="30" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
             <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 起草</view>
             <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
           </view>
-          <textarea class="fin farea" auto-height placeholder="是什么（必填）：一句大白话" value="{{item.explain}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" />
-          <textarea class="fin farea" auto-height placeholder="怎么选（选填）：换算到自家的判断标准" value="{{item.judge}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="judge" bind:input="onRowInput" />
-          <textarea class="fin farea" auto-height placeholder="避坑/怎么问（选填）：噱头预警、该问商家什么" value="{{item.caution}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="caution" bind:input="onRowInput" />
+          <textarea class="fin farea" auto-height value="{{item.explain}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" />
+          <textarea class="fin farea" auto-height value="{{item.judge}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="judge" bind:input="onRowInput" />
+          <textarea class="fin farea" auto-height value="{{item.caution}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="caution" bind:input="onRowInput" />
         </view>
         <view class="add-row" data-list="glossary" bind:tap="addRow">＋ 添加一条</view>
       </view>

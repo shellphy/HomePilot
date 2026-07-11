@@ -15,7 +15,6 @@
           class="frow-input"
           type="nickname"
           value="{{nickname}}"
-          placeholder="请填写"
           data-field="nickname"
           bind:input="onInput"
           bind:blur="onInput"
@@ -47,7 +46,7 @@
         </picker>
         <view class="frow">
           <text class="frow-label">房号</text>
-          <input class="frow-input" value="{{roomLabel}}" placeholder="如 1802" data-field="roomLabel" bind:input="onInput" />
+          <input class="frow-input" value="{{roomLabel}}" data-field="roomLabel" bind:input="onInput" />
         </view>
       </block>
 
@@ -55,15 +54,15 @@
       <block wx:else>
         <view class="frow">
           <text class="frow-label">名称<text class="f-required">*</text></text>
-          <input class="frow-input" value="{{partyName}}" placeholder="{{identityMeta.name_hint || '请填写'}}" data-field="partyName" bind:input="onInput" />
+          <input class="frow-input" value="{{partyName}}" data-field="partyName" bind:input="onInput" />
         </view>
         <view class="frow" wx:if="{{identityMeta.category_label}}">
           <text class="frow-label">{{identityMeta.category_label}}</text>
-          <input class="frow-input" value="{{partyCategory}}" placeholder="如 门窗、全屋定制" data-field="partyCategory" bind:input="onInput" />
+          <input class="frow-input" value="{{partyCategory}}" data-field="partyCategory" bind:input="onInput" />
         </view>
         <view class="frow">
           <text class="frow-label">简介</text>
-          <input class="frow-input" value="{{partyIntro}}" placeholder="一句话介绍，显示在名录和详情页" data-field="partyIntro" bind:input="onInput" maxlength="60" />
+          <input class="frow-input" value="{{partyIntro}}" data-field="partyIntro" bind:input="onInput" maxlength="60" />
         </view>
       </block>
     </view>
@@ -72,7 +71,7 @@
     <block wx:if="{{identity !== 'resident'}}">
       <view class="card">
         <view class="q-title">详细介绍</view>
-        <textarea class="fin farea" placeholder="{{identityMeta.description_hint || '想让邻居知道的都可以写在这里'}}" value="{{partyDescription}}" data-field="partyDescription" bind:input="onInput" maxlength="2000" />
+        <textarea class="fin farea" value="{{partyDescription}}" data-field="partyDescription" bind:input="onInput" maxlength="2000" />
       </view>
       <view class="card">
         <view class="q-title">照片<text class="q-note">门头、资质、服务现场…最多 9 张</text></view>
