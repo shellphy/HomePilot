@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Matters\CensusType;
 use App\Models\Matter;
+use App\Models\Party;
 use App\Models\Resident;
 use App\Models\Stance;
 use App\Settings\CommunitySettings;
@@ -21,6 +22,7 @@ class StatsController extends Controller
         return response()->json([
             // 只算选好楼栋的成员：静默登录会把路过的人也建号，不选楼栋不算「邻居」
             'residents' => Resident::where('unit_label', '!=', '')->count(),
+            'listed_parties' => Party::where('is_listed', true)->count(),
             'total_households' => $settings->total_households,
             'category_interest' => $this->categoryInterest(),
         ]);

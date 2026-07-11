@@ -71,4 +71,14 @@ class Party extends Model
     {
         return $this->hasMany(Resident::class, 'affiliated_party_id');
     }
+
+    /**
+     * 以该相关方身份发起的事项（身份快照，成员切换身份不影响）。
+     *
+     * @return HasMany<Matter, $this>
+     */
+    public function initiatedMatters(): HasMany
+    {
+        return $this->hasMany(Matter::class, 'initiator_party_id');
+    }
 }

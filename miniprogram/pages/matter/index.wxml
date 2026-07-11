@@ -10,6 +10,7 @@
         my-review="{{myReview}}"
         contacts="{{contacts}}"
         initiator-contact="{{initiatorContact}}"
+        is-party="{{isParty}}"
         bind:refresh="reload"
       />
       <matter-detail
@@ -18,6 +19,7 @@
         joined="{{joined}}"
         is-initiator="{{isInitiator}}"
         can-respond="{{canRespond}}"
+        is-party="{{isParty}}"
         bind:refresh="reload"
       />
     </block>

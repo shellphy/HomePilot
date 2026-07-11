@@ -14,7 +14,7 @@
 <view class="card" wx:if="{{matter.pitch}}">
   <view class="kicker">发起人说</view>
   <view class="pitch">“{{matter.pitch}}”</view>
-  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · 牵头人</view>
+  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 牵头人' : '牵头人'}}</view>
 </view>
 
 <view class="card pending-tip" wx:if="{{!matter.is_approved}}">
@@ -77,7 +77,7 @@
   <view class="hint">已有 {{matter.join_count}} 人联名。名单不对外公示（仅牵头人可见），放心参与。</view>
 </view>
 
-<view class="cta-dock">
+<view class="cta-dock" wx:if="{{!isParty}}">
   <t-button
     theme="{{joined ? 'light' : 'primary'}}"
     block

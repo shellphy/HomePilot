@@ -1,0 +1,35 @@
+.intro {
+  padding: 20rpx 8rpx 4rpx;
+}
+
+.party {
+  padding: 28rpx;
+}
+
+.party-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.party-name {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.party-badge {
+  font-size: 22rpx;
+  color: #06ae56;
+}
+
+.party-sub {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #6b675e;
+}
+
+.party-note {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #9b978c;
+}

@@ -19,6 +19,7 @@ Component({
     myReview: Object,
     contacts: Array,          // 团长视角：同意共享的参团者联系方式（成团后）
     initiatorContact: Object, // 参团者视角：团长联系方式（成团后且自己同意过共享）
+    isParty: Boolean,         // 相关方身份不参与接龙，隐藏报名按钮
   },
 
   data: {

@@ -46,6 +46,12 @@ class ActivityType extends MatterType
         return ['pitch' => $validated['pitch'] ?? ''];
     }
 
+    /** 已认证商家可以发起探店、开放日类活动。 */
+    public function merchantInitiatable(): bool
+    {
+        return true;
+    }
+
     public function allowsJoin(Matter $matter): bool
     {
         return $matter->state === 'open';

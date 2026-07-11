@@ -47,6 +47,12 @@ abstract class MatterType
         return true;
     }
 
+    /** 已认证商家是否可以发起该类型事项（带商家署名与「已认证」标识）。 */
+    public function merchantInitiatable(): bool
+    {
+        return false;
+    }
+
     /** 是否出现在小区事项流里。 */
     public function visibleInList(Matter $matter): bool
     {

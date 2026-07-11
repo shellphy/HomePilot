@@ -60,3 +60,18 @@
   padding: 12rpx 8rpx 16rpx;
 }
 
+
+.prow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 28rpx;
+}
+.prow-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.prow-note {
+  font-size: 26rpx;
+  color: #9b978c;
+}

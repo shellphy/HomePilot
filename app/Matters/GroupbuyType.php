@@ -61,6 +61,12 @@ class GroupbuyType extends MatterType
         ];
     }
 
+    /** 已认证商家可以发起商家直供团。 */
+    public function merchantInitiatable(): bool
+    {
+        return true;
+    }
+
     /** 未成团前都可以报名/取消。 */
     public function allowsJoin(Matter $matter): bool
     {

@@ -16,7 +16,7 @@
 <view class="card" wx:if="{{matter.pitch}}">
   <view class="kicker">发起人的话</view>
   <view class="pitch">“{{matter.pitch}}”</view>
-  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · 本团发起人</view>
+  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人' : '本团发起人'}}</view>
 </view>
 
 <view class="card" wx:if="{{matter.glossary.length}}">
@@ -140,7 +140,7 @@
   </view>
 </view>
 
-<view class="cta-dock" wx:if="{{matter.state !== 'done'}}">
+<view class="cta-dock" wx:if="{{matter.state !== 'done' && !isParty}}">
   <t-button
     theme="{{joined ? 'light' : 'primary'}}"
     block

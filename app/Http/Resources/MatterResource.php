@@ -28,7 +28,13 @@ class MatterResource extends JsonResource
             'type' => $this->type,
             'type_label' => $type->label(),
             'initiator_id' => $this->initiator_id,
-            'initiator_name' => $this->whenLoaded('initiator', fn () => $this->initiator?->displayName()),
+            // 商家发起的事项署商家名（发起时的身份快照），业主发起的署「楼栋 + 昵称」
+            'initiator_name' => $this->whenLoaded('initiator', fn () => $this->initiatorParty ? $this->initiatorParty->name : $this->initiator?->displayName()),
+            'initiator_party' => $this->whenLoaded('initiatorParty', fn () => $this->initiatorParty ? [
+                'label' => $this->initiatorParty->typeLabel(),
+                'name' => $this->initiatorParty->name,
+                'is_listed' => $this->initiatorParty->is_listed,
+            ] : null),
             'category' => $this->category,
             'title' => $this->title,
             'state' => $this->state,

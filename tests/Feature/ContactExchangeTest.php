@@ -20,17 +20,13 @@ test('joining stores the contact sharing consent and rejoining updates it', func
         ->and($stance->refresh()->payload['share_contact'])->toBeTrue();
 });
 
-test('an owner must pick a building before joining but party members are exempt', function () {
+test('an owner must pick a building before joining', function () {
     $matter = Matter::factory()->open()->create();
 
     Sanctum::actingAs(Resident::factory()->withoutUnit()->create());
     $this->postJson("/api/matters/{$matter->id}/join")
         ->assertUnprocessable()
         ->assertJsonValidationErrors('profile');
-
-    // 相关方以入驻身份出现，没有楼栋概念
-    Sanctum::actingAs(Resident::factory()->merchant()->create(['unit_label' => '']));
-    $this->postJson("/api/matters/{$matter->id}/join")->assertCreated();
 });
 
 test('once the deal is done the initiator sees only consenting participants with a phone', function () {

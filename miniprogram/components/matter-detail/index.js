@@ -13,6 +13,7 @@ Component({
     joined: Boolean,
     isInitiator: Boolean,
     canRespond: Boolean, // 被认证的治理类相关方成员：可发官方回应
+    isParty: Boolean,    // 相关方身份不参与接龙，隐藏参与按钮
   },
 
   data: {
