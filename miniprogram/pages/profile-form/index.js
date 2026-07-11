@@ -93,7 +93,7 @@ Page({
 
   onPickBuilding(event) {
     const index = Number(event.detail.value);
-    this.setData({ buildingIndex: index, unitLabel: this.data.buildings[index] || '' });
+    this.setData({ buildingIndex: index, unitLabel: this.data.buildings[index] });
   },
 
   onInput(event) {
