@@ -51,7 +51,7 @@ class ResidentResource extends JsonResource
                 'description' => $this->lastParty->description ?? '',
                 'images' => $this->lastParty->images ?? [],
             ] : null,
-            // 我参与过的征集（通用：装修摸底、将来的收房/车位摸底都在这里）
+            // 我参与过的征集
             'censuses' => $this->stances()
                 ->where('mode', Stance::MODE_REGISTER)
                 ->whereHas('matter', fn ($query) => $query->where('type', 'census'))

@@ -1,6 +1,7 @@
 // 通用张罗表单：活动 / 互助 / 维权（团购有专属表单 groupbuy-form）
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
 const { guardProfileError } = require('../../utils/profile-guard');
 
 const TYPE_COPY = {
@@ -25,7 +26,7 @@ const TYPE_COPY = {
 };
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     id: null,
@@ -58,19 +59,6 @@ Page({
         targetCount: matter.target_count ? String(matter.target_count) : '',
       });
     });
-  },
-
-  // 有未保存的修改时，返回/退出前弹确认，防止编辑丢失（与管理端表单同一套交互）
-  markDirty() {
-    if (this.dirty || !wx.enableAlertBeforeUnload) return;
-    this.dirty = true;
-    wx.enableAlertBeforeUnload({ message: '修改还没保存，确定要离开吗？' });
-  },
-
-  clearDirty() {
-    if (!this.dirty) return;
-    this.dirty = false;
-    wx.disableAlertBeforeUnload();
   },
 
   onInput(event) {

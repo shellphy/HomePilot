@@ -1,4 +1,4 @@
-// 管理端服务层：审核、发布、问卷、明细、认证、社区设置（原 PC 后台的全部能力）
+// 管理端服务层：审核、发布、问卷、明细、认证、社区设置
 const { request } = require('../request');
 
 function listMatters(pendingOnly) {

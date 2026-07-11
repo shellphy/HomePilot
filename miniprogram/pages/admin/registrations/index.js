@@ -42,7 +42,7 @@ Page({
   },
 
   toggle(event) {
-    const id = event.currentTarget.dataset.id;
+    const { id } = event.currentTarget.dataset;
     this.setData({ openId: this.data.openId === id ? null : id });
   },
 });

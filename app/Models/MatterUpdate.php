@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * 事项时间线条目（原"团购进度更新"的泛化）。
- * author_party_id 非空 = 治理类相关方的官方回应。
+ * 事项时间线条目。author_party_id 非空 = 治理类相关方的官方回应。
  *
  * @property int $id
  * @property int $matter_id

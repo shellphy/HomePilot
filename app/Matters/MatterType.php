@@ -68,7 +68,7 @@ abstract class MatterType
     /** 该成员是否参与过这件事（有接龙表态）。 */
     public function isParticipant(Matter $matter, Resident $resident): bool
     {
-        return $this->hasJoined($matter, $resident);
+        return $matter->joins()->where('resident_id', $resident->id)->exists();
     }
 
     public function initialState(): string
@@ -123,12 +123,6 @@ abstract class MatterType
         return true;
     }
 
-    /** 是否开放评价表态。 */
-    public function allowsReview(Matter $matter, Resident $resident): bool
-    {
-        return $this->reviewOpen($matter) && $this->isParticipant($matter, $resident);
-    }
-
     /** 列表排序权重（小者在前）。 */
     public function sortWeight(Matter $matter): int
     {
@@ -152,12 +146,4 @@ abstract class MatterType
 
         return $payload;
     }
-
-    protected function hasJoined(Matter $matter, Resident $resident): bool
-    {
-        return $matter->joins()->where('resident_id', $resident->id)->exists();
-    }
-
-    /** 允许被检查器忽略未使用参数。 */
-    protected function unused(mixed ...$args): void {}
 }

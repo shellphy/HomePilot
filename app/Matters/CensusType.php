@@ -6,7 +6,6 @@ use App\Models\Matter;
 
 /**
  * 征集/摸底：面向全小区收集结构化表态（mode=register），聚合结果匿名公示。
- * 装修意向摸底是第一个实例；收房问题、车位需求摸底将来同构接入。
  * 由管理员发起；参与走登记表态而不是接龙。
  */
 class CensusType extends MatterType

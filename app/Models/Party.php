@@ -50,6 +50,16 @@ class Party extends Model
         self::TYPE_COMMITTEE => ['label' => '业委会', 'self_registrable' => true, 'name_hint' => '如：天青府业主委员会', 'category_label' => '', 'description_hint' => '业委会职责、如何联系、正在推进的事……'],
     ];
 
+    protected $fillable = ['type', 'name', 'category', 'intro', 'description', 'images', 'is_listed'];
+
+    protected function casts(): array
+    {
+        return [
+            'images' => 'array',
+            'is_listed' => 'boolean',
+        ];
+    }
+
     public function typeLabel(): string
     {
         return self::TYPES[$this->type]['label'] ?? $this->type;
@@ -62,22 +72,6 @@ class Party extends Model
     public function isGovernance(): bool
     {
         return in_array($this->type, [self::TYPE_PROPERTY, self::TYPE_DEVELOPER, self::TYPE_COMMITTEE], true);
-    }
-
-    protected $fillable = ['type', 'name', 'category', 'intro', 'description', 'images', 'is_listed'];
-
-    protected function casts(): array
-    {
-        return [
-            'images' => 'array',
-            'is_listed' => 'boolean',
-        ];
-    }
-
-    /** @return HasMany<Resident, $this> */
-    public function members(): HasMany
-    {
-        return $this->hasMany(Resident::class, 'affiliated_party_id');
     }
 
     /**
