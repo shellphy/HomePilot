@@ -55,7 +55,7 @@
       <textarea class="fin farea" auto-height maxlength="2000" placeholder="写给全小区看的内容" value="{{body}}" data-field="body" bind:input="onInput" />
     </view>
     <view class="card" wx:else>
-      <view class="q-title">{{type === 'census' ? '征集说明（显示在数据页顶部）' : '把事情说清楚'}}</view>
+      <view class="q-title">{{type === 'census' ? '征集说明' : '把事情说清楚'}}</view>
       <textarea class="fin farea" auto-height maxlength="1000" value="{{pitch}}" data-field="pitch" bind:input="onInput" />
     </view>
 

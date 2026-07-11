@@ -81,9 +81,6 @@ Page({
         activeCount: doings.length,
         residents: stats.residents,
       });
-      if (options.community && options.community.name) {
-        wx.setNavigationBarTitle({ title: options.community.name });
-      }
     });
   },
 
