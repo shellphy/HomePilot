@@ -1,34 +1,33 @@
-// 小区数据页：全部征集的聚合总览。
-// 不带 id：罗列事项流里所有征集，各自一个板块；带 id（从征集卡片进来）：只看那一期。
-// 新增一期征集，这里自动多出一个板块，无需任何改动。
+// 小区数据 tab：全部征集的总览。
+// 进行中的征集渲染成带进度与头牌数据的大卡，已结束的收进「往期数据」列表；
+// 单期完整聚合在 pages/census-insights。新增一期征集，这里自动多一张卡，无需任何改动。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 
-function toBars(counts) {
-  const entries = Object.entries(counts || {});
-  const max = Math.max(1, ...entries.map(([, count]) => count));
-  return entries.map(([label, count]) => ({
-    label,
-    count,
-    percent: Math.round((count / max) * 100),
-  }));
+/** @returns {{question: string, label: string, count: number}|null} 第一道已有答案的题里票数最高的选项 */
+function topAnswer(aggregates) {
+  for (const module of aggregates || []) {
+    for (const question of module.questions || []) {
+      const entries = Object.entries(question.counts || {});
+      if (entries.length) {
+        entries.sort((a, b) => b[1] - a[1]);
+        return { question: question.text, label: entries[0][0], count: entries[0][1] };
+      }
+    }
+  }
+  return null;
 }
 
 Page({
   behaviors: [load],
 
   data: {
-    censusId: null, // 带 id = 单期详情，不带 = 总览列表
     residents: 0,
-    blocks: [], // 详情模式：这一期的完整聚合
-    items: [],  // 总览模式：各期征集的概况列表
+    openCards: [], // 进行中的征集大卡
+    pastItems: [], // 已结束的往期列表
     communityName: '',
     dataFootnote: '',
-  },
-
-  onLoad(query) {
-    if (query.id) this.setData({ censusId: Number(query.id) });
   },
 
   onShow() {
@@ -41,10 +40,12 @@ Page({
   },
 
   onShareAppMessage() {
-    const first = this.data.blocks[0];
+    const first = this.data.openCards[0];
     return {
-      title: first ? `${first.title}｜${first.registered} 人已登记` : `${this.data.communityName || '小区'} · 小区数据`,
-      path: `/pages/insights/index${this.data.censusId ? '?id=' + this.data.censusId : ''}`,
+      title: first
+        ? `${first.title}｜${first.registered} 人已登记`
+        : `${this.data.communityName || '小区'} · 小区数据`,
+      path: '/pages/insights/index',
     };
   },
 
@@ -54,47 +55,42 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [stats, options] = await Promise.all([
+      const [stats, options, feed] = await Promise.all([
         profile.getStats(),
         profile.getOptions(),
+        matters.listMatters(),
       ]);
+      const censuses = feed.data.filter((matter) => matter.type === 'census');
 
-      // 详情模式：只看这一期的完整聚合
-      let blocks = [];
-      let items = [];
-      if (this.data.censusId) {
-        const census = await matters.getCensus(this.data.censusId);
-        blocks = [{
-          id: this.data.censusId,
-          title: census.title,
-          state: census.state,
-          pitch: census.pitch,
-          registered: census.registered_count,
-          myAnswered: Object.keys(census.answers || {}).length,
-          sections: census.aggregates.map((module) => ({
-            title: module.title,
-            questions: module.questions
-              .map((question) => ({ text: question.text, bars: toBars(question.counts) }))
-              .filter((question) => question.bars.length),
-          })),
-        }];
-        wx.setNavigationBarTitle({ title: census.title });
-      } else {
-        // 总览模式：只列各期征集的概况，点进去看详情（数据都在事项流里，无需逐期请求）
-        const feed = await matters.listMatters();
-        items = feed.data
-          .filter((matter) => matter.type === 'census')
-          .map((matter) => ({
+      // 进行中的通常只有一两期，逐期拉聚合做头牌数据；往期直接用事项流字段
+      const openCards = await Promise.all(censuses
+        .filter((matter) => matter.state === 'open')
+        .map(async (matter) => {
+          const census = await matters.getCensus(matter.id);
+          return {
             id: matter.id,
             title: matter.title,
-            note: `${matter.state_label} · ${matter.register_count} 人已登记`,
-          }));
-      }
+            pitch: census.pitch,
+            registered: census.registered_count,
+            myAnswered: Object.keys(census.answers || {}).length,
+            percent: stats.residents
+              ? Math.min(100, Math.round((census.registered_count / stats.residents) * 100))
+              : 0,
+            top: topAnswer(census.aggregates),
+          };
+        }));
+      const pastItems = censuses
+        .filter((matter) => matter.state !== 'open')
+        .map((matter) => ({
+          id: matter.id,
+          title: matter.title,
+          note: `${matter.state_label} · ${matter.register_count} 人已登记`,
+        }));
 
       this.setData({
         residents: stats.residents,
-        blocks,
-        items,
+        openCards,
+        pastItems,
         communityName: (options.community && options.community.name) || '',
         dataFootnote: (options.community && options.community.data_footnote) || '',
       });
@@ -102,7 +98,7 @@ Page({
   },
 
   goDetail(event) {
-    wx.navigateTo({ url: `/pages/insights/index?id=${event.currentTarget.dataset.id}` });
+    wx.navigateTo({ url: `/pages/census-insights/index?id=${event.currentTarget.dataset.id}` });
   },
 
   goCensusForm(event) {

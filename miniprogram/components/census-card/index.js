@@ -1,4 +1,4 @@
-// 征集卡片：摸底类事项（装修意向摸底等），点击进入其公示面（小区数据页）
+// 征集卡片：摸底类事项（装修意向摸底等），点击进入其公示面（征集详情页）
 Component({
   options: {
     styleIsolation: 'apply-shared',
@@ -10,7 +10,7 @@ Component({
 
   methods: {
     goInsights() {
-      wx.navigateTo({ url: `/pages/insights/index?id=${this.data.matter.id}` });
+      wx.navigateTo({ url: `/pages/census-insights/index?id=${this.data.matter.id}` });
     },
   },
 });
