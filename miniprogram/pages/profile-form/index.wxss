@@ -1,38 +1,78 @@
-/* 头像行：官方示例同款极简写法（padding:0 + 定宽 !important 压住 button 默认样式） */
-.avatar-row {
+/* 行式表单：标签左、内容右对齐、细分割线，视觉对齐「我的」页列表 */
+.form-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.frow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 8rpx;
+  gap: 24rpx;
+  min-height: 116rpx;
+  border-bottom: 1rpx solid var(--line);
 }
-.avatar-label {
-  margin: 0;
+.frow:last-child {
+  border-bottom: none;
 }
-.avatar-wrapper {
+.frow-hover {
+  opacity: 0.55;
+}
+.frow-label {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+.frow-input {
+  flex: 1;
+  min-width: 0;
+  height: 116rpx;
+  text-align: right;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+.frow-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.frow-arrow {
+  flex-shrink: 0;
+  font-size: 36rpx;
+  line-height: 1;
+  color: var(--line-dark);
+}
+
+/* 头像行：把 button 默认样式压成普通行 */
+.frow-btn {
+  width: 100%;
   padding: 0;
   margin: 0;
-  width: 96rpx !important;
-  height: 96rpx;
-  border-radius: 50%;
+  min-height: 132rpx;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  font-weight: normal;
+  line-height: inherit;
+  color: inherit;
+  text-align: left;
 }
-.avatar-wrapper::after {
+.frow-btn::after {
   border: none;
 }
 .avatar {
-  display: block;
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
+  margin-left: auto; /* 头像靠行右侧，与其他行的值对齐 */
+  flex-shrink: 0;
 }
+/* 未设置头像时的通用灰色人形剪影（与「我的」页一致） */
 .avatar-fallback {
-  background: var(--brand-bg);
-  line-height: 96rpx;
-  text-align: center;
-  color: var(--brand-deep);
-  font-size: 40rpx;
-  font-weight: 700;
-}
-
-.privacy-inline {
-  padding: 20rpx 4rpx 0;
+  background-color: #dde0e5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='40' r='17' fill='%23ffffff'/%3E%3Cpath d='M50 63c-18 0-29.5 10-32.5 22a50 50 0 0 0 65 0C79.5 73 68 63 50 63z' fill='%23ffffff'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
 }
