@@ -102,7 +102,7 @@
     </view>
 
     <!-- 危险操作与吸底的保存拉开距离，避免误触 -->
-    <t-button wx:if="{{id}}" theme="danger" variant="text" block class="del-btn" bind:tap="remove">删除这件事项</t-button>
+    <t-button wx:if="{{id}}" theme="danger" variant="text" block style="margin-top: 40rpx" bind:tap="remove">删除这件事项</t-button>
 
     <view class="footer-bar">
       <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '发布'}}</t-button>

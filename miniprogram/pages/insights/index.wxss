@@ -72,10 +72,6 @@
   margin-bottom: 14rpx;
 }
 
-.census-cta {
-  margin-bottom: 12rpx;
-}
-
 /* 总览模式的征集列表 */
 .census-list {
   padding-top: 0;
