@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MatterJoined;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
@@ -51,21 +52,29 @@ class JoinController extends Controller
                 ['resident_id' => $resident->id, 'mode' => Stance::MODE_JOIN],
                 ['payload' => ['share_contact' => $shareContact] + ($stage !== null ? ['stage' => $stage] : [])],
             );
+
+            MatterJoined::dispatch($matter, $stance);
         }
 
         // 共享意愿的变更、意向升级为确认参团，都是表态的一部分，同样走修订链——"只增不改"
         if (! $stance->wasRecentlyCreated) {
             $revised = array_merge($stance->payload ?? [], ['share_contact' => $shareContact]);
+            $upgraded = false;
 
             // 接龙开放期间重复报名视为升级承诺：登记过意向的这一下就是「确认参团」
             if ($type->allowsJoin($matter)
                 && $stance->joinStageValue() === Stance::JOIN_STAGE_INTENT
                 && $type->joinStage($matter) === Stance::JOIN_STAGE_CONFIRMED) {
                 $revised['stage'] = Stance::JOIN_STAGE_CONFIRMED;
+                $upgraded = true;
             }
 
             if ($revised !== ($stance->payload ?? [])) {
                 $stance->reviseTo($revised);
+            }
+
+            if ($upgraded) {
+                MatterJoined::dispatch($matter, $stance, upgraded: true);
             }
         }
 

@@ -3,6 +3,7 @@
 const matters = require('../../utils/api/matters');
 const { pillClass, TYPE_META, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { requestSubscribe } = require('../../utils/subscribe');
 
 Component({
   options: {
@@ -103,6 +104,8 @@ Component({
     async doToggle(leaving) {
       this.setData({ submitting: true });
       try {
+        // 加入的这一下顺手收一次订阅授权：之后状态流转/进展才有额度可推
+        if (!leaving) await requestSubscribe();
         const res = leaving
           ? await matters.leave(this.data.matter.id)
           : await matters.join(this.data.matter.id, this.data.shareContact);
@@ -183,6 +186,7 @@ Component({
 
       this.setData({ submittingReview: true });
       try {
+        await requestSubscribe();
         await matters.review(this.data.matter.id, reviewRating, reviewContent.trim());
         wx.showToast({ title: '评价已发布', icon: 'success' });
         this.refresh();

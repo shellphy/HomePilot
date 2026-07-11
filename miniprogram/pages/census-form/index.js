@@ -3,6 +3,7 @@
 // 在这里只做前置引导，表单里没有联系方式字段。
 const matters = require('../../utils/api/matters');
 const { getMe, invalidateMe } = require('../../utils/me');
+const { requestSubscribe } = require('../../utils/subscribe');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 
@@ -113,6 +114,8 @@ Page({
 
     this.setData({ submitting: true });
     try {
+      // 答完最后一个模块顺手收一次订阅授权：征集收尾的通知才有额度可推（中间模块不打扰）
+      if (moduleIndex + 1 >= modules.length) await requestSubscribe();
       if (Object.keys(moduleAnswers).length) {
         await matters.saveCensus(id, { answers: moduleAnswers });
         invalidateMe(); // 「我的」页展示答题进度，需要重新拉

@@ -5,6 +5,7 @@
 const { uploadImage } = require('../../utils/request');
 const profile = require('../../utils/api/profile');
 const { getMe, updateMe, authPhone, bindParty, unbindParty } = require('../../utils/me');
+const { requestSubscribe } = require('../../utils/subscribe');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 
@@ -180,6 +181,8 @@ Page({
           room_label: roomLabel.trim(),
         });
       } else {
+        // 入驻提交顺手收一次订阅授权：认证结果的通知才有额度可推
+        await requestSubscribe();
         await updateMe({ nickname: nickname.trim() });
         await bindParty(identity, {
           name: partyName.trim(),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MatterReviewed;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReviewResource;
@@ -44,6 +45,8 @@ class ReviewController extends Controller
                 'mode' => Stance::MODE_REVIEW,
                 'payload' => $payload,
             ]);
+
+            MatterReviewed::dispatch($matter, $review);
         }
 
         return response()->json(

@@ -4,6 +4,7 @@ const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { requestSubscribe } = require('../../utils/subscribe');
 
 Page({
   behaviors: [load, dirty],
@@ -110,6 +111,8 @@ Page({
 
     this.setData({ submitting: true });
     try {
+      // 提交的这一下顺手收一次订阅授权：审核结果/新报名的通知才有额度可推
+      await requestSubscribe();
       if (id) {
         // 不带 state：状态推进走详情页按钮（后端只放行推进一步，表单里跳选只会报错）
         await matters.updateGroupbuy(id, payload);
