@@ -26,7 +26,7 @@
       <view class="frow" wx:if="{{!id}}">
         <view class="frow-main">
           <view class="row-title">按户出方案</view>
-          <view class="row-sub">中央空调、全屋定制这类选它：商家上门量房，每户方案报价单独出，报名邻居的手机号从谈判阶段起与你互通</view>
+          <view class="row-sub">中央空调、全屋定制这类选它：商家逐户沟通需求（如上门量房）、单独出方案报价，报名邻居的手机号从谈判阶段起与你互通</view>
         </view>
         <switch checked="{{needsSurvey}}" bind:change="onSurveyChange" color="#06ae56" />
       </view>

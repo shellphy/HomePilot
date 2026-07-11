@@ -105,7 +105,7 @@ test('a standard done deal exchanges contacts only with confirmed participants',
     $this->getJson("/api/matters/{$matter->id}")->assertJsonPath('initiator_contact', null);
 });
 
-// ---- 方案型团购（needs_survey）：量房必须发生在成团前，联系互通提前到谈判中 ----
+// ---- 方案型团购（needs_survey）：逐户沟通（如量房）必须发生在成团前，联系互通提前到谈判中 ----
 
 test('a survey groupbuy opens contacts during negotiation so the merchant can visit homes', function () {
     $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'phone' => '13900000000']);
@@ -114,7 +114,7 @@ test('a survey groupbuy opens contacts during negotiation so the merchant can vi
     $intender = Resident::factory()->inUnit('5栋')->create(['nickname' => '老王', 'phone' => '13811112222']);
     Stance::factory()->for($matter, 'matter')->for($intender, 'resident')->intent()->create();
 
-    // 方案型团里报名本身就是约量房：意向档也进互通名单
+    // 方案型团里报名本身就是约商家出方案：意向档也进互通名单
     Sanctum::actingAs($initiator);
     expect($this->getJson("/api/matters/{$matter->id}")->json('contacts'))
         ->toBe([['name' => '5栋 老王', 'phone' => '13811112222']]);

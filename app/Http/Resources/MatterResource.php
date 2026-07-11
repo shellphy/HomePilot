@@ -54,7 +54,7 @@ class MatterResource extends JsonResource
             'join_count' => $this->whenCounted('joins'),
             // 确认参团数（团购两段表态里进成交名单的口径；其余类型与 join_count 一致）
             'confirmed_count' => $this->whenCounted('confirmedJoins'),
-            // 方案型团购（如中央空调）：商家逐户量房出方案，联系互通从谈判中开始
+            // 方案型团购（如中央空调）：商家逐户沟通需求、单独出方案，联系互通从谈判中开始
             'needs_survey' => (bool) $this->payloadValue('needs_survey', false),
             'register_count' => (int) ($this->register_count ?? 0),
             'registered_by_me' => (bool) ($this->registered_by_me ?? false),

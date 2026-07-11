@@ -50,7 +50,8 @@ class GroupbuyType extends MatterType
         return [
             'pitch' => ['nullable', 'string', 'max:1000'],
             'perk' => ['nullable', 'string', 'max:100'],
-            // 方案型团购（如中央空调）：非标品，商家需逐户量房出方案，联系互通提前到谈判中
+            // 方案型团购（如中央空调、全屋定制）：非标品，商家需逐户沟通需求（如上门量房）
+            // 单独出方案，联系互通提前到谈判中
             'needs_survey' => ['sometimes', 'boolean'],
             'terms' => ['nullable', 'array'],
             'terms.*.label' => ['required', 'string', 'max:30'],
@@ -119,7 +120,8 @@ class GroupbuyType extends MatterType
 
     /**
      * 联系方式互通阶段：标品团成团后才互通（建群、收款在此后发生）；
-     * 方案型团从谈判中开始（商家不上门量房就出不了方案，业主拿不到自家报价没法决定参团）。
+     * 方案型团从谈判中开始（商家不先逐户沟通——量房、看户型——就出不了方案，
+     * 业主拿不到自家报价没法决定参团）。
      */
     public function contactsOpen(Matter $matter): bool
     {
@@ -130,7 +132,7 @@ class GroupbuyType extends MatterType
 
     /**
      * 标品团只跟确认参团的人互通（登记过意向不等于进了成交名单）；
-     * 方案型团里报名本身就是约量房，意向档也在互通名单里。
+     * 方案型团里报名本身就是约商家出方案，意向档也在互通名单里。
      */
     public function contactEligible(Matter $matter, Stance $join): bool
     {

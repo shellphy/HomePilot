@@ -56,7 +56,7 @@ class MatterFactory extends Factory
     }
 
     /**
-     * 方案型团购（中央空调这类非标品）：商家逐户量房出方案，联系互通提前到谈判中。
+     * 方案型团购（中央空调这类非标品）：商家逐户沟通需求、单独出方案，联系互通提前到谈判中。
      */
     public function survey(): static
     {
