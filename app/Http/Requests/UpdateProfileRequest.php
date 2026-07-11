@@ -19,16 +19,6 @@ class UpdateProfileRequest extends FormRequest
     }
 
     /**
-     * 楼栋号是选项不是自由文本，规整掉首尾空格再校验。
-     */
-    protected function prepareForValidation(): void
-    {
-        if ($this->has('unit_label')) {
-            $this->merge(['unit_label' => trim((string) $this->input('unit_label'))]);
-        }
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      * 可选字段可清空（传空即清空）；手机号走授权接口（/me/phone），相关方身份走 PartyController。
      *
