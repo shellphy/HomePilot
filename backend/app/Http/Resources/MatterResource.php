@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Matter;
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -49,7 +49,7 @@ class MatterResource extends JsonResource
             'published_on' => $this->created_at?->format('m-d'),
             'roster' => $this->whenLoaded(
                 'joins',
-                fn () => $this->joins->map(fn (Record $join): string => $join->resident->displayName()),
+                fn () => $this->joins->map(fn (Stance $join): string => $join->resident->displayName()),
             ),
             'updates' => MatterUpdateResource::collection($this->whenLoaded('updates')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),

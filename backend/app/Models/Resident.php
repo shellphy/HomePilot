@@ -18,12 +18,11 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $avatar
  * @property string $wechat_id
  * @property string $phone
+ * @property string $unit_label
  * @property string $room_label
- * @property int|null $unit_id
- * @property int|null $party_id
+ * @property int|null $affiliated_party_id
  * @property bool $is_admin
- * @property-read Unit|null $unit
- * @property-read Party|null $party
+ * @property-read Party|null $affiliatedParty
  */
 class Resident extends Authenticatable
 {
@@ -36,9 +35,9 @@ class Resident extends Authenticatable
         'avatar',
         'wechat_id',
         'phone',
+        'unit_label',
         'room_label',
-        'unit_id',
-        'party_id',
+        'affiliated_party_id',
     ];
 
     protected function casts(): array
@@ -48,30 +47,20 @@ class Resident extends Authenticatable
         ];
     }
 
-    /** @return BelongsTo<Unit, $this> */
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class);
-    }
-
-    /** @return BelongsTo<Party, $this> */
-    public function party(): BelongsTo
-    {
-        return $this->belongsTo(Party::class);
-    }
-
-    /** @return HasMany<Record, $this> */
-    public function records(): HasMany
-    {
-        return $this->hasMany(Record::class);
-    }
-
     /**
-     * 把楼栋号绑定为户对象（不存在则创建）。
+     * 以哪个相关方身份出现（如商家入驻绑定 merchant 相关方）；业主为 null。
+     *
+     * @return BelongsTo<Party, $this>
      */
-    public function bindUnit(string $label): void
+    public function affiliatedParty(): BelongsTo
     {
-        $this->update(['unit_id' => Unit::firstOrCreate(['label' => trim($label)])->id]);
+        return $this->belongsTo(Party::class, 'affiliated_party_id');
+    }
+
+    /** @return HasMany<Stance, $this> */
+    public function stances(): HasMany
+    {
+        return $this->hasMany(Stance::class);
     }
 
     /**
@@ -79,6 +68,6 @@ class Resident extends Authenticatable
      */
     public function displayName(): string
     {
-        return trim(($this->unit?->label ?? '').' '.$this->nickname);
+        return trim($this->unit_label.' '.$this->nickname);
     }
 }

@@ -47,7 +47,7 @@ class CensusType extends MatterType
         return false;
     }
 
-    /** 征集中置顶于事务流。 */
+    /** 征集中置顶于事项流。 */
     public function sortWeight(Matter $matter): int
     {
         return $matter->state === 'open' ? 0 : 9;

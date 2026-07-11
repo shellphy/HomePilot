@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 /**
- * 征集事务的表态：问卷 schema 存在事务 payload 里（modules），
+ * 征集事项的表态：问卷 schema 存在事项 payload 里（modules），
  * 本控制器完全通用——装修意向摸底、收房问题摸底、车位需求摸底共用。
  */
 class CensusController extends Controller
@@ -26,7 +26,7 @@ class CensusController extends Controller
     {
         abort_unless($matter->type === 'census', 404);
 
-        $record = $this->recordOf($matter, $request);
+        $stance = $this->stanceOf($matter, $request);
 
         return response()->json([
             'title' => $matter->title,
@@ -34,8 +34,8 @@ class CensusController extends Controller
             'pitch' => $matter->payloadValue('pitch', ''),
             'modules' => $matter->payloadValue('modules', []),
             'collects_contact' => (bool) $matter->payloadValue('collects_contact', false),
-            'answers' => $record?->payload['answers'] ?? (object) [],
-            'registered_count' => $matter->records()->where('mode', Record::MODE_REGISTER)->count(),
+            'answers' => $stance?->payload['answers'] ?? (object) [],
+            'registered_count' => $matter->stances()->where('mode', Stance::MODE_REGISTER)->count(),
             'aggregates' => $this->aggregates($matter),
         ]);
     }
@@ -52,7 +52,7 @@ class CensusController extends Controller
 
         $resident = $this->resident($request);
 
-        if ($matter->payloadValue('collects_contact') && (! $resident->unit_id || $resident->wechat_id === '')) {
+        if ($matter->payloadValue('collects_contact') && ($resident->unit_label === '' || $resident->wechat_id === '')) {
             throw ValidationException::withMessages([
                 'profile' => '参与前请先在「我的 · 个人资料」里完善楼栋号和微信号',
             ]);
@@ -64,8 +64,8 @@ class CensusController extends Controller
         $questions = $this->questions($matter);
         $this->validateAnswers($answers['answers'], $questions);
 
-        $record = $this->recordOf($matter, $request);
-        $merged = array_merge($record?->payload['answers'] ?? [], $answers['answers']);
+        $stance = $this->stanceOf($matter, $request);
+        $merged = array_merge($stance?->payload['answers'] ?? [], $answers['answers']);
 
         // 必答题在合并后必须齐全（保证基础模块先答）
         foreach ($questions as $key => $question) {
@@ -74,12 +74,12 @@ class CensusController extends Controller
             }
         }
 
-        if ($record) {
-            $record->reviseTo(['answers' => $merged]);
+        if ($stance) {
+            $stance->reviseTo(['answers' => $merged]);
         } else {
-            $record = $matter->records()->create([
+            $stance = $matter->stances()->create([
                 'resident_id' => $resident->id,
-                'mode' => Record::MODE_REGISTER,
+                'mode' => Stance::MODE_REGISTER,
                 'payload' => ['answers' => $merged],
             ]);
         }
@@ -87,14 +87,14 @@ class CensusController extends Controller
         return response()->json([
             'answered' => count($merged),
             'total' => $questions->count(),
-            'registered_count' => $matter->records()->where('mode', Record::MODE_REGISTER)->count(),
-        ], $record->wasRecentlyCreated ? 201 : 200);
+            'registered_count' => $matter->stances()->where('mode', Stance::MODE_REGISTER)->count(),
+        ], $stance->wasRecentlyCreated ? 201 : 200);
     }
 
-    private function recordOf(Matter $matter, Request $request): ?Record
+    private function stanceOf(Matter $matter, Request $request): ?Stance
     {
-        return $matter->records()
-            ->where('mode', Record::MODE_REGISTER)
+        return $matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
             ->where('resident_id', $this->resident($request)->id)
             ->first();
     }
@@ -141,10 +141,10 @@ class CensusController extends Controller
      */
     private function aggregates(Matter $matter): array
     {
-        $allAnswers = $matter->records()
-            ->where('mode', Record::MODE_REGISTER)
+        $allAnswers = $matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
             ->get()
-            ->map(fn (Record $record): array => $record->payload['answers'] ?? []);
+            ->map(fn (Stance $stance): array => $stance->payload['answers'] ?? []);
 
         return collect($matter->payloadValue('modules', []))
             ->map(fn (array $module): array => [

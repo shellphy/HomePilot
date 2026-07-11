@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\Matter;
 use App\Models\MatterUpdate;
-use App\Models\Record;
 use App\Models\Resident;
+use App\Models\Stance;
 use App\Settings\CommunitySettings;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
     use WithoutModelEvents;
 
     /**
-     * 本地联调数据：小区生活全景——公告、维权、活动、互助、团购五种事务 + 一批装修档案。
-     * 装修只是其中一个板块；其余事务对应业主群里真实在聊的话题。
+     * 本地联调数据：小区生活全景——公告、维权、活动、互助、团购五种事项 + 一批装修档案。
+     * 装修只是其中一个板块；其余事项对应业主群里真实在聊的话题。
      */
     public function run(): void
     {
@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
                 ],
             ],
         ]);
-        Record::factory()->count(17)->for($decoration, 'matter')->create();
+        Stance::factory()->count(17)->for($decoration, 'matter')->create();
         MatterUpdate::factory()->for($decoration, 'matter')->create([
             'happened_on' => now()->subDays(7)->toDateString(),
             'content' => '团长家水电开槽完成，横平竖直验收通过',
@@ -65,7 +65,7 @@ class DatabaseSeeder extends Seeder
                 'glossary' => [],
             ],
         ]);
-        Record::factory()->count(23)->for($hvac, 'matter')->create();
+        Stance::factory()->count(23)->for($hvac, 'matter')->create();
 
         Matter::factory()->for($initiator, 'initiator')->create([
             'category' => '全屋定制',
@@ -102,7 +102,7 @@ class DatabaseSeeder extends Seeder
                 'pitch' => '销售口径车位 15.8 万一个，周边同类小区普遍 10~12 万。凑满 100 户联名，正式向开发商递交问询函，要求公开车位定价依据并给出团购价。',
             ],
         ]);
-        Record::factory()->count(47)->for($rights, 'matter')->create();
+        Stance::factory()->count(47)->for($rights, 'matter')->create();
 
         $inspection = Matter::factory()->rights()->for($initiator, 'initiator')->create([
             'state' => 'negotiating',
@@ -112,7 +112,7 @@ class DatabaseSeeder extends Seeder
                 'pitch' => '有邻居从工地照片发现门槛石、卫浴五金与样板间标注品牌不一致。已凑齐 50 户联名并递交开发商，等待书面答复，进展会更新在本页。',
             ],
         ]);
-        Record::factory()->count(52)->for($inspection, 'matter')->create();
+        Stance::factory()->count(52)->for($inspection, 'matter')->create();
         MatterUpdate::factory()->for($inspection, 'matter')->create([
             'happened_on' => now()->subDays(3)->toDateString(),
             'content' => '开发商客服已签收联名函，承诺 15 个工作日内书面答复',
@@ -126,7 +126,7 @@ class DatabaseSeeder extends Seeder
                 'pitch' => '这周六上午去富森美建材市场，主看门窗和全屋定制，有经验的邻居带队讲怎么看材料。上期去了 8 家人，收获很大。地铁站集合，报名后拉小群。',
             ],
         ]);
-        Record::factory()->count(9)->for($activity, 'matter')->create();
+        Stance::factory()->count(9)->for($activity, 'matter')->create();
 
         // ---- 互助：轻量的邻里协作 ----
         $aid = Matter::factory()->aid()->for($initiator, 'initiator')->create([
@@ -135,9 +135,9 @@ class DatabaseSeeder extends Seeder
                 'pitch' => '本周日上午去项目工地看施工进度，我开车有 3 个空位，住得近的邻居可以拼车，油费不用给，人齐出发。',
             ],
         ]);
-        Record::factory()->count(3)->for($aid, 'matter')->create();
+        Stance::factory()->count(3)->for($aid, 'matter')->create();
 
-        // ---- 征集：装修意向摸底（问卷 schema 在事务 payload 里，登记=对它的表态）----
+        // ---- 征集：装修意向摸底（问卷 schema 在事项 payload 里，登记=对它的表态）----
         $census = Matter::factory()->create([
             'type' => 'census',
             'initiator_id' => null,
@@ -160,7 +160,7 @@ class DatabaseSeeder extends Seeder
                 ]], $this->surveyModules()),
             ],
         ]);
-        Record::factory()->count(46)->censusAnswers()->create(['matter_id' => $census->id]);
+        Stance::factory()->count(46)->censusAnswers()->create(['matter_id' => $census->id]);
     }
 
     /**

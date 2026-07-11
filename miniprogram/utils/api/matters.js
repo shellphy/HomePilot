@@ -1,4 +1,4 @@
-// 事务与表态的服务层：页面不拼 URL，只表达意图
+// 事项与表态的服务层：页面不拼 URL，只表达意图
 const { request } = require('../request');
 
 function listMatters() {
@@ -25,7 +25,7 @@ function updateGroupbuy(id, data) {
   return request(`/matters/${id}`, { method: 'PUT', data });
 }
 
-// 通用事务（活动/互助/维权）的发起与编辑
+// 通用事项（活动/互助/维权）的发起与编辑
 function createMatter(type, data) {
   return request('/matters', { method: 'POST', data: { type, ...data } });
 }

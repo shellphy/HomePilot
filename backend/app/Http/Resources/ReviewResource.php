@@ -2,14 +2,14 @@
 
 namespace App\Http\Resources;
 
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * 评价表态（mode=review 的记录）。
+ * 评价表态（mode=review 的表态）。
  *
- * @mixin Record
+ * @mixin Stance
  */
 class ReviewResource extends JsonResource
 {

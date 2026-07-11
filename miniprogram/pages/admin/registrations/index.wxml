@@ -4,7 +4,7 @@
       <input class="fin" placeholder="搜昵称 / 楼栋 / 微信号 / 手机号" value="{{keyword}}" bind:input="onSearch" />
     </view>
     <view class="card">
-      <block wx:for="{{records}}" wx:key="id">
+      <block wx:for="{{registrations}}" wx:key="id">
         <view class="row" hover-class="row-hover" data-id="{{item.id}}" bind:tap="toggle">
           <view class="row-main">
             <view class="row-title">{{item.unit_label || '未填楼栋'}}{{item.room_label ? ' ' + item.room_label : ''}} · {{item.nickname}}</view>
@@ -20,7 +20,7 @@
           <view wx:if="{{!item.answers.length}}" class="hint">没有答案</view>
         </view>
       </block>
-      <view wx:if="{{!records.length}}" class="hint">{{keyword ? '没有匹配的登记' : '还没有人登记'}}</view>
+      <view wx:if="{{!registrations.length}}" class="hint">{{keyword ? '没有匹配的登记' : '还没有人登记'}}</view>
     </view>
   </page-status>
 </view>

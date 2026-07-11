@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Matter;
-use App\Models\Record;
 use App\Models\Resident;
+use App\Models\Stance;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
@@ -48,7 +48,7 @@ function basicAnswers(array $overrides = []): array
 test('the census ships its schema, my answers and aggregates', function () {
     $census = renovationCensus();
     $resident = Resident::factory()->create();
-    Record::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
     Sanctum::actingAs($resident);
 
     $this->getJson("/api/matters/{$census->id}/census")
@@ -75,7 +75,7 @@ test('a complete member profile is a precondition, not part of the form', functi
         ->assertUnprocessable()
         ->assertJsonValidationErrors('profile');
 
-    expect($resident->refresh()->unit_id)->toBeNull();
+    expect($resident->refresh()->unit_label)->toBe('');
 
     // 在「个人资料」完善档案后，同样的答卷可以提交
     $this->putJson('/api/me', ['unit_label' => '7栋', 'wechat_id' => 'laoK-2026'])->assertSuccessful();
@@ -84,10 +84,10 @@ test('a complete member profile is a precondition, not part of the form', functi
         ->assertCreated()
         ->assertJsonPath('registered_count', 1);
 
-    $record = Record::where('mode', Record::MODE_REGISTER)->first();
+    $stance = Stance::where('mode', Stance::MODE_REGISTER)->first();
 
-    expect($record->matter_id)->toBe($census->id)
-        ->and($record->payload['answers']['layout'])->toBe(app(CommunitySettings::class)->layouts[0]);
+    expect($stance->matter_id)->toBe($census->id)
+        ->and($stance->payload['answers']['layout'])->toBe(app(CommunitySettings::class)->layouts[0]);
 });
 
 test('answers merge module by module and keep a revision trail', function () {
@@ -100,11 +100,11 @@ test('answers merge module by module and keep a revision trail', function () {
         ->assertSuccessful()
         ->assertJsonPath('answered', 4);
 
-    $record = Record::where('mode', Record::MODE_REGISTER)->first();
+    $stance = Stance::where('mode', Stance::MODE_REGISTER)->first();
 
-    expect(Record::where('mode', Record::MODE_REGISTER)->count())->toBe(1)
-        ->and($record->payload['answers'])->toHaveKeys(['layout', 'household_size'])
-        ->and($record->revisions()->count())->toBe(1);
+    expect(Stance::where('mode', Stance::MODE_REGISTER)->count())->toBe(1)
+        ->and($stance->payload['answers'])->toHaveKeys(['layout', 'household_size'])
+        ->and($stance->revisions()->count())->toBe(1);
 });
 
 test('required questions must be answered before optional modules', function () {
@@ -119,7 +119,7 @@ test('required questions must be answered before optional modules', function () 
 test('the census rejects unknown questions and invalid options', function (array $answers) {
     $census = renovationCensus();
     $resident = Resident::factory()->create();
-    Record::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
     Sanctum::actingAs($resident);
 
     $this->putJson("/api/matters/{$census->id}/census", ['answers' => $answers])
@@ -153,7 +153,7 @@ test('census endpoints reject non census matters', function () {
 test('the feed carries register counts and whether I registered', function () {
     $census = renovationCensus();
     $resident = Resident::factory()->create();
-    Record::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
     Sanctum::actingAs($resident);
 
     $this->getJson('/api/matters')
@@ -166,7 +166,7 @@ test('the feed carries register counts and whether I registered', function () {
 test('my censuses ride the profile payload', function () {
     $census = renovationCensus();
     $resident = Resident::factory()->create();
-    Record::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
     Sanctum::actingAs($resident);
 
     $this->getJson('/api/me')

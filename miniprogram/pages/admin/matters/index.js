@@ -1,4 +1,4 @@
-// 管理端 · 事务列表：审核队列与全部事务，发布新事务的入口
+// 管理端 · 事项列表：审核队列与全部事项，发布新事项的入口
 const admin = require('../../../utils/api/admin');
 const profile = require('../../../utils/api/profile');
 const load = require('../../../behaviors/load');

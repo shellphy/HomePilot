@@ -1,4 +1,4 @@
-// 事务相关的共享常量（列表、详情、发起页都用，改文案只改这里）
+// 事项相关的共享常量（列表、详情、发起页都用，改文案只改这里）
 
 const PILL_CLASS = {
   open: 'pill-open',
@@ -10,7 +10,7 @@ const PILL_CLASS = {
   resolved: 'pill-done',
 };
 
-// 各事务类型的参与文案（团购/公告有专属组件，不走这份配置）
+// 各事项类型的参与文案（团购/公告有专属组件，不走这份配置）
 const TYPE_META = {
   activity: { joinCta: '报名参加', joinedCta: '已报名 ✓（点击取消）', foot: '人已报名', roster: '报名名单' },
   aid: { joinCta: '算我一个', joinedCta: '已加入 ✓（点击退出）', foot: '人已加入', roster: '参与名单' },

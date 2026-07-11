@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -24,7 +24,7 @@ class JoinController extends Controller
 
         $matter->joins()->firstOrCreate([
             'resident_id' => $resident->id,
-            'mode' => Record::MODE_JOIN,
+            'mode' => Stance::MODE_JOIN,
         ]);
 
         return response()->json([

@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\MatterResource;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -18,7 +18,7 @@ class MatterController extends Controller
     use ResolvesResident;
 
     /**
-     * 小区事务流（仅已审核，混合类型）：按类型自己声明的权重排序。
+     * 小区事项流（仅已审核，混合类型）：按类型自己声明的权重排序。
      */
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -26,9 +26,9 @@ class MatterController extends Controller
 
         $matters = Matter::approved()
             ->withCount('joins')
-            ->withCount(['records as register_count' => fn ($query) => $query->where('mode', Record::MODE_REGISTER)])
-            ->withExists(['records as registered_by_me' => fn ($query) => $query
-                ->where('mode', Record::MODE_REGISTER)
+            ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
+            ->withExists(['stances as registered_by_me' => fn ($query) => $query
+                ->where('mode', Stance::MODE_REGISTER)
                 ->where('resident_id', $resident->id)])
             ->latest()
             ->get()
@@ -40,7 +40,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 我参与过的事务（有接龙表态的）。
+     * 我参与过的事项（有接龙表态的）。
      */
     public function joined(Request $request): AnonymousResourceCollection
     {
@@ -56,7 +56,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 我发起的事务（含待审核的）。
+     * 我发起的事项（含待审核的）。
      */
     public function mine(Request $request): AnonymousResourceCollection
     {
@@ -69,7 +69,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 详情：未审核的事务只有发起人自己能看。
+     * 详情：未审核的事项只有发起人自己能看。
      */
     public function show(Request $request, Matter $matter): MatterResource
     {
@@ -80,10 +80,10 @@ class MatterController extends Controller
         $matter
             ->loadCount('joins')
             ->load([
-                'initiator.unit',
-                'joins' => fn ($query) => $query->with('resident.unit')->oldest(),
+                'initiator',
+                'joins' => fn ($query) => $query->with('resident')->oldest(),
                 'updates' => fn ($query) => $query->latest('happened_on'),
-                'reviews' => fn ($query) => $query->with('resident.unit')->latest(),
+                'reviews' => fn ($query) => $query->with('resident')->latest(),
             ]);
 
         $myReview = $matter->reviews->firstWhere('resident_id', $resident->id);
@@ -99,7 +99,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 发起事务：任何业主可发起（类型需允许），发起人即牵头人；管理员审核后公示。
+     * 发起事项：任何业主可发起（类型需允许），发起人即牵头人；管理员审核后公示。
      */
     public function store(Request $request): JsonResponse
     {
@@ -110,7 +110,7 @@ class MatterController extends Controller
         ])['type'];
 
         $type = MatterTypeRegistry::for($typeKey);
-        abort_unless($type->userInitiatable(), 403, '该类型的事务由管理员发布');
+        abort_unless($type->userInitiatable(), 403, '该类型的事项由管理员发布');
 
         $validated = $request->validate($this->rulesFor($typeKey));
 

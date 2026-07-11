@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Matter;
-use App\Models\Record;
 use App\Models\Resident;
+use App\Models\Stance;
 use Laravel\Sanctum\Sanctum;
 
 test('the matter feed puts active groupbuys first and finished ones last', function () {
@@ -36,7 +36,7 @@ test('published notices ride the same feed and pin to the top', function () {
 
 test('the matter feed carries join counts', function () {
     $matter = Matter::factory()->open()->create();
-    Record::factory()->count(3)->for($matter, 'matter')->create();
+    Stance::factory()->count(3)->for($matter, 'matter')->create();
 
     Sanctum::actingAs(Resident::factory()->create());
 
@@ -48,7 +48,7 @@ test('the matter feed carries join counts', function () {
 test('the matter detail shows the roster and whether I joined', function () {
     $matter = Matter::factory()->open()->create();
     $neighbor = Resident::factory()->inUnit('5栋')->create(['nickname' => '老王']);
-    Record::factory()->for($matter, 'matter')->for($neighbor, 'resident')->create();
+    Stance::factory()->for($matter, 'matter')->for($neighbor, 'resident')->create();
 
     Sanctum::actingAs(Resident::factory()->create());
 
@@ -77,13 +77,13 @@ test('joining twice stays idempotent', function () {
         ->assertCreated()
         ->assertJsonPath('join_count', 1);
 
-    expect(Record::where('mode', Record::MODE_JOIN)->count())->toBe(1);
+    expect(Stance::where('mode', Stance::MODE_JOIN)->count())->toBe(1);
 });
 
 test('a resident can cancel their join', function () {
     $matter = Matter::factory()->open()->create();
     $resident = Resident::factory()->create();
-    Record::factory()->for($matter, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->for($matter, 'matter')->for($resident, 'resident')->create();
     Sanctum::actingAs($resident);
 
     $this->deleteJson("/api/matters/{$matter->id}/join")
@@ -91,13 +91,13 @@ test('a resident can cancel their join', function () {
         ->assertJsonPath('joined', false)
         ->assertJsonPath('join_count', 0);
 
-    expect(Record::where('mode', Record::MODE_JOIN)->count())->toBe(0);
+    expect(Stance::where('mode', Stance::MODE_JOIN)->count())->toBe(0);
 });
 
 test('cancelling never touches other residents joins', function () {
     $matter = Matter::factory()->open()->create();
     $neighbor = Resident::factory()->create();
-    Record::factory()->for($matter, 'matter')->for($neighbor, 'resident')->create();
+    Stance::factory()->for($matter, 'matter')->for($neighbor, 'resident')->create();
 
     Sanctum::actingAs(Resident::factory()->create());
 
@@ -105,7 +105,7 @@ test('cancelling never touches other residents joins', function () {
         ->assertSuccessful()
         ->assertJsonPath('join_count', 1);
 
-    expect(Record::where('mode', Record::MODE_JOIN)->count())->toBe(1);
+    expect(Stance::where('mode', Stance::MODE_JOIN)->count())->toBe(1);
 });
 
 test('joining a finished groupbuy is rejected', function () {
@@ -141,7 +141,7 @@ test('a resolved rights action stops taking signatures', function () {
 test('the joined list carries only matters I have a join record on', function () {
     $resident = Resident::factory()->create();
     $joined = Matter::factory()->open()->create();
-    Record::factory()->for($joined, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->for($joined, 'matter')->for($resident, 'resident')->create();
     Matter::factory()->open()->create(); // 别人的事，不该出现
 
     Sanctum::actingAs($resident);

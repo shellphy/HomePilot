@@ -1,4 +1,4 @@
-// 通用事务卡片（活动/互助/维权等接龙型事务；团购/公告有专属卡片）
+// 通用事项卡片（活动/互助/维权等接龙型事项；团购/公告有专属卡片）
 const { pillClass, TYPE_META } = require('../../utils/constants');
 
 Component({

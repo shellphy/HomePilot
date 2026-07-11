@@ -2,8 +2,8 @@
 
 use App\Models\Matter;
 use App\Models\Party;
-use App\Models\Record;
 use App\Models\Resident;
+use App\Models\Stance;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
@@ -142,15 +142,15 @@ test('admin reads census records with contact details and resolved question text
         ],
     ]);
     $resident = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'wechat_id' => 'laok', 'room_label' => '1802']);
-    Record::factory()->create([
+    Stance::factory()->create([
         'matter_id' => $census->id,
         'resident_id' => $resident->id,
-        'mode' => Record::MODE_REGISTER,
+        'mode' => Stance::MODE_REGISTER,
         'payload' => ['answers' => ['q1' => '半包']],
     ]);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->getJson("/api/admin/matters/{$census->id}/records")
+    $this->getJson("/api/admin/matters/{$census->id}/registrations")
         ->assertSuccessful()
         ->assertJsonPath('data.0.unit_label', '3栋')
         ->assertJsonPath('data.0.room_label', '1802')

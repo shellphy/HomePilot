@@ -36,7 +36,7 @@ class PartyController extends Controller
         ]);
 
         // 已是同类型身份：更新现有相关方档案，而不是每次保存都新建一个
-        $party = $resident->party;
+        $party = $resident->affiliatedParty;
         if ($party && $party->type === $validated['type']) {
             $party->update([
                 'name' => $validated['name'],
@@ -48,10 +48,10 @@ class PartyController extends Controller
                 'name' => $validated['name'],
                 'category' => $validated['category'] ?? '',
             ]);
-            $resident->update(['party_id' => $party->id]);
+            $resident->update(['affiliated_party_id' => $party->id]);
         }
 
-        return ResidentResource::make($resident->load(['unit', 'party']));
+        return ResidentResource::make($resident->load('affiliatedParty'));
     }
 
     /**
@@ -60,8 +60,8 @@ class PartyController extends Controller
     public function destroy(Request $request): ResidentResource
     {
         $resident = $this->resident($request);
-        $resident->update(['party_id' => null]);
+        $resident->update(['affiliated_party_id' => null]);
 
-        return ResidentResource::make($resident->load(['unit', 'party']));
+        return ResidentResource::make($resident->load('affiliatedParty'));
     }
 }

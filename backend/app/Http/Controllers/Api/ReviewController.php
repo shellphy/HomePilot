@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReviewResource;
 use App\Models\Matter;
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -41,13 +41,13 @@ class ReviewController extends Controller
         } else {
             $review = $matter->reviews()->create([
                 'resident_id' => $resident->id,
-                'mode' => Record::MODE_REVIEW,
+                'mode' => Stance::MODE_REVIEW,
                 'payload' => $payload,
             ]);
         }
 
         return response()->json(
-            ['data' => ReviewResource::make($review->load('resident.unit'))],
+            ['data' => ReviewResource::make($review->load('resident'))],
             $review->wasRecentlyCreated ? 201 : 200,
         );
     }

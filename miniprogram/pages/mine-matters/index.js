@@ -1,4 +1,4 @@
-// 我参与的 / 我牵头的事务列表
+// 我参与的 / 我牵头的事项列表
 const matters = require('../../utils/api/matters');
 const { pillClass } = require('../../utils/constants');
 const load = require('../../behaviors/load');

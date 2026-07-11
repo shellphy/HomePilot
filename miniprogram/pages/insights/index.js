@@ -1,5 +1,5 @@
 // 小区数据页：全部征集的聚合总览。
-// 不带 id：罗列事务流里所有征集，各自一个板块；带 id（从征集卡片进来）：只看那一期。
+// 不带 id：罗列事项流里所有征集，各自一个板块；带 id（从征集卡片进来）：只看那一期。
 // 新增一期征集，这里自动多出一个板块，无需任何改动。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
@@ -80,7 +80,7 @@ Page({
         }];
         wx.setNavigationBarTitle({ title: census.title });
       } else {
-        // 总览模式：只列各期征集的概况，点进去看详情（数据都在事务流里，无需逐期请求）
+        // 总览模式：只列各期征集的概况，点进去看详情（数据都在事项流里，无需逐期请求）
         const feed = await matters.listMatters();
         items = feed.data
           .filter((matter) => matter.type === 'census')

@@ -5,27 +5,27 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
-use App\Models\Record;
+use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * 管理端 · 事务：审核、发布（公告/征集等管理员专属类型）、编辑、删除。
+ * 管理端 · 事项：审核、发布（公告/征集等管理员专属类型）、编辑、删除。
  */
 class MatterAdminController extends Controller
 {
     /**
-     * 全部事务（含待审核）；?pending=1 只看待审核队列。
+     * 全部事项（含待审核）；?pending=1 只看待审核队列。
      */
     public function index(Request $request): JsonResponse
     {
         $matters = Matter::query()
             ->when($request->boolean('pending'), fn ($query) => $query->where('is_approved', false))
-            ->with('initiator.unit')
+            ->with('initiator')
             ->withCount('joins')
-            ->withCount(['records as register_count' => fn ($query) => $query->where('mode', Record::MODE_REGISTER)])
+            ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
             ->latest()
             ->get();
 
@@ -38,13 +38,13 @@ class MatterAdminController extends Controller
     public function show(Matter $matter): JsonResponse
     {
         $matter->loadCount('joins')
-            ->loadCount(['records as register_count' => fn ($query) => $query->where('mode', Record::MODE_REGISTER)]);
+            ->loadCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)]);
 
         return response()->json(['data' => $this->present($matter)]);
     }
 
     /**
-     * 管理员发布事务（任何类型，包括公告/征集这类业主不能自发的），默认直接公示。
+     * 管理员发布事项（任何类型，包括公告/征集这类业主不能自发的），默认直接公示。
      */
     public function store(Request $request): JsonResponse
     {
@@ -109,26 +109,26 @@ class MatterAdminController extends Controller
     /**
      * 登记明细（含楼栋/房号/微信/手机等仅管理员可见字段），答案换算成题面文字。
      */
-    public function records(Matter $matter): JsonResponse
+    public function registrations(Matter $matter): JsonResponse
     {
         $questions = collect($matter->payloadValue('modules', []))
             ->flatMap(fn (array $module): array => $module['questions'] ?? [])
             ->keyBy('key');
 
-        $records = $matter->records()
-            ->where('mode', Record::MODE_REGISTER)
-            ->with('resident.unit')
+        $registrations = $matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
+            ->with('resident')
             ->latest()
             ->get()
-            ->map(fn (Record $record): array => [
-                'id' => $record->id,
-                'unit_label' => $record->resident?->unit?->label ?? '',
-                'room_label' => $record->resident?->room_label ?? '',
-                'nickname' => $record->resident?->nickname ?? '',
-                'wechat_id' => $record->resident?->wechat_id ?? '',
-                'phone' => $record->resident?->phone ?? '',
-                'created_at' => $record->created_at?->format('Y-m-d H:i'),
-                'answers' => collect($record->payload['answers'] ?? [])
+            ->map(fn (Stance $stance): array => [
+                'id' => $stance->id,
+                'unit_label' => $stance->resident?->unit_label ?? '',
+                'room_label' => $stance->resident?->room_label ?? '',
+                'nickname' => $stance->resident?->nickname ?? '',
+                'wechat_id' => $stance->resident?->wechat_id ?? '',
+                'phone' => $stance->resident?->phone ?? '',
+                'created_at' => $stance->created_at?->format('Y-m-d H:i'),
+                'answers' => collect($stance->payload['answers'] ?? [])
                     ->map(fn (mixed $value, string $key): array => [
                         'question' => $questions[$key]['text'] ?? $key,
                         'answer' => is_array($value) ? implode('、', $value) : (string) $value,
@@ -136,7 +136,7 @@ class MatterAdminController extends Controller
                     ->values(),
             ]);
 
-        return response()->json(['data' => $records]);
+        return response()->json(['data' => $registrations]);
     }
 
     /**

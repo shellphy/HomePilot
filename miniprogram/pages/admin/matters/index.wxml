@@ -1,6 +1,6 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <t-button theme="primary" block bind:tap="goCreate">发布新事务</t-button>
+    <t-button theme="primary" block bind:tap="goCreate">发布新事项</t-button>
 
     <view class="chips filter-chips">
       <view class="chip {{typeFilter === '' ? 'chip-on' : ''}}" data-type="" bind:tap="pickType">全部类型</view>
@@ -35,7 +35,7 @@
         <view wx:else class="pill pill-open">已公示</view>
       </view>
 
-      <view wx:if="{{!matters.length}}" class="hint">{{stateFilter === 'pending' ? '没有待审核的事务' : '这个筛选下没有事务'}}</view>
+      <view wx:if="{{!matters.length}}" class="hint">{{stateFilter === 'pending' ? '没有待审核的事项' : '这个筛选下没有事项'}}</view>
     </view>
   </page-status>
 </view>

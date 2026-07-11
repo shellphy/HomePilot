@@ -5,7 +5,7 @@ namespace App\Matters;
 use App\Models\Matter;
 
 /**
- * 公告：最简单的事务类型（单向公示），
+ * 公告：最简单的事项类型（单向公示），
  * 存在的意义是证明"新场景 = 一个类型类"这条内核承诺成立。
  */
 class NoticeType extends MatterType
@@ -41,7 +41,7 @@ class NoticeType extends MatterType
         return false;
     }
 
-    /** 归档的公告退出事务流。 */
+    /** 归档的公告退出事项流。 */
     public function visibleInList(Matter $matter): bool
     {
         return $matter->state === 'published';

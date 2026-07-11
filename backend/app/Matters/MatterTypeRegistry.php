@@ -22,7 +22,7 @@ class MatterTypeRegistry
     public static function for(string $key): MatterType
     {
         if (! isset(self::TYPES[$key])) {
-            throw new InvalidArgumentException("未知的事务类型：{$key}");
+            throw new InvalidArgumentException("未知的事项类型：{$key}");
         }
 
         return self::$instances[$key] ??= new (self::TYPES[$key]);

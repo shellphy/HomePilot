@@ -6,17 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * 记录的历史版本（append-only）。
+ * 表态的历史版本（append-only）。
  *
  * @property int $id
- * @property int $record_id
+ * @property int $stance_id
  * @property array<string, mixed> $payload
  */
-class RecordRevision extends Model
+class StanceRevision extends Model
 {
     public const UPDATED_AT = null;
 
-    protected $fillable = ['record_id', 'payload'];
+    protected $fillable = ['stance_id', 'payload'];
 
     protected function casts(): array
     {
@@ -25,9 +25,9 @@ class RecordRevision extends Model
         ];
     }
 
-    /** @return BelongsTo<Record, $this> */
-    public function record(): BelongsTo
+    /** @return BelongsTo<Stance, $this> */
+    public function stance(): BelongsTo
     {
-        return $this->belongsTo(Record::class);
+        return $this->belongsTo(Stance::class);
     }
 }

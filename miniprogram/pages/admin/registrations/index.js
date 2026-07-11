@@ -8,9 +8,9 @@ Page({
   data: {
     id: null,
     all: [],
-    records: [],
+    registrations: [],
     keyword: '',
-    openId: null, // 展开答案的记录
+    openId: null, // 展开答案的登记
   },
 
   onLoad(query) {
@@ -20,7 +20,7 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const res = await admin.listRecords(this.data.id);
+      const res = await admin.listRegistrations(this.data.id);
       this.setData({ all: res.data });
       this.applyFilter();
     });
@@ -34,8 +34,8 @@ Page({
   applyFilter() {
     const { all, keyword } = this.data;
     this.setData({
-      records: keyword
-        ? all.filter((record) => [record.nickname, record.unit_label, record.room_label, record.wechat_id, record.phone]
+      registrations: keyword
+        ? all.filter((registration) => [registration.nickname, registration.unit_label, registration.room_label, registration.wechat_id, registration.phone]
           .some((field) => field && field.includes(keyword)))
         : all,
     });
