@@ -31,8 +31,8 @@ class JoinController extends Controller
             ]);
         }
 
-        $validated = $request->validate(['share_contact' => ['sometimes', 'boolean']]);
-        $shareContact = (bool) ($validated['share_contact'] ?? true);
+        $request->validate(['share_contact' => ['sometimes', 'boolean']]);
+        $shareContact = $request->boolean('share_contact', true);
 
         $stance = $matter->joins()->firstOrCreate(
             ['resident_id' => $resident->id, 'mode' => Stance::MODE_JOIN],

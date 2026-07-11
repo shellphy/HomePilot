@@ -65,8 +65,8 @@ Page({
         joined: res.joined,
         isInitiator: res.data.initiator_id === me.id,
         myReview: res.my_review || null,
-        contacts: res.contacts || [],
-        initiatorContact: res.initiator_contact || null,
+        contacts: res.contacts,
+        initiatorContact: res.initiator_contact,
         canRespond: !!(me.party && me.party.is_listed && GOVERNANCE_TYPES.includes(me.party.type)),
       });
       wx.setNavigationBarTitle({ title: res.data.title });

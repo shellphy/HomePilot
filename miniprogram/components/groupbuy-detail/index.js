@@ -111,9 +111,10 @@ Component({
       }
     },
 
-    // 业主没选楼栋号会被后端拦下：引导去个人资料补全，回来即可报名
+    // 业主没选楼栋号会被后端拦下（errors.profile）：引导去个人资料补全，回来即可报名
     handleJoinError(error) {
-      if ((error.message || '').includes('楼栋号')) {
+      const errors = (error.response && error.response.data && error.response.data.errors) || {};
+      if (errors.profile) {
         wx.showModal({
           title: '先选好楼栋号',
           content: '接龙名单以「楼栋 + 昵称」公示，报名前请先在个人资料里选好楼栋号。',
