@@ -15,10 +15,10 @@ class UploadController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'image' => ['required', 'image', 'max:5120'],
+            'image' => ['required', 'image', 'max:10240'],
         ], [
             'image.image' => '只能上传图片',
-            'image.max' => '图片不能超过 5MB',
+            'image.max' => '图片不能超过 10MB',
         ]);
 
         $path = $validated['image']->store('uploads', 'public');
