@@ -5,7 +5,7 @@
     <!-- 整行都是资料入口，头像在这里只是展示（编辑在内页） -->
     <view class="profile" hover-class="profile-hover" bind:tap="goProfile">
       <image wx:if="{{me.avatar}}" class="avatar" src="{{me.avatar}}" mode="aspectFill" />
-      <view wx:else class="avatar avatar-fallback">{{me.nickname ? me.nickname[0] : '邻'}}</view>
+      <view wx:else class="avatar avatar-fallback"></view>
       <view class="profile-main">
         <view class="profile-name">{{me.nickname || '未设置昵称'}}</view>
         <view class="profile-sub" wx:if="{{identityLine}}">{{identityLine}}</view>

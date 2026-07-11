@@ -1,57 +1,68 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <view class="card">
-      <view class="avatar-row">
-        <text class="f-label avatar-label">头像</text>
-        <button class="avatar-wrapper" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
-          <image wx:if="{{avatar}}" class="avatar" src="{{avatar}}" mode="aspectFill" />
-          <view wx:else class="avatar avatar-fallback">{{nickname ? nickname[0] : '邻'}}</view>
-        </button>
+    <view class="card form-list">
+      <!-- 头像行：整行是 chooseAvatar 按钮，头像靠右贴箭头 -->
+      <button class="frow frow-btn" hover-class="frow-hover" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
+        <text class="frow-label">头像</text>
+        <image wx:if="{{avatar}}" class="avatar" src="{{avatar}}" mode="aspectFill" />
+        <view wx:else class="avatar avatar-fallback"></view>
+        <text class="frow-arrow">›</text>
+      </button>
+
+      <view class="frow">
+        <text class="frow-label">昵称</text>
+        <input
+          class="frow-input"
+          type="nickname"
+          value="{{nickname}}"
+          placeholder="请填写"
+          data-field="nickname"
+          bind:input="onInput"
+          bind:blur="onInput"
+          bind:change="onInput"
+        />
       </view>
 
-      <view class="f-label">昵称</view>
-      <input
-        class="fin"
-        type="nickname"
-        value="{{nickname}}"
-        data-field="nickname"
-        bind:input="onInput"
-        bind:blur="onInput"
-        bind:change="onInput"
-      />
-
-      <view class="f-label">身份</view>
-      <view class="chips">
-        <view
-          wx:for="{{identities}}"
-          wx:key="key"
-          class="chip {{identity === item.key ? 'chip-on' : ''}}"
-          data-value="{{item.key}}"
-          bind:tap="pickIdentity"
-        >{{item.label}}</view>
+      <view class="frow" hover-class="frow-hover" bind:tap="chooseIdentity">
+        <text class="frow-label">身份</text>
+        <text class="frow-value">{{identityLabel}}</text>
+        <text class="frow-arrow">›</text>
       </view>
 
       <!-- 业主 -->
       <block wx:if="{{identity === 'resident'}}">
-        <view class="f-label">楼栋号<text class="f-required">*</text></view>
-        <input class="fin" value="{{unitLabel}}" data-field="unitLabel" bind:input="onInput" />
-        <view class="f-label">房号<text class="q-note">选填</text></view>
-        <input class="fin" value="{{roomLabel}}" data-field="roomLabel" bind:input="onInput" />
-        <view class="f-label">微信号<text class="q-note">选填</text></view>
-        <input class="fin" value="{{wechatId}}" data-field="wechatId" bind:input="onInput" />
-        <view class="f-label">手机号<text class="q-note">选填</text></view>
-        <input class="fin" type="number" value="{{phone}}" data-field="phone" bind:input="onInput" />
+        <view class="frow">
+          <text class="frow-label">楼栋号<text class="f-required">*</text></text>
+          <input class="frow-input" value="{{unitLabel}}" placeholder="必填" data-field="unitLabel" bind:input="onInput" />
+        </view>
+        <view class="frow">
+          <text class="frow-label">房号</text>
+          <input class="frow-input" value="{{roomLabel}}" placeholder="选填" data-field="roomLabel" bind:input="onInput" />
+        </view>
+        <view class="frow">
+          <text class="frow-label">微信号</text>
+          <input class="frow-input" value="{{wechatId}}" placeholder="选填" data-field="wechatId" bind:input="onInput" />
+        </view>
+        <view class="frow">
+          <text class="frow-label">手机号</text>
+          <input class="frow-input" type="number" value="{{phone}}" placeholder="选填" data-field="phone" bind:input="onInput" />
+        </view>
       </block>
 
       <!-- 商家等相关方 -->
       <block wx:else>
-        <view class="f-label">名称</view>
-        <input class="fin" value="{{partyName}}" data-field="partyName" bind:input="onInput" />
-        <view class="f-label">主营</view>
-        <input class="fin" value="{{partyCategory}}" data-field="partyCategory" bind:input="onInput" />
-        <view class="privacy privacy-inline">相关方身份对全小区公开，报名、登记、发起都和业主一样，只是以这个身份出现；可随时切回业主。进入公示名单需管理员认证。</view>
+        <view class="frow">
+          <text class="frow-label">名称<text class="f-required">*</text></text>
+          <input class="frow-input" value="{{partyName}}" placeholder="必填" data-field="partyName" bind:input="onInput" />
+        </view>
+        <view class="frow">
+          <text class="frow-label">主营</text>
+          <input class="frow-input" value="{{partyCategory}}" placeholder="选填" data-field="partyCategory" bind:input="onInput" />
+        </view>
       </block>
     </view>
+
+    <view class="privacy" wx:if="{{identity !== 'resident'}}">相关方身份对全小区公开，报名、登记、发起都和业主一样，只是以这个身份出现；可随时切回业主。进入公示名单需管理员认证。</view>
 
     <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">保存</t-button>
   </page-status>
