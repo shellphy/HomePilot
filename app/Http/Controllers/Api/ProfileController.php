@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\ResidentResource;
 use App\Services\WeChat;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
 {
@@ -29,6 +30,21 @@ class ProfileController extends Controller
         $resident->save();
 
         // 与 show() 保持一致的完整视图，小程序端会直接把该响应当缓存用
+        return ResidentResource::make($resident->load('affiliatedParty'));
+    }
+
+    /**
+     * 标记「我牵头的 / 我参与的」列表已读：打开列表页时调用，清掉「我的」页红点。
+     */
+    public function markSeen(Request $request): ResidentResource
+    {
+        $validated = $request->validate([
+            'kind' => ['required', Rule::in(['mine', 'joined'])],
+        ]);
+
+        $resident = $this->resident($request);
+        $resident->forceFill([$validated['kind'].'_seen_at' => now()])->save();
+
         return ResidentResource::make($resident->load('affiliatedParty'));
     }
 

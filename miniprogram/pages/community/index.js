@@ -28,6 +28,7 @@ Page({
     wx.stopPullDownRefresh();
   },
 
+  // 社区名称只认 /options 下发（社区设置里改），没取到时用中性兜底，不写死具体小区
   onShareAppMessage() {
     const { community, activeCount } = this.data;
     return {

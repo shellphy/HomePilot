@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * 事项：社区正在处理的一件事（系统的中心运行时对象）。
@@ -25,6 +26,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property bool $is_approved
  * @property int $target_count
  * @property array<string, mixed>|null $payload
+ * @property Carbon|null $last_activity_at
+ * @property int|null $last_activity_resident_id
  * @property-read Resident|null $initiator
  * @property-read Party|null $initiatorParty
  */
@@ -53,7 +56,20 @@ class Matter extends Model
         return [
             'is_approved' => 'boolean',
             'payload' => 'array',
+            'last_activity_at' => 'datetime',
         ];
+    }
+
+    /**
+     * 记录一次对发起人/参与者有意义的动态（审核结果、状态流转、成交公示、时间线进展），
+     * 供「我的」页未读红点比对；actor 记下触发人，比对时排除自己触发的动态。
+     */
+    public function recordActivity(?Resident $actor): void
+    {
+        $this->forceFill([
+            'last_activity_at' => now(),
+            'last_activity_resident_id' => $actor?->id,
+        ])->save();
     }
 
     public function typeDef(): MatterType

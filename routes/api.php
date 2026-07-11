@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [ProfileController::class, 'show']);
     Route::put('/me', [ProfileController::class, 'update']);
     Route::post('/me/phone', [ProfileController::class, 'updatePhone']);
+    Route::post('/me/seen', [ProfileController::class, 'markSeen']);
     Route::post('/me/party', [PartyController::class, 'store']);
     Route::delete('/me/party', [PartyController::class, 'destroy']);
     Route::get('/parties', [PartyController::class, 'index']);

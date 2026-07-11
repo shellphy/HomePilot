@@ -228,3 +228,19 @@
   transform: scale(0.8);
   transform-origin: right center;
 }
+
+/* 成团后没共享联系方式的说明（互通是双向的） */
+.share-note {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 16rpx;
+}
+
+/* 相关方身份的报名区说明 */
+.party-note {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-bottom: 16rpx;
+}

@@ -26,6 +26,14 @@ function invalidateMe() {
   cached = null;
 }
 
+// 标记「我牵头的(mine) / 我参与的(joined)」列表已读：打开列表页时调用，
+// 清掉「我的」页与 tab 上的未读红点（has_mine_updates / has_joined_updates）
+async function markSeen(kind) {
+  const res = await request('/me/seen', { method: 'POST', data: { kind } });
+  cached = Promise.resolve(res.data);
+  return res.data;
+}
+
 // 手机号授权：官方组件（open-type="getPhoneNumber"）拿到的 code 换微信绑定号码，
 // 这是手机号唯一的写入途径（不接受手填）
 async function authPhone(code) {
@@ -49,4 +57,4 @@ async function unbindParty() {
   return res.data;
 }
 
-module.exports = { getMe, updateMe, invalidateMe, authPhone, bindParty, unbindParty };
+module.exports = { getMe, updateMe, invalidateMe, markSeen, authPhone, bindParty, unbindParty };

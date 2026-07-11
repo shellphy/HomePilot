@@ -15,12 +15,15 @@ Component({
     isInitiator: Boolean,
     myReview: Object,    // 我的评价（结束后可修改）
     canRespond: Boolean, // 被认证的治理类相关方成员：可发官方回应
-    isParty: Boolean,    // 相关方身份不参与接龙，隐藏参与按钮
+    isParty: Boolean,    // 相关方身份不参与接龙，参与区改为解释 + 切回业主入口
+    partyLabel: String,  // 当前相关方身份的显示名（解释文案用）
   },
 
   data: {
     pillClass: '',
     meta: {},
+    nextState: null,   // 状态机的下一站（终态时为 null）
+    nextIsFinal: false, // 下一站是否终态：终态不可回退，确认弹窗要说清后果
     submitting: false,
     reviews: [],
     reviewRating: 0,
@@ -31,9 +34,15 @@ Component({
   observers: {
     matter(matter) {
       if (!matter) return;
+      // 状态只能沿状态机推进一步（与后端守卫一致），算出下一站；终态时为 null（按钮隐藏）
+      const states = stateOptions(matter.states);
+      const stateIndex = states.findIndex((state) => state.value === matter.state);
+      const nextState = stateIndex >= 0 ? states[stateIndex + 1] || null : null;
       this.setData({
         pillClass: pillClass(matter.state),
         meta: TYPE_META[matter.type] || { joinCta: '参与', joinedCta: '已参与（点击取消）', foot: '人已参与', roster: '参与名单' },
+        nextState,
+        nextIsFinal: !!nextState && stateIndex + 2 === states.length,
         reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
       });
     },
@@ -133,15 +142,22 @@ Component({
       wx.navigateTo({ url: `/pages/matter-update/index?id=${this.data.matter.id}` });
     },
 
+    // 状态只能推进到下一站（跳步/回退后端会拦）；进终态是不可逆动作，确认时把后果讲清楚
     flipState() {
-      const { matter } = this.data;
-      const options = stateOptions(matter.states).filter((state) => state.value !== matter.state);
+      const { matter, nextState, nextIsFinal } = this.data;
+      if (!nextState) return;
 
-      wx.showActionSheet({
-        itemList: options.map((state) => `流转为「${state.label}」`),
-        success: async ({ tapIndex }) => {
+      wx.showModal({
+        title: `流转为「${nextState.label}」？`,
+        content: nextIsFinal
+          ? `「${nextState.label}」是最终状态，确认后不能再回退，评价等事后环节将开启（纠错需联系管理员）。`
+          : `状态将从「${matter.state_label}」推进为「${nextState.label}」，此后不能退回上一步。`,
+        confirmText: '确认流转',
+        cancelText: '再想想',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
           try {
-            await matters.flipState(matter.id, options[tapIndex].value);
+            await matters.flipState(matter.id, nextState.value);
             wx.showToast({ title: '状态已更新', icon: 'success' });
             this.refresh();
           } catch (error) {
@@ -149,6 +165,11 @@ Component({
           }
         },
       });
+    },
+
+    // 相关方身份不参与接龙：去个人资料页切回业主身份
+    goSwitchIdentity() {
+      wx.navigateTo({ url: '/pages/profile-form/index' });
     },
   },
 });

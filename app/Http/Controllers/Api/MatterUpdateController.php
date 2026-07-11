@@ -40,6 +40,7 @@ class MatterUpdateController extends Controller
             'author_party_id' => $isInitiator ? null : $party->id,
         ]);
 
+        $matter->recordActivity($resident);
         MatterUpdatePosted::dispatch($update);
 
         return response()->json(['data' => MatterUpdateResource::make($update)], 201);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Events\MatterApproved;
 use App\Events\MatterStateChanged;
+use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
@@ -18,6 +19,8 @@ use Illuminate\Validation\Rule;
  */
 class MatterAdminController extends Controller
 {
+    use ResolvesResident;
+
     /**
      * 全部事项（含待审核）；?pending=1 只看待审核队列。
      */
@@ -89,6 +92,7 @@ class MatterAdminController extends Controller
         ]);
 
         if ($matter->state !== $previousState) {
+            $matter->recordActivity($this->resident($request));
             MatterStateChanged::dispatch($matter, $previousState);
         }
 
@@ -112,6 +116,12 @@ class MatterAdminController extends Controller
                 'reject_reason' => $validated['is_approved'] ? '' : ($validated['reason'] ?? ''),
             ]),
         ]);
+
+        // 审核结果对发起人是关键动态：喂给「我的」页未读红点。
+        // 驳回时待审事项的 is_approved 本来就是 false，不能只看变化——每次驳回（理由可能更新）都记
+        if ($matter->is_approved !== $wasApproved || ! $matter->is_approved) {
+            $matter->recordActivity($this->resident($request));
+        }
 
         if ($matter->is_approved && ! $wasApproved) {
             MatterApproved::dispatch($matter);
@@ -206,6 +216,8 @@ class MatterAdminController extends Controller
 
     /**
      * 管理端校验：通用字段 + 按类型的 payload 结构（征集问卷校验最严，答案按它落库）。
+     * 列级字段（category/target_count）与业主前台同一份 baseRules：
+     * 管理员代发的团购同样必须有品类与目标人数，两条创建路径校验强度一致。
      *
      * @return array<string, mixed>
      */
@@ -219,6 +231,7 @@ class MatterAdminController extends Controller
             'state' => ['sometimes', Rule::in(array_keys($type->states()))],
             'is_approved' => ['sometimes', 'boolean'],
             'target_count' => ['sometimes', 'integer', 'min:0'],
+            ...$type->baseRules(),
             'payload' => ['sometimes', 'array'],
             'payload.pitch' => ['sometimes', 'nullable', 'string', 'max:1000'],
             'payload.body' => ['sometimes', 'nullable', 'string', 'max:2000'],

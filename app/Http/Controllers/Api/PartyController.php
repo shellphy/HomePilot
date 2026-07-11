@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentResource;
 use App\Models\Party;
-use App\Models\Resident;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,14 +28,9 @@ class PartyController extends Controller
             ->orderByDesc('deal_count')
             ->get();
 
-        // 联系电话取档案归属人（last_party_id）的授权手机号，老数据兜底当前绑定人；
+        // 联系电话取档案联系人（当前绑定成员优先，其次最近绑定过的成员）的授权手机号；
         // 归属人暂时切回业主也不影响名录展示
-        $owners = Resident::query()
-            ->where('phone', '!=', '')
-            ->where(fn ($query) => $query
-                ->whereIn('last_party_id', $parties->pluck('id'))
-                ->orWhereIn('affiliated_party_id', $parties->pluck('id')))
-            ->get(['affiliated_party_id', 'last_party_id', 'phone']);
+        $owners = Party::contactCandidatesFor($parties->pluck('id'), withPhoneOnly: true);
 
         // 评价挂在事项上，按发起方聚合出每家的均分（小区体量小，PHP 侧聚合即可）
         $reviews = Stance::where('mode', Stance::MODE_REVIEW)
@@ -48,8 +42,7 @@ class PartyController extends Controller
         return response()->json([
             'data' => $parties->map(function (Party $party) use ($reviews, $owners): array {
                 $partyReviews = $reviews->get($party->id, collect());
-                $owner = $owners->firstWhere('last_party_id', $party->id)
-                    ?? $owners->firstWhere('affiliated_party_id', $party->id);
+                $owner = $party->contactOwnerAmong($owners);
 
                 return [
                     'id' => $party->id,
@@ -82,12 +75,9 @@ class PartyController extends Controller
         $isOwner = $resident->affiliated_party_id === $party->id || $resident->last_party_id === $party->id;
         abort_unless($party->is_listed || $resident->is_admin || $isOwner, 404);
 
-        $owner = Resident::query()
-            ->where('phone', '!=', '')
-            ->where(fn ($query) => $query
-                ->where('last_party_id', $party->id)
-                ->orWhere('affiliated_party_id', $party->id))
-            ->first();
+        $owner = $party->contactOwnerAmong(
+            Party::contactCandidatesFor(collect([$party->id]), withPhoneOnly: true),
+        );
 
         $reviews = Stance::where('mode', Stance::MODE_REVIEW)
             ->whereHas('matter', fn ($query) => $query->where('initiator_party_id', $party->id))

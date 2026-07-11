@@ -47,13 +47,43 @@ test('the initiator cannot flip a matter out of its final state', function () {
     expect($matter->refresh()->state)->toBe('done');
 });
 
-test('non-final states still flow freely including into the final state', function () {
+// ---- 顺序流转：发起人只能沿状态机推进一步，跳步/回退都不行 ----
+
+test('the initiator advances the state one step at a time', function () {
     $initiator = Resident::factory()->create();
-    $matter = Matter::factory()->open()->for($initiator, 'initiator')->create();
+    $matter = Matter::factory()->for($initiator, 'initiator')->create();
     Sanctum::actingAs($initiator);
 
     $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'negotiating'])->assertSuccessful();
+    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'open'])->assertSuccessful();
     $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'done'])->assertSuccessful();
+
+    expect($matter->refresh()->state)->toBe('done');
+});
+
+test('the initiator cannot skip states or move backwards', function () {
+    $initiator = Resident::factory()->create();
+    $matter = Matter::factory()->for($initiator, 'initiator')->create();
+    Sanctum::actingAs($initiator);
+
+    // seeking 一步跳 done：跳步会直接触发联系互通与评价，拦下
+    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'done'])->assertUnprocessable();
+    // seeking 跳 open 同样是跳步
+    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'open'])->assertUnprocessable();
+
+    $open = Matter::factory()->open()->for($initiator, 'initiator')->create();
+    // open 回退 seeking：非终态之间也不允许回退
+    $this->putJson("/api/matters/{$open->id}/state", ['state' => 'seeking'])->assertUnprocessable();
+    // 编辑接口带 state 同样受守卫
+    $this->putJson("/api/matters/{$open->id}", [
+        'title' => $open->title,
+        'category' => $open->category,
+        'target_count' => $open->target_count,
+        'state' => 'seeking',
+    ])->assertUnprocessable();
+
+    expect($matter->refresh()->state)->toBe('seeking')
+        ->and($open->refresh()->state)->toBe('open');
 });
 
 test('admins can still rescue a matter out of its final state', function () {
@@ -62,6 +92,8 @@ test('admins can still rescue a matter out of its final state', function () {
 
     $this->putJson("/api/admin/matters/{$matter->id}", [
         'title' => $matter->title,
+        'category' => $matter->category,
+        'target_count' => $matter->target_count,
         'state' => 'open',
     ])->assertSuccessful();
 

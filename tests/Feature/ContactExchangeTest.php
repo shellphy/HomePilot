@@ -20,6 +20,22 @@ test('joining stores the contact sharing consent and rejoining updates it', func
         ->and($stance->refresh()->payload['share_contact'])->toBeTrue();
 });
 
+test('a participant can still revise the sharing consent after the deal closes but nobody new can join', function () {
+    $matter = Matter::factory()->done()->create();
+    $participant = Resident::factory()->create();
+    Stance::factory()->for($matter, 'matter')->for($participant, 'resident')->create(['payload' => ['share_contact' => false]]);
+
+    // 已在名单里：成团后补开共享，才能与团长互见电话
+    Sanctum::actingAs($participant);
+    $this->postJson("/api/matters/{$matter->id}/join", ['share_contact' => true])->assertCreated();
+    expect(Stance::where('mode', Stance::MODE_JOIN)->sole()->payload['share_contact'])->toBeTrue();
+
+    // 不在名单里的：成团后不能再加入
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->postJson("/api/matters/{$matter->id}/join")->assertUnprocessable();
+    expect(Stance::where('mode', Stance::MODE_JOIN)->count())->toBe(1);
+});
+
 test('an owner must pick a building before joining', function () {
     $matter = Matter::factory()->open()->create();
 

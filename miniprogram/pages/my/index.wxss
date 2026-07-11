@@ -130,3 +130,12 @@
   flex-shrink: 0;
 }
 
+
+/* 未读红点：对应列表里有我没看过的新动态 */
+.row-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #fa5151;
+  flex-shrink: 0;
+}

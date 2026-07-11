@@ -1,5 +1,6 @@
 // 我参与的 / 我牵头的事项列表
 const matters = require('../../utils/api/matters');
+const { markSeen } = require('../../utils/me');
 const { pillClass } = require('../../utils/constants');
 const load = require('../../behaviors/load');
 
@@ -27,6 +28,8 @@ Page({
       this.setData({
         matters: res.data.map((matter) => ({ ...matter, pillClass: pillClass(matter.state) })),
       });
+      // 看过列表即已读：清掉「我的」页对应红点（失败不影响浏览）
+      markSeen(this.data.kind).catch(() => {});
     });
   },
 

@@ -82,7 +82,7 @@ test('only the initiator can edit a matter', function () {
     $payload = [
         'category' => $matter->category,
         'title' => $matter->title,
-        'state' => 'open',
+        'state' => 'negotiating',
         'target_count' => 20,
     ];
 
@@ -92,7 +92,7 @@ test('only the initiator can edit a matter', function () {
     Sanctum::actingAs($initiator);
     $this->putJson("/api/matters/{$matter->id}", $payload)
         ->assertSuccessful()
-        ->assertJsonPath('data.state', 'open');
+        ->assertJsonPath('data.state', 'negotiating');
 });
 
 test('editing keeps payload fields that are not part of the form', function () {
@@ -115,18 +115,18 @@ test('only the initiator can flip the state through the state endpoint', functio
     $matter = Matter::factory()->for($initiator, 'initiator')->create();
 
     Sanctum::actingAs(Resident::factory()->create());
-    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'open'])->assertForbidden();
+    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'negotiating'])->assertForbidden();
 
     Sanctum::actingAs($initiator);
     $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'flying'])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('state');
 
-    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'open'])
+    $this->putJson("/api/matters/{$matter->id}/state", ['state' => 'negotiating'])
         ->assertSuccessful()
-        ->assertJsonPath('data.state', 'open');
+        ->assertJsonPath('data.state', 'negotiating');
 
-    expect($matter->refresh()->state)->toBe('open');
+    expect($matter->refresh()->state)->toBe('negotiating');
 });
 
 test('only the initiator can post timeline updates', function () {
