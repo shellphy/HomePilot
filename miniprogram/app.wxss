@@ -172,3 +172,78 @@ page {
   line-height: 1.7;
   padding: 4rpx 8rpx 20rpx;
 }
+
+/* ---- 行式表单：标签左、内容右对齐、细分割线（资料编辑、管理端表单共用）---- */
+.form-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.frow {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-height: 116rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+.frow:last-child {
+  border-bottom: none;
+}
+.frow-hover {
+  opacity: 0.55;
+}
+.frow-label {
+  flex-shrink: 0;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+.frow-main {
+  flex: 1;
+  min-width: 0;
+  padding: 20rpx 0;
+}
+.frow-input {
+  flex: 1;
+  min-width: 0;
+  height: 116rpx;
+  text-align: right;
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+.frow-value {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.frow-arrow {
+  flex-shrink: 0;
+  font-size: 36rpx;
+  line-height: 1;
+  color: var(--line-dark);
+}
+/* 行式卡片里的长文本块（textarea 等占整行的控件） */
+.fblock {
+  padding: 24rpx 0 28rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+.fblock:last-child {
+  border-bottom: none;
+}
+
+/* ---- 吸底操作条：主操作固定可达；页面内容区加 has-footer 预留高度 ---- */
+.footer-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: var(--bg-page);
+}
+.has-footer {
+  padding-bottom: calc(150rpx + env(safe-area-inset-bottom));
+}

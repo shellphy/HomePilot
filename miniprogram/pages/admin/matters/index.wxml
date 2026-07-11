@@ -1,7 +1,5 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <t-button theme="primary" block bind:tap="goCreate">发布新事项</t-button>
-
     <view class="chips filter-chips">
       <view class="chip {{typeFilter === '' ? 'chip-on' : ''}}" data-type="" bind:tap="pickType">全部类型</view>
       <view
@@ -19,7 +17,7 @@
     </view>
 
     <view class="card list-card">
-      <view class="row" wx:for="{{matters}}" wx:key="id" data-id="{{item.id}}" bind:tap="goEdit">
+      <view class="row" hover-class="row-hover" wx:for="{{matters}}" wx:key="id" data-id="{{item.id}}" bind:tap="goEdit">
         <view class="row-main">
           <view class="row-title">{{item.title}}</view>
           <view class="row-sub">{{item.type_label}} · {{item.state_label}} · {{item.initiator}}</view>
@@ -36,6 +34,10 @@
       </view>
 
       <view wx:if="{{!matters.length}}" class="hint">{{stateFilter === 'pending' ? '没有待审核的事项' : '这个筛选下没有事项'}}</view>
+    </view>
+
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" bind:tap="goCreate">发布新事项</t-button>
     </view>
   </page-status>
 </view>
