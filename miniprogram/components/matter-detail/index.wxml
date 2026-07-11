@@ -23,6 +23,31 @@
   <block wx:else>待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）</block>
 </view>
 
+<!-- 联系互通阶段（活动报名中/互助进行中）：参与者见发起人 -->
+<view class="card deal-card" wx:if="{{initiatorContact}}">
+  <view class="kicker">联系发起人 · 拉群与对接</view>
+  <view class="term-row">
+    <text class="term-label">{{initiatorContact.name}}</text>
+    <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="onPhoneTap">{{initiatorContact.phone}} 拨打/复制</text>
+  </view>
+</view>
+
+<!-- 互通阶段没共享联系方式的参与者：解释互通是双向对等的，给补开入口 -->
+<view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
+  <view class="kicker">联系发起人 · 拉群与对接</view>
+  <view class="share-note">你加入时没有开启联系方式共享，所以你和发起人互相看不到对方电话（互通是双向的）。</view>
+  <t-button theme="light" size="medium" block bind:tap="enableShare">开启共享，与发起人互通</t-button>
+</view>
+
+<!-- 联系互通阶段：发起人见同意共享的参与者 -->
+<view class="card deal-card" wx:if="{{isInitiator && contacts.length}}">
+  <view class="kicker">参与联系名单（{{contacts.length}}）· 仅你可见，用于拉群对接</view>
+  <view class="term-row" wx:for="{{contacts}}" wx:key="phone">
+    <text class="term-label">{{item.name}}</text>
+    <text class="term-value" data-phone="{{item.phone}}" bind:tap="onPhoneTap">{{item.phone}} 拨打/复制</text>
+  </view>
+</view>
+
 <view class="card leader-ops" wx:if="{{isInitiator}}">
   <view class="kicker">牵头人操作（这件事由你负责）</view>
   <!-- 唯一的 primary 放最前：日常最常做的是发进展 -->
@@ -113,6 +138,11 @@
 </view>
 
 <view class="cta-dock" wx:if="{{matter.join_open && !isParty}}">
+  <!-- 互通联系方式的类型（活动/互助）：加入前用开关选共享意愿；维权不互通，开关不出现 -->
+  <view class="cta-share" wx:if="{{!joined && matter.contacts_open}}">
+    <text class="cta-share-text">{{meta.shareText || '与发起人互通手机号（仅双方可见）'}}</text>
+    <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
+  </view>
   <t-button
     theme="{{joined ? 'light' : 'primary'}}"
     block

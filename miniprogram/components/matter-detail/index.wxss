@@ -188,6 +188,51 @@
   padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
   background: linear-gradient(to top, #f6f6f3 75%, rgba(246, 246, 243, 0));
 }
+.cta-share {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.cta-share-text {
+  font-size: 24rpx;
+  color: var(--text-muted);
+}
+.cta-share switch {
+  transform: scale(0.8);
+  transform-origin: right center;
+}
+
+/* 联系互通卡片（与团购详情同一套视觉） */
+.deal-card {
+  border: 2rpx solid var(--brand);
+}
+.term-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  font-size: 26rpx;
+}
+.term-row:last-child {
+  border-bottom: none;
+}
+.term-label {
+  color: var(--text-secondary);
+}
+.term-value {
+  font-weight: 600;
+  text-align: right;
+  max-width: 65%;
+}
+
+/* 互通阶段没共享联系方式的说明（互通是双向的） */
+.share-note {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 16rpx;
+}
 
 /* 相关方身份的参与区说明 */
 .party-note {

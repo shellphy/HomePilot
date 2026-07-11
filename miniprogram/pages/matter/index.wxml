@@ -25,6 +25,9 @@
         can-respond="{{canRespond}}"
         is-party="{{isParty}}"
         party-label="{{partyLabel}}"
+        contacts="{{contacts}}"
+        initiator-contact="{{initiatorContact}}"
+        my-share-contact="{{myShareContact}}"
         bind:refresh="reload"
       />
     </block>

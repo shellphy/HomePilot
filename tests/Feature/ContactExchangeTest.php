@@ -77,6 +77,61 @@ test('contacts stay closed before the deal is done', function () {
     expect($this->getJson("/api/matters/{$matter->id}")->json('initiator_contact'))->toBeNull();
 });
 
+// ---- 活动/互助：协调发生在事前，报名中/进行中就互通（发起人 ↔ 同意共享的参与者） ----
+
+test('activities and aids exchange contacts with the initiator while active', function (string $factoryState) {
+    $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'phone' => '13900000000']);
+    $matter = Matter::factory()->{$factoryState}()->for($initiator, 'initiator')->create();
+
+    $consenting = Resident::factory()->inUnit('5栋')->create(['nickname' => '老王', 'phone' => '13811112222']);
+    $declined = Resident::factory()->create(['phone' => '13833334444']);
+    Stance::factory()->for($matter, 'matter')->for($consenting, 'resident')->create(['payload' => ['share_contact' => true]]);
+    Stance::factory()->for($matter, 'matter')->for($declined, 'resident')->create(['payload' => ['share_contact' => false]]);
+
+    Sanctum::actingAs($initiator);
+    expect($this->getJson("/api/matters/{$matter->id}")->json('contacts'))
+        ->toBe([['name' => '5栋 老王', 'phone' => '13811112222']]);
+
+    Sanctum::actingAs($consenting);
+    $this->getJson("/api/matters/{$matter->id}")
+        ->assertJsonPath('data.contacts_open', true)
+        ->assertJsonPath('initiator_contact.name', '3栋 老K')
+        ->assertJsonPath('initiator_contact.phone', '13900000000');
+
+    Sanctum::actingAs($declined);
+    $this->getJson("/api/matters/{$matter->id}")->assertJsonPath('initiator_contact', null);
+})->with(['activity', 'aid']);
+
+test('activity contacts close once it ends or is cancelled', function (string $state) {
+    $initiator = Resident::factory()->create(['phone' => '13900000000']);
+    $matter = Matter::factory()->activity()->for($initiator, 'initiator')->create(['state' => $state]);
+    $participant = Resident::factory()->create(['phone' => '13811112222']);
+    Stance::factory()->for($matter, 'matter')->for($participant, 'resident')->create(['payload' => ['share_contact' => true]]);
+
+    Sanctum::actingAs($initiator);
+    expect($this->getJson("/api/matters/{$matter->id}")->json('contacts'))->toBe([]);
+
+    Sanctum::actingAs($participant);
+    $this->getJson("/api/matters/{$matter->id}")
+        ->assertJsonPath('data.contacts_open', false)
+        ->assertJsonPath('initiator_contact', null);
+})->with(['done', 'aborted']);
+
+test('rights actions never exchange contacts even while collecting', function () {
+    $initiator = Resident::factory()->create(['phone' => '13900000000']);
+    $matter = Matter::factory()->rights()->for($initiator, 'initiator')->create();
+    $signer = Resident::factory()->create(['phone' => '13811112222']);
+    Stance::factory()->for($matter, 'matter')->for($signer, 'resident')->create(['payload' => ['share_contact' => true]]);
+
+    Sanctum::actingAs($initiator);
+    expect($this->getJson("/api/matters/{$matter->id}")->json('contacts'))->toBe([]);
+
+    Sanctum::actingAs($signer);
+    $this->getJson("/api/matters/{$matter->id}")
+        ->assertJsonPath('data.contacts_open', false)
+        ->assertJsonPath('initiator_contact', null);
+});
+
 test('a consenting participant sees the initiator contact after the deal, a declining one does not', function () {
     $initiator = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'phone' => '13900000000']);
     $matter = Matter::factory()->done()->for($initiator, 'initiator')->create();

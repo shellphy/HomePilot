@@ -63,6 +63,15 @@ class ActivityType extends MatterType
         return $matter->state === 'open';
     }
 
+    /**
+     * 报名中就互通联系方式（发起人 ↔ 同意共享的报名者）：
+     * 拉群、约集合时间都发生在活动开始前，等结束了互通就没意义了。
+     */
+    public function contactsOpen(Matter $matter): bool
+    {
+        return $matter->state === 'open';
+    }
+
     /** 活动结束后开放评价：口碑沉淀不只属于团购（商家办的活动也计入其档案）。 */
     public function reviewOpen(Matter $matter): bool
     {
