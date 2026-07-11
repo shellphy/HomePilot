@@ -9,7 +9,7 @@ return new class extends SettingsMigration
      */
     public function up(): void
     {
-        $this->migrator->add('community.name', '天青府');
+        $this->migrator->add('community.name', '武汉招商天青府');
         $this->migrator->add('community.app_name', '天青府家园');
         $this->migrator->add('community.slogan', '咱们小区自己的公共空间');
         $this->migrator->add('community.sub_slogan', '公益运营 · 不代收任何款项');

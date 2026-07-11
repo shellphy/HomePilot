@@ -17,7 +17,7 @@ Page({
     initiatorContact: null, // 参与者视角：牵头人联系方式（互通阶段且自己同意过共享）
     canRespond: false,      // 被认证的治理类相关方成员：可发官方回应
     isParty: false,         // 相关方身份不参与接龙，隐藏报名按钮
-    appName: '天青府家园',
+    communityName: '武汉招商天青府',
   },
 
   onLoad(query) {
@@ -29,10 +29,10 @@ Page({
   },
 
   onShareAppMessage() {
-    const { matter, id, appName } = this.data;
-    if (!matter) return { title: appName, path: '/pages/community/index' };
+    const { matter, id, communityName } = this.data;
+    if (!matter) return { title: communityName, path: '/pages/community/index' };
     if (matter.type === 'notice') {
-      return { title: `${matter.title}｜${appName}`, path: `/pages/matter/index?id=${id}` };
+      return { title: `${matter.title}｜${communityName}`, path: `/pages/matter/index?id=${id}` };
     }
     return {
       title: `${matter.title}｜${matter.join_count} 位邻居已参与`,
@@ -41,8 +41,8 @@ Page({
   },
 
   onShareTimeline() {
-    const { matter, appName } = this.data;
-    return { title: matter ? `${matter.title}｜${appName}` : appName };
+    const { matter, communityName } = this.data;
+    return { title: matter ? `${matter.title}｜${communityName}` : communityName };
   },
 
   reload() {
@@ -52,8 +52,8 @@ Page({
         getMe(),
         profile.getOptions(),
       ]);
-      if (options.community && options.community.app_name) {
-        this.setData({ appName: options.community.app_name });
+      if (options.community && options.community.name) {
+        this.setData({ communityName: options.community.name });
       }
       // 征集类事项的详情就是它的公示面（小区数据页对应期次）
       if (res.data.type === 'census') {

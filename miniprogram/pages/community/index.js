@@ -31,14 +31,14 @@ Page({
   onShareAppMessage() {
     const { community, activeCount } = this.data;
     return {
-      title: `${community.app_name || '天青府家园'} · ${activeCount} 件事正在张罗`,
+      title: `${community.name || '武汉招商天青府'} · ${activeCount} 件事正在张罗`,
       path: '/pages/community/index',
     };
   },
 
   onShareTimeline() {
     const { community } = this.data;
-    return { title: `${community.app_name || '天青府家园'} · ${community.slogan || ''}` };
+    return { title: `${community.name || '武汉招商天青府'} · ${community.slogan || ''}` };
   },
 
   reload() {
@@ -67,8 +67,8 @@ Page({
         activeCount: doings.filter((matter) => !CLOSED.includes(matter.state)).length,
         residents: stats.residents,
       });
-      if (options.community && options.community.app_name) {
-        wx.setNavigationBarTitle({ title: options.community.app_name });
+      if (options.community && options.community.name) {
+        wx.setNavigationBarTitle({ title: options.community.name });
       }
     });
   },

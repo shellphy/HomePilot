@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Party;
-use App\Settings\CommunitySettings;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,7 +20,7 @@ class PartyFactory extends Factory
         return [
             'type' => Party::TYPE_MERCHANT,
             'name' => fake()->company(),
-            'category' => fake()->randomElement(app(CommunitySettings::class)->categories),
+            'category' => fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗']),
             'is_listed' => false,
         ];
     }

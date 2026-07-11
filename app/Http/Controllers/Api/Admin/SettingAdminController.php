@@ -23,19 +23,15 @@ class SettingAdminController extends Controller
         [
             'title' => '社区身份',
             'fields' => [
-                ['key' => 'name', 'label' => '小区名称', 'kind' => 'input'],
-                ['key' => 'app_name', 'label' => '小程序对外名称', 'kind' => 'input'],
+                ['key' => 'name', 'label' => '小区名称（导航栏与分享标题用）', 'kind' => 'input'],
                 ['key' => 'slogan', 'label' => '主口号', 'kind' => 'input'],
                 ['key' => 'sub_slogan', 'label' => '副口号', 'kind' => 'input'],
-                ['key' => 'total_households', 'label' => '小区总户数', 'kind' => 'number'],
             ],
         ],
         [
             'title' => '承诺与提示文案',
             'fields' => [
-                ['key' => 'pledge', 'label' => '公益承诺（详情页等处展示）', 'kind' => 'textarea'],
                 ['key' => 'initiator_note', 'label' => '牵头人须知（发起页展示）', 'kind' => 'textarea'],
-                ['key' => 'initiate_hint', 'label' => '发起引导语', 'kind' => 'textarea'],
                 ['key' => 'data_footnote', 'label' => '数据页脚注', 'kind' => 'textarea'],
             ],
         ],
@@ -43,9 +39,6 @@ class SettingAdminController extends Controller
             'title' => '选项清单（一行一项）',
             'fields' => [
                 ['key' => 'buildings', 'label' => '楼栋（个人资料按此选择）', 'kind' => 'list'],
-                ['key' => 'layouts', 'label' => '户型', 'kind' => 'list'],
-                ['key' => 'decoration_modes', 'label' => '装修方式', 'kind' => 'list'],
-                ['key' => 'categories', 'label' => '团购品类', 'kind' => 'list'],
             ],
         ],
     ];
@@ -62,22 +55,12 @@ class SettingAdminController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:30'],
-            'app_name' => ['required', 'string', 'max:30'],
             'slogan' => ['required', 'string', 'max:50'],
             'sub_slogan' => ['required', 'string', 'max:50'],
-            'pledge' => ['required', 'string', 'max:500'],
             'initiator_note' => ['required', 'string', 'max:500'],
-            'initiate_hint' => ['required', 'string', 'max:500'],
             'data_footnote' => ['required', 'string', 'max:200'],
-            'total_households' => ['required', 'integer', 'min:1'],
             'buildings' => ['required', 'array', 'min:1'],
             'buildings.*' => ['required', 'string', 'max:10'],
-            'layouts' => ['required', 'array', 'min:1'],
-            'layouts.*' => ['required', 'string', 'max:50'],
-            'decoration_modes' => ['required', 'array', 'min:1'],
-            'decoration_modes.*' => ['required', 'string', 'max:20'],
-            'categories' => ['required', 'array', 'min:1'],
-            'categories.*' => ['required', 'string', 'max:20'],
         ]);
 
         $settings->fill($validated);

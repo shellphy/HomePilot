@@ -2,11 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Matters\CensusType;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
-use App\Settings\CommunitySettings;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -46,9 +44,10 @@ class StanceFactory extends Factory
             'mode' => Stance::MODE_REGISTER,
             'payload' => [
                 'answers' => [
-                    'layout' => fake()->randomElement(app(CommunitySettings::class)->layouts),
-                    'decoration_mode' => fake()->randomElement(app(CommunitySettings::class)->decoration_modes),
-                    CensusType::CATEGORY_INTEREST_KEY => [fake()->randomElement(app(CommunitySettings::class)->categories)],
+                    // 户型/装修方式与种子问卷（DatabaseSeeder 基础登记模块）的选项保持一致
+                    'layout' => fake()->randomElement(['107㎡', '130㎡', '154㎡']),
+                    'decoration_mode' => fake()->randomElement(['全包（都交给装修公司）', '半包（主材自己买）', '清包（只请工人）', '还没定']),
+                    'interests' => [fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗'])],
                 ],
             ],
         ]);
