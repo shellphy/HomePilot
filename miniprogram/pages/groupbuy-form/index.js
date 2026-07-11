@@ -20,6 +20,8 @@ Page({
     perk: '',
     terms: [],
     glossary: [],
+    // 按户出方案（中央空调这类非标品）：只在发起时选，之后不可改（联系互通的隐私承诺不同）
+    needsSurvey: false,
     initiatorNote: '',
     submitting: false,
   },
@@ -52,6 +54,7 @@ Page({
           perk: matter.perk || '',
           terms: matter.terms || [],
           glossary: matter.glossary || [],
+          needsSurvey: !!matter.needs_survey,
         });
       }
     });
@@ -71,6 +74,11 @@ Page({
   onInput(event) {
     this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
+  },
+
+  onSurveyChange(event) {
+    this.markDirty();
+    this.setData({ needsSurvey: event.detail.value });
   },
 
   // 条目列表（团购条件 / 买前必懂）的增删改
@@ -113,6 +121,8 @@ Page({
       perk: perk.trim(),
       terms: this.data.terms.filter((t) => t.label.trim() && t.value.trim()),
       glossary: this.data.glossary.filter((g) => g.term.trim() && g.explain.trim()),
+      // 发起时锁定；编辑时也回传当前值（后端只认发起时的选择）
+      needs_survey: this.data.needsSurvey,
     };
 
     this.setData({ submitting: true });

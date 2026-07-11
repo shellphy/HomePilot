@@ -4,6 +4,7 @@ namespace App\Matters;
 
 use App\Models\Matter;
 use App\Models\Resident;
+use App\Models\Stance;
 
 /**
  * 事项类型：定义一类社区事项装载哪些能力——状态机、payload 校验、
@@ -11,6 +12,9 @@ use App\Models\Resident;
  */
 abstract class MatterType
 {
+    /** 旁路终态的统一 key：半途收场（未成团/已取消）都落在这个状态上。 */
+    public const ABORT_STATE = 'aborted';
+
     /** 类型标识，如 groupbuy。 */
     abstract public function key(): string;
 
@@ -77,29 +81,66 @@ abstract class MatterType
     }
 
     /**
-     * 终态（状态机最后一个状态，如已成团/已有结果）：进入后发起人不能再回退——
+     * 旁路终态的显示名（如 未成团/已取消）：半途收场的出口，从任意非终态可直接进入，
+     * 不触发评价/联系互通等事后能力。null 表示该类型没有半途收场一说（如公告/征集）。
+     */
+    public function abortLabel(): ?string
+    {
+        return null;
+    }
+
+    public function hasAbort(): bool
+    {
+        return $this->abortLabel() !== null;
+    }
+
+    /**
+     * 全部合法状态（顺序流转的主线 + 旁路终态），校验与显示用。
+     *
+     * @return array<string, string>
+     */
+    public function allStates(): array
+    {
+        $label = $this->abortLabel();
+
+        return $label === null
+            ? $this->states()
+            : $this->states() + [self::ABORT_STATE => $label];
+    }
+
+    /**
+     * 终态（状态机最后一个状态如已成团/已有结果，以及旁路终态）：进入后发起人不能再回退——
      * 联系方式互通、评价等事后能力都以终态为闸门，回退会撕裂数据语义。管理端不受限，作为纠错通道。
      */
     public function isFinalState(string $state): bool
     {
-        return $state === array_key_last($this->states());
+        return $state === self::ABORT_STATE || $state === array_key_last($this->states());
     }
 
     public function stateLabel(string $state): string
     {
-        return $this->states()[$state] ?? $state;
+        return $this->allStates()[$state] ?? $state;
     }
 
     /**
-     * 发起人侧的合法状态流转：只能沿状态机顺序推进一步。
+     * 发起人侧的合法状态流转：只能沿状态机顺序推进一步，或从任意非终态直接收场（旁路终态）。
      * 跳步会绕过中间环节（如一步跳到已成团直接触发联系互通），回退会撕裂事后数据语义，
      * 都不允许；确需纠错走管理端（不受此限）。
      */
     public function canAdvanceTo(string $from, string $to): bool
     {
-        $states = array_keys($this->states());
+        if ($this->isFinalState($from)) {
+            return false;
+        }
 
-        return array_search($to, $states, true) === array_search($from, $states, true) + 1;
+        if ($to === self::ABORT_STATE) {
+            return $this->hasAbort();
+        }
+
+        $states = array_keys($this->states());
+        $fromIndex = array_search($from, $states, true);
+
+        return $fromIndex !== false && array_search($to, $states, true) === $fromIndex + 1;
     }
 
     /** 是否开放接龙表态。 */
@@ -109,12 +150,38 @@ abstract class MatterType
     }
 
     /**
+     * 此刻报名落下的承诺档位：null = 该类型不分档（报名即参与）。
+     * 团购分 intent（登记意向）与 confirmed（确认参团）两档，见 GroupbuyType。
+     */
+    public function joinStage(Matter $matter): ?string
+    {
+        return null;
+    }
+
+    /**
      * 是否进入联系方式互通阶段（如团购成团后）：
      * 牵头人可见同意共享者的手机号，同意共享的参与者可见牵头人手机号。
      */
     public function contactsOpen(Matter $matter): bool
     {
         return false;
+    }
+
+    /** 互通阶段里这条接龙是否参与联系交换（如标品团购只跟确认参团的人互通）。 */
+    public function contactEligible(Matter $matter, Stance $join): bool
+    {
+        return true;
+    }
+
+    /**
+     * 发起时锁定、编辑不可再改的 payload 键（如团购的方案型开关：
+     * 中途翻转会改变联系互通的隐私承诺）。管理端不受此限。
+     *
+     * @return array<int, string>
+     */
+    public function lockedPayloadKeys(): array
+    {
+        return [];
     }
 
     /** 接龙名单是否对外公示（否=对外只公示计数，明细仅牵头人可见，如维权联名）。 */

@@ -30,7 +30,7 @@ class MatterController extends Controller
 
         $matters = Matter::approved()
             ->with('initiatorParty')
-            ->withCount('joins')
+            ->withCount(['joins', 'confirmedJoins'])
             ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
             ->withExists(['stances as registered_by_me' => fn ($query) => $query
                 ->where('mode', Stance::MODE_REGISTER)
@@ -53,7 +53,7 @@ class MatterController extends Controller
 
         $matters = Matter::approved()
             ->whereHas('joins', fn ($query) => $query->whereBelongsTo($resident, 'resident'))
-            ->withCount('joins')
+            ->withCount(['joins', 'confirmedJoins'])
             ->latest()
             ->get();
 
@@ -66,7 +66,7 @@ class MatterController extends Controller
     public function mine(Request $request): AnonymousResourceCollection
     {
         $matters = Matter::whereBelongsTo($this->resident($request), 'initiator')
-            ->withCount('joins')
+            ->withCount(['joins', 'confirmedJoins'])
             ->latest()
             ->get();
 
@@ -83,7 +83,7 @@ class MatterController extends Controller
         abort_unless($matter->is_approved || $matter->initiator_id === $resident->id, 404);
 
         $matter
-            ->loadCount('joins')
+            ->loadCount(['joins', 'confirmedJoins'])
             ->load([
                 'initiator',
                 'initiatorParty',
@@ -99,6 +99,8 @@ class MatterController extends Controller
             ->additional([
                 'joined' => $myJoin !== null,
                 'my_share_contact' => (bool) ($myJoin?->payload['share_contact'] ?? false),
+                // 我的承诺档位（团购分意向/确认两档）：接龙中的意向登记者据此看到「确认参团」入口
+                'my_join_stage' => $myJoin?->joinStageValue(),
                 'my_review' => $myReview ? [
                     'rating' => (int) ($myReview->payload['rating'] ?? 0),
                     'content' => $myReview->payload['content'] ?? '',
@@ -115,23 +117,28 @@ class MatterController extends Controller
      */
     private function contactExchange(Matter $matter, Resident $resident, ?Stance $myJoin): array
     {
-        if (! $matter->typeDef()->contactsOpen($matter)) {
+        $type = $matter->typeDef();
+
+        if (! $type->contactsOpen($matter)) {
             return ['contacts' => [], 'initiator_contact' => null];
         }
 
-        // 牵头人视角：同意共享且已授权手机号的参与者
+        // 牵头人视角：同意共享、档位够格（标品团只互通确认参团的）且已授权手机号的参与者
         $contacts = $matter->initiator_id === $resident->id
             ? $matter->joins
-                ->filter(fn (Stance $join): bool => (bool) ($join->payload['share_contact'] ?? false) && $join->resident->phone !== '')
+                ->filter(fn (Stance $join): bool => (bool) ($join->payload['share_contact'] ?? false)
+                    && $type->contactEligible($matter, $join)
+                    && $join->resident->phone !== '')
                 ->map(fn (Stance $join): array => ['name' => $join->resident->displayName(), 'phone' => $join->resident->phone])
                 ->values()
                 ->all()
             : [];
 
-        // 参与者视角：自己同意了共享，才能看到牵头人的手机号（对等交换）
+        // 参与者视角：自己同意了共享且档位够格，才能看到牵头人的手机号（对等交换）
         $initiator = $matter->initiator;
         $initiatorContact = $myJoin !== null
             && (bool) ($myJoin->payload['share_contact'] ?? false)
+            && $type->contactEligible($matter, $myJoin)
             && $initiator !== null
             && $initiator->phone !== ''
             && $initiator->id !== $resident->id
@@ -198,7 +205,7 @@ class MatterController extends Controller
 
         $type = $matter->typeDef();
         $validated = $request->validate(array_merge($this->rulesFor($matter->type), [
-            'state' => ['sometimes', Rule::in(array_keys($type->states()))],
+            'state' => ['sometimes', Rule::in(array_keys($type->allStates()))],
         ]));
 
         if (($validated['state'] ?? $matter->state) !== $matter->state) {
@@ -207,13 +214,20 @@ class MatterController extends Controller
 
         $previousState = $matter->state;
 
+        // 保留成交公示等不在编辑表单里的 payload 字段；被驳回的事项编辑即重新提交（清掉驳回理由）
+        $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated), ['reject_reason' => '']);
+
+        // 发起时锁定的键（如方案型开关）编辑不可改，纠错走管理端
+        foreach ($type->lockedPayloadKeys() as $lockedKey) {
+            $payload[$lockedKey] = $matter->payloadValue($lockedKey);
+        }
+
         $matter->update([
             'title' => $validated['title'],
             'category' => $validated['category'] ?? $matter->category,
             'state' => $validated['state'] ?? $matter->state,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
-            // 保留成交公示等不在编辑表单里的 payload 字段；被驳回的事项编辑即重新提交（清掉驳回理由）
-            'payload' => array_merge($matter->payload ?? [], $type->payloadFrom($validated), ['reject_reason' => '']),
+            'payload' => $payload,
         ]);
 
         if ($matter->state !== $previousState) {
@@ -233,7 +247,7 @@ class MatterController extends Controller
         abort_unless($matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
 
         $validated = $request->validate([
-            'state' => ['required', Rule::in(array_keys($matter->typeDef()->states()))],
+            'state' => ['required', Rule::in(array_keys($matter->typeDef()->allStates()))],
         ]);
 
         if ($validated['state'] !== $matter->state) {
@@ -283,8 +297,8 @@ class MatterController extends Controller
     }
 
     /**
-     * 状态流转守卫（发起人侧）：终态（如已成团/已有结果）后联系方式已互通、评价已开放，
-     * 不能再回退；非终态之间也只能沿状态机顺序推进一步，跳步/回退都不行。
+     * 状态流转守卫（发起人侧）：终态（如已成团/已有结果/未成团）后联系方式已互通、评价已开放，
+     * 不能再回退；非终态之间只能沿状态机顺序推进一步，或直接收场（旁路终态），跳步/回退都不行。
      * 确需纠错找管理员（管理端编辑不受此限）。
      */
     private function guardTransition(Matter $matter, string $to): void
@@ -300,7 +314,9 @@ class MatterController extends Controller
         abort_unless(
             $type->canAdvanceTo($matter->state, $to),
             422,
-            '状态只能按「'.implode(' → ', $type->states()).'」逐步推进；如需纠错请联系管理员',
+            '状态只能按「'.implode(' → ', $type->states()).'」逐步推进'
+                .($type->hasAbort() ? '，或直接收场为「'.$type->abortLabel().'」' : '')
+                .'；如需纠错请联系管理员',
         );
     }
 

@@ -1,16 +1,19 @@
 <view class="card">
   <view class="head-row">
     <view class="pill {{pillClass}}">{{matter.state_label}}</view>
-    <!-- 量词跟着状态走，与列表卡片一致：意向期是「感兴趣」，接龙后是「已报名」 -->
+    <!-- 量词跟着阶段走，与列表卡片一致：意向期是「感兴趣」，接龙后按「已确认参团」口径 -->
     <view class="head-count">
-      <text class="head-num">{{matter.join_count}}</text>
-      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 人{{matter.state === 'seeking' ? '感兴趣' : '已报名'}}</text>
-      <text wx:else> 人{{matter.state === 'seeking' ? '感兴趣' : '已报名'}}</text>
+      <text class="head-num">{{headCount}}</text>
+      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 人{{headNoun}}</text>
+      <text wx:else> 人{{headNoun}}</text>
     </view>
   </view>
   <view wx:if="{{matter.state === 'open' && matter.target_count}}" class="meter head-meter">
     <view class="meter-fill" style="width: {{percent}}%"></view>
   </view>
+  <!-- 两段表态：接龙中还挂着的意向，等本人回来确认才计入成团人数 -->
+  <view wx:if="{{matter.state === 'open' && intentCount}}" class="head-intent">另有 {{intentCount}} 人登记过意向，确认参团后才计入人数</view>
+  <view wx:if="{{matter.needs_survey}}" class="head-survey">按户出方案的团购：报名后商家上门量房，你家的方案和报价单独谈</view>
   <view wx:if="{{matter.perk}}" class="head-perk">{{matter.perk}}</view>
 </view>
 
@@ -51,25 +54,25 @@
   <block wx:else>待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）</block>
 </view>
 
-<!-- 成团后的联系互通：参团者见团长 -->
+<!-- 联系互通阶段（标品团成团后；方案型团从谈判中开始）：参团者见团长 -->
 <view class="card deal-card" wx:if="{{initiatorContact}}">
-  <view class="kicker">联系团长 · 建群与对接</view>
+  <view class="kicker">联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '约量房、谈方案' : '建群与对接'}}</view>
   <view class="term-row">
     <text class="term-label">{{initiatorContact.name}}</text>
     <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="onPhoneTap">{{initiatorContact.phone}} 拨打/复制</text>
   </view>
 </view>
 
-<!-- 成团后没共享联系方式的参团者：解释互通是双向对等的，给补开入口 -->
-<view class="card deal-card" wx:if="{{matter.state === 'done' && joined && !isInitiator && !myShareContact}}">
-  <view class="kicker">联系团长 · 建群与对接</view>
+<!-- 互通阶段没共享联系方式的参团者：解释互通是双向对等的，给补开入口 -->
+<view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
+  <view class="kicker">联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '约量房、谈方案' : '建群与对接'}}</view>
   <view class="share-note">你报名时没有开启联系方式共享，所以你和团长互相看不到对方电话（互通是双向的）。</view>
   <t-button theme="light" size="medium" block bind:tap="enableShare">开启共享，与团长互通</t-button>
 </view>
 
-<!-- 成团后的联系互通：团长见同意共享的参团者 -->
+<!-- 联系互通阶段：团长见同意共享的参团者 -->
 <view class="card deal-card" wx:if="{{isInitiator && contacts.length}}">
-  <view class="kicker">参团联系名单（{{contacts.length}}）· 仅你可见，用于建群对接</view>
+  <view class="kicker">{{matter.needs_survey && matter.state !== 'done' ? '报名联系名单（' + contacts.length + '）· 仅你可见，用于安排量房' : '参团联系名单（' + contacts.length + '）· 仅你可见，用于建群对接'}}</view>
   <view class="term-row" wx:for="{{contacts}}" wx:key="phone">
     <text class="term-label">{{item.name}}</text>
     <text class="term-value" data-phone="{{item.phone}}" bind:tap="onPhoneTap">{{item.phone}} 拨打/复制</text>
@@ -84,6 +87,8 @@
     <t-button theme="{{matter.state === 'done' ? 'light' : 'primary'}}" size="medium" bind:tap="goProgress">发布进度</t-button>
     <t-button wx:if="{{nextState}}" theme="light" size="medium" bind:tap="flipState">推进到「{{nextState.label}}」</t-button>
     <t-button theme="light" size="medium" bind:tap="goEdit">编辑团购</t-button>
+    <!-- 收场出口：人数不够/没谈成时给个体面台阶，别让失败的团挂成僵尸 -->
+    <t-button wx:if="{{nextState && matter.abort_state}}" theme="light" size="medium" class="abort-btn" bind:tap="abortMatter">按「{{matter.abort_state.label}}」收场</t-button>
   </view>
 </view>
 
@@ -151,17 +156,27 @@
 </view>
 
 <view class="cta-dock" wx:if="{{matter.join_open && !isParty}}">
-  <view class="cta-share" wx:if="{{!joined}}">
-    <text class="cta-share-text">成团后与团长互通手机号（仅双方可见）</text>
-    <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
-  </view>
-  <t-button
-    theme="{{joined ? 'light' : 'primary'}}"
-    block
-    size="large"
-    loading="{{submitting}}"
-    bind:tap="toggleJoin"
-  >{{joined ? '已报名 ✓（点击取消）' : (matter.state === 'seeking' ? '我感兴趣，登记意向' : '报名接龙')}}</t-button>
+  <!-- 登记过意向、条件已谈定：确认参团是此刻唯一的主动作 -->
+  <block wx:if="{{needConfirm}}">
+    <view class="cta-share">
+      <text class="cta-share-text">条件谈定了。你登记过意向，确认参团后才计入成团人数</text>
+    </view>
+    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="confirmJoin">确认参团</t-button>
+    <t-button theme="light" block size="medium" class="cta-secondary" bind:tap="toggleJoin">这次不参加了（退出名单）</t-button>
+  </block>
+  <block wx:else>
+    <view class="cta-share" wx:if="{{!joined}}">
+      <text class="cta-share-text">{{matter.needs_survey && intentPhase ? '同意团长/商家联系我量房（手机号仅双方可见）' : '成团后与团长互通手机号（仅双方可见）'}}</text>
+      <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
+    </view>
+    <t-button
+      theme="{{joined ? 'light' : 'primary'}}"
+      block
+      size="large"
+      loading="{{submitting}}"
+      bind:tap="toggleJoin"
+    >{{joined ? (myJoinStage === 'intent' ? '已登记意向 ✓（点击取消）' : '已确认参团 ✓（点击取消）') : (intentPhase ? (matter.needs_survey ? '我感兴趣，约商家量房' : '我感兴趣，登记意向') : '确认参团')}}</t-button>
+  </block>
 </view>
 
 <!-- 相关方身份：不进接龙名单，但说清楚为什么、怎么参与 -->

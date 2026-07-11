@@ -2,8 +2,11 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="form-hint">成交公示是团购的最后一步：把最终谈成的条件、返点让利的去向摊开给全小区看。透明是下一个团的信任来源。</view>
 
+    <!-- 方案型团每户成交价不同：引导公示规则口径（折扣/返利/成交户数/户均区间），不是统一价 -->
+    <view class="form-hint" wx:if="{{needsSurvey}}">这是按户出方案的团购，每家成交价不同：公示统一的规则（如折扣、返利、免费项）和成交户数、户均价区间，让邻居能对照自家方案核验。</view>
+
     <view class="card">
-      <view class="q-title">最终成交条件<text class="f-required">*</text><text class="q-note">已预填团购条件，请改成实际成交版</text></view>
+      <view class="q-title">最终成交条件<text class="f-required">*</text><text class="q-note">{{needsSurvey ? '写规则与区间，如「统一 8.2 折」「成交 12 户」' : '已预填团购条件，请改成实际成交版'}}</text></view>
       <view class="row-item" wx:for="{{finalTerms}}" wx:key="index">
         <input class="fin row-label" placeholder="名目" value="{{item.label}}" data-index="{{index}}" data-key="label" bind:input="onRowInput" />
         <input class="fin row-value" placeholder="如 588 元/㎡" value="{{item.value}}" data-index="{{index}}" data-key="value" bind:input="onRowInput" />

@@ -94,6 +94,8 @@ page {
 .pill-negotiating { background: var(--warn-bg); color: var(--warn); }
 .pill-seeking { background: var(--info-bg); color: var(--info); }
 .pill-done { background: var(--done-bg); color: var(--text-muted); }
+/* 旁路终态（未成团/已取消）：和「已成团」区分开，但用灰底不抢注意力——收场是常态不是事故 */
+.pill-aborted { background: var(--done-bg); color: var(--danger); }
 
 /* 进度条 */
 .meter {

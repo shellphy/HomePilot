@@ -127,6 +127,18 @@ class Matter extends Model
     }
 
     /**
+     * 确认参团的接龙（不含仅登记意向的）；没有 stage 的老表态按确认算。
+     *
+     * @return HasMany<Stance, $this>
+     */
+    public function confirmedJoins(): HasMany
+    {
+        return $this->joins()->where(fn ($query) => $query
+            ->whereNull('payload->stage')
+            ->orWhere('payload->stage', '!=', Stance::JOIN_STAGE_INTENT));
+    }
+
+    /**
      * 评价表态。
      *
      * @return HasMany<Stance, $this>

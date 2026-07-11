@@ -19,6 +19,7 @@ Page({
     isParty: false,         // 相关方身份不参与接龙，改为解释 + 切回业主入口
     partyLabel: '',         // 当前相关方身份的显示名（解释文案用）
     myShareContact: false,  // 我报名时的联系方式共享意愿（成团后补开共享的入口据此显示）
+    myJoinStage: '',        // 我的承诺档位（团购分意向/确认）：接龙中的意向登记者看到「确认参团」入口
     communityName: '小区', // 兜底文案，实际名称由 /options 下发
   },
 
@@ -74,6 +75,7 @@ Page({
         isParty: !!me.party,
         partyLabel: me.party ? me.party.label : '',
         myShareContact: !!res.my_share_contact,
+        myJoinStage: res.my_join_stage || '',
       });
       wx.setNavigationBarTitle({ title: res.data.title });
     });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Matters\MatterType;
 use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\Request;
@@ -40,12 +41,21 @@ class MatterResource extends JsonResource
             'state' => $this->state,
             'state_label' => $type->stateLabel($this->state),
             'states' => $type->states(),
+            // 旁路终态（未成团/已取消）：发起人从任意非终态可直接收场，与顺序推进分开渲染
+            'abort_state' => $type->hasAbort()
+                ? ['value' => MatterType::ABORT_STATE, 'label' => $type->abortLabel()]
+                : null,
             'is_approved' => $this->is_approved,
             'target_count' => $this->target_count,
             // 表态阶段开关（由类型状态机决定），小程序端据此渲染报名/评价区，不自行推断状态
             'join_open' => $type->allowsJoin($this->resource),
             'review_open' => $type->reviewOpen($this->resource),
+            'contacts_open' => $type->contactsOpen($this->resource),
             'join_count' => $this->whenCounted('joins'),
+            // 确认参团数（团购两段表态里进成交名单的口径；其余类型与 join_count 一致）
+            'confirmed_count' => $this->whenCounted('confirmedJoins'),
+            // 方案型团购（如中央空调）：商家逐户量房出方案，联系互通从谈判中开始
+            'needs_survey' => (bool) $this->payloadValue('needs_survey', false),
             'register_count' => (int) ($this->register_count ?? 0),
             'registered_by_me' => (bool) ($this->registered_by_me ?? false),
             'pitch' => $this->payloadValue('pitch', ''),

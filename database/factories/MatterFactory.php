@@ -50,6 +50,21 @@ class MatterFactory extends Factory
         return $this->state(fn (): array => ['state' => 'done']);
     }
 
+    public function aborted(): static
+    {
+        return $this->state(fn (): array => ['state' => 'aborted']);
+    }
+
+    /**
+     * 方案型团购（中央空调这类非标品）：商家逐户量房出方案，联系互通提前到谈判中。
+     */
+    public function survey(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'payload' => array_merge($attributes['payload'] ?? [], ['needs_survey' => true]),
+        ]);
+    }
+
     public function pending(): static
     {
         return $this->state(fn (): array => ['is_approved' => false]);

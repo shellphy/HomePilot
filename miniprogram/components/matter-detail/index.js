@@ -142,6 +142,30 @@ Component({
       wx.navigateTo({ url: `/pages/matter-update/index?id=${this.data.matter.id}` });
     },
 
+    // 办不下去/不再推进的收场出口：不开放评价等事后环节，也不可再改
+    abortMatter() {
+      const { matter } = this.data;
+      if (!matter.abort_state) return;
+
+      wx.showModal({
+        title: `按「${matter.abort_state.label}」收场？`,
+        content: `确认后这件事按「${matter.abort_state.label}」收场：参与关闭、名单封存，不开放评价，且不能再改回来（弄错了需要联系管理员）。`,
+        confirmText: '确认收场',
+        cancelText: '再想想',
+        confirmColor: '#e34d59',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await matters.flipState(matter.id, matter.abort_state.value);
+            wx.showToast({ title: '已收场', icon: 'none' });
+            this.refresh();
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          }
+        },
+      });
+    },
+
     // 状态只能推进到下一站（跳步/回退后端会拦）；进终态是不可逆动作，确认时把后果讲清楚
     flipState() {
       const { matter, nextState, nextIsFinal } = this.data;

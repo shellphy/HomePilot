@@ -47,9 +47,15 @@ class RightsType extends MatterType
         return ['pitch' => $validated['pitch'] ?? ''];
     }
 
+    /** 牵头人不再推进时的收场出口：与「已有结果」分开，不了了之也要有个交代。 */
+    public function abortLabel(): ?string
+    {
+        return '已终止';
+    }
+
     public function allowsJoin(Matter $matter): bool
     {
-        return $matter->state !== 'resolved';
+        return ! $this->isFinalState($matter->state);
     }
 
     /** 联名名单不对外公示（怕被针对是联名的最大心理门槛），对外只给计数，明细仅牵头人可见。 */
@@ -60,6 +66,6 @@ class RightsType extends MatterType
 
     public function sortWeight(Matter $matter): int
     {
-        return $matter->state === 'resolved' ? 9 : 1;
+        return $this->isFinalState($matter->state) ? 9 : 1;
     }
 }

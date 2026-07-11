@@ -27,6 +27,16 @@ class StanceFactory extends Factory
         ];
     }
 
+    /**
+     * 登记意向档的接龙（团购条款未定前的兴趣，不算进成交名单）。
+     */
+    public function intent(bool $shareContact = true): static
+    {
+        return $this->state(fn (): array => [
+            'payload' => ['share_contact' => $shareContact, 'stage' => Stance::JOIN_STAGE_INTENT],
+        ]);
+    }
+
     public function review(int $rating = 5, string $content = ''): static
     {
         return $this->state(fn (): array => [

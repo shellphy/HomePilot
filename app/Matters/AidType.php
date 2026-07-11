@@ -46,6 +46,12 @@ class AidType extends MatterType
         return ['pitch' => $validated['pitch'] ?? ''];
     }
 
+    /** 互助没凑成的收场出口：与「已结束」分开，取消的互助不开放评价。 */
+    public function abortLabel(): ?string
+    {
+        return '已取消';
+    }
+
     public function allowsJoin(Matter $matter): bool
     {
         return $matter->state === 'open';

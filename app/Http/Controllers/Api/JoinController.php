@@ -28,12 +28,14 @@ class JoinController extends Controller
         $request->validate(['share_contact' => ['sometimes', 'boolean']]);
         $shareContact = $request->boolean('share_contact', true);
 
+        $type = $matter->typeDef();
+
         // 已在名单里的只是变更共享意愿：接龙关闭后（如已成团）也允许——
         // 没共享的参与者事后想联系团长，得留一条自助补开共享的路
         $stance = $matter->joins()->whereBelongsTo($resident, 'resident')->first();
 
         if ($stance === null) {
-            abort_unless($matter->typeDef()->allowsJoin($matter), 422, '当前不能报名');
+            abort_unless($type->allowsJoin($matter), 422, '当前不能报名');
 
             // 名单以「楼栋 + 昵称」公示，先选楼栋号才能上名单
             if ($resident->unit_label === '') {
@@ -42,15 +44,29 @@ class JoinController extends Controller
                 ]);
             }
 
+            // 承诺档位由类型按当前状态定（团购：意向征集/谈判中=登记意向，接龙中=确认参团）
+            $stage = $type->joinStage($matter);
+
             $stance = $matter->joins()->firstOrCreate(
                 ['resident_id' => $resident->id, 'mode' => Stance::MODE_JOIN],
-                ['payload' => ['share_contact' => $shareContact]],
+                ['payload' => ['share_contact' => $shareContact] + ($stage !== null ? ['stage' => $stage] : [])],
             );
         }
 
-        // 共享意愿的变更也是表态的一部分，同样走修订链——"只增不改"
-        if (! $stance->wasRecentlyCreated && (bool) ($stance->payload['share_contact'] ?? false) !== $shareContact) {
-            $stance->reviseTo(array_merge($stance->payload ?? [], ['share_contact' => $shareContact]));
+        // 共享意愿的变更、意向升级为确认参团，都是表态的一部分，同样走修订链——"只增不改"
+        if (! $stance->wasRecentlyCreated) {
+            $revised = array_merge($stance->payload ?? [], ['share_contact' => $shareContact]);
+
+            // 接龙开放期间重复报名视为升级承诺：登记过意向的这一下就是「确认参团」
+            if ($type->allowsJoin($matter)
+                && $stance->joinStageValue() === Stance::JOIN_STAGE_INTENT
+                && $type->joinStage($matter) === Stance::JOIN_STAGE_CONFIRMED) {
+                $revised['stage'] = Stance::JOIN_STAGE_CONFIRMED;
+            }
+
+            if ($revised !== ($stance->payload ?? [])) {
+                $stance->reviseTo($revised);
+            }
         }
 
         return response()->json([
@@ -60,10 +76,14 @@ class JoinController extends Controller
     }
 
     /**
-     * 取消接龙。
+     * 取消接龙。接龙关闭后（已成团/已有结果/已收场）名单就是事后依据
+     * （成交名单、联系互通、评价资格都挂在上面），不能再自行退出——终态守卫保护的
+     * 数据语义在这条路径上同样成立；确有变动找牵头人或管理员。
      */
     public function destroy(Request $request, Matter $matter): JsonResponse
     {
+        abort_unless($matter->typeDef()->allowsJoin($matter), 422, '报名已截止，名单已封存不能自行退出；确有变动请联系牵头人或管理员');
+
         $matter->joins()->whereBelongsTo($this->resident($request), 'resident')->delete();
 
         return response()->json([
