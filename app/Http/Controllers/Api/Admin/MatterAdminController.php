@@ -25,7 +25,7 @@ class MatterAdminController extends Controller
     {
         $matters = Matter::query()
             ->when($request->boolean('pending'), fn ($query) => $query->where('is_approved', false))
-            ->with('initiator')
+            ->with(['initiator', 'initiatorParty'])
             ->withCount('joins')
             ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
             ->latest()
@@ -164,6 +164,19 @@ class MatterAdminController extends Controller
     }
 
     /**
+     * 审核队列里的发起人署名：相关方身份的事项亮明身份快照（审核商家发起的事项时一眼可辨）。
+     */
+    private function initiatorLabel(Matter $matter): string
+    {
+        if ($matter->initiatorParty) {
+            return $matter->initiatorParty->typeLabel().' · '.$matter->initiatorParty->name
+                .($matter->initiatorParty->is_listed ? '（已认证）' : '（未认证）');
+        }
+
+        return $matter->initiator?->displayName() ?: '管理员发布';
+    }
+
+    /**
      * 管理端一览用的完整视图：原始 payload（编辑表单要用）+ 审核状态 + 发起人。
      *
      * @return array<string, mixed>
@@ -183,7 +196,7 @@ class MatterAdminController extends Controller
             'states' => $type->states(),
             'is_approved' => $matter->is_approved,
             'target_count' => $matter->target_count,
-            'initiator' => $matter->initiator?->displayName() ?: '管理员发布',
+            'initiator' => $this->initiatorLabel($matter),
             'join_count' => (int) ($matter->joins_count ?? 0),
             'register_count' => (int) ($matter->register_count ?? 0),
             'payload' => $matter->payload ?? (object) [],
@@ -229,9 +242,11 @@ class MatterAdminController extends Controller
                 'payload.modules.*.questions' => ['sometimes', 'array'],
                 'payload.modules.*.questions.*.key' => ['sometimes', 'string', 'max:30'],
                 'payload.modules.*.questions.*.text' => ['required', 'string', 'max:100'],
-                'payload.modules.*.questions.*.type' => ['required', Rule::in(['single', 'multi'])],
+                'payload.modules.*.questions.*.type' => ['required', Rule::in(['single', 'multi', 'text'])],
+                'payload.modules.*.questions.*.note' => ['sometimes', 'nullable', 'string', 'max:200'],
                 'payload.modules.*.questions.*.required' => ['sometimes', 'boolean'],
-                'payload.modules.*.questions.*.options' => ['required', 'array', 'min:2'],
+                // 填空题没有选项（前端不传该键）；选择题至少两个
+                'payload.modules.*.questions.*.options' => ['required_unless:payload.modules.*.questions.*.type,text', 'array', 'min:2'],
                 'payload.modules.*.questions.*.options.*' => ['required', 'string', 'max:50'],
             ];
         }

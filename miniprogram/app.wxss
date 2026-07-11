@@ -113,6 +113,13 @@ page {
   color: var(--text-muted);
   margin-left: 12rpx;
 }
+/* 题目注释：题干下的白话解释（问卷即入门课的容器） */
+.q-explain {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: -8rpx 0 18rpx;
+}
 
 .chips {
   display: flex;

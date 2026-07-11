@@ -4,14 +4,21 @@
       <view class="q-title">题目<text class="f-required">*</text></view>
       <input class="fin" placeholder="如：打算怎么装？" value="{{text}}" data-field="text" bind:input="onInput" />
 
+      <view class="q-title">注释<text class="q-note">选填，显示在题干下方，给不熟悉的邻居解释概念</text></view>
+      <textarea class="fin farea" auto-height placeholder="如：全包=材料和人工都由装修公司负责" value="{{note}}" data-field="note" bind:input="onInput" />
+
       <view class="q-title">题型</view>
       <view class="chips">
         <view class="chip {{type === 'single' ? 'chip-on' : ''}}" data-type="single" bind:tap="pickType">单选</view>
         <view class="chip {{type === 'multi' ? 'chip-on' : ''}}" data-type="multi" bind:tap="pickType">多选</view>
+        <view class="chip {{type === 'text' ? 'chip-on' : ''}}" data-type="text" bind:tap="pickType">填空</view>
       </view>
 
-      <view class="q-title">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个</text></view>
-      <textarea class="fin farea" auto-height placeholder="全包&#10;半包&#10;清包" value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
+      <block wx:if="{{type !== 'text'}}">
+        <view class="q-title">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个</text></view>
+        <textarea class="fin farea" auto-height placeholder="全包&#10;半包&#10;清包" value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
+      </block>
+      <view wx:else class="q-explain">填空题的回答不进公示统计，只在「登记明细」里可见</view>
 
       <view class="switch-row">
         <view class="switch-label">必答</view>

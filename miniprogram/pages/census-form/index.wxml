@@ -24,7 +24,18 @@
           <text wx:if="{{question.required}}" class="f-required">必答</text>
           <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
         </view>
-        <view class="chips">
+        <view wx:if="{{question.note}}" class="q-explain">{{question.note}}</view>
+        <textarea
+          wx:if="{{question.type === 'text'}}"
+          class="fin farea"
+          auto-height
+          maxlength="500"
+          placeholder="写下你的情况或看法"
+          value="{{answers[question.key]}}"
+          data-qkey="{{question.key}}"
+          bind:input="onText"
+        />
+        <view wx:else class="chips">
           <view
             wx:for="{{question.options}}"
             wx:for-item="option"

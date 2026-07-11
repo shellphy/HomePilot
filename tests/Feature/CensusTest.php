@@ -184,3 +184,61 @@ test('guests cannot touch the census', function () {
     $this->getJson("/api/matters/{$census->id}/census")->assertUnauthorized();
     $this->putJson("/api/matters/{$census->id}/census", [])->assertUnauthorized();
 });
+
+test('text questions accept free-form answers but stay out of the public aggregates', function () {
+    $census = Matter::factory()->create([
+        'type' => 'census',
+        'state' => 'open',
+        'title' => '装修探店摸底',
+        'payload' => [
+            'modules' => [[
+                'key' => 'visits',
+                'title' => '探店情况',
+                'questions' => [
+                    ['key' => 'visited', 'text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司']],
+                    ['key' => 'pitfall', 'text' => '踩过什么坑或有什么心得？', 'type' => 'text', 'note' => '只做管理端参考，不公开展示'],
+                ],
+            ]],
+        ],
+    ]);
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->putJson("/api/matters/{$census->id}/census", [
+        'answers' => ['visited' => ['A 公司'], 'pitfall' => '定金说随时退，合同里却写不退，签约前要问清'],
+    ])->assertCreated();
+
+    // 公示聚合只有选择题；填空题的原文不出现在公开面
+    $aggregates = $this->getJson("/api/matters/{$census->id}/census")
+        ->assertSuccessful()
+        ->json('aggregates.0.questions');
+    expect(collect($aggregates)->pluck('key')->all())->toBe(['visited']);
+
+    // 填空原文进管理端登记明细
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+    $this->getJson("/api/admin/matters/{$census->id}/registrations")
+        ->assertSuccessful()
+        ->assertJsonPath('data.0.answers.1.question', '踩过什么坑或有什么心得？')
+        ->assertJsonPath('data.0.answers.1.answer', '定金说随时退，合同里却写不退，签约前要问清');
+});
+
+test('blank or oversized text answers are rejected', function () {
+    $census = Matter::factory()->create([
+        'type' => 'census',
+        'state' => 'open',
+        'payload' => [
+            'modules' => [[
+                'key' => 'visits',
+                'title' => '探店情况',
+                'questions' => [
+                    ['key' => 'pitfall', 'text' => '踩过什么坑？', 'type' => 'text'],
+                ],
+            ]],
+        ],
+    ]);
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->putJson("/api/matters/{$census->id}/census", ['answers' => ['pitfall' => '   ']])
+        ->assertUnprocessable();
+    $this->putJson("/api/matters/{$census->id}/census", ['answers' => ['pitfall' => str_repeat('长', 501)]])
+        ->assertUnprocessable();
+});
