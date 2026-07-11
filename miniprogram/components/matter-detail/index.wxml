@@ -36,7 +36,7 @@
 <view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
   <view class="kicker">联系发起人 · 拉群与对接</view>
   <view class="share-note">你加入时没有开启联系方式共享，所以你和发起人互相看不到对方电话（互通是双向的）。</view>
-  <t-button theme="light" size="medium" block bind:tap="enableShare">开启共享，与发起人互通</t-button>
+  <t-button theme="light" size="medium" block style="width: 100%" bind:tap="enableShare">开启共享，与发起人互通</t-button>
 </view>
 
 <!-- 联系互通阶段：发起人见同意共享的参与者 -->
@@ -121,7 +121,7 @@
         bind:input="onReviewInput"
         maxlength="500"
       />
-      <t-button theme="light" size="medium" block loading="{{submittingReview}}" bind:tap="submitReview">
+      <t-button theme="light" size="medium" block style="width: 100%" loading="{{submittingReview}}" bind:tap="submitReview">
         {{myReview ? '更新评价' : '发布评价'}}
       </t-button>
     </view>
@@ -143,10 +143,14 @@
     <text class="cta-share-text">{{meta.shareText || '与发起人互通手机号（仅双方可见）'}}</text>
     <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
   </view>
+  <!-- 已加入后主动作变成「取消 xx」：中性描边样式说明这是次要动作，点击有确认弹窗兜底。
+       宽度用 style 直传：block 缩写在部分基础库不生效，外部 class 受 virtualHost 限制（与 insights 页同因） -->
   <t-button
-    theme="{{joined ? 'light' : 'primary'}}"
+    theme="{{joined ? 'default' : 'primary'}}"
+    variant="{{joined ? 'outline' : 'base'}}"
     block
     size="large"
+    style="width: 100%"
     loading="{{submitting}}"
     bind:tap="toggleJoin"
   >{{joined ? meta.joinedCta : meta.joinCta}}</t-button>
@@ -155,5 +159,5 @@
 <!-- 相关方身份：不进名单，但说清楚为什么、怎么参与 -->
 <view class="cta-dock" wx:if="{{matter.join_open && isParty}}">
   <view class="party-note">你正以「{{partyLabel}}」身份浏览，{{meta.roster}}仅向业主开放</view>
-  <t-button theme="light" block size="large" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
+  <t-button theme="light" block size="large" style="width: 100%" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
 </view>

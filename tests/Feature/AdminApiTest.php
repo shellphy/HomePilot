@@ -268,10 +268,55 @@ test('admin publishing a groupbuy requires the same category and target count as
         'title' => '中央空调团购',
     ])->assertUnprocessable()->assertJsonValidationErrors(['category', 'target_count']);
 
+    // 团购没有「不设目标」：目标人数是去谈价的筹码，管理端也至少 1 人
+    $this->postJson('/api/admin/matters', [
+        'type' => 'groupbuy',
+        'title' => '中央空调团购',
+        'category' => '中央空调',
+        'target_count' => 0,
+    ])->assertUnprocessable()->assertJsonValidationErrors(['target_count']);
+
     $this->postJson('/api/admin/matters', [
         'type' => 'groupbuy',
         'title' => '中央空调团购',
         'category' => '中央空调',
         'target_count' => 30,
+    ])->assertCreated();
+});
+
+test('admin payload fields share the member form field limits', function () {
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    // payload 规则直接复用业主端 payloadRules：上限一致，不再各改各的漂移开
+    $this->postJson('/api/admin/matters', [
+        'type' => 'groupbuy',
+        'title' => '门窗团购',
+        'category' => '门窗',
+        'target_count' => 20,
+        'payload' => ['perk' => str_repeat('优', 150)],
+    ])->assertUnprocessable()->assertJsonValidationErrors(['payload.perk']);
+
+    $this->postJson('/api/admin/matters', [
+        'type' => 'groupbuy',
+        'title' => '门窗团购',
+        'category' => '门窗',
+        'target_count' => 20,
+        'payload' => ['glossary' => [['term' => '断桥铝', 'explain' => str_repeat('解', 400)]]],
+    ])->assertUnprocessable()->assertJsonValidationErrors(['payload.glossary.0.explain']);
+});
+
+test('admin notices require a body', function () {
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    // 公告的 body 规则同样来自类型定义（required）：没正文的公告业主端没法看
+    $this->postJson('/api/admin/matters', [
+        'type' => 'notice',
+        'title' => '停水通知',
+    ])->assertUnprocessable()->assertJsonValidationErrors(['payload.body']);
+
+    $this->postJson('/api/admin/matters', [
+        'type' => 'notice',
+        'title' => '停水通知',
+        'payload' => ['body' => '周三上午 9 点到 12 点全小区停水，请提前储水。'],
     ])->assertCreated();
 });

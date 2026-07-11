@@ -17,6 +17,6 @@
       </view>
     </view>
 
-    <t-button wx:if="{{!matters.length}}" theme="light" block bind:tap="goCommunity">回小区页看看</t-button>
+    <t-button wx:if="{{!matters.length}}" theme="light" block style="width: 100%" bind:tap="goCommunity">回小区页看看</t-button>
   </page-status>
 </view>
