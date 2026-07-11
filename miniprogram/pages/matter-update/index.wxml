@@ -1,7 +1,7 @@
 <view class="page-body">
   <view class="card">
     <view class="q-title">日期</view>
-    <picker mode="date" value="{{date}}" bind:change="onDateChange">
+    <picker mode="date" value="{{date}}" end="{{today}}" bind:change="onDateChange">
       <view class="fin">{{date}}</view>
     </picker>
   </view>

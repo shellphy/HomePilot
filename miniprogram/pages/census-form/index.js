@@ -4,9 +4,10 @@
 const matters = require('../../utils/api/matters');
 const { getMe, invalidateMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     id: null,
@@ -56,6 +57,7 @@ Page({
   },
 
   pick(event) {
+    this.markDirty();
     const { qkey, qtype, value } = event.currentTarget.dataset;
     const answers = { ...this.data.answers };
 
@@ -74,6 +76,7 @@ Page({
 
   // 填空题：输入即记，空白视为未作答（提交时过滤）
   onText(event) {
+    this.markDirty();
     this.setData({ [`answers.${event.currentTarget.dataset.qkey}`]: event.detail.value });
   },
 
@@ -114,6 +117,7 @@ Page({
         await matters.saveCensus(id, { answers: moduleAnswers });
         invalidateMe(); // 「我的」页展示答题进度，需要重新拉
       }
+      this.clearDirty(); // 当前模块已落库，返回不再拦
 
       if (moduleIndex + 1 < modules.length) {
         this.showModule(moduleIndex + 1);
@@ -123,7 +127,16 @@ Page({
           content: '这些信息只做匿名统计，聚合结果对全小区公示。不想答的题以后随时可以补。',
           showCancel: false,
           confirmText: '好的',
-          success: () => wx.redirectTo({ url: `/pages/census-insights/index?id=${id}` }),
+          // 从公示页进来的走返回（onShow 自会刷新），避免栈里叠两张公示页；其他入口 redirect 过去看结果
+          success: () => {
+            const pages = getCurrentPages();
+            const prev = pages[pages.length - 2];
+            if (prev && prev.route === 'pages/census-insights/index') {
+              wx.navigateBack();
+            } else {
+              wx.redirectTo({ url: `/pages/census-insights/index?id=${id}` });
+            }
+          },
         });
       }
     } catch (error) {

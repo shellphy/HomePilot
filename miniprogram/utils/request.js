@@ -6,7 +6,7 @@ function wxLogin() {
   return new Promise((resolve, reject) => {
     wx.login({
       success: (res) => resolve(res.code),
-      fail: reject,
+      fail: () => reject(new Error('微信登录失败，请重试')),
     });
   });
 }
@@ -22,7 +22,13 @@ function rawRequest(path, { method = 'GET', data, token } = {}) {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       success: resolve,
-      fail: reject,
+      // 微信的 fail 对象只有 errMsg 没有 message，包成 Error 让上层的
+      // error.message 兜底逻辑（load 骨架屏重试、toast）能拿到人话
+      fail: (err) => reject(new Error(
+        err && err.errMsg && err.errMsg.includes('timeout')
+          ? '网络超时，请稍后重试'
+          : '网络异常，请检查网络后重试',
+      )),
     });
   });
 }

@@ -68,11 +68,19 @@
         theme="primary"
         block
         size="large"
-        loading="{{submitting}}"
+        loading="{{savingAction === 'publish'}}"
         style="width: 100%; margin-bottom: 12rpx"
         bind:tap="publish"
-      >发布到公示面</t-button>
-      <t-button theme="default" variant="outline" block size="large" style="width: 100%" bind:tap="saveDraft">仅保存草稿</t-button>
+      >{{published ? '更新公示内容' : '发布到公示面'}}</t-button>
+      <t-button
+        theme="default"
+        variant="outline"
+        block
+        size="large"
+        loading="{{savingAction === 'draft'}}"
+        style="width: 100%"
+        bind:tap="saveDraft"
+      >{{published ? '撤下公示（转回草稿）' : '仅保存草稿'}}</t-button>
     </block>
   </page-status>
 </view>

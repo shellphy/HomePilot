@@ -1,4 +1,4 @@
-<view class="card ncard" bind:tap="goDetail">
+<view class="card ncard" hover-class="card-hover" bind:tap="goDetail">
   <view class="ncard-row">
     <view class="ncard-tag">公告</view>
     <view class="ncard-title">{{matter.title}}</view>

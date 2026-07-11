@@ -1,10 +1,11 @@
 <view class="card">
   <view class="head-row">
     <view class="pill {{pillClass}}">{{matter.state_label}}</view>
+    <!-- 量词跟着状态走，与列表卡片一致：意向期是「感兴趣」，接龙后是「已报名」 -->
     <view class="head-count">
       <text class="head-num">{{matter.join_count}}</text>
-      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 人</text>
-      <text wx:else> 人</text>
+      <text wx:if="{{matter.target_count}}"> / {{matter.target_count}} 人{{matter.state === 'seeking' ? '感兴趣' : '已报名'}}</text>
+      <text wx:else> 人{{matter.state === 'seeking' ? '感兴趣' : '已报名'}}</text>
     </view>
   </view>
   <view wx:if="{{matter.state === 'open' && matter.target_count}}" class="meter head-meter">
@@ -54,7 +55,7 @@
   <view class="kicker">联系团长 · 建群与对接</view>
   <view class="term-row">
     <text class="term-label">{{initiatorContact.name}}</text>
-    <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="copyPhone">{{initiatorContact.phone}} 复制</text>
+    <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="onPhoneTap">{{initiatorContact.phone}} 拨打/复制</text>
   </view>
 </view>
 
@@ -70,7 +71,7 @@
   <view class="kicker">参团联系名单（{{contacts.length}}）· 仅你可见，用于建群对接</view>
   <view class="term-row" wx:for="{{contacts}}" wx:key="phone">
     <text class="term-label">{{item.name}}</text>
-    <text class="term-value" data-phone="{{item.phone}}" bind:tap="copyPhone">{{item.phone}} 复制</text>
+    <text class="term-value" data-phone="{{item.phone}}" bind:tap="onPhoneTap">{{item.phone}} 拨打/复制</text>
   </view>
 </view>
 

@@ -1,8 +1,8 @@
-<view class="card ccard" bind:tap="goInsights">
+<view class="card ccard" hover-class="card-hover" bind:tap="goInsights">
   <view class="ccard-row">
     <view class="ccard-tag">征集</view>
     <view class="ccard-title">{{matter.title}}</view>
-    <view class="pill {{matter.state === 'open' ? 'pill-open' : 'pill-done'}}">{{matter.state_label}}</view>
+    <view class="pill {{pillClass}}">{{matter.state_label}}</view>
   </view>
   <view wx:if="{{matter.pitch}}" class="ccard-pitch">{{matter.pitch}}</view>
   <view class="ccard-foot">

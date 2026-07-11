@@ -54,5 +54,5 @@
 .merchant-line {
   margin-top: 8rpx;
   font-size: 24rpx;
-  color: #b8860b;
+  color: var(--warn);
 }

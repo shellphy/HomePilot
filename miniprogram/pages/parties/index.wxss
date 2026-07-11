@@ -17,9 +17,14 @@
   font-weight: 600;
 }
 
+/* 与商家详情页的认证徽章同款：名录/详情同一枚标识长一个样 */
 .party-badge {
+  flex-shrink: 0;
   font-size: 22rpx;
-  color: #06ae56;
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+  border-radius: 8rpx;
+  padding: 6rpx 14rpx;
 }
 
 .party-sub {
@@ -36,8 +41,4 @@
   margin-top: 8rpx;
   font-size: 24rpx;
   color: #9b978c;
-}
-
-.card-hover {
-  opacity: 0.85;
 }

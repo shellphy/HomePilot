@@ -1,4 +1,4 @@
-<view class="card mcard" bind:tap="goDetail">
+<view class="card mcard" hover-class="card-hover" bind:tap="goDetail">
   <view class="mcard-row">
     <view class="mcard-tag mcard-tag-{{matter.type}}">{{matter.type_label}}</view>
     <view class="mcard-title">{{matter.title}}</view>

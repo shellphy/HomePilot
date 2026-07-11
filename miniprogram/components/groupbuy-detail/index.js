@@ -137,8 +137,19 @@ Component({
       }
     },
 
-    copyPhone(event) {
-      wx.setClipboardData({ data: event.currentTarget.dataset.phone });
+    // 联系电话点击给两个动作：拨打（对齐商家名录的一键拨号）或复制（建群粘贴用）
+    onPhoneTap(event) {
+      const { phone } = event.currentTarget.dataset;
+      wx.showActionSheet({
+        itemList: [`拨打 ${phone}`, '复制号码'],
+        success: ({ tapIndex }) => {
+          if (tapIndex === 0) {
+            wx.makePhoneCall({ phoneNumber: phone });
+          } else {
+            wx.setClipboardData({ data: phone });
+          }
+        },
+      });
     },
 
     previewImage(event) {

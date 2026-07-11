@@ -1,9 +1,10 @@
 // 成交公示（groupbuy 类型的收尾表单）
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
 
 Page({
-  behaviors: [load],
+  behaviors: [load, dirty],
 
   data: {
     id: null,
@@ -30,19 +31,23 @@ Page({
   },
 
   onRowInput(event) {
+    this.markDirty();
     const { index, key } = event.currentTarget.dataset;
     this.setData({ [`finalTerms[${index}].${key}`]: event.detail.value });
   },
 
   onNoteInput(event) {
+    this.markDirty();
     this.setData({ finalNote: event.detail.value });
   },
 
   addTerm() {
+    this.markDirty();
     this.setData({ finalTerms: [...this.data.finalTerms, { label: '', value: '' }] });
   },
 
   removeTerm(event) {
+    this.markDirty();
     const finalTerms = this.data.finalTerms.filter((_, i) => i !== event.currentTarget.dataset.index);
     this.setData({ finalTerms });
   },
@@ -57,11 +62,12 @@ Page({
     this.setData({ submitting: true });
     try {
       await matters.publishDeal(id, finalTerms, finalNote.trim());
+      this.clearDirty();
+      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
       wx.showToast({ title: '成交公示已发布', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
       this.setData({ submitting: false });
     }
   },

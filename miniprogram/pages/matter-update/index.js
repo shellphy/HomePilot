@@ -1,5 +1,6 @@
 const { uploadImage } = require('../../utils/request');
 const matters = require('../../utils/api/matters');
+const dirty = require('../../behaviors/dirty');
 
 function today() {
   const now = new Date();
@@ -9,9 +10,12 @@ function today() {
 }
 
 Page({
+  behaviors: [dirty],
+
   data: {
     id: null,
     date: '',
+    today: '', // 进度是已发生的事，日期选择上限到今天
     content: '',
     images: [],
     uploading: false,
@@ -19,14 +23,16 @@ Page({
   },
 
   onLoad(query) {
-    this.setData({ id: Number(query.id), date: today() });
+    this.setData({ id: Number(query.id), date: today(), today: today() });
   },
 
   onDateChange(event) {
+    this.markDirty();
     this.setData({ date: event.detail.value });
   },
 
   onInput(event) {
+    this.markDirty();
     this.setData({ content: event.detail.value });
   },
 
@@ -42,6 +48,7 @@ Page({
         this.setData({ uploading: true });
         try {
           const urls = await Promise.all(tempFiles.map((file) => uploadImage(file.tempFilePath)));
+          this.markDirty();
           this.setData({ images: [...this.data.images, ...urls] });
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
@@ -53,6 +60,7 @@ Page({
   },
 
   removeImage(event) {
+    this.markDirty();
     const images = this.data.images.filter((_, i) => i !== event.currentTarget.dataset.index);
     this.setData({ images });
   },
@@ -69,11 +77,12 @@ Page({
     this.setData({ submitting: true });
     try {
       await matters.postUpdate(id, { happened_on: date, content: content.trim(), images });
+      this.clearDirty();
+      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
       wx.showToast({ title: '进度已发布', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
       this.setData({ submitting: false });
     }
   },

@@ -42,6 +42,10 @@ page {
   padding: 28rpx;
   margin-bottom: 20rpx;
 }
+/* 整卡可点的统一按压反馈：所有 bind:tap 跳转的卡片都挂这个 hover-class */
+.card-hover {
+  opacity: 0.85;
+}
 
 .kicker {
   font-size: 22rpx;

@@ -1,4 +1,4 @@
-<view class="card gcard {{matter.state === 'done' ? 'gcard-done' : ''}}" bind:tap="goDetail">
+<view class="card gcard {{matter.state === 'done' ? 'gcard-done' : ''}}" hover-class="card-hover" bind:tap="goDetail">
   <view class="gcard-row">
     <view class="gcard-cat">{{matter.category}}</view>
     <view class="gcard-title">{{matter.title}}</view>
