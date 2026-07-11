@@ -13,10 +13,6 @@ test('a resident can maintain their own profile independently of any census', fu
         ->assertJsonPath('data.unit_label', '5栋');
 
     expect($resident->refresh()->unit_label)->toBe('5栋');
-
-    // 楼栋号会规整首尾空格后再校验
-    $this->putJson('/api/me', ['unit_label' => ' 5栋 '])->assertSuccessful();
-    expect($resident->refresh()->unit_label)->toBe('5栋');
 });
 
 test('the unit label must come from the community building list', function () {

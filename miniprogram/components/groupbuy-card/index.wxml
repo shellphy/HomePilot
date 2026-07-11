@@ -4,6 +4,7 @@
     <view class="gcard-title">{{matter.title}}</view>
     <view class="pill {{pillClass}}">{{matter.state_label}}</view>
   </view>
+  <view wx:if="{{matter.initiator_party}}" class="merchant-line">🏪 {{matter.initiator_party.name}} · 已认证{{matter.initiator_party.label}}发起</view>
   <view wx:if="{{matter.perk}}" class="gcard-perk">{{matter.perk}}</view>
   <view wx:if="{{matter.state === 'open' && matter.target_count}}" class="meter gcard-meter">
     <view class="meter-fill" style="width: {{percent}}%"></view>

@@ -43,3 +43,10 @@
 .approve-btn-hover {
   opacity: 0.8;
 }
+
+.approve-btn-reject {
+  margin-right: 12rpx;
+  background: #ffffff;
+  color: #d54941;
+  border: 1rpx solid #e5e2da;
+}

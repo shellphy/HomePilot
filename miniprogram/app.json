@@ -11,6 +11,7 @@
     "pages/groupbuy-deal/index",
     "pages/mine-matters/index",
     "pages/profile-form/index",
+    "pages/parties/index",
     "pages/admin/matters/index",
     "pages/admin/matter-form/index",
     "pages/admin/census-schema/index",

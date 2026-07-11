@@ -96,14 +96,22 @@ class MatterAdminController extends Controller
     }
 
     /**
-     * 审核：通过（公示给全小区）或撤下。
+     * 审核：通过（公示给全小区）或驳回/撤下（附理由，发起人在详情页看到，编辑后即重新提交）。
      */
     public function approve(Request $request, Matter $matter): JsonResponse
     {
-        $validated = $request->validate(['is_approved' => ['required', 'boolean']]);
+        $validated = $request->validate([
+            'is_approved' => ['required', 'boolean'],
+            'reason' => ['sometimes', 'nullable', 'string', 'max:200'],
+        ]);
 
         $wasApproved = $matter->is_approved;
-        $matter->update($validated);
+        $matter->update([
+            'is_approved' => $validated['is_approved'],
+            'payload' => array_merge($matter->payload ?? [], [
+                'reject_reason' => $validated['is_approved'] ? '' : ($validated['reason'] ?? ''),
+            ]),
+        ]);
 
         if ($matter->is_approved && ! $wasApproved) {
             MatterApproved::dispatch($matter);

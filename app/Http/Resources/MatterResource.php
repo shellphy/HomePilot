@@ -28,7 +28,13 @@ class MatterResource extends JsonResource
             'type' => $this->type,
             'type_label' => $type->label(),
             'initiator_id' => $this->initiator_id,
-            'initiator_name' => $this->whenLoaded('initiator', fn () => $this->initiator?->displayName()),
+            // 商家发起的事项署商家名（发起时的身份快照），业主发起的署「楼栋 + 昵称」
+            'initiator_name' => $this->whenLoaded('initiator', fn () => $this->initiatorParty ? $this->initiatorParty->name : $this->initiator?->displayName()),
+            'initiator_party' => $this->whenLoaded('initiatorParty', fn () => $this->initiatorParty ? [
+                'label' => $this->initiatorParty->typeLabel(),
+                'name' => $this->initiatorParty->name,
+                'is_listed' => $this->initiatorParty->is_listed,
+            ] : null),
             'category' => $this->category,
             'title' => $this->title,
             'state' => $this->state,
@@ -47,9 +53,15 @@ class MatterResource extends JsonResource
             'final_note' => $this->payloadValue('final_note', ''),
             'body' => $this->payloadValue('body', ''),
             'published_on' => $this->created_at?->format('m-d'),
+            // 被驳回时给发起人看的理由（未审核的事项只有发起人能打开详情）
+            'reject_reason' => $this->payloadValue('reject_reason', ''),
+            // 名单不对外公示的类型（如维权联名）：对外只给计数，明细仅牵头人可见
+            'roster_hidden' => ! $type->rosterPublic($this->resource),
             'roster' => $this->whenLoaded(
                 'joins',
-                fn () => $this->joins->map(fn (Stance $join): string => $join->resident->displayName()),
+                fn () => $type->rosterPublic($this->resource) || $this->initiator_id === $request->user()?->id
+                    ? $this->joins->map(fn (Stance $join): string => $join->resident->displayName())
+                    : collect(),
             ),
             'updates' => MatterUpdateResource::collection($this->whenLoaded('updates')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),

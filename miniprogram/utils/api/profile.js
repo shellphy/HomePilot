@@ -23,8 +23,14 @@ function getStats() {
   return request('/stats');
 }
 
+// 已认证相关方名录（商家带成团数与评价沉淀）
+function listParties() {
+  return request('/parties');
+}
+
 module.exports = {
   getOptions,
   invalidateOptions,
   getStats,
+  listParties,
 };

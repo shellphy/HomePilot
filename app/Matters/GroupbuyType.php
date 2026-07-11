@@ -61,6 +61,12 @@ class GroupbuyType extends MatterType
         ];
     }
 
+    /** 已认证商家可以发起商家直供团。 */
+    public function merchantInitiatable(): bool
+    {
+        return true;
+    }
+
     /** 未成团前都可以报名/取消。 */
     public function allowsJoin(Matter $matter): bool
     {
@@ -69,6 +75,12 @@ class GroupbuyType extends MatterType
 
     /** 成团后开放评价。 */
     public function reviewOpen(Matter $matter): bool
+    {
+        return $matter->state === 'done';
+    }
+
+    /** 成团后团长与同意共享的参团者互通手机号（建群、收款、量房都在此后发生）。 */
+    public function contactsOpen(Matter $matter): bool
     {
         return $matter->state === 'done';
     }

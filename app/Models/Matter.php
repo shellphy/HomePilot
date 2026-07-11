@@ -17,12 +17,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property string $type
  * @property int|null $initiator_id
+ * @property int|null $initiator_party_id
  * @property string $title
  * @property string $category
  * @property string $state
  * @property bool $is_approved
  * @property int $target_count
  * @property array<string, mixed>|null $payload
+ * @property-read Resident|null $initiator
+ * @property-read Party|null $initiatorParty
  */
 class Matter extends Model
 {
@@ -32,6 +35,7 @@ class Matter extends Model
     protected $fillable = [
         'type',
         'initiator_id',
+        'initiator_party_id',
         'title',
         'category',
         'state',
@@ -74,6 +78,16 @@ class Matter extends Model
     public function initiator(): BelongsTo
     {
         return $this->belongsTo(Resident::class, 'initiator_id');
+    }
+
+    /**
+     * 发起时的相关方身份快照（已认证商家发起的事项带商家署名）。
+     *
+     * @return BelongsTo<Party, $this>
+     */
+    public function initiatorParty(): BelongsTo
+    {
+        return $this->belongsTo(Party::class, 'initiator_party_id');
     }
 
     /** @return HasMany<Stance, $this> */

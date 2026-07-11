@@ -65,7 +65,7 @@
     </view>
 
     <view class="privacy">手机号仅管理员可见，用于必要时联系；不会出现在任何公示名单里。</view>
-    <view class="privacy" wx:if="{{identity !== 'resident'}}">相关方身份对全小区公开，报名、登记、发起都和业主一样，只是以这个身份出现；可随时切回业主。进入公示名单需管理员认证。</view>
+    <view class="privacy" wx:if="{{identity !== 'resident'}}">相关方身份对全小区公开。商家经管理员认证后可发起团购和活动（带「已认证」标识）并进入商家名录；相关方不参与业主接龙，可随时切回业主身份。</view>
 
     <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">保存</t-button>
   </page-status>

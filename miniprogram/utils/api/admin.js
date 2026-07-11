@@ -17,8 +17,9 @@ function updateMatter(id, data) {
   return request(`/admin/matters/${id}`, { method: 'PUT', data });
 }
 
-function approveMatter(id, approved) {
-  return request(`/admin/matters/${id}/approve`, { method: 'PUT', data: { is_approved: approved } });
+// reason 仅驳回时有意义：展示给发起人，编辑后即重新提交
+function approveMatter(id, approved, reason = '') {
+  return request(`/admin/matters/${id}/approve`, { method: 'PUT', data: { is_approved: approved, reason } });
 }
 
 function deleteMatter(id) {

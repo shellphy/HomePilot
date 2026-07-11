@@ -50,3 +50,9 @@
   font-weight: 700;
   color: var(--text-primary);
 }
+
+.merchant-line {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #b8860b;
+}

@@ -12,10 +12,16 @@
         <view
           class="portal-btn"
           hover-class="portal-btn-hover"
-          wx:if="{{initiatableTypes.length}}"
+          wx:if="{{initiatableTypes.length || merchantUnlisted}}"
           bind:tap="goCreate"
         >我来张罗</view>
       </view>
+    </view>
+
+    <!-- 已认证商家名录入口（有认证商家才出现） -->
+    <view wx:if="{{listedParties}}" class="card prow" hover-class="row-hover" bind:tap="goParties">
+      <text class="prow-title">已认证商家名录</text>
+      <text class="prow-note">{{listedParties}} 家 ›</text>
     </view>
 
     <!-- 公告 -->

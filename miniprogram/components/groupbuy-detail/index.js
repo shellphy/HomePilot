@@ -17,6 +17,9 @@ Component({
     joined: Boolean,
     isInitiator: Boolean,
     myReview: Object,
+    contacts: Array,          // 团长视角：同意共享的参团者联系方式（成团后）
+    initiatorContact: Object, // 参团者视角：团长联系方式（成团后且自己同意过共享）
+    isParty: Boolean,         // 相关方身份不参与接龙，隐藏报名按钮
   },
 
   data: {
@@ -51,29 +54,83 @@ Component({
       this.triggerEvent('refresh');
     },
 
-    async toggleJoin() {
+    toggleJoin() {
       if (this.data.submitting) return;
+
+      if (this.data.joined) {
+        // 一键误触就掉出名单太伤，取消前确认
+        wx.showModal({
+          title: '取消报名？',
+          content: '你会从接龙名单里移除，之后可以随时再报。',
+          confirmText: '取消报名',
+          cancelText: '再想想',
+          success: ({ confirm }) => {
+            if (confirm) this.doLeave();
+          },
+        });
+        return;
+      }
+
+      // 报名前确认联系方式共享意愿：成团后建群、收款、量房都靠它
+      wx.showModal({
+        title: '报名接龙',
+        content: '成团后需要建群对接、安排上门，是否同意届时与团长互通手机号？手机号只在你和团长之间可见，不会公开展示。',
+        confirmText: '同意并报名',
+        cancelText: '仅报名',
+        success: ({ confirm }) => this.doJoin(confirm),
+      });
+    },
+
+    async doJoin(shareContact) {
       this.setData({ submitting: true });
       try {
-        const res = this.data.joined
-          ? await matters.leave(this.data.matter.id)
-          : await matters.join(this.data.matter.id);
-        if (res.joined) {
-          wx.showModal({
-            title: '报名成功',
-            content: '你已经在接龙名单里了。谈判结果和进度都会更新在本页，有进展记得回来看看。',
-            showCancel: false,
-            confirmText: '好的',
-          });
-        } else {
-          wx.showToast({ title: '已取消报名', icon: 'none' });
-        }
+        await matters.join(this.data.matter.id, shareContact);
+        wx.showModal({
+          title: '报名成功',
+          content: '你已经在接龙名单里了。谈判结果和进度都会更新在本页，有进展记得回来看看。',
+          showCancel: false,
+          confirmText: '好的',
+        });
+        this.refresh();
+      } catch (error) {
+        this.handleJoinError(error);
+      } finally {
+        this.setData({ submitting: false });
+      }
+    },
+
+    async doLeave() {
+      this.setData({ submitting: true });
+      try {
+        await matters.leave(this.data.matter.id);
+        wx.showToast({ title: '已取消报名', icon: 'none' });
         this.refresh();
       } catch (error) {
         wx.showToast({ title: error.message, icon: 'none' });
       } finally {
         this.setData({ submitting: false });
       }
+    },
+
+    // 业主没选楼栋号会被后端拦下（errors.profile）：引导去个人资料补全，回来即可报名
+    handleJoinError(error) {
+      const errors = (error.response && error.response.data && error.response.data.errors) || {};
+      if (errors.profile) {
+        wx.showModal({
+          title: '先选好楼栋号',
+          content: '接龙名单以「楼栋 + 昵称」公示，报名前请先在个人资料里选好楼栋号。',
+          confirmText: '去完善',
+          success: ({ confirm }) => {
+            if (confirm) wx.navigateTo({ url: '/pages/profile-form/index' });
+          },
+        });
+        return;
+      }
+      wx.showToast({ title: error.message, icon: 'none' });
+    },
+
+    copyPhone(event) {
+      wx.setClipboardData({ data: event.currentTarget.dataset.phone });
     },
 
     previewImage(event) {

@@ -43,6 +43,7 @@ class OptionController extends Controller
                     'key' => $key,
                     'label' => MatterTypeRegistry::for($key)->label(),
                     'user_initiatable' => MatterTypeRegistry::for($key)->userInitiatable(),
+                    'merchant_initiatable' => MatterTypeRegistry::for($key)->merchantInitiatable(),
                 ])
                 ->values(),
         ]);
