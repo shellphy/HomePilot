@@ -32,7 +32,7 @@
         </view>
       </view>
 
-      <view class="hint" wx:if="{{!party.is_listed}}">这份档案还未经管理员认证，仅管理员和归属人可见。</view>
+      <view class="hint" wx:if="{{!party.is_listed}}">这份档案还没通过管理员认证，暂时不对小区公开。</view>
     </block>
   </page-status>
 </view>

@@ -66,7 +66,7 @@
 <!-- 互通阶段没共享联系方式的参团者：解释互通是双向对等的，给补开入口 -->
 <view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
   <view class="kicker">联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '沟通需求、谈方案' : '建群与对接'}}</view>
-  <view class="share-note">你报名时没有开启联系方式共享，所以你和团长互相看不到对方电话（互通是双向的）。</view>
+  <view class="share-note">你报名时没有开启联系方式共享，你和团长现在互相看不到对方电话。</view>
   <t-button theme="light" size="medium" block style="width: 100%" bind:tap="enableShare">开启共享，与团长互通</t-button>
 </view>
 
