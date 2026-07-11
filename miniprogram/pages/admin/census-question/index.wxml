@@ -18,7 +18,7 @@
         <view class="q-title">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个</text></view>
         <textarea class="fin farea" auto-height placeholder="全包&#10;半包&#10;清包" value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
       </block>
-      <view wx:else class="q-explain">填空题的回答不进公示统计，只在「登记明细」里可见</view>
+      <view wx:else class="q-explain">填空题的回答不直接公示；可在公示页的「文本题明细与归纳」里归纳成主题后发布</view>
 
       <view class="switch-row">
         <view class="switch-label">必答</view>

@@ -138,16 +138,31 @@ class CensusController extends Controller
             ->get()
             ->map(fn (Stance $stance): array => $stance->payload['answers'] ?? []);
 
+        $summaries = $matter->payloadValue('text_summaries', []);
+
         return collect($matter->payloadList('modules'))
-            ->map(function (array $module) use ($allAnswers): array {
+            ->map(function (array $module) use ($allAnswers, $summaries): array {
                 $questions = $module['questions'] ?? [];
 
                 return [
                     'title' => $module['title'] ?? '',
-                    // 填空题不进公示面：开放文字只作管理端明细（情报），聚合只统计选择题
+                    // 选择题统计选项计数；填空题不出原文，只有管理员发布过人工归纳（主题+条数）才进公示面
                     'questions' => collect(is_array($questions) ? $questions : [])
-                        ->reject(fn (array $question): bool => ($question['type'] ?? '') === 'text')
-                        ->map(function (array $question) use ($allAnswers): array {
+                        ->map(function (array $question) use ($allAnswers, $summaries): ?array {
+                            if (($question['type'] ?? '') === 'text') {
+                                $summary = $summaries[$question['key']] ?? null;
+
+                                if (! ($summary['published'] ?? false)) {
+                                    return null;
+                                }
+
+                                return [
+                                    'key' => $question['key'],
+                                    'text' => $question['text'],
+                                    'themes' => $summary['themes'],
+                                ];
+                            }
+
                             $values = $allAnswers
                                 ->map(fn (array $answers) => $answers[$question['key']] ?? null)
                                 ->filter()
@@ -158,7 +173,10 @@ class CensusController extends Controller
                                 'text' => $question['text'],
                                 'counts' => $values->countBy()->sortDesc(),
                             ];
-                        })->values()->all(),
+                        })
+                        ->filter()
+                        ->values()
+                        ->all(),
                 ];
             })
             ->values()
