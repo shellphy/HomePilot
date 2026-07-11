@@ -1,65 +1,66 @@
-<view class="page-body">
+<view class="page-body tabbed">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <!-- 总览模式：概览 + 各期征集列表 -->
-    <block wx:if="{{!censusId}}">
-      <view class="card">
-        <view class="hero-num">{{residents}} <text class="hero-sub">位邻居已进入这个空间</text></view>
-        <view class="hero-cap">数据均为匿名聚合，明细仅管理员可见</view>
-      </view>
+    <view class="card">
+      <view class="hero-num">{{residents}} <text class="hero-sub">位邻居已进入这个空间</text></view>
+      <view class="hero-cap">数据均为匿名聚合，明细仅管理员可见</view>
+    </view>
 
-      <block wx:if="{{items.length}}">
-        <view class="feed-head">征集数据</view>
-        <view class="card census-list">
-          <view
-            class="crow"
-            hover-class="crow-hover"
-            wx:for="{{items}}"
-            wx:key="id"
-            data-id="{{item.id}}"
-            bind:tap="goDetail"
-          >
-            <text class="crow-title">{{item.title}}</text>
-            <view class="crow-right">
-              <text class="crow-note">{{item.note}}</text>
-              <text class="crow-arrow">›</text>
-            </view>
-          </view>
+    <!-- 进行中的征集：大卡（进度 + 头牌数据 + 参与按钮），点卡片看完整数据 -->
+    <block wx:if="{{openCards.length}}">
+      <view class="feed-head">正在征集</view>
+      <view
+        class="card fcard"
+        wx:for="{{openCards}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bind:tap="goDetail"
+      >
+        <view class="fcard-row">
+          <view class="fcard-tag">征集中</view>
+          <view class="fcard-title">{{item.title}}</view>
         </view>
-      </block>
+        <view wx:if="{{item.pitch}}" class="fcard-pitch">{{item.pitch}}</view>
+        <view wx:if="{{item.top}}" class="fcard-top">「{{item.top.question}}」答得最多的是 {{item.top.label}}（{{item.top.count}} 人）</view>
+        <view class="fcard-meter">
+          <view class="fcard-fill" style="width: {{item.percent}}%"></view>
+        </view>
+        <view class="fcard-foot">
+          <text><text class="fcard-num">{{item.registered}}</text> 人已登记</text>
+          <text class="fcard-cta">看完整数据 ›</text>
+        </view>
+        <!-- 原生 view 截断冒泡（virtualHost 组件上的 catch 不可靠）；
+             宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
+             外部 class 在 virtualHost 渲染下不一定作用到按钮盒子 -->
+        <view class="fcard-btn" data-id="{{item.id}}" catch:tap="goCensusForm">
+          <t-button
+            theme="primary"
+            block
+            size="large"
+            style="width: 100%"
+          >{{item.myAnswered ? '更新我的登记（已答 ' + item.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
+        </view>
+      </view>
     </block>
 
-    <!-- 详情模式：单期完整聚合 -->
-    <block wx:for="{{blocks}}" wx:for-item="block" wx:key="id">
-      <view class="card">
-        <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
-        <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
-      </view>
-
-      <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
-        <view class="card" wx:if="{{section.questions.length}}">
-          <view class="kicker">{{section.title}}</view>
-          <view class="qa" wx:for="{{section.questions}}" wx:for-item="question" wx:key="text">
-            <view class="qa-text">{{question.text}}</view>
-            <view class="bar" wx:for="{{question.bars}}" wx:key="label">
-              <view class="bar-label">{{item.label}}</view>
-              <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
-              <view class="bar-value">{{item.count}}</view>
-            </view>
+    <!-- 已结束的往期：一行一期，点进看详情 -->
+    <block wx:if="{{pastItems.length}}">
+      <view class="feed-head">往期数据</view>
+      <view class="card census-list">
+        <view
+          class="crow"
+          hover-class="crow-hover"
+          wx:for="{{pastItems}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bind:tap="goDetail"
+        >
+          <text class="crow-title">{{item.title}}</text>
+          <view class="crow-right">
+            <text class="crow-note">{{item.note}}</text>
+            <text class="crow-arrow">›</text>
           </view>
         </view>
-      </block>
-
-      <!-- 宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
-           外部 class 在 virtualHost 渲染下不一定作用到按钮盒子（此前背景铺不满的根因） -->
-      <t-button
-        wx:if="{{block.state === 'open'}}"
-        theme="primary"
-        block
-        size="large"
-        style="width: 100%; margin-bottom: 12rpx"
-        data-id="{{block.id}}"
-        bind:tap="goCensusForm"
-      >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
+      </view>
     </block>
 
     <view class="map-foot">{{dataFootnote}}</view>

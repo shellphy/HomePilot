@@ -57,7 +57,7 @@ Page({
       }
       // 征集类事项的详情就是它的公示面（小区数据页对应期次）
       if (res.data.type === 'census') {
-        wx.redirectTo({ url: `/pages/insights/index?id=${res.data.id}` });
+        wx.redirectTo({ url: `/pages/census-insights/index?id=${res.data.id}` });
         return;
       }
       const GOVERNANCE_TYPES = ['property', 'developer', 'committee'];

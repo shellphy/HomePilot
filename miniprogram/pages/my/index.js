@@ -60,21 +60,21 @@ Page({
     wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 我的答题：答过的直接落到那一期的聚合页，多期弹选择；没答过就去数据总览逛逛
+  // 我的答题：答过的直接落到那一期的聚合详情，多期弹选择；没答过就去数据 tab 逛逛
   goCensus() {
     const censuses = (this.data.me && this.data.me.censuses) || [];
     if (!censuses.length) {
-      wx.navigateTo({ url: '/pages/insights/index' });
+      wx.switchTab({ url: '/pages/insights/index' });
       return;
     }
     if (censuses.length === 1) {
-      wx.navigateTo({ url: `/pages/insights/index?id=${censuses[0].matter_id}` });
+      wx.navigateTo({ url: `/pages/census-insights/index?id=${censuses[0].matter_id}` });
       return;
     }
     wx.showActionSheet({
       itemList: censuses.map((census) => `${census.title}（已答 ${census.answered} 题）`),
       success: ({ tapIndex }) => {
-        wx.navigateTo({ url: `/pages/insights/index?id=${censuses[tapIndex].matter_id}` });
+        wx.navigateTo({ url: `/pages/census-insights/index?id=${censuses[tapIndex].matter_id}` });
       },
     });
   },

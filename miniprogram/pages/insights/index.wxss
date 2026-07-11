@@ -13,39 +13,6 @@
   margin: 6rpx 0 20rpx;
 }
 
-.bar {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  margin-bottom: 18rpx;
-  font-size: 24rpx;
-}
-.bar:last-child {
-  margin-bottom: 0;
-}
-.bar-label {
-  width: 190rpx;
-  text-align: right;
-  color: var(--text-secondary);
-  flex-shrink: 0;
-}
-.bar-track {
-  flex: 1;
-  height: 24rpx;
-  border-radius: 8rpx;
-  background: var(--bg-page);
-  overflow: hidden;
-}
-.bar-fill {
-  height: 100%;
-  background: var(--brand);
-  border-radius: 0 8rpx 8rpx 0;
-}
-.bar-value {
-  width: 60rpx;
-  font-weight: 600;
-}
-
 .map-foot {
   text-align: center;
   font-size: 22rpx;
@@ -60,19 +27,73 @@
   padding: 12rpx 8rpx 16rpx;
 }
 
-.qa {
-  margin-bottom: 24rpx;
+/* 进行中的征集大卡 */
+.fcard-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
 }
-.qa:last-child {
-  margin-bottom: 0;
-}
-.qa-text {
-  font-size: 25rpx;
+.fcard-tag {
+  font-size: 21rpx;
   font-weight: 600;
-  margin-bottom: 14rpx;
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+  border-radius: 8rpx;
+  padding: 4rpx 12rpx;
+  flex-shrink: 0;
+}
+.fcard-title {
+  flex: 1;
+  font-size: 29rpx;
+  font-weight: 600;
+}
+.fcard-pitch {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 12rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.fcard-top {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  margin-top: 12rpx;
+}
+.fcard-meter {
+  height: 16rpx;
+  border-radius: 8rpx;
+  background: var(--bg-page);
+  overflow: hidden;
+  margin-top: 20rpx;
+}
+.fcard-fill {
+  height: 100%;
+  background: var(--brand);
+  border-radius: 0 8rpx 8rpx 0;
+}
+.fcard-foot {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  margin-top: 14rpx;
+}
+.fcard-num {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.fcard-cta {
+  color: var(--brand-deep);
+  font-weight: 600;
+}
+.fcard-btn {
+  margin-top: 20rpx;
 }
 
-/* 总览模式的征集列表 */
+/* 往期征集列表 */
 .census-list {
   padding-top: 0;
   padding-bottom: 0;
