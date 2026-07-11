@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Matters\CensusType;
 use App\Models\Matter;
 use App\Models\Record;
 use App\Models\Resident;
@@ -48,7 +49,7 @@ class RecordFactory extends Factory
                 'answers' => [
                     'layout' => fake()->randomElement(app(CommunitySettings::class)->layouts),
                     'decoration_mode' => fake()->randomElement(app(CommunitySettings::class)->decoration_modes),
-                    'interests' => [fake()->randomElement(app(CommunitySettings::class)->categories)],
+                    CensusType::CATEGORY_INTEREST_KEY => [fake()->randomElement(app(CommunitySettings::class)->categories)],
                 ],
             ],
         ]);

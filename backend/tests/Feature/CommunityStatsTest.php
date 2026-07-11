@@ -1,5 +1,8 @@
 <?php
 
+use App\Matters\CensusType;
+use App\Models\Matter;
+use App\Models\Record;
 use App\Models\Resident;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
@@ -11,7 +14,32 @@ test('stats report the community overview', function () {
     $this->getJson('/api/stats')
         ->assertSuccessful()
         ->assertJsonPath('residents', 4)
-        ->assertJsonPath('total_households', app(CommunitySettings::class)->total_households);
+        ->assertJsonPath('total_households', app(CommunitySettings::class)->total_households)
+        ->assertJsonPath('category_interest', []);
+});
+
+test('stats aggregate category interest from census answers', function () {
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $census = Matter::factory()->create(['type' => 'census', 'state' => 'open', 'is_approved' => true]);
+    Record::factory()->censusAnswers()->count(2)->for($census, 'matter')->create([
+        'payload' => ['answers' => [CensusType::CATEGORY_INTEREST_KEY => ['门窗', '地暖']]],
+    ]);
+    Record::factory()->censusAnswers()->for($census, 'matter')->create([
+        'payload' => ['answers' => [CensusType::CATEGORY_INTEREST_KEY => ['门窗']]],
+    ]);
+
+    // 未审核征集的答案不计入
+    $pending = Matter::factory()->create(['type' => 'census', 'state' => 'open', 'is_approved' => false]);
+    Record::factory()->censusAnswers()->for($pending, 'matter')->create([
+        'payload' => ['answers' => [CensusType::CATEGORY_INTEREST_KEY => ['全屋定制']]],
+    ]);
+
+    $this->getJson('/api/stats')
+        ->assertSuccessful()
+        ->assertJsonPath('category_interest.门窗', 3)
+        ->assertJsonPath('category_interest.地暖', 2)
+        ->assertJsonMissingPath('category_interest.全屋定制');
 });
 
 test('guests cannot read stats', function () {
