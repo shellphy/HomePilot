@@ -1,4 +1,4 @@
-// 事务详情壳：负责取数与分享，渲染分发给类型详情组件
+// 事项详情壳：负责取数与分享，渲染分发给类型详情组件
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
 const { getMe } = require('../../utils/me');
@@ -51,7 +51,7 @@ Page({
       if (options.community && options.community.app_name) {
         this.setData({ appName: options.community.app_name });
       }
-      // 征集类事务的详情就是它的公示面（小区数据页对应期次）
+      // 征集类事项的详情就是它的公示面（小区数据页对应期次）
       if (res.data.type === 'census') {
         wx.redirectTo({ url: `/pages/insights/index?id=${res.data.id}` });
         return;

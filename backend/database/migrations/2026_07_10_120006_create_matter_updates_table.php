@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * 事务时间线：一件事的公开经过（原"团购进度更新"的泛化）。
+     * 事项时间线：一件事的公开经过（原"团购进度更新"的泛化）。
      */
     public function up(): void
     {

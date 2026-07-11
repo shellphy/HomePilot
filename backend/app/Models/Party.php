@@ -60,12 +60,6 @@ class Party extends Model
     /** @return HasMany<Resident, $this> */
     public function members(): HasMany
     {
-        return $this->hasMany(Resident::class);
-    }
-
-    /** @return HasMany<Record, $this> */
-    public function records(): HasMany
-    {
-        return $this->hasMany(Record::class);
+        return $this->hasMany(Resident::class, 'affiliated_party_id');
     }
 }

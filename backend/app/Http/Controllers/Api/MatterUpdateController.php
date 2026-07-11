@@ -14,7 +14,7 @@ class MatterUpdateController extends Controller
     use ResolvesResident;
 
     /**
-     * 发布事务时间线（进度）：只有发起人可以。
+     * 发布事项时间线（进度）：只有发起人可以。
      */
     public function store(Request $request, Matter $matter): JsonResponse
     {

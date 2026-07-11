@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class MatterFactory extends Factory
 {
     /**
-     * 默认：已审核、意向征集中的团购事务。
+     * 默认：已审核、意向征集中的团购事项。
      *
      * @return array<string, mixed>
      */
@@ -87,7 +87,7 @@ class MatterFactory extends Factory
     }
 
     /**
-     * 公告事务（第二类型）。
+     * 公告事项（第二类型）。
      */
     public function notice(): static
     {

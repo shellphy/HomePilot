@@ -12,12 +12,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * 事务：社区正在处理的一件事（系统的中心运行时对象）。
+ * 事项：社区正在处理的一件事（系统的中心运行时对象）。
  *
  * @property int $id
  * @property string $type
  * @property int|null $initiator_id
- * @property int|null $party_id
  * @property string $title
  * @property string $category
  * @property string $state
@@ -33,7 +32,6 @@ class Matter extends Model
     protected $fillable = [
         'type',
         'initiator_id',
-        'party_id',
         'title',
         'category',
         'state',
@@ -66,28 +64,22 @@ class Matter extends Model
         return $this->belongsTo(Resident::class, 'initiator_id');
     }
 
-    /** @return BelongsTo<Party, $this> */
-    public function party(): BelongsTo
+    /** @return HasMany<Stance, $this> */
+    public function stances(): HasMany
     {
-        return $this->belongsTo(Party::class);
+        return $this->hasMany(Stance::class);
     }
 
-    /** @return HasMany<Record, $this> */
-    public function records(): HasMany
-    {
-        return $this->hasMany(Record::class);
-    }
-
-    /** 接龙表态。@return HasMany<Record, $this> */
+    /** 接龙表态。@return HasMany<Stance, $this> */
     public function joins(): HasMany
     {
-        return $this->records()->where('mode', Record::MODE_JOIN);
+        return $this->stances()->where('mode', Stance::MODE_JOIN);
     }
 
-    /** 评价表态。@return HasMany<Record, $this> */
+    /** 评价表态。@return HasMany<Stance, $this> */
     public function reviews(): HasMany
     {
-        return $this->records()->where('mode', Record::MODE_REVIEW);
+        return $this->stances()->where('mode', Stance::MODE_REVIEW);
     }
 
     /** @return HasMany<MatterUpdate, $this> */

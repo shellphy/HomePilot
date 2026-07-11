@@ -9,7 +9,7 @@ Page({
 
   data: {
     id: null,
-    states: [], // 编辑时来自后端下发的该事务状态机；新建不选状态（后端定初始态）
+    states: [], // 编辑时来自后端下发的该事项状态机；新建不选状态（后端定初始态）
     categories: [],
     category: '',
     customCategory: '',

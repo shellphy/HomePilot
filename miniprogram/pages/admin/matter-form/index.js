@@ -1,4 +1,4 @@
-// 管理端 · 事务发布/编辑：所有类型共用，按类型显示对应字段
+// 管理端 · 事项发布/编辑：所有类型共用，按类型显示对应字段
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 
@@ -30,7 +30,7 @@ Page({
   onLoad(query) {
     const id = query.id ? Number(query.id) : null;
     this.setData({ id, type: query.type || 'notice' });
-    wx.setNavigationBarTitle({ title: id ? '编辑事务' : '发布事务' });
+    wx.setNavigationBarTitle({ title: id ? '编辑事项' : '发布事项' });
     if (!id) this.setData({ loaded: true });
   },
 
@@ -100,8 +100,8 @@ Page({
     wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${this.data.id}` });
   },
 
-  goRecords() {
-    wx.navigateTo({ url: `/pages/admin/records/index?id=${this.data.id}` });
+  goRegistrations() {
+    wx.navigateTo({ url: `/pages/admin/registrations/index?id=${this.data.id}` });
   },
 
   async submit() {
@@ -153,7 +153,7 @@ Page({
 
   remove() {
     wx.showModal({
-      title: '删除这件事务？',
+      title: '删除这件事项？',
       content: '相关的表态记录会一并删除，不可恢复',
       confirmText: '删除',
       confirmColor: '#e34d59',

@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Resident;
-use App\Models\Unit;
 use Laravel\Sanctum\Sanctum;
 
 test('a resident can maintain their own contact profile independently of any census', function () {
@@ -17,12 +16,11 @@ test('a resident can maintain their own contact profile independently of any cen
         ->assertJsonPath('data.unit_label', '5栋')
         ->assertJsonPath('data.wechat_id', 'laoK-2026');
 
-    expect($resident->refresh()->unit->label)->toBe('5栋')
-        ->and(Unit::count())->toBe(1);
+    expect($resident->refresh()->unit_label)->toBe('5栋');
 
-    // 换楼栋复用已有的户对象
-    $this->putJson('/api/me', ['unit_label' => '5栋'])->assertSuccessful();
-    expect(Unit::count())->toBe(1);
+    // 楼栋号会规整首尾空格
+    $this->putJson('/api/me', ['unit_label' => ' 5栋 '])->assertSuccessful();
+    expect($resident->refresh()->unit_label)->toBe('5栋');
 });
 
 test('the room label is a separate private field and optional fields can be cleared', function () {
@@ -52,7 +50,7 @@ test('an owner cannot clear the unit label but a party member has no such requir
         ->assertUnprocessable()
         ->assertJsonValidationErrors('unit_label');
 
-    expect($owner->refresh()->unit->label)->toBe('5栋');
+    expect($owner->refresh()->unit_label)->toBe('5栋');
 
     // 相关方账号没有楼栋概念，允许为空
     $merchant = Resident::factory()->merchant()->create();

@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // 小区概况（户数、入驻数）
     Route::get('/stats', [StatsController::class, 'index']);
 
-    // 事务与表态
+    // 事项与表态
     Route::get('/matters', [MatterController::class, 'index']);
     Route::get('/matters/mine', [MatterController::class, 'mine']);
     Route::get('/matters/joined', [MatterController::class, 'joined']);
@@ -55,7 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/matters/{matter}', [MatterAdminController::class, 'update']);
         Route::put('/matters/{matter}/approve', [MatterAdminController::class, 'approve']);
         Route::delete('/matters/{matter}', [MatterAdminController::class, 'destroy']);
-        Route::get('/matters/{matter}/records', [MatterAdminController::class, 'records']);
+        Route::get('/matters/{matter}/registrations', [MatterAdminController::class, 'registrations']);
         Route::get('/parties', [PartyAdminController::class, 'index']);
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
         Route::get('/settings', [SettingAdminController::class, 'show']);

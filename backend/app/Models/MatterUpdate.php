@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * 事务时间线条目（原"团购进度更新"的泛化）。
+ * 事项时间线条目（原"团购进度更新"的泛化）。
  *
  * @property int $id
  * @property int $matter_id

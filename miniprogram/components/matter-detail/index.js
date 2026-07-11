@@ -1,5 +1,5 @@
-// 通用事务详情体（活动/互助/维权等接龙型事务）：
-// 该类事务的全部行为（参与/流转/进度/编辑入口）都在组件内，变更后向页面发 refresh。
+// 通用事项详情体（活动/互助/维权等接龙型事项）：
+// 该类事项的全部行为（参与/流转/进度/编辑入口）都在组件内，变更后向页面发 refresh。
 const matters = require('../../utils/api/matters');
 const { pillClass, TYPE_META, stateOptions } = require('../../utils/constants');
 

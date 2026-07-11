@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Party;
 use App\Models\Resident;
-use App\Models\Unit;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,29 +21,26 @@ class ResidentFactory extends Factory
         return [
             'openid' => fake()->unique()->md5(),
             'nickname' => fake()->firstName(),
-            // 复用式取栋：同一栋住很多户，也避免与显式创建的栋号唯一键冲突
-            'unit_id' => fn (): int => Unit::firstOrCreate(['label' => fake()->numberBetween(1, 20).'栋'])->id,
+            'unit_label' => fake()->numberBetween(1, 20).'栋',
             'phone' => fake()->numerify('138########'),
             'wechat_id' => fake()->userName(),
         ];
     }
 
     /**
-     * 指定楼栋（不存在则创建）。
+     * 指定楼栋。
      */
     public function inUnit(string $label): static
     {
-        return $this->state(fn (): array => [
-            'unit_id' => Unit::firstOrCreate(['label' => $label])->id,
-        ]);
+        return $this->state(fn (): array => ['unit_label' => $label]);
     }
 
     /**
-     * 尚未绑定楼栋的新用户。
+     * 尚未填写楼栋的新用户。
      */
     public function withoutUnit(): static
     {
-        return $this->state(fn (): array => ['unit_id' => null]);
+        return $this->state(fn (): array => ['unit_label' => '']);
     }
 
     /**
@@ -61,7 +57,7 @@ class ResidentFactory extends Factory
     public function merchant(string $name = '青城中央空调', string $category = '中央空调'): static
     {
         return $this->state(fn (): array => [
-            'party_id' => Party::factory()->merchant()->create(['name' => $name, 'category' => $category])->id,
+            'affiliated_party_id' => Party::factory()->merchant()->create(['name' => $name, 'category' => $category])->id,
         ]);
     }
 }

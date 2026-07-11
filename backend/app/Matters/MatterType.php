@@ -6,7 +6,7 @@ use App\Models\Matter;
 use App\Models\Resident;
 
 /**
- * 事务类型：定义一类社区事务装载哪些能力——状态机、payload 校验、
+ * 事项类型：定义一类社区事项装载哪些能力——状态机、payload 校验、
  * 表态模式开关、列表排序权重。新场景 = 新增一个子类，不新建表、不新建端点。
  */
 abstract class MatterType
@@ -41,13 +41,13 @@ abstract class MatterType
         return [];
     }
 
-    /** 业主是否可以从小程序发起该类型事务（否=仅管理端创建）。 */
+    /** 业主是否可以从小程序发起该类型事项（否=仅管理端创建）。 */
     public function userInitiatable(): bool
     {
         return true;
     }
 
-    /** 是否出现在小区事务流里。 */
+    /** 是否出现在小区事项流里。 */
     public function visibleInList(Matter $matter): bool
     {
         return true;

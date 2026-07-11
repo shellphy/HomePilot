@@ -25,8 +25,8 @@ function deleteMatter(id) {
   return request(`/admin/matters/${id}`, { method: 'DELETE' });
 }
 
-function listRecords(matterId) {
-  return request(`/admin/matters/${matterId}/records`);
+function listRegistrations(matterId) {
+  return request(`/admin/matters/${matterId}/registrations`);
 }
 
 function listParties() {
@@ -52,7 +52,7 @@ module.exports = {
   updateMatter,
   approveMatter,
   deleteMatter,
-  listRecords,
+  listRegistrations,
   listParties,
   certifyParty,
   getSettings,

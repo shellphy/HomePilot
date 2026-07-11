@@ -2,28 +2,26 @@
 
 namespace App\Models;
 
-use Database\Factories\RecordFactory;
+use Database\Factories\StanceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * 记录：结构化表态的沉淀原子。
+ * 表态：结构化表态的沉淀原子。
  * 修改表态请走 reviseTo()，旧值进修订链——"只增不改"。
  *
  * @property int $id
- * @property int|null $matter_id
- * @property int|null $party_id
+ * @property int $matter_id
  * @property int $resident_id
  * @property string $mode
- * @property string $subject
  * @property array<string, mixed>|null $payload
  * @property-read Resident $resident
  */
-class Record extends Model
+class Stance extends Model
 {
-    /** @use HasFactory<RecordFactory> */
+    /** @use HasFactory<StanceFactory> */
     use HasFactory;
 
     public const MODE_REGISTER = 'register';
@@ -32,14 +30,10 @@ class Record extends Model
 
     public const MODE_REVIEW = 'review';
 
-    public const MODE_VOTE = 'vote';
-
     protected $fillable = [
         'matter_id',
-        'party_id',
         'resident_id',
         'mode',
-        'subject',
         'payload',
     ];
 
@@ -73,15 +67,9 @@ class Record extends Model
         return $this->belongsTo(Resident::class);
     }
 
-    /** @return BelongsTo<Party, $this> */
-    public function party(): BelongsTo
-    {
-        return $this->belongsTo(Party::class);
-    }
-
-    /** @return HasMany<RecordRevision, $this> */
+    /** @return HasMany<StanceRevision, $this> */
     public function revisions(): HasMany
     {
-        return $this->hasMany(RecordRevision::class);
+        return $this->hasMany(StanceRevision::class);
     }
 }

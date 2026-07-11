@@ -4,15 +4,15 @@ namespace Database\Factories;
 
 use App\Matters\CensusType;
 use App\Models\Matter;
-use App\Models\Record;
 use App\Models\Resident;
+use App\Models\Stance;
 use App\Settings\CommunitySettings;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Record>
+ * @extends Factory<Stance>
  */
-class RecordFactory extends Factory
+class StanceFactory extends Factory
 {
     /**
      * 默认：一条接龙表态。
@@ -24,8 +24,7 @@ class RecordFactory extends Factory
         return [
             'matter_id' => Matter::factory(),
             'resident_id' => Resident::factory(),
-            'mode' => Record::MODE_JOIN,
-            'subject' => '',
+            'mode' => Stance::MODE_JOIN,
             'payload' => null,
         ];
     }
@@ -33,18 +32,18 @@ class RecordFactory extends Factory
     public function review(int $rating = 5, string $content = ''): static
     {
         return $this->state(fn (): array => [
-            'mode' => Record::MODE_REVIEW,
+            'mode' => Stance::MODE_REVIEW,
             'payload' => ['rating' => $rating, 'content' => $content],
         ]);
     }
 
     /**
-     * 征集表态（答案挂在所属征集事务上）。
+     * 征集表态（答案挂在所属征集事项上）。
      */
     public function censusAnswers(): static
     {
         return $this->state(fn (): array => [
-            'mode' => Record::MODE_REGISTER,
+            'mode' => Stance::MODE_REGISTER,
             'payload' => [
                 'answers' => [
                     'layout' => fake()->randomElement(app(CommunitySettings::class)->layouts),

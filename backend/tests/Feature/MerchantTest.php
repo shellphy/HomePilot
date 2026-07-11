@@ -19,7 +19,7 @@ test('a resident can self register as a merchant', function () {
         ->assertJsonPath('data.party.label', '商家')
         ->assertJsonPath('data.party.name', '青城中央空调');
 
-    expect($resident->refresh()->party->is_listed)->toBeFalse(); // 公示名单要管理员认证
+    expect($resident->refresh()->affiliatedParty->is_listed)->toBeFalse(); // 公示名单要管理员认证
 });
 
 test('resubmitting merchant info updates the same party instead of creating another', function () {
@@ -51,7 +51,7 @@ test('a party member can switch back to resident and the party record survives',
         ->assertSuccessful()
         ->assertJsonPath('data.party', null);
 
-    expect($merchant->refresh()->party_id)->toBeNull()
+    expect($merchant->refresh()->affiliated_party_id)->toBeNull()
         ->and(Party::count())->toBe(1); // 相关方档案保留，供管理端追溯
 });
 

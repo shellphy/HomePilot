@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 class OptionController extends Controller
 {
     /**
-     * 静态配置统一下发：社区身份与文案、表单选项、可发起的事务类型。
+     * 静态配置统一下发：社区身份与文案、表单选项、可发起的事项类型。
      * 全部来自数据库 settings（小程序「小区管理 · 社区设置」可视化编辑），改配置不发版、不改代码。
      */
     public function index(CommunitySettings $settings): JsonResponse

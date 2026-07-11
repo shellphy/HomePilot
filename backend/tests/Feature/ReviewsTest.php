@@ -1,14 +1,14 @@
 <?php
 
 use App\Models\Matter;
-use App\Models\Record;
 use App\Models\Resident;
+use App\Models\Stance;
 use Laravel\Sanctum\Sanctum;
 
 function joinedResident(Matter $matter): Resident
 {
     $resident = Resident::factory()->create();
-    Record::factory()->for($matter, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->for($matter, 'matter')->for($resident, 'resident')->create();
 
     return $resident;
 }
@@ -22,7 +22,7 @@ test('a participant can review a finished groupbuy', function () {
         ->assertCreated()
         ->assertJsonPath('data.rating', 5);
 
-    expect(Record::where('mode', Record::MODE_REVIEW)->count())->toBe(1);
+    expect(Stance::where('mode', Stance::MODE_REVIEW)->count())->toBe(1);
 });
 
 test('re-reviewing revises the existing review and keeps the trail', function () {
@@ -34,9 +34,9 @@ test('re-reviewing revises the existing review and keeps the trail', function ()
     $this->putJson("/api/matters/{$matter->id}/review", ['rating' => 3, 'content' => '后来打胶有点毛糙'])
         ->assertSuccessful();
 
-    $review = Record::where('mode', Record::MODE_REVIEW)->first();
+    $review = Stance::where('mode', Stance::MODE_REVIEW)->first();
 
-    expect(Record::where('mode', Record::MODE_REVIEW)->count())->toBe(1)
+    expect(Stance::where('mode', Stance::MODE_REVIEW)->count())->toBe(1)
         ->and($review->payload['rating'])->toBe(3)
         ->and($review->revisions()->count())->toBe(1)
         ->and($review->revisions()->first()->payload['rating'])->toBe(5);
@@ -60,8 +60,8 @@ test('reviews are rejected before the groupbuy is done', function () {
 test('the matter detail carries reviews and my review', function () {
     $matter = Matter::factory()->done()->create();
     $resident = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K']);
-    Record::factory()->for($matter, 'matter')->for($resident, 'resident')->create();
-    Record::factory()->review(4, '整体满意')->for($matter, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->for($matter, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->review(4, '整体满意')->for($matter, 'matter')->for($resident, 'resident')->create();
 
     Sanctum::actingAs($resident);
 

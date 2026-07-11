@@ -68,7 +68,7 @@
           </view>
           <text class="row-arrow">›</text>
         </view>
-        <view class="row" hover-class="row-hover" bind:tap="goRecords">
+        <view class="row" hover-class="row-hover" bind:tap="goRegistrations">
           <view class="row-main">
             <view class="row-title">登记明细</view>
             <view class="row-sub">含楼栋、房号、联系方式，仅管理员可见</view>
@@ -109,6 +109,6 @@
     </view>
 
     <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '发布'}}</t-button>
-    <t-button wx:if="{{id}}" theme="danger" variant="text" block class="del-btn" bind:tap="remove">删除这件事务</t-button>
+    <t-button wx:if="{{id}}" theme="danger" variant="text" block class="del-btn" bind:tap="remove">删除这件事项</t-button>
   </page-status>
 </view>
