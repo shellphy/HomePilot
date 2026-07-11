@@ -5,6 +5,9 @@ const profile = require('../../utils/api/profile');
 const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
+// 各类型的收尾态：收尾的事不再占整卡，压成单行沉底
+const CLOSED = ['done', 'closed', 'resolved'];
+
 Page({
   behaviors: [load],
 
@@ -14,7 +17,8 @@ Page({
     merchantUnlisted: false, // 未认证商家：入口保留，点击引导认证
     listedParties: 0,
     notices: [],
-    doings: [],
+    doings: [], // 进行中的事：整卡
+    finished: [], // 已收尾的事：单行 {id, type, title, note}
     activeCount: 0,
     residents: 0,
   },
@@ -51,8 +55,16 @@ Page({
         getMe(),
       ]);
       const notices = res.data.filter((matter) => matter.type === 'notice');
-      const doings = res.data.filter((matter) => matter.type !== 'notice');
-      const CLOSED = ['done', 'closed', 'resolved'];
+      const all = res.data.filter((matter) => matter.type !== 'notice');
+      const doings = all.filter((matter) => !CLOSED.includes(matter.state));
+      const finished = all.filter((matter) => CLOSED.includes(matter.state)).map((matter) => ({
+        id: matter.id,
+        type: matter.type,
+        title: matter.title,
+        note: matter.type === 'census'
+          ? `${matter.register_count} 人登记 · ${matter.state_label}`
+          : `${matter.join_count} 人 · ${matter.state_label}`,
+      }));
       // 张罗入口按身份分流：业主看 user_initiatable，已认证商家看 merchant_initiatable，
       // 其余相关方（物业等）没有发起入口（他们的参与方式是官方回应）
       const isMerchant = !!(me.party && me.party.type === 'merchant');
@@ -65,7 +77,8 @@ Page({
         listedParties: stats.listed_parties,
         notices,
         doings,
-        activeCount: doings.filter((matter) => !CLOSED.includes(matter.state)).length,
+        finished,
+        activeCount: doings.length,
         residents: stats.residents,
       });
       if (options.community && options.community.name) {
@@ -74,8 +87,14 @@ Page({
     });
   },
 
-  goInsights() {
-    wx.switchTab({ url: '/pages/insights/index' });
+  // 收尾行点进各自的落点：征集看数据公示，其余看事项详情
+  goFinished(e) {
+    const { id, type } = e.currentTarget.dataset;
+    wx.navigateTo({
+      url: type === 'census'
+        ? `/pages/census-insights/index?id=${id}`
+        : `/pages/matter/index?id=${id}`,
+    });
   },
 
   goParties() {

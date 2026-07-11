@@ -73,7 +73,51 @@
 }
 .prow-note {
   font-size: 26rpx;
-  color: #9b978c;
+  color: var(--text-muted);
+}
+.row-hover {
+  opacity: 0.55;
+}
+
+/* 已收尾的事：单行列表，样式对齐数据页「往期数据」 */
+.finished-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.drow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  height: 104rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+.drow:last-child {
+  border-bottom: none;
+}
+.drow-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 27rpx;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.drow-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.drow-note {
+  font-size: 23rpx;
+  color: var(--text-muted);
+}
+.drow-arrow {
+  font-size: 32rpx;
+  line-height: 1;
+  color: var(--line-dark);
 }
 
 /* 空态下的行动按钮：跟在号召文案下方，视线落点即入口 */

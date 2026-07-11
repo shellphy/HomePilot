@@ -5,9 +5,10 @@
       <view class="portal-name">{{community.name}}</view>
       <view class="portal-sub">{{community.slogan}} · {{community.sub_slogan}}</view>
       <view class="portal-stats">
-        <view class="pstat" bind:tap="goInsights">
+        <!-- 只做氛围数字：去数据页走底部 tab，不在这里塞重复入口 -->
+        <view class="pstat">
           <view class="pstat-num">{{residents}}<text class="pstat-unit"> 位</text></view>
-          <view class="pstat-label">邻居在这里 · 小区数据 ›</view>
+          <view class="pstat-label">邻居在这里</view>
         </view>
         <view
           class="portal-btn"
@@ -39,10 +40,32 @@
     </block>
     <!-- 空态：号召和行动放在同一处，别让人读完还得回头找顶部入口 -->
     <view wx:if="{{!doings.length}}" class="hint">
-      还没有人牵头张罗。第一个张罗的人，就是这件事的牵头人。
+      {{finished.length ? '进行中的事都收尾了。下一件事，等你来张罗。' : '还没有人牵头张罗。第一个张罗的人，就是这件事的牵头人。'}}
       <view class="empty-cta" wx:if="{{initiatableTypes.length || merchantUnlisted}}">
-        <t-button theme="primary" size="medium" bind:tap="goCreate">我来张罗第一件事</t-button>
+        <t-button theme="primary" size="medium" bind:tap="goCreate">我来张罗{{finished.length ? '一件事' : '第一件事'}}</t-button>
       </view>
     </view>
+
+    <!-- 已收尾的事：压成单行收在最底部，不跟进行中的抢版面（对齐数据页「往期数据」的行式） -->
+    <block wx:if="{{finished.length}}">
+      <view class="feed-head">已经收尾的事</view>
+      <view class="card finished-list">
+        <view
+          class="drow"
+          hover-class="row-hover"
+          wx:for="{{finished}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-type="{{item.type}}"
+          bind:tap="goFinished"
+        >
+          <text class="drow-title">{{item.title}}</text>
+          <view class="drow-right">
+            <text class="drow-note">{{item.note}}</text>
+            <text class="drow-arrow">›</text>
+          </view>
+        </view>
+      </view>
+    </block>
   </page-status>
 </view>
