@@ -81,6 +81,21 @@ abstract class MatterType
         return false;
     }
 
+    /**
+     * 是否进入联系方式互通阶段（如团购成团后）：
+     * 牵头人可见同意共享者的手机号，同意共享的参与者可见牵头人手机号。
+     */
+    public function contactsOpen(Matter $matter): bool
+    {
+        return false;
+    }
+
+    /** 接龙名单是否对外公示（否=对外只公示计数，明细仅牵头人可见，如维权联名）。 */
+    public function rosterPublic(Matter $matter): bool
+    {
+        return true;
+    }
+
     /** 是否开放评价表态。 */
     public function allowsReview(Matter $matter, Resident $resident): bool
     {

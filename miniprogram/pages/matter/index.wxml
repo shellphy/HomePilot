@@ -8,6 +8,8 @@
         joined="{{joined}}"
         is-initiator="{{isInitiator}}"
         my-review="{{myReview}}"
+        contacts="{{contacts}}"
+        initiator-contact="{{initiatorContact}}"
         bind:refresh="reload"
       />
       <matter-detail
@@ -15,6 +17,7 @@
         matter="{{matter}}"
         joined="{{joined}}"
         is-initiator="{{isInitiator}}"
+        can-respond="{{canRespond}}"
         bind:refresh="reload"
       />
     </block>

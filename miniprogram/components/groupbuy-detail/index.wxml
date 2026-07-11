@@ -45,7 +45,26 @@
 </view>
 
 <view class="card pending-tip" wx:if="{{!matter.is_approved}}">
-  ⏳ 待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）
+  <block wx:if="{{matter.reject_reason}}">❌ 已被驳回：{{matter.reject_reason}}（修改后保存即重新提交审核）</block>
+  <block wx:else>⏳ 待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）</block>
+</view>
+
+<!-- 成团后的联系互通：参团者见团长 -->
+<view class="card deal-card" wx:if="{{initiatorContact}}">
+  <view class="kicker">联系团长 · 建群与对接</view>
+  <view class="term-row">
+    <text class="term-label">{{initiatorContact.name}}</text>
+    <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="copyPhone">{{initiatorContact.phone}} 复制</text>
+  </view>
+</view>
+
+<!-- 成团后的联系互通：团长见同意共享的参团者 -->
+<view class="card deal-card" wx:if="{{isInitiator && contacts.length}}">
+  <view class="kicker">参团联系名单（{{contacts.length}}）· 仅你可见，用于建群对接</view>
+  <view class="term-row" wx:for="{{contacts}}" wx:key="phone">
+    <text class="term-label">{{item.name}}</text>
+    <text class="term-value" data-phone="{{item.phone}}" bind:tap="copyPhone">{{item.phone}} 复制</text>
+  </view>
 </view>
 
 <view class="card leader-ops" wx:if="{{isInitiator}}">
@@ -63,7 +82,7 @@
   <view class="tline" wx:for="{{matter.updates}}" wx:key="index">
     <view class="tline-dot {{index === 0 ? 'tline-dot-latest' : ''}}"></view>
     <view class="tline-main">
-      <view class="tline-date">{{item.happened_on}}</view>
+      <view class="tline-date">{{item.happened_on}}{{item.author ? ' · ' + item.author + '（官方回应）' : ''}}</view>
       <view class="tline-content">{{item.content}}</view>
       <view class="tline-shots" wx:if="{{item.images.length}}">
         <image

@@ -19,7 +19,8 @@ class StatsController extends Controller
     public function index(CommunitySettings $settings): JsonResponse
     {
         return response()->json([
-            'residents' => Resident::count(),
+            // 只算选好楼栋的成员：静默登录会把路过的人也建号，不选楼栋不算「邻居」
+            'residents' => Resident::where('unit_label', '!=', '')->count(),
             'total_households' => $settings->total_households,
             'category_interest' => $this->categoryInterest(),
         ]);

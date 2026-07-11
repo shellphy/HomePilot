@@ -58,6 +58,25 @@ test('the matter detail shows the roster and whether I joined', function () {
         ->assertJsonPath('joined', false);
 });
 
+test('rights rosters stay private: count only for others, full list for the initiator', function () {
+    $initiator = Resident::factory()->create();
+    $matter = Matter::factory()->rights()->for($initiator, 'initiator')->create();
+    $neighbor = Resident::factory()->inUnit('5栋')->create(['nickname' => '老王']);
+    Stance::factory()->for($matter, 'matter')->for($neighbor, 'resident')->create();
+
+    // 旁观者：只见计数，不见名单
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->getJson("/api/matters/{$matter->id}")
+        ->assertJsonPath('data.roster_hidden', true)
+        ->assertJsonPath('data.roster', [])
+        ->assertJsonPath('data.join_count', 1);
+
+    // 牵头人：明细可见
+    Sanctum::actingAs($initiator);
+    $this->getJson("/api/matters/{$matter->id}")
+        ->assertJsonPath('data.roster.0', '5栋 老王');
+});
+
 test('a resident can join a matter and the count grows', function () {
     $matter = Matter::factory()->open()->create();
     Sanctum::actingAs(Resident::factory()->create());

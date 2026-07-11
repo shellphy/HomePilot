@@ -9,6 +9,8 @@ use Laravel\Sanctum\Sanctum;
 
 test('stats report the community overview', function () {
     Resident::factory()->count(3)->create();
+    // 静默登录产生、还没选楼栋的路人不算「邻居」
+    Resident::factory()->withoutUnit()->count(2)->create();
     Sanctum::actingAs(Resident::factory()->create());
 
     $this->getJson('/api/stats')
