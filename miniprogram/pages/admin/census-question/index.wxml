@@ -28,8 +28,8 @@
       </view>
     </view>
 
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="save">保存题目</t-button>
+    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="save">保存题目</t-button>
     <!-- 危险操作与保存拉开距离，避免误触（与事项表单同一约定） -->
-    <t-button wx:if="{{qi >= 0}}" theme="danger" variant="text" block style="margin-top: 40rpx" bind:tap="remove">删除这道题</t-button>
+    <t-button wx:if="{{qi >= 0}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这道题</t-button>
   </page-status>
 </view>

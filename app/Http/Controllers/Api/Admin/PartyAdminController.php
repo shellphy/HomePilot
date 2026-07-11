@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Events\PartyListed;
 use App\Http\Controllers\Controller;
 use App\Models\Party;
 use Illuminate\Http\JsonResponse;
@@ -48,7 +49,12 @@ class PartyAdminController extends Controller
     {
         $validated = $request->validate(['is_listed' => ['required', 'boolean']]);
 
+        $wasListed = $party->is_listed;
         $party->update($validated);
+
+        if ($party->is_listed && ! $wasListed) {
+            PartyListed::dispatch($party);
+        }
 
         return response()->json(['data' => ['id' => $party->id, 'is_listed' => $party->is_listed]]);
     }

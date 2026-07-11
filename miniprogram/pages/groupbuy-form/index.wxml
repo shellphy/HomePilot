@@ -4,17 +4,17 @@
     <view class="card form-list">
       <view class="frow">
         <text class="frow-label">标题<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="如：门窗团购（断桥铝）" value="{{title}}" maxlength="30" data-field="title" bind:input="onInput" />
+        <input class="frow-input" placeholder="如：门窗团购（断桥铝）" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
       </view>
 
       <view class="frow">
         <text class="frow-label">品类<text class="f-required">*</text></text>
-        <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" maxlength="12" data-field="category" bind:input="onInput" />
+        <input class="frow-input" placeholder="如：装修公司、门窗" value="{{category}}" maxlength="30" data-field="category" bind:input="onInput" />
       </view>
 
       <view class="frow">
         <text class="frow-label">阶梯优惠</text>
-        <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" maxlength="50" data-field="perk" bind:input="onInput" />
+        <input class="frow-input" placeholder="如：满 20 人赠全屋水电升级" value="{{perk}}" maxlength="100" data-field="perk" bind:input="onInput" />
       </view>
 
       <view class="frow">
@@ -38,15 +38,7 @@
         <text class="frow-value">已开启</text>
       </view>
 
-      <!-- 状态流转：单选走 action-sheet，与管理端表单同一套交互 -->
-      <view class="frow" wx:if="{{stateKeys.length}}" hover-class="frow-hover" bind:tap="chooseState">
-        <view class="frow-main">
-          <view class="row-title">状态</view>
-          <view class="row-sub">还没谈价选「意向征集」先探人数，条件谈好了选「接龙中」</view>
-        </view>
-        <text class="frow-value">{{states[state]}}</text>
-        <text class="frow-arrow">›</text>
-      </view>
+      <!-- 状态流转不在编辑表单里：团长只能沿状态机推进一步，入口统一在详情页的「推进到下一站」 -->
     </view>
 
     <view class="card">
@@ -57,8 +49,8 @@
     <view class="card">
       <view class="q-title">团购条件<text class="q-note">谈成后再填也可以</text></view>
       <view class="pair" wx:for="{{terms}}" wx:key="index">
-        <input class="fin pair-a" placeholder="名目" value="{{item.label}}" data-list="terms" data-index="{{index}}" data-field="label" bind:input="onRowInput" />
-        <input class="fin pair-b" placeholder="如 618 元/㎡" value="{{item.value}}" data-list="terms" data-index="{{index}}" data-field="value" bind:input="onRowInput" />
+        <input class="fin pair-a" placeholder="名目" value="{{item.label}}" maxlength="30" data-list="terms" data-index="{{index}}" data-field="label" bind:input="onRowInput" />
+        <input class="fin pair-b" placeholder="如 618 元/㎡" value="{{item.value}}" maxlength="100" data-list="terms" data-index="{{index}}" data-field="value" bind:input="onRowInput" />
         <view class="pair-del" data-list="terms" data-index="{{index}}" bind:tap="removeRow">✕</view>
       </view>
       <view class="add-row" data-list="terms" bind:tap="addRow">＋ 添加一条</view>
@@ -68,7 +60,7 @@
       <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，3~5 条</text></view>
       <view class="pair pair-col" wx:for="{{glossary}}" wx:key="index">
         <view class="pair-head">
-          <input class="fin pair-a" placeholder="术语，如 1 拖 5、双转子压缩机" value="{{item.term}}" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
+          <input class="fin pair-a" placeholder="术语，如 1 拖 5、双转子压缩机" value="{{item.term}}" maxlength="30" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
           <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 起草</view>
           <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
         </view>
@@ -82,7 +74,7 @@
     <view class="privacy">{{initiatorNote}}</view>
 
     <view class="footer-bar">
-      <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '提交审核'}}</t-button>
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '提交审核'}}</t-button>
     </view>
   </page-status>
 </view>

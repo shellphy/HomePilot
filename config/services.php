@@ -38,6 +38,8 @@ return [
     'wechat' => [
         'appid' => env('WECHAT_APPID'),
         'secret' => env('WECHAT_SECRET'),
+        // 「活动状态提醒」订阅消息模板：单模板打全场景，未配置时静默不发
+        'subscribe_template_id' => env('WECHAT_SUBSCRIBE_TEMPLATE_ID'),
     ],
 
 ];

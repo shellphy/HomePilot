@@ -3,14 +3,16 @@
 namespace App\Events;
 
 use App\Models\Matter;
+use App\Models\Resident;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
 /**
- * 事项状态流转（成团/谈崩/有结果…）。订阅消息上线后在此挂通知参与者的 listener。
+ * 事项状态流转（成团/谈崩/有结果…）。actor = 流转操作人（发起人或管理员），通知时排除。
  */
 class MatterStateChanged
 {
-    use Dispatchable;
+    use Dispatchable, SerializesModels;
 
-    public function __construct(public Matter $matter, public string $previousState) {}
+    public function __construct(public Matter $matter, public string $previousState, public ?Resident $actor = null) {}
 }

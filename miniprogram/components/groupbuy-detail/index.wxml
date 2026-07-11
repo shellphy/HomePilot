@@ -94,8 +94,8 @@
 <!-- 互通阶段没共享联系方式的参团者：解释互通是双向对等的，给补开入口 -->
 <view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
   <view class="kicker">联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '沟通需求、谈方案' : '建群与对接'}}</view>
-  <view class="share-note">你报名时没有开启联系方式共享，所以你和团长互相看不到对方电话（互通是双向的）。</view>
-  <t-button theme="light" size="medium" block bind:tap="enableShare">开启共享，与团长互通</t-button>
+  <view class="share-note">你报名时没有开启联系方式共享，你和团长现在互相看不到对方电话。</view>
+  <t-button theme="light" size="medium" block style="width: 100%" bind:tap="enableShare">开启共享，与团长互通</t-button>
 </view>
 
 <!-- 联系互通阶段：团长见同意共享的参团者 -->
@@ -167,7 +167,7 @@
         bind:input="onReviewInput"
         maxlength="500"
       />
-      <t-button theme="light" size="medium" block loading="{{submittingReview}}" bind:tap="submitReview">
+      <t-button theme="light" size="medium" block style="width: 100%" loading="{{submittingReview}}" bind:tap="submitReview">
         {{myReview ? '更新评价' : '发布评价'}}
       </t-button>
     </view>
@@ -189,28 +189,32 @@
     <view class="cta-share">
       <text class="cta-share-text">条件谈定了。你登记过意向，确认参团后才计入成团人数</text>
     </view>
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="confirmJoin">确认参团</t-button>
-    <t-button theme="light" block size="medium" class="cta-secondary" bind:tap="toggleJoin">这次不参加了（退出名单）</t-button>
+    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="confirmJoin">确认参团</t-button>
+    <t-button theme="default" variant="outline" block size="medium" class="cta-secondary" style="width: 100%" bind:tap="toggleJoin">这次不参加了</t-button>
   </block>
   <block wx:else>
     <view class="cta-share" wx:if="{{!joined}}">
       <text class="cta-share-text">{{matter.needs_survey && intentPhase ? '同意团长/商家联系我沟通需求、出方案（手机号仅双方可见）' : '成团后与团长互通手机号（仅双方可见）'}}</text>
       <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
     </view>
+    <!-- 已在名单里时主动作变成「取消 xx」：中性描边样式说明这是次要动作，点击有确认弹窗兜底。
+         宽度用 style 直传：block 缩写在部分基础库不生效，外部 class 受 virtualHost 限制（与 insights 页同因） -->
     <t-button
-      theme="{{joined ? 'light' : 'primary'}}"
+      theme="{{joined ? 'default' : 'primary'}}"
+      variant="{{joined ? 'outline' : 'base'}}"
       block
       size="large"
+      style="width: 100%"
       loading="{{submitting}}"
       bind:tap="toggleJoin"
-    >{{joined ? (myJoinStage === 'intent' ? '已登记意向 ✓（点击取消）' : '已确认参团 ✓（点击取消）') : (intentPhase ? (matter.needs_survey ? '我感兴趣，等我的方案' : '我感兴趣，登记意向') : '确认参团')}}</t-button>
+    >{{joined ? (myJoinStage === 'intent' ? '取消登记' : '取消参团') : (intentPhase ? (matter.needs_survey ? '我感兴趣，等我的方案' : '我感兴趣，登记意向') : '确认参团')}}</t-button>
   </block>
 </view>
 
 <!-- 相关方身份：不进接龙名单，但说清楚为什么、怎么参与 -->
 <view class="cta-dock" wx:if="{{matter.join_open && isParty}}">
   <view class="party-note">你正以「{{partyLabel}}」身份浏览，接龙名单仅向业主开放</view>
-  <t-button theme="light" block size="large" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
+  <t-button theme="light" block size="large" style="width: 100%" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
 </view>
 
 <!-- 就地解释弹层：点中文案里的术语时弹出对应的「买前必懂」决策卡 -->

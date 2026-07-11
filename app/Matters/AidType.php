@@ -57,6 +57,12 @@ class AidType extends MatterType
         return $matter->state === 'open';
     }
 
+    /** 进行中就互通联系方式：拼车、代收不互通电话成不了事。 */
+    public function contactsOpen(Matter $matter): bool
+    {
+        return $matter->state === 'open';
+    }
+
     /** 互助结束后开放评价，给后来搭伙的邻居留参考。 */
     public function reviewOpen(Matter $matter): bool
     {

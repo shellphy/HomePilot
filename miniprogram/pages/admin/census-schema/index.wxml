@@ -12,7 +12,7 @@
       <view wx:if="{{!modules.length}}" class="hint">还没有题目。问卷按模块组织，先添加第一个模块。</view>
     </view>
 
-    <t-button theme="light" block bind:tap="addModule">＋ 添加模块</t-button>
+    <t-button theme="light" block style="width: 100%" bind:tap="addModule">＋ 添加模块</t-button>
     <view class="privacy">已经收到答案后，只加新题、不改老题不删选项，否则旧答案会和统计对不上。</view>
   </page-status>
 </view>

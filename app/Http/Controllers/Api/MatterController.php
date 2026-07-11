@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MatterDealPosted;
 use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
@@ -236,7 +237,7 @@ class MatterController extends Controller
 
         if ($matter->state !== $previousState) {
             $matter->recordActivity($resident);
-            MatterStateChanged::dispatch($matter, $previousState);
+            MatterStateChanged::dispatch($matter, $previousState, $resident);
         }
 
         return response()->json(['data' => MatterResource::make($matter)]);
@@ -263,7 +264,7 @@ class MatterController extends Controller
 
         if ($matter->state !== $previousState) {
             $matter->recordActivity($resident);
-            MatterStateChanged::dispatch($matter, $previousState);
+            MatterStateChanged::dispatch($matter, $previousState, $resident);
         }
 
         return response()->json(['data' => MatterResource::make($matter)]);
@@ -296,6 +297,7 @@ class MatterController extends Controller
         ]);
 
         $matter->recordActivity($resident);
+        MatterDealPosted::dispatch($matter);
 
         return response()->json(['data' => MatterResource::make($matter)]);
     }

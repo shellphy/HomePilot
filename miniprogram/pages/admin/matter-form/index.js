@@ -22,6 +22,7 @@ Page({
     body: '',
     pitch: '',
     perk: '',
+    needsSurvey: false, // 团购：按户出方案（业主端发起时锁定，管理端作为纠错通道可改）
     collectsContact: false,
     terms: [],
     glossary: [],
@@ -64,6 +65,7 @@ Page({
         body: payload.body || '',
         pitch: payload.pitch || '',
         perk: payload.perk || '',
+        needsSurvey: !!payload.needs_survey,
         collectsContact: !!payload.collects_contact,
         terms: payload.terms || [],
         glossary: payload.glossary || [],
@@ -224,12 +226,23 @@ Page({
     const { data } = this;
     if (data.submitting) return;
     if (!data.title.trim()) return wx.showToast({ title: '先填标题', icon: 'none' });
+    // 与后端规则（业主端同一份）对齐，别等 422 才发现
+    if (data.type === 'notice' && !data.body.trim()) {
+      return wx.showToast({ title: '公告得有正文', icon: 'none' });
+    }
+    if (data.type === 'groupbuy') {
+      if (!data.category.trim()) return wx.showToast({ title: '请填写品类', icon: 'none' });
+      if (!data.targetCount || Number(data.targetCount) < 1) {
+        return wx.showToast({ title: '请填写目标人数', icon: 'none' });
+      }
+    }
 
     const payload = {};
     if (data.type === 'notice') payload.body = data.body.trim();
     if (data.type !== 'notice') payload.pitch = data.pitch.trim();
     if (data.type === 'groupbuy') {
       payload.perk = data.perk.trim();
+      payload.needs_survey = data.needsSurvey;
       payload.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
       payload.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
     }

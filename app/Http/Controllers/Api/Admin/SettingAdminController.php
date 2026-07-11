@@ -23,7 +23,7 @@ class SettingAdminController extends Controller
         [
             'title' => '社区身份',
             'fields' => [
-                ['key' => 'name', 'label' => '小区名称（导航栏与分享标题用）', 'kind' => 'input'],
+                ['key' => 'name', 'label' => '小区名称', 'kind' => 'input'],
                 ['key' => 'slogan', 'label' => '主口号', 'kind' => 'input'],
                 ['key' => 'sub_slogan', 'label' => '副口号', 'kind' => 'input'],
             ],
@@ -31,16 +31,16 @@ class SettingAdminController extends Controller
         [
             'title' => '承诺与提示文案',
             'fields' => [
-                ['key' => 'initiator_note', 'label' => '牵头人须知（发起页展示）', 'kind' => 'textarea'],
+                ['key' => 'initiator_note', 'label' => '牵头人须知', 'kind' => 'textarea'],
                 ['key' => 'data_footnote', 'label' => '数据页脚注', 'kind' => 'textarea'],
-                ['key' => 'admin_contact', 'label' => '管理员联系方式（认证引导展示）', 'kind' => 'textarea'],
-                ['key' => 'ai_context', 'label' => '小区硬条件（AI 答疑的背景，如外机位/层高）', 'kind' => 'textarea'],
+                ['key' => 'admin_contact', 'label' => '管理员联系方式', 'kind' => 'textarea'],
+                ['key' => 'ai_context', 'label' => '小区硬条件（AI 答疑背景，如外机位/层高）', 'kind' => 'textarea'],
             ],
         ],
         [
-            'title' => '选项清单（一行一项）',
+            'title' => '选项清单',
             'fields' => [
-                ['key' => 'buildings', 'label' => '楼栋（个人资料按此选择）', 'kind' => 'list'],
+                ['key' => 'buildings', 'label' => '楼栋', 'kind' => 'list'],
             ],
         ],
     ];

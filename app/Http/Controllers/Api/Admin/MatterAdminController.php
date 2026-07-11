@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Events\MatterApproved;
+use App\Events\MatterRejected;
 use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
@@ -101,8 +102,9 @@ class MatterAdminController extends Controller
         ]);
 
         if ($matter->state !== $previousState) {
-            $matter->recordActivity($this->resident($request));
-            MatterStateChanged::dispatch($matter, $previousState);
+            $admin = $this->resident($request);
+            $matter->recordActivity($admin);
+            MatterStateChanged::dispatch($matter, $previousState, $admin);
         }
 
         return response()->json(['data' => $this->present($matter)]);
@@ -134,6 +136,11 @@ class MatterAdminController extends Controller
 
         if ($matter->is_approved && ! $wasApproved) {
             MatterApproved::dispatch($matter);
+        }
+
+        // 每次驳回都通知（理由可能更新），与上面红点的口径一致
+        if (! $matter->is_approved) {
+            MatterRejected::dispatch($matter);
         }
 
         return response()->json(['data' => $this->present($matter)]);
@@ -228,8 +235,9 @@ class MatterAdminController extends Controller
 
     /**
      * 管理端校验：通用字段 + 按类型的 payload 结构（征集问卷校验最严，答案按它落库）。
-     * 列级字段（category/target_count）与业主前台同一份 baseRules：
-     * 管理员代发的团购同样必须有品类与目标人数，两条创建路径校验强度一致。
+     * 列级字段（category/target_count）与 payload 字段都直接复用业主前台的
+     * baseRules/payloadRules：管理员代发的团购同样必须有品类与目标人数，
+     * 字段必填与字数上限两条路径永远一致，不会各改各的漂移开。
      *
      * @return array<string, mixed>
      */
@@ -245,19 +253,11 @@ class MatterAdminController extends Controller
             'target_count' => ['sometimes', 'integer', 'min:0'],
             ...$type->baseRules(),
             'payload' => ['sometimes', 'array'],
-            'payload.pitch' => ['sometimes', 'nullable', 'string', 'max:1000'],
-            'payload.needs_survey' => ['sometimes', 'boolean'],
-            'payload.body' => ['sometimes', 'nullable', 'string', 'max:2000'],
-            'payload.perk' => ['sometimes', 'nullable', 'string', 'max:200'],
-            'payload.terms' => ['sometimes', 'array'],
-            'payload.terms.*.label' => ['required', 'string', 'max:30'],
-            'payload.terms.*.value' => ['required', 'string', 'max:100'],
-            'payload.glossary' => ['sometimes', 'array'],
-            'payload.glossary.*.term' => ['required', 'string', 'max:30'],
-            'payload.glossary.*.explain' => ['required', 'string', 'max:500'],
-            'payload.glossary.*.judge' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'payload.glossary.*.caution' => ['sometimes', 'nullable', 'string', 'max:500'],
         ];
+
+        foreach ($type->payloadRules() as $key => $rule) {
+            $rules["payload.{$key}"] = $rule;
+        }
 
         if ($typeKey === 'census') {
             $rules += [

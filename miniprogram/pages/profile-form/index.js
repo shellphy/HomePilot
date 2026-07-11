@@ -5,6 +5,7 @@
 const { uploadImage } = require('../../utils/request');
 const profile = require('../../utils/api/profile');
 const { getMe, updateMe, authPhone, bindParty, unbindParty } = require('../../utils/me');
+const { requestSubscribe } = require('../../utils/subscribe');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 
@@ -84,7 +85,7 @@ Page({
   async onGetPhone(event) {
     if (!event.detail.code) {
       // 用户点了拒绝：给一句反馈说明用途与可见范围，而不是无声无息
-      wx.showToast({ title: '未授权。手机号仅管理员和成团对接可见，不会公示', icon: 'none' });
+      wx.showToast({ title: '未授权。手机号只有管理员和对接的团长能看到，不会公示', icon: 'none' });
       return;
     }
     try {
@@ -180,6 +181,8 @@ Page({
           room_label: roomLabel.trim(),
         });
       } else {
+        // 入驻提交顺手收一次订阅授权：认证结果的通知才有额度可推
+        await requestSubscribe();
         await updateMe({ nickname: nickname.trim() });
         await bindParty(identity, {
           name: partyName.trim(),

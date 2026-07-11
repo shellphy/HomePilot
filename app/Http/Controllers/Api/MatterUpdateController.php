@@ -41,7 +41,7 @@ class MatterUpdateController extends Controller
         ]);
 
         $matter->recordActivity($resident);
-        MatterUpdatePosted::dispatch($update);
+        MatterUpdatePosted::dispatch($update, $resident);
 
         return response()->json(['data' => MatterUpdateResource::make($update)], 201);
     }

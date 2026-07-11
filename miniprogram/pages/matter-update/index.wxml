@@ -29,6 +29,6 @@
   </view>
 
   <view class="footer-bar">
-    <t-button theme="primary" block size="large" loading="{{submitting}}" bind:tap="submit">发布进度</t-button>
+    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">发布进度</t-button>
   </view>
 </view>
