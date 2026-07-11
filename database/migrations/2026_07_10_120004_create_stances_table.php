@@ -24,7 +24,6 @@ return new class extends Migration
 
             $table->unique(['matter_id', 'resident_id', 'mode']);
             $table->index(['matter_id', 'mode']);
-            $table->index(['resident_id', 'mode']);
         });
     }
 

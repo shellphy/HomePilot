@@ -24,6 +24,12 @@ return new class extends Migration
             $table->boolean('is_approved')->default(false);
             $table->unsignedInteger('target_count')->default(0);
             $table->json('payload')->nullable(); // groupbuy: pitch/perk/terms/glossary/final_terms/final_note；notice: body
+            // 事项之间的从属关联：征集挂到团购上（配套摸底问卷），团购详情页展示问卷入口
+            $table->foreignId('related_matter_id')->nullable()->constrained('matters')->nullOnDelete();
+            // 站内未读信号：最近一次对参与者/发起人有意义的动态（审核/流转/公示/进展），
+            // 与成员的已读时间比对得出「我的」页红点；resident_id 用于排除自己触发的动态
+            $table->timestamp('last_activity_at')->nullable();
+            $table->foreignId('last_activity_resident_id')->nullable()->constrained('residents')->nullOnDelete();
             $table->timestamps();
             // 软删除：误删可从库里恢复，表态/动态一并保留（级联只在真删时发生）
             $table->softDeletes();

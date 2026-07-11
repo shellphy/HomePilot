@@ -152,7 +152,7 @@ class Matter extends Model
     }
 
     /**
-     * 确认参团的接龙（不含仅登记意向的）；没有 stage 的老表态按确认算。
+     * 确认参团的接龙（不含仅登记意向的）；只有团购写 stage，其余类型的接龙报名即确认。
      *
      * @return HasMany<Stance, $this>
      */

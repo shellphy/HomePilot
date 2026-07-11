@@ -28,7 +28,7 @@ function pillClass(state) {
 
 function joinPercent(matter) {
   if (!matter.target_count) return 0;
-  // 目标进度按「确认参团」口径（团购两段表态）；老数据/其他类型没有该字段时退回总数
+  // 目标进度按「确认参团」口径（团购两段表态）；其他类型没有该字段时退回总数
   const count = matter.confirmed_count != null ? matter.confirmed_count : matter.join_count;
   return Math.min(100, Math.round((count / matter.target_count) * 100));
 }
