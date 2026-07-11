@@ -13,16 +13,14 @@ if [ -z "$APP_KEY" ]; then
     exit 1
 fi
 
-tries=0
-until php artisan migrate --force; do
-    tries=$((tries + 1))
-    if [ "$tries" -ge 10 ]; then
-        echo "错误：等待数据库超时，迁移失败。" >&2
-        exit 1
-    fi
-    echo "数据库尚未就绪，3 秒后重试（$tries/10）……"
-    sleep 3
-done
+# SQLite 数据库文件在具名卷里，首次启动时创建并交给 php-fpm 工作进程读写
+if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ] && [ -n "$DB_DATABASE" ]; then
+    mkdir -p "$(dirname "$DB_DATABASE")"
+    [ -f "$DB_DATABASE" ] || touch "$DB_DATABASE"
+    chown -R www-data:www-data "$(dirname "$DB_DATABASE")"
+fi
+
+php artisan migrate --force
 
 php artisan optimize
 
