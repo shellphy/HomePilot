@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "参与征集",
   "usingComponents": {
-    "page-status": "/components/page-status/index"
+    "page-status": "/components/page-status/index",
+    "ai-chat-panel": "/components/ai-chat-panel/index"
   }
 }

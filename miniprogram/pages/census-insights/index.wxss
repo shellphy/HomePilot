@@ -102,6 +102,25 @@
   margin-top: 4rpx;
 }
 
+/* 整体分析主入口：品牌底色，比常规卡片更抢眼 */
+.ai-analysis {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--brand-bg);
+  border: 1rpx solid var(--brand);
+}
+.ai-analysis-title {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--brand-deep);
+}
+.ai-analysis-sub {
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  margin-top: 4rpx;
+}
+
 .admin-entry {
   display: flex;
   align-items: center;

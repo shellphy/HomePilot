@@ -1,29 +1,15 @@
 // 管理端服务层：审核、发布、问卷、明细、认证、社区设置
 const { request } = require('../request');
 
+// 事项 CRUD（创建/详情/编辑/删除）已并入统一 /matters 接口（见 utils/api/matters）。
+// 这里只保留管理端专属动作：待审列表、审核、明细、文本题归纳、认证、社区设置。
 function listMatters(pendingOnly) {
   return request(`/admin/matters${pendingOnly ? '?pending=1' : ''}`);
-}
-
-function getMatter(id) {
-  return request(`/admin/matters/${id}`);
-}
-
-function createMatter(data) {
-  return request('/admin/matters', { method: 'POST', data });
-}
-
-function updateMatter(id, data) {
-  return request(`/admin/matters/${id}`, { method: 'PUT', data });
 }
 
 // reason 仅驳回时有意义：展示给发起人，编辑后即重新提交
 function approveMatter(id, approved, reason = '') {
   return request(`/admin/matters/${id}/approve`, { method: 'PUT', data: { is_approved: approved, reason } });
-}
-
-function deleteMatter(id) {
-  return request(`/admin/matters/${id}`, { method: 'DELETE' });
 }
 
 function listRegistrations(matterId) {
@@ -58,11 +44,7 @@ function saveSettings(data) {
 
 module.exports = {
   listMatters,
-  getMatter,
-  createMatter,
-  updateMatter,
   approveMatter,
-  deleteMatter,
   listRegistrations,
   getCensusText,
   saveCensusSummary,

@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -55,7 +54,6 @@ class Matter extends Model
         'reject_reason',
         'target_count',
         'payload',
-        'related_matter_id',
     ];
 
     /**
@@ -164,29 +162,6 @@ class Matter extends Model
     public function initiatorParty(): BelongsTo
     {
         return $this->belongsTo(Party::class, 'initiator_party_id');
-    }
-
-    /**
-     * 挂靠的目标事项（征集挂在团购上时，指向那个团购）。
-     *
-     * @return BelongsTo<Matter, $this>
-     */
-    public function relatedMatter(): BelongsTo
-    {
-        return $this->belongsTo(Matter::class, 'related_matter_id');
-    }
-
-    /**
-     * 挂在本事项上的配套征集（团购详情页的摸底问卷入口）；取最新一份已公示的。
-     *
-     * @return HasOne<Matter, $this>
-     */
-    public function attachedCensus(): HasOne
-    {
-        return $this->hasOne(Matter::class, 'related_matter_id')
-            ->where('type', 'census')
-            ->where('review_status', MatterReviewStatus::Approved->value)
-            ->latest('id');
     }
 
     /** @return HasMany<Stance, $this> */

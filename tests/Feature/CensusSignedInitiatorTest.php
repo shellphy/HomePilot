@@ -9,7 +9,7 @@ test('admin publishes a census signed by a party and residents see who is asking
     Sanctum::actingAs(Resident::factory()->admin()->create());
     $property = Party::factory()->create(['type' => Party::TYPE_PROPERTY, 'name' => '天青府物业服务中心']);
 
-    $response = $this->postJson('/api/admin/matters', [
+    $response = $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '电梯改造需求调研',
         'initiator_party_id' => $property->id,
@@ -44,7 +44,7 @@ test('a signed census carries its initiator party in the community feed', functi
 test('signing requires an existing party', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '调研',
         'initiator_party_id' => 9999,
@@ -62,7 +62,7 @@ test('admin removes the signature with an explicit null', function () {
         'payload' => ['pitch' => '', 'modules' => []],
     ]);
 
-    $this->putJson('/api/admin/matters/'.$census->id, [
+    $this->putJson('/api/matters/'.$census->id, [
         'title' => $census->title,
         'initiator_party_id' => null,
     ])->assertSuccessful();

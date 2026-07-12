@@ -28,7 +28,7 @@
 <!-- 驳回是「需要你处理」的负面结果，用红系；排队等待保持橙色中性 -->
 <view class="card pending-tip {{matter.review_status === 'rejected' ? 'pending-tip-reject' : ''}}" wx:if="{{matter.review_status !== 'approved'}}">
   <block wx:if="{{matter.review_status === 'rejected'}}">已被驳回：{{matter.reject_reason}}（修改后保存即重新提交审核）</block>
-  <block wx:else>待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）</block>
+  <block wx:else>待审核，通过后就会出现在小区页里（只有你自己能看到这个页面）</block>
 </view>
 
 <!-- 联系互通阶段（活动报名中/互助进行中）：参与者见发起人 -->

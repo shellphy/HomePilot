@@ -1,0 +1,96 @@
+<?php
+
+use App\Ai\Agents\MatterExplainer;
+use App\Models\Matter;
+use App\Models\Resident;
+use App\Models\Stance;
+
+/**
+ * 用带答案的征集构造 explainer，断言指令里带上了征集专属上下文。
+ */
+function censusWithAnswers(): array
+{
+    $census = Matter::factory()->create([
+        'type' => 'census',
+        'state' => 'open',
+        'title' => '定制柜摸底',
+        'payload' => [
+            'purpose' => '开团前先摸清大家想装什么',
+            'modules' => [[
+                'key' => 'm1',
+                'title' => '柜体',
+                'questions' => [
+                    [
+                        'key' => 'q1',
+                        'text' => '柜体倾向哪种板材？',
+                        'type' => 'single',
+                        'options' => ['颗粒板', '多层实木'],
+                        'option_notes' => ['便宜，环保看等级', '贵约三成，更防潮'],
+                    ],
+                    [
+                        'key' => 'q2',
+                        'text' => '还有什么想说的？',
+                        'type' => 'text',
+                    ],
+                ],
+            ]],
+        ],
+    ]);
+
+    $asker = Resident::factory()->create();
+    $census->stances()->create([
+        'resident_id' => $asker->id,
+        'mode' => Stance::MODE_REGISTER,
+        'payload' => ['answers' => ['q1' => '多层实木', 'q2' => '希望环保达标']],
+    ]);
+
+    // 另外两户也登记，让「多数选择」有可聚合的数据
+    foreach (['颗粒板', '颗粒板'] as $choice) {
+        $census->stances()->create([
+            'resident_id' => Resident::factory()->create()->id,
+            'mode' => Stance::MODE_REGISTER,
+            'payload' => ['answers' => ['q1' => $choice]],
+        ]);
+    }
+
+    return [$census, $asker];
+}
+
+test('census ai context carries purpose, questions, option notes, my answer and top choice', function () {
+    [$census, $asker] = censusWithAnswers();
+
+    $instructions = (string) (new MatterExplainer($census, $asker))->instructions();
+
+    expect($instructions)
+        ->toContain('开团前先摸清大家想装什么') // 发起目的
+        ->toContain('柜体倾向哪种板材？')       // 题面
+        ->toContain('多层实木｜贵约三成，更防潮') // 选项 + 解释
+        ->toContain('柜体倾向哪种板材？→多层实木') // 提问业主自己的选择（换算成题面文字）
+        ->toContain('希望环保达标')               // 我填空题的答案
+        ->toContain('多数选「颗粒板」（2 人）');   // 匿名聚合的多数选择
+});
+
+test('census ai context omits my registration for a resident who has not answered', function () {
+    [$census] = censusWithAnswers();
+
+    $freshResident = Resident::factory()->create();
+    $instructions = (string) (new MatterExplainer($census, $freshResident))->instructions();
+
+    // 没登记就不注入「我的选择」，但问卷题目与多数选择照常在
+    expect($instructions)
+        ->toContain('柜体倾向哪种板材？')
+        ->not->toContain('提问业主的登记');
+});
+
+test('groupbuy ai context is unaffected by the census branch', function () {
+    $groupbuy = Matter::factory()->create([
+        'title' => '中央空调团购',
+        'payload' => ['pitch' => '我自己家也装这套', 'purpose' => '不应出现'],
+    ]);
+
+    $instructions = (string) (new MatterExplainer($groupbuy))->instructions();
+
+    expect($instructions)
+        ->toContain('我自己家也装这套')
+        ->not->toContain('发起目的'); // census 分支不碰其它类型
+});

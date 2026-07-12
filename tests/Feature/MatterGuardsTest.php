@@ -90,7 +90,7 @@ test('admins can still rescue a matter out of its final state', function () {
     $matter = Matter::factory()->done()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->putJson("/api/admin/matters/{$matter->id}", [
+    $this->putJson("/api/matters/{$matter->id}", [
         'title' => $matter->title,
         'category' => $matter->category,
         'target_count' => $matter->target_count,
@@ -107,7 +107,7 @@ test('admin deletion soft deletes and keeps stances while hiding the matter from
     Stance::factory()->for($matter, 'matter')->create();
 
     Sanctum::actingAs(Resident::factory()->admin()->create());
-    $this->deleteJson("/api/admin/matters/{$matter->id}")->assertSuccessful();
+    $this->deleteJson("/api/matters/{$matter->id}")->assertSuccessful();
 
     expect(Matter::count())->toBe(0)
         ->and(Matter::withTrashed()->count())->toBe(1)

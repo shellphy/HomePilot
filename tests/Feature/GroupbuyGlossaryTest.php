@@ -71,14 +71,12 @@ test('admin can edit the three-part glossary through the admin form', function (
     Sanctum::actingAs(Resident::factory()->admin()->create());
     $matter = Matter::factory()->create();
 
-    $this->putJson('/api/admin/matters/'.$matter->id, [
+    $this->putJson('/api/matters/'.$matter->id, [
         'title' => $matter->title,
         'category' => $matter->category,
         'target_count' => $matter->target_count,
-        'payload' => [
-            'glossary' => [
-                ['term' => '双转子压缩机', 'explain' => '两个转子轮流做功', 'caution' => '问清压缩机具体型号，答不上来的要警惕'],
-            ],
+        'glossary' => [
+            ['term' => '双转子压缩机', 'explain' => '两个转子轮流做功', 'caution' => '问清压缩机具体型号，答不上来的要警惕'],
         ],
     ])->assertSuccessful();
 

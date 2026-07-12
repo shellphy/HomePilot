@@ -30,6 +30,42 @@
   margin-top: 14rpx;
 }
 
+/* 末模块的授权勾选：明确是把匿名破例给具体发起方看，默认关 */
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  background: #ffffff;
+  border-radius: 20rpx;
+  padding: 24rpx 26rpx;
+  margin-bottom: 16rpx;
+}
+.consent-box {
+  flex-shrink: 0;
+  width: 40rpx;
+  height: 40rpx;
+  border: 1rpx solid var(--line-dark);
+  border-radius: 10rpx;
+  color: #fff;
+  font-size: 26rpx;
+  text-align: center;
+  line-height: 40rpx;
+}
+.consent-box-on {
+  background: var(--brand);
+  border-color: var(--brand);
+}
+.consent-title {
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.consent-sub {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 6rpx;
+}
+
 /* 按钮的 flex 占比走 style 直传（外部 class 在 virtualHost 组件上不可靠） */
 .nav-btns {
   display: flex;
@@ -42,6 +78,14 @@
   font-size: 22rpx;
   color: var(--text-muted);
   padding-top: 20rpx;
+}
+
+/* 每道题的「问 AI」入口：轻量小字，不抢答题主线 */
+.ask-ai {
+  display: inline-block;
+  font-size: 22rpx;
+  color: var(--brand);
+  margin: 6rpx 0 16rpx;
 }
 
 /* 带解释的选项：竖排行，配色语义与 chip 一致 */
