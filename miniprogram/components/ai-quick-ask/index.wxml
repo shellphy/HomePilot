@@ -1,7 +1,5 @@
-<view class="card">
-  <view class="kicker">有疑问？点一下直接问 AI</view>
-  <view class="chips">
-    <view class="chip" wx:for="{{questions}}" wx:key="*this" data-q="{{item}}" bind:tap="ask">{{item}}</view>
-    <view class="chip quick-more" bind:tap="askBlank">问别的…</view>
-  </view>
+<view class="ai-entry" hover-class="ai-entry-hover" bind:tap="open">
+  <view class="ai-entry-badge"></view>
+  <view class="ai-entry-title">问问 AI</view>
+  <view class="ai-entry-arrow">›</view>
 </view>

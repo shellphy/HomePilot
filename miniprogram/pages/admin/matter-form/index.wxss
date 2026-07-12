@@ -30,3 +30,13 @@
   color: var(--line-dark);
   flex-shrink: 0;
 }
+
+/* 已驳回态回显：与审核列表同一套红系胶囊/理由样式 */
+.pill-reject {
+  flex-shrink: 0;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.row-sub-reject {
+  color: var(--danger);
+}

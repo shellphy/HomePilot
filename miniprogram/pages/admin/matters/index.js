@@ -11,7 +11,7 @@ Page({
     matters: [],       // 过滤后的展示列表
     matterTypes: [],
     typeFilter: '',    // '' = 全部类型
-    stateFilter: '',   // '' 全部 / pending 待审核 / approved 已公示
+    stateFilter: '',   // '' 全部 / 其余直接对应 review_status：pending / rejected / approved
   },
 
   onShow() {
@@ -34,8 +34,7 @@ Page({
     this.setData({
       matters: all
         .filter((matter) => !typeFilter || matter.type === typeFilter)
-        .filter((matter) => !stateFilter
-          || (stateFilter === 'pending' ? !matter.is_approved : matter.is_approved)),
+        .filter((matter) => !stateFilter || matter.review_status === stateFilter),
     });
   },
 

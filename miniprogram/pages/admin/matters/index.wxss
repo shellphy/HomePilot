@@ -53,3 +53,13 @@
   color: var(--danger);
   border: 1rpx solid #e5e2da;
 }
+
+/* 已驳回态：红系胶囊点明状态（对齐「已公示」的只读胶囊），旁边只留翻案用的「通过」 */
+.pill-reject {
+  flex-shrink: 0;
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+.row-sub-reject {
+  color: var(--danger);
+}

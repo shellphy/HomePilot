@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MatterReviewStatus;
 use App\Models\Matter;
 use App\Models\Party;
 use App\Models\Resident;
@@ -28,17 +29,18 @@ test('rejecting a matter stores the reason and editing resubmits it', function (
     ])->assertSuccessful();
 
     $matter->refresh();
-    expect($matter->payloadValue('reject_reason'))->toBe('')
-        ->and($matter->is_approved)->toBeFalse();
+    expect($matter->reject_reason)->toBe('')
+        ->and($matter->is_approved)->toBeFalse()
+        ->and($matter->review_status)->toBe(MatterReviewStatus::Pending);
 });
 
 test('approving clears any previous reject reason', function () {
-    $matter = Matter::factory()->pending()->create(['payload' => ['reject_reason' => '旧理由']]);
+    $matter = Matter::factory()->rejected('旧理由')->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     $this->putJson("/api/admin/matters/{$matter->id}/approve", ['is_approved' => true])->assertSuccessful();
 
-    expect($matter->refresh()->payloadValue('reject_reason'))->toBe('');
+    expect($matter->refresh()->reject_reason)->toBe('');
 });
 
 test('certified governance parties post official responses onto the timeline', function () {

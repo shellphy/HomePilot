@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\MatterReviewStatus;
 use App\Matters\MatterType;
 use App\Matters\MatterTypeRegistry;
 use Database\Factories\MatterFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -23,7 +25,9 @@ use Illuminate\Support\Carbon;
  * @property string $title
  * @property string $category
  * @property string $state
- * @property bool $is_approved
+ * @property MatterReviewStatus $review_status
+ * @property string $reject_reason
+ * @property-read bool $is_approved 派生：review_status 是否为已公示
  * @property int $target_count
  * @property array<string, mixed>|null $payload
  * @property Carbon|null $last_activity_at
@@ -46,18 +50,68 @@ class Matter extends Model
         'title',
         'category',
         'state',
-        'is_approved',
+        'review_status',
+        'reject_reason',
         'target_count',
         'payload',
+    ];
+
+    /**
+     * 新建实例的默认审核态：业主自发的事项一律先待审核；
+     * 让内存中的模型（如刚 create 出来还没回查）也有确定值，避免依赖数据库列默认。
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'review_status' => 'pending',
+        'reject_reason' => '',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_approved' => 'boolean',
+            'review_status' => MatterReviewStatus::class,
             'payload' => 'array',
             'last_activity_at' => 'datetime',
         ];
+    }
+
+    /**
+     * 派生的「是否已公示」布尔：大量「对外可见吗」的判断只关心这一点，
+     * 保留为访问器让调用方无需感知三态枚举。
+     *
+     * @return Attribute<bool, never>
+     */
+    protected function isApproved(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->review_status === MatterReviewStatus::Approved);
+    }
+
+    /** 审核通过并公示，清掉可能存在的驳回理由。 */
+    public function approve(): void
+    {
+        $this->update([
+            'review_status' => MatterReviewStatus::Approved,
+            'reject_reason' => '',
+        ]);
+    }
+
+    /** 驳回并附理由；发起人在详情页看到，编辑重提后回到待审核。 */
+    public function reject(string $reason): void
+    {
+        $this->update([
+            'review_status' => MatterReviewStatus::Rejected,
+            'reject_reason' => $reason,
+        ]);
+    }
+
+    /** 打回待审核（撤下已公示、或驳回后被发起人编辑重新提交）。 */
+    public function markPending(): void
+    {
+        $this->update([
+            'review_status' => MatterReviewStatus::Pending,
+            'reject_reason' => '',
+        ]);
     }
 
     /**
@@ -170,6 +224,6 @@ class Matter extends Model
      */
     public function scopeApproved(Builder $query): Builder
     {
-        return $query->where('is_approved', true);
+        return $query->where('review_status', MatterReviewStatus::Approved->value);
     }
 }

@@ -24,6 +24,9 @@ Page({
     states: {},        // {key: label}，编辑时用于状态流转（管理员用全部状态含旁路终态）
     stateKeys: [],
     isApproved: true,
+    reviewStatus: '',      // pending / rejected / approved：编辑时回显当前审核态
+    reviewStatusLabel: '',
+    rejectReason: '',
     targetCount: '',
     // 按类型使用的内容字段
     body: '',
@@ -63,6 +66,10 @@ Page({
         typeLabel: matter.type_label,
         title: matter.title,
         category: matter.category || '',
+        // 审核态回显（三态：pending/approved/rejected + 驳回理由），管理端编辑器据此渲染公示开关/驳回提示
+        reviewStatus: matter.review_status,
+        reviewStatusLabel: matter.review_status_label,
+        rejectReason: matter.reject_reason || '',
         targetCount: matter.target_count ? String(matter.target_count) : '',
         // 内容字段一律读平铺（对所有人可见），不依赖管理员专属的 payload
         body: matter.body || '',
@@ -230,12 +237,14 @@ Page({
     }
 
     const body = this.buildContent();
-    // 管理动作字段只在管理员编辑时下发（后端也按 is_admin 授权）；
-    // 审核发布是独立动作（走待审列表），创建一律进待审，这里不设 is_approved
+    // 管理动作字段只在管理员编辑时下发（后端也按 is_admin 授权）
     if (data.isAdmin) {
       if (data.state) body.state = data.state;
       // 显式传 null 表示去署名（后端按键是否存在区分）
       if (data.type === 'census') body.initiator_party_id = data.initiatorPartyId;
+      // 「公示到小区页」开关（仅编辑时有效）：后端按 review_status 落地（勾上→公示，撤下→回待审核）。
+      // 创建一律进待审队列，不下发此开关
+      if (data.id) body.is_approved = data.isApproved;
     }
 
     this.setData({ submitting: true });

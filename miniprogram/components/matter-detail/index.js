@@ -51,7 +51,7 @@ Component({
         nextState,
         nextIsFinal: !!nextState && stateIndex + 2 === states.length,
         reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
-      });
+      }, () => this.measureDock());
     },
     myReview(myReview) {
       this.setData({
@@ -64,6 +64,17 @@ Component({
   methods: {
     refresh() {
       this.triggerEvent('refresh');
+    },
+
+    // 量出吸底操作条的实际高度上报给页面，让页面按需精确预留底部空间：
+    // 操作条高度随状态变（互通开关行 / 相关方说明），固定值要么遮内容要么留空白。
+    measureDock() {
+      this.createSelectorQuery()
+        .select('.cta-dock')
+        .boundingClientRect((rect) => {
+          this.triggerEvent('dockmeasure', { height: rect ? Math.ceil(rect.height) : 0 });
+        })
+        .exec();
     },
 
     toggleJoin() {

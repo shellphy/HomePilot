@@ -14,6 +14,7 @@ Component({
     matterId: null,
     matterTitle: '',
     messages: [], // {role: 'user'|'ai', text}
+    presets: [], // 「猜你想问」预设问题，仅空对话时展示在输入框上方
     input: '',
     sending: false,
     remaining: null, // 今日剩余提问次数（后端下发）
@@ -21,18 +22,26 @@ Component({
   },
 
   methods: {
-    // 宿主页面打开面板时调用；带 question 则自动填入并发送（快捷提问）
-    open({ matterId, matterTitle, question }) {
+    // 宿主页面打开面板时调用；带 question 则自动填入并发送（如术语追问），
+    // 带 questions 则作为「猜你想问」在空对话时展示，让业主自己挑
+    open({ matterId, matterTitle, question, questions }) {
       const cache = wx.getStorageSync(this.cacheKey(matterId)) || {};
       this.conversationId = cache.conversationId || null;
       this.setData({
         matterId,
         matterTitle: matterTitle || '',
         messages: cache.messages || [],
+        presets: questions || [],
         input: question || '',
       });
       this.scrollToBottom();
       if (question) this.send();
+    },
+
+    // 点「猜你想问」里的一条：直接发出去，等同于自己打字提问
+    pickPreset(event) {
+      this.setData({ input: event.currentTarget.dataset.q });
+      this.send();
     },
 
     cacheKey(matterId) {

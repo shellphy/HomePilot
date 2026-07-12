@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\MatterReviewStatus;
 use App\Events\MatterApproved;
 use App\Events\MatterRejected;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
@@ -25,7 +26,7 @@ class MatterAdminController extends Controller
     public function index(Request $request): JsonResponse
     {
         $matters = Matter::query()
-            ->when($request->boolean('pending'), fn ($query) => $query->where('is_approved', false))
+            ->when($request->boolean('pending'), fn ($query) => $query->where('review_status', MatterReviewStatus::Pending->value))
             ->with(['initiator', 'initiatorParty'])
             ->withCount('joins')
             ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
@@ -33,8 +34,9 @@ class MatterAdminController extends Controller
             ->get();
 
         return response()->json([
+            // 只数真正待处理的（驳回态在等发起人修改，不占管理员的队列徽标）
             'data' => $matters->map(fn (Matter $matter): array => $this->present($matter)),
-            'pending_count' => Matter::where('is_approved', false)->count(),
+            'pending_count' => Matter::where('review_status', MatterReviewStatus::Pending->value)->count(),
         ]);
     }
 
@@ -49,25 +51,22 @@ class MatterAdminController extends Controller
         ]);
 
         $wasApproved = $matter->is_approved;
-        $matter->update([
-            'is_approved' => $validated['is_approved'],
-            'payload' => array_merge($matter->payload ?? [], [
-                'reject_reason' => $validated['is_approved'] ? '' : ($validated['reason'] ?? ''),
-            ]),
-        ]);
 
-        // 审核结果对发起人是关键动态：喂给「我的」页未读红点。
-        // 驳回时待审事项的 is_approved 本来就是 false，不能只看变化——每次驳回（理由可能更新）都记
-        if ($matter->is_approved !== $wasApproved || ! $matter->is_approved) {
-            $matter->recordActivity($this->resident($request));
+        if ($validated['is_approved']) {
+            $matter->approve();
+        } else {
+            $matter->reject($validated['reason'] ?? '');
         }
 
+        // 审核结果对发起人是关键动态：喂给「我的」页未读红点。
+        // 通过只在状态真的翻正时记；驳回每次都记（理由可能更新）。
         if ($matter->is_approved && ! $wasApproved) {
+            $matter->recordActivity($this->resident($request));
             MatterApproved::dispatch($matter);
         }
 
-        // 每次驳回都通知（理由可能更新），与上面红点的口径一致
         if (! $matter->is_approved) {
+            $matter->recordActivity($this->resident($request));
             MatterRejected::dispatch($matter);
         }
 
@@ -144,6 +143,9 @@ class MatterAdminController extends Controller
             // 管理端可选全部状态（含旁路终态），作为纠错通道
             'states' => $type->allStates(),
             'is_approved' => $matter->is_approved,
+            'review_status' => $matter->review_status->value,
+            'review_status_label' => $matter->review_status->label(),
+            'reject_reason' => $matter->reject_reason,
             'target_count' => $matter->target_count,
             'initiator' => $this->initiatorLabel($matter),
             'initiator_party_id' => $matter->initiator_party_id,

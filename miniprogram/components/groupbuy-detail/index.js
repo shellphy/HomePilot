@@ -80,10 +80,10 @@ Component({
         headCount: confirmedPhase && matter.confirmed_count != null ? matter.confirmed_count : matter.join_count,
         headNoun,
         reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
-      });
+      }, () => this.measureDock());
     },
     'matter.state, joined, myJoinStage': function (state, joined, myJoinStage) {
-      this.setData({ needConfirm: !!joined && myJoinStage === 'intent' && state === 'open' });
+      this.setData({ needConfirm: !!joined && myJoinStage === 'intent' && state === 'open' }, () => this.measureDock());
     },
     myReview(myReview) {
       this.setData({
@@ -96,6 +96,17 @@ Component({
   methods: {
     refresh() {
       this.triggerEvent('refresh');
+    },
+
+    // 量出吸底操作条的实际高度上报给页面，让页面按需精确预留底部空间：
+    // 操作条高度随状态变（互通开关行 / 确认参团双按钮），固定值要么遮内容要么留空白。
+    measureDock() {
+      this.createSelectorQuery()
+        .select('.cta-dock')
+        .boundingClientRect((rect) => {
+          this.triggerEvent('dockmeasure', { height: rect ? Math.ceil(rect.height) : 0 });
+        })
+        .exec();
     },
 
     toggleJoin() {

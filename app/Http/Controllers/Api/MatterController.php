@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\MatterReviewStatus;
 use App\Events\MatterDealPosted;
 use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
@@ -202,7 +203,7 @@ class MatterController extends Controller
             'category' => $validated['category'] ?? '',
             // 初始状态由类型的状态机决定，不接受客户端指定
             'state' => $type->initialState(),
-            'is_approved' => false,
+            // review_status 默认 pending：业主自发的事项一律先进审核队列
             'target_count' => $validated['target_count'] ?? 0,
             'payload' => $type->payloadFrom($validated),
         ]);
@@ -227,6 +228,8 @@ class MatterController extends Controller
 
         if ($isAdmin) {
             $rules['initiator_party_id'] = ['sometimes', 'nullable', Rule::exists('parties', 'id')];
+            // 管理端「公示到小区页」开关：勾上→通过公示，撤下→回待审核（审核态仍以 review_status 落地）
+            $rules['is_approved'] = ['sometimes', 'boolean'];
         }
 
         $validated = $request->validate($rules);
@@ -238,8 +241,8 @@ class MatterController extends Controller
 
         $previousState = $matter->state;
 
-        // 保留成交公示等不在编辑表单里的 payload 字段；被驳回的事项编辑即重新提交（清掉驳回理由）
-        $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated), ['reject_reason' => '']);
+        // 保留成交公示等不在编辑表单里的 payload 字段
+        $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated));
 
         // 发起时锁定的键（如方案型开关）发起人编辑不可改，纠错走管理端
         if (! $isAdmin) {
@@ -261,6 +264,23 @@ class MatterController extends Controller
             $updateData['initiator_party_id'] = array_key_exists('initiator_party_id', $validated)
                 ? $validated['initiator_party_id']
                 : $matter->initiator_party_id;
+        }
+
+        // 被驳回的事项，发起人编辑保存即重新提交审核：打回待审、清掉驳回理由
+        if ($matter->review_status === MatterReviewStatus::Rejected) {
+            $updateData['review_status'] = MatterReviewStatus::Pending;
+            $updateData['reject_reason'] = '';
+        }
+
+        // 管理端「公示到小区页」开关（发起人不下发此键）：勾上→通过并清理驳回理由；
+        // 把已公示的撤下→回待审核；待审/驳回态只编辑其它字段时保持原状态
+        if ($isAdmin && array_key_exists('is_approved', $validated)) {
+            if ($validated['is_approved']) {
+                $updateData['review_status'] = MatterReviewStatus::Approved;
+                $updateData['reject_reason'] = '';
+            } elseif ($matter->is_approved) {
+                $updateData['review_status'] = MatterReviewStatus::Pending;
+            }
         }
 
         $matter->update($updateData);

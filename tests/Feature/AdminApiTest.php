@@ -35,7 +35,7 @@ test('the admin:grant command grants and revokes by id or phone', function () {
 });
 
 test('admin sees the pending queue and approves matters onto the feed', function () {
-    $pending = Matter::factory()->create(['is_approved' => false, 'title' => '待审核的团']);
+    $pending = Matter::factory()->pending()->create(['title' => '待审核的团']);
     Matter::factory()->open()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
@@ -50,6 +50,47 @@ test('admin sees the pending queue and approves matters onto the feed', function
         ->assertJsonPath('data.is_approved', true);
 
     expect($pending->refresh()->is_approved)->toBeTrue();
+});
+
+test('admin publishes and takes down a matter via the edit form switch', function () {
+    $pending = Matter::factory()->pending()->create(['type' => 'notice', 'title' => '公告', 'payload' => ['body' => '正文']]);
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    // 勾上「公示到小区页」→ 通过公示
+    $this->putJson("/api/matters/{$pending->id}", [
+        'title' => '公告',
+        'body' => '正文',
+        'is_approved' => true,
+    ])->assertSuccessful()
+        ->assertJsonPath('data.review_status', 'approved');
+
+    // 撤下（关闭开关）→ 回到待审核
+    $this->putJson("/api/matters/{$pending->id}", [
+        'title' => '公告',
+        'body' => '正文',
+        'is_approved' => false,
+    ])->assertSuccessful()
+        ->assertJsonPath('data.review_status', 'pending');
+});
+
+test('non-admin initiator cannot flip the approval switch', function () {
+    $resident = Resident::factory()->create(['unit_label' => '1栋']);
+    $matter = Matter::factory()->pending()->create([
+        'type' => 'notice',
+        'title' => '公告',
+        'initiator_id' => $resident->id,
+        'payload' => ['body' => '正文'],
+    ]);
+    Sanctum::actingAs($resident);
+
+    // 发起人下发 is_approved 也不生效：审核态由校验丢弃，仍是待审核
+    $this->putJson("/api/matters/{$matter->id}", [
+        'title' => '公告',
+        'body' => '正文',
+        'is_approved' => true,
+    ])->assertSuccessful();
+
+    expect($matter->refresh()->is_approved)->toBeFalse();
 });
 
 test('admin publishes a census with a questionnaire and missing keys are generated', function () {
@@ -235,10 +276,9 @@ test('census schema accepts text questions without options and keeps question no
 test('the admin queue signs matters with the initiator party snapshot', function () {
     $merchant = Resident::factory()->merchant('青城中央空调')->create();
     $merchant->affiliatedParty->update(['is_listed' => true]);
-    Matter::factory()->create([
+    Matter::factory()->pending()->create([
         'initiator_id' => $merchant->id,
         'initiator_party_id' => $merchant->affiliated_party_id,
-        'is_approved' => false,
     ]);
 
     Sanctum::actingAs(Resident::factory()->admin()->create());
