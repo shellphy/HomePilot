@@ -1,4 +1,4 @@
-<view class="page-body detail-body {{matter.join_open ? 'has-dock' : ''}}">
+<view class="page-body detail-body" style="{{matter.join_open ? 'padding-bottom: calc(360rpx + env(safe-area-inset-bottom))' : ''}}">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <block wx:if="{{matter}}">
       <notice-detail wx:if="{{matter.type === 'notice'}}" matter="{{matter}}" />
