@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
     /**
      * 本地联调数据：小区生活全景。
      * 覆盖团购全生命周期（方案型谈判中 / 标品接龙中 / 商家直供 / 已成团带评价 / 未成团收场 / 意向征集）、
-     * 配套摸底问卷、署名调研、问答区、公告 / 维权 / 活动 / 互助。
+     * 科普与摸底问卷、署名调研、问答区、公告 / 维权 / 活动 / 互助。
      */
     public function run(): void
     {
@@ -94,7 +94,7 @@ class DatabaseSeeder extends Seeder
 
     /**
      * 中央空调 · 方案型团购（谈判中）：本小区只有一个外机位，这是最典型的非标品团。
-     * 挂配套摸底问卷（结果给团长当谈判弹药），问答区有已答/热门未答。
+     * 问答区有已答/热门未答两条。
      */
     private function hvacGroupbuy(): void
     {
@@ -138,48 +138,6 @@ class DatabaseSeeder extends Seeder
             'happened_on' => now()->subDays(2)->toDateString(),
             'content' => '两家经销商本周六上午来小区集中量房，已登记意向的邻居留意电话',
         ]);
-
-        // 配套摸底问卷：选项自带解释（答题即建概念），结果直接喂给谈判
-        $survey = Matter::factory()->create([
-            'type' => 'census',
-            'initiator_id' => null,
-            'state' => 'open',
-            'category' => '中央空调',
-            'title' => '中央空调需求摸底',
-            'payload' => [
-                'pitch' => '答 3 道题帮团长摸清全小区的需求口径，谈判更有底气；结果匿名聚合公示。',
-                'modules' => [[
-                    'key' => 'hvac',
-                    'title' => '你家的情况',
-                    'questions' => [
-                        [
-                            'key' => 'rooms', 'text' => '打算装几个房间？', 'type' => 'single', 'required' => true,
-                            'options' => ['3 个（1 拖 3）', '4 个（1 拖 4）', '5 个（1 拖 5）', '还没想好'],
-                            'option_notes' => ['两房或三房只装卧室客厅', '三房两厅最常见的配置', '四房或全屋覆盖', '选这个也是有效信息'],
-                        ],
-                        [
-                            'key' => 'priority', 'text' => '更在意哪一样？', 'type' => 'single', 'required' => true,
-                            'options' => ['静音', '省电', '价格', '品牌'],
-                            'option_notes' => ['卧室睡眠敏感选这个，关注压缩机与内机噪音值', '常年开的家庭电费差距明显，看能效等级', '', ''],
-                        ],
-                        [
-                            'key' => 'budget', 'text' => '这块预算大概？', 'type' => 'single',
-                            'options' => ['3 万以内', '3~4.5 万', '4.5 万以上', '还没概念'],
-                        ],
-                    ],
-                ]],
-            ],
-        ]);
-        foreach (range(1, 28) as $i) {
-            Stance::factory()->for($survey, 'matter')->create([
-                'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => [
-                    'rooms' => fake()->randomElement(['3 个（1 拖 3）', '4 个（1 拖 4）', '4 个（1 拖 4）', '5 个（1 拖 5）']),
-                    'priority' => fake()->randomElement(['静音', '静音', '省电', '价格']),
-                    'budget' => fake()->randomElement(['3 万以内', '3~4.5 万', '3~4.5 万', '4.5 万以上', '还没概念']),
-                ]],
-            ]);
-        }
 
         // 问答区：已答的沉淀在前，热门未答的等团长处理
         $answered = MatterQuestion::factory()->for($hvac)->answered(
@@ -523,7 +481,7 @@ class DatabaseSeeder extends Seeder
                     ],
                     [
                         'key' => 'system_pref', 'text' => '氟机还是水机，你更倾向哪种？', 'type' => 'single',
-                        'note' => '这俩差在室内「用什么传冷热」。氟机（多联机）室内走冷媒：制冷快、系统成熟、性价比高，是绝大多数家庭的选择，缺点是出风偏凉偏干。水机室内走水：出风柔和、不干燥、体感更舒服，适合追求舒适或大面积，缺点是造价高、制冷稍慢。（要不要带地暖、热水是另一回事，后面「联供」会讲——氟机、水机都能配地暖。）',
+                        'note' => '这俩差在室内「用什么传冷热」。氟机（多联机）室内走冷媒：制冷快、系统成熟、性价比高，是绝大多数家庭的选择，缺点是出风偏凉偏干。水机室内走水：出风柔和、不干燥、体感更舒服，适合追求舒适或大面积，缺点是造价高、制冷稍慢。',
                         'options' => ['氟机 / 多联机（主流、性价比高）', '水机（出风更柔和、造价高）', '还分不清，想让人现场讲讲'],
                         'option_notes' => [
                             '制冷快、成熟、性价比高，九成家庭的选择',
