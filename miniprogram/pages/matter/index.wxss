@@ -1,3 +1,8 @@
 .detail-body {
-  padding-bottom: 220rpx;
+  padding-bottom: 40rpx;
+}
+/* 底部固定操作区高度可变（互通开关行 / 团购确认双按钮），且悬浮在安全区之上：
+   预留够高再叠加安全区，最后一屏内容（如「我要提问」）才不会被操作区遮住 */
+.detail-body.has-dock {
+  padding-bottom: calc(340rpx + env(safe-area-inset-bottom));
 }

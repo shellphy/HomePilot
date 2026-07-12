@@ -1,4 +1,4 @@
-<view class="page-body detail-body">
+<view class="page-body detail-body {{matter.join_open ? 'has-dock' : ''}}">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <block wx:if="{{matter}}">
       <notice-detail wx:if="{{matter.type === 'notice'}}" matter="{{matter}}" />
