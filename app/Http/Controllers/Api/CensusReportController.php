@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Actions\GenerateCensusReport;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
+use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 class CensusReportController extends Controller
 {
     use ResolvesResident;
+
+    public function __construct(private CensusReportPresentation $presentation) {}
 
     public function show(Request $request, Matter $matter): JsonResponse
     {
@@ -34,7 +37,7 @@ class CensusReportController extends Controller
     public function share(Request $request, Matter $matter): JsonResponse
     {
         $stance = $this->ownedStance($request, $matter);
-        abort_unless(is_array($stance->payload['ai_report'] ?? null), 422, '请先生成需求报告');
+        abort_unless(is_array($stance->payload['ai_report'] ?? null), 422, '请先生成问卷总结');
         $payload = $stance->payload;
         $payload['report_share_enabled'] = true;
         $stance->update(['payload' => $payload]);
@@ -65,6 +68,7 @@ class CensusReportController extends Controller
         return response()->json([
             'title' => $stance->matter->title,
             'report' => $stance->payload['ai_report'],
+            'presentation' => $this->presentation->for($stance->matter),
             'generated_at' => $stance->payload['ai_report_generated_at'] ?? null,
             'shared' => true,
         ]);
@@ -89,6 +93,7 @@ class CensusReportController extends Controller
         return [
             'title' => $matter->title,
             'report' => is_array($report) ? $report : null,
+            'presentation' => $this->presentation->for($matter),
             'generated_at' => $stance->payload['ai_report_generated_at'] ?? null,
             'share_enabled' => $shareEnabled,
             'share_token' => $shareEnabled ? ($stance->payload['report_share_token'] ?? null) : null,

@@ -21,6 +21,7 @@ Page({
     needProfile: false, // 该征集要求档案完整且当前缺失 → 先去完善个人资料
     initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的登记」勾选
     visibleToInitiator: false, // 是否把匿名破例给这个发起者本人看（默认关）
+    reportPresentation: {}, // 答题前预告完成后的 AI 个性化总结价值
     submitting: false,
     aiChatShow: false, // AI 答疑半屏面板（每道题「问 AI」呼出）
   },
@@ -88,6 +89,7 @@ Page({
         picked: this.buildPicked(answers),
         needProfile: census.collects_contact && (!me.unit_label || !me.phone),
         initiatorParty: census.initiator_party || null,
+        reportPresentation: census.report_presentation || {},
         // 回填上次选择：改登记时保持勾选状态，默认关
         visibleToInitiator: !!census.my_visible_to_initiator,
       });
@@ -202,10 +204,10 @@ Page({
         this.showModule(moduleIndex + 1);
       } else {
         wx.showModal({
-          title: '感谢参与！',
-          content: '这些信息只做匿名统计，聚合结果对全小区公示。不想答的题以后随时可以补。',
+          title: '答完了，去看 AI 总结',
+          content: 'AI 可以把你的选择整理成重点、风险、待确认项和可分享的沟通清单；聚合统计仍只展示匿名结果。',
           showCancel: false,
-          confirmText: '好的',
+          confirmText: '查看结果',
           // 从公示页进来的走返回（onShow 自会刷新），避免栈里叠两张公示页；其他入口 redirect 过去看结果
           success: () => {
             const pages = getCurrentPages();

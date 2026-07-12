@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Ai\Agents\CensusReportGenerator;
+use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
@@ -12,6 +13,8 @@ use RuntimeException;
 
 class GenerateCensusReport
 {
+    public function __construct(private CensusReportPresentation $presentation) {}
+
     /** @return array<string, mixed> */
     public function handle(Matter $matter, Stance $stance, Resident $resident): array
     {
@@ -27,6 +30,7 @@ class GenerateCensusReport
             'questionnaire' => [
                 'title' => $matter->title,
                 'purpose' => $matter->payloadValue('purpose', ''),
+                'report_presentation' => $this->presentation->for($matter),
                 'modules' => $matter->payloadList('modules'),
             ],
             'resident_context' => [
@@ -37,7 +41,7 @@ class GenerateCensusReport
 
         $response = (new CensusReportGenerator)->prompt($prompt);
         if (! $response instanceof StructuredAgentResponse) {
-            throw new RuntimeException('AI 未返回结构化需求报告');
+            throw new RuntimeException('AI 未返回结构化问卷总结');
         }
         $report = $response->toArray();
         $payload = $stance->payload ?? [];

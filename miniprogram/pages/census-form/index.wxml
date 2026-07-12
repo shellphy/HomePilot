@@ -10,6 +10,22 @@
     </block>
 
     <block wx:elif="{{current}}">
+      <view class="ai-report-preview" wx:if="{{moduleIndex === 0}}">
+        <view class="ai-preview-head">
+          <view class="ai-preview-mark">AI</view>
+          <view>
+            <view class="ai-preview-title">答完后，生成「{{reportPresentation.report_title || '我的问卷总结'}}」</view>
+            <view class="ai-preview-sub">不是只有匿名统计，还会根据你的每一道答案生成个人总结</view>
+          </view>
+        </view>
+        <view class="ai-preview-points">
+          <text>明确选择与优先级</text>
+          <text>风险与待确认项</text>
+          <text>可分享的沟通清单</text>
+        </view>
+        <view class="ai-preview-foot">完成整份问卷后，可在结果页一键生成、继续问 AI 或安全分享。AI 只依据你的答案整理，不替你做决定。</view>
+      </view>
+
       <view class="step-bar">
         <view class="step-text">{{current.title}} · {{moduleIndex + 1}} / {{modules.length}}</view>
         <view class="meter step-meter">

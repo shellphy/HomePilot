@@ -14,6 +14,7 @@ Page({
     shareToken: '',
     generating: false,
     aiChatShow: false,
+    presentation: {},
   },
 
   onLoad(query) {
@@ -31,7 +32,8 @@ Page({
         ? await matters.getSharedCensusReport(this.data.token)
         : await matters.getCensusReport(this.data.censusId);
       this.applyReport(data);
-      wx.setNavigationBarTitle({ title: data.title || '装修需求报告' });
+      const presentation = data.presentation || {};
+      wx.setNavigationBarTitle({ title: presentation.report_title || '我的问卷总结' });
     });
   },
 
@@ -42,6 +44,7 @@ Page({
       generatedAt: data.generated_at || '',
       shareEnabled: !!data.share_enabled,
       shareToken: data.share_token || this.data.token || '',
+      presentation: data.presentation || {},
     });
   },
 
@@ -94,10 +97,10 @@ Page({
 
   onShareAppMessage() {
     if (!this.data.shareEnabled || !this.data.shareToken) {
-      return { title: '我的装修需求报告', path: `/pages/census-report/index?id=${this.data.censusId}` };
+      return { title: this.data.presentation.report_title || '我的问卷总结', path: `/pages/census-report/index?id=${this.data.censusId}` };
     }
     return {
-      title: `${this.data.title}｜装修需求报告`,
+      title: `${this.data.title}｜${this.data.presentation.report_title || '问卷总结'}`,
       path: `/pages/census-report/index?token=${this.data.shareToken}`,
     };
   },

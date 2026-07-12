@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
+use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,8 @@ use Illuminate\Validation\ValidationException;
 class CensusController extends Controller
 {
     use ResolvesResident;
+
+    public function __construct(private CensusReportPresentation $presentation) {}
 
     /**
      * 下发问卷 schema + 我的答案 + 匿名聚合。
@@ -34,6 +37,7 @@ class CensusController extends Controller
             'state' => $matter->state,
             'pitch' => $matter->payloadValue('pitch', ''),
             'purpose' => $matter->payloadValue('purpose', ''),
+            'report_presentation' => $this->presentation->for($matter),
             'modules' => $matter->payloadValue('modules', []),
             'collects_contact' => (bool) $matter->payloadValue('collects_contact', false),
             'answers' => $stance?->payload['answers'] ?? (object) [],

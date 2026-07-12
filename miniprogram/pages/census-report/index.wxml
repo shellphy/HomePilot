@@ -3,14 +3,14 @@
     <block wx:if="{{!token && !report}}">
       <view class="card report-empty">
         <view class="empty-title">把答卷变成真正能用的需求报告</view>
-        <view class="empty-copy">AI 会整理你的明确选择、优先级、冲突、待确认问题和给商家的沟通清单。报告只依据你的答案，不替你做决定。</view>
+        <view class="empty-copy">{{presentation.empty_description}}</view>
         <t-button theme="primary" block size="large" loading="{{generating}}" bind:tap="generate">生成我的报告</t-button>
       </view>
     </block>
 
     <block wx:elif="{{report}}">
       <view class="report-hero">
-        <view class="report-kicker">你的装修需求画像</view>
+        <view class="report-kicker">{{presentation.profile_label}}</view>
         <view class="report-title">{{report.headline}}</view>
         <view class="report-overview">{{report.overview}}</view>
       </view>
@@ -32,9 +32,9 @@
         </view>
       </view>
 
-      <view class="card warning-card" wx:if="{{report.red_flags.length}}">
-        <view class="section-title">别被商家带着走</view>
-        <view class="bullet" wx:for="{{report.red_flags}}" wx:key="*this">• {{item}}</view>
+      <view class="card warning-card" wx:if="{{report.risks.length}}">
+        <view class="section-title">{{presentation.risk_label}}</view>
+        <view class="bullet" wx:for="{{report.risks}}" wx:key="*this">• {{item}}</view>
       </view>
 
       <view class="card" wx:if="{{report.open_questions.length}}">
@@ -42,20 +42,20 @@
         <view class="check" wx:for="{{report.open_questions}}" wx:key="*this"><text class="box"></text>{{item}}</view>
       </view>
 
-      <view class="card merchant-card" wx:if="{{report.merchant_brief.length}}">
-        <view class="section-title">给设计师 / 商家的需求清单</view>
-        <view class="bullet" wx:for="{{report.merchant_brief}}" wx:key="*this">• {{item}}</view>
+      <view class="card merchant-card" wx:if="{{report.share_brief.length}}">
+        <view class="section-title">{{presentation.brief_label}}</view>
+        <view class="bullet" wx:for="{{report.share_brief}}" wx:key="*this">• {{item}}</view>
         <view class="privacy">分享页不包含姓名、电话、楼栋和邻居统计。你可以随时关闭旧链接。</view>
       </view>
 
       <view wx:if="{{!token}}" class="actions">
-        <t-button theme="primary" block size="large" open-type="share" wx:if="{{shareEnabled}}">分享给设计师 / 商家</t-button>
+        <t-button theme="primary" block size="large" open-type="share" wx:if="{{shareEnabled}}">{{presentation.share_button_label}}</t-button>
         <t-button theme="primary" block size="large" bind:tap="enableShare" wx:else>开启安全分享</t-button>
         <t-button theme="light" block size="large" bind:tap="askAi">继续问 AI</t-button>
         <t-button theme="light" block size="large" loading="{{generating}}" bind:tap="generate">按最新答案重新生成</t-button>
         <view class="revoke" wx:if="{{shareEnabled}}" bind:tap="revokeShare">关闭分享并让旧链接失效</view>
       </view>
-      <view class="shared-foot" wx:else>这是一份业主主动分享的只读需求报告，请以双方最终确认的图纸与合同为准。</view>
+      <view class="shared-foot" wx:else>{{presentation.share_disclaimer}}</view>
     </block>
   </page-status>
 
