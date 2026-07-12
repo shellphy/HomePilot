@@ -35,6 +35,9 @@ class MatterExplainer implements Agent, Conversational
 
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，业主追问时再展开。
+- 业主问某道问卷题时，先解释这道题在装修决策里影响什么，再结合户型、已选答案和其他登记给出建议；不要把背景资料整段复述给业主。
+- 信息不足以判断时，只追问一个最影响选择的关键问题；不要一次抛出一串问题。
+- 区分“必须遵守的安全 / 规范底线”和“可以按预算偏好选择的方案”，不要把经验做法说成唯一标准。
 - 优先结合下面的背景资料回答；把参数换算到业主自己家的情况来讲。
 - 不评价、不推荐、不贬低任何具体品牌或商家。
 - 凡涉及本次商家的具体承诺（保修年限、售后范围、赠品、最终价格），明确提醒以商家书面确认为准，建议业主在事项页向团长/商家提问留档。
@@ -131,10 +134,18 @@ PROMPT.$this->matterContext();
         /** @var array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}> $questionMap */
         $questionMap = [];
         $questionLines = [];
-        // 题目多时只注入前若干题；答题现场问某道题会把题面写进 question，不受此截断影响
-        $limit = 24;
 
         foreach ($this->matter->payloadList('modules') as $module) {
+            $moduleTitle = trim((string) ($module['title'] ?? ''));
+            $moduleIntro = trim((string) ($module['intro'] ?? ''));
+            if ($moduleTitle !== '') {
+                $moduleLine = "模块：{$moduleTitle}";
+                if ($moduleIntro !== '') {
+                    $moduleLine .= "；模块说明：{$moduleIntro}";
+                }
+                $questionLines[] = $moduleLine;
+            }
+
             foreach ((array) ($module['questions'] ?? []) as $question) {
                 $key = (string) ($question['key'] ?? '');
                 $text = trim((string) ($question['text'] ?? ''));
@@ -143,33 +154,40 @@ PROMPT.$this->matterContext();
                 }
 
                 $type = (string) ($question['type'] ?? 'single');
+                $note = trim((string) ($question['note'] ?? ''));
                 $options = array_values(array_map('strval', (array) ($question['options'] ?? [])));
                 $notes = array_map('strval', (array) ($question['option_notes'] ?? []));
                 $questionMap[$key] = ['text' => $text, 'type' => $type, 'options' => $options, 'notes' => $notes];
 
-                if (count($questionLines) >= $limit) {
-                    continue;
-                }
-
                 if ($type === 'text') {
-                    $questionLines[] = "题目：{$text}（填空题）";
+                    $questionLine = "题目：{$text}（填空题）";
+                    if ($note !== '') {
+                        $questionLine .= "；题目说明：{$note}";
+                    }
+                    $questionLines[] = $questionLine;
 
                     continue;
                 }
 
                 $pairs = [];
                 foreach ($options as $i => $option) {
-                    $note = trim((string) ($notes[$i] ?? ''));
-                    $pairs[] = $note !== '' ? "{$option}｜{$note}" : $option;
+                    $optionNote = trim((string) ($notes[$i] ?? ''));
+                    $pairs[] = $optionNote !== '' ? "{$option}｜{$optionNote}" : $option;
                 }
 
-                $questionLines[] = "题目：{$text}"
-                    .($pairs !== [] ? '；选项：'.implode(' / ', $pairs) : '');
+                $questionLine = "题目：{$text}";
+                if ($note !== '') {
+                    $questionLine .= "；题目说明：{$note}";
+                }
+                if ($pairs !== []) {
+                    $questionLine .= '；选项：'.implode(' / ', $pairs);
+                }
+                $questionLines[] = $questionLine;
             }
         }
 
         if ($questionLines !== []) {
-            $lines[] = '问卷题目与选项：';
+            $lines[] = '完整问卷结构、说明与选项：';
             foreach ($questionLines as $line) {
                 $lines[] = "- {$line}";
             }
