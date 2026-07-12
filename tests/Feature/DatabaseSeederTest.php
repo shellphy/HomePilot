@@ -7,8 +7,8 @@ test('it seeds exactly five renovation questionnaires with valid schemas and exa
     $this->seed();
 
     $expectedQuestionCounts = [
-        '硬装怎么做 · 答题即入门' => 28,
-        '中央空调怎么选 · 答题即入门' => 11,
+        '硬装怎么做 · 答题即入门' => 32,
+        '中央空调怎么选 · 答题即入门' => 15,
         '全屋定制怎么选 · 答题即入门' => 24,
         '软装怎么搭 · 答题即入门' => 19,
         '全屋需求摸底 · 说说你家怎么住' => 26,
@@ -67,7 +67,7 @@ test('it seeds exactly five renovation questionnaires with valid schemas and exa
     $hardFinishQuestions = collect($censuses['硬装怎么做 · 答题即入门']->payload['modules'])
         ->flatMap(fn (array $module): array => $module['questions']);
 
-    expect($hardFinishQuestions)->toHaveCount(28)
+    expect($hardFinishQuestions)->toHaveCount(32)
         ->and($hardFinishQuestions->pluck('key'))->toContain(
             'handover_check',
             'trade_coordination',
