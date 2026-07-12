@@ -24,6 +24,8 @@
           <text wx:if="{{question.required}}" class="f-required">必答</text>
           <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
         </view>
+        <!-- 疑问冒头就地问：题面直传给 AI，不懂这道题不用退出去查 -->
+        <view class="ask-ai" data-text="{{question.text}}" bind:tap="askQuestion">不懂这道题？问 AI</view>
         <view wx:if="{{question.note}}" class="q-explain">{{question.note}}</view>
         <textarea
           wx:if="{{question.type === 'text'}}"
@@ -71,4 +73,16 @@
       <view class="skip-note">带「必答」的答完就行，其他题跳过也没关系</view>
     </block>
   </page-status>
+
+  <!-- AI 答疑半屏面板：page-container 原生支持返回手势关闭 -->
+  <page-container
+    show="{{aiChatShow}}"
+    position="bottom"
+    round
+    custom-style="height: 82vh;"
+    bind:beforeleave="onAiChatLeave"
+    bind:leave="onAiChatLeave"
+  >
+    <ai-chat-panel id="aiChat" />
+  </page-container>
 </view>

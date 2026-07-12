@@ -44,6 +44,14 @@
   padding-top: 20rpx;
 }
 
+/* 每道题的「问 AI」入口：轻量小字，不抢答题主线 */
+.ask-ai {
+  display: inline-block;
+  font-size: 22rpx;
+  color: var(--brand);
+  margin: 6rpx 0 16rpx;
+}
+
 /* 带解释的选项：竖排行，配色语义与 chip 一致 */
 .opts {
   display: flex;

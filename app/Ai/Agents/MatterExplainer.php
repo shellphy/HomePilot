@@ -4,6 +4,7 @@ namespace App\Ai\Agents;
 
 use App\Models\Matter;
 use App\Models\Resident;
+use App\Models\Stance;
 use App\Settings\CommunitySettings;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
@@ -79,6 +80,14 @@ PROMPT.$this->matterContext();
             $lines[] = "发起人的话：{$pitch}";
         }
 
+        // 征集：注入目的、问卷题目与选项解释、提问业主自己的登记、各题多数选择，
+        // AI 才既能讲清某道题、又能基于「我家怎么答的」做整体分析。
+        if ($this->matter->type === 'census') {
+            foreach ($this->censusContextLines() as $censusLine) {
+                $lines[] = $censusLine;
+            }
+        }
+
         if (($perk = (string) $this->matter->payloadValue('perk', '')) !== '') {
             $lines[] = "阶梯优惠：{$perk}";
         }
@@ -104,5 +113,175 @@ PROMPT.$this->matterContext();
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * 征集专属上下文：发起目的、问卷题目与选项解释、提问业主的登记、各题多数选择。
+     *
+     * @return array<int, string>
+     */
+    private function censusContextLines(): array
+    {
+        $lines = [];
+
+        if (($purpose = trim((string) $this->matter->payloadValue('purpose', ''))) !== '') {
+            $lines[] = "发起目的：{$purpose}";
+        }
+
+        /** @var array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}> $questionMap */
+        $questionMap = [];
+        $questionLines = [];
+        // 题目多时只注入前若干题；答题现场问某道题会把题面写进 question，不受此截断影响
+        $limit = 24;
+
+        foreach ($this->matter->payloadList('modules') as $module) {
+            foreach ((array) ($module['questions'] ?? []) as $question) {
+                $key = (string) ($question['key'] ?? '');
+                $text = trim((string) ($question['text'] ?? ''));
+                if ($key === '' || $text === '') {
+                    continue;
+                }
+
+                $type = (string) ($question['type'] ?? 'single');
+                $options = array_values(array_map('strval', (array) ($question['options'] ?? [])));
+                $notes = array_map('strval', (array) ($question['option_notes'] ?? []));
+                $questionMap[$key] = ['text' => $text, 'type' => $type, 'options' => $options, 'notes' => $notes];
+
+                if (count($questionLines) >= $limit) {
+                    continue;
+                }
+
+                if ($type === 'text') {
+                    $questionLines[] = "题目：{$text}（填空题）";
+
+                    continue;
+                }
+
+                $pairs = [];
+                foreach ($options as $i => $option) {
+                    $note = trim((string) ($notes[$i] ?? ''));
+                    $pairs[] = $note !== '' ? "{$option}｜{$note}" : $option;
+                }
+
+                $questionLines[] = "题目：{$text}"
+                    .($pairs !== [] ? '；选项：'.implode(' / ', $pairs) : '');
+            }
+        }
+
+        if ($questionLines !== []) {
+            $lines[] = '问卷题目与选项：';
+            foreach ($questionLines as $line) {
+                $lines[] = "- {$line}";
+            }
+        }
+
+        if ($this->asker !== null) {
+            foreach ($this->myRegistrationLines($questionMap) as $i => $line) {
+                if ($i === 0) {
+                    $lines[] = '提问业主的登记（我的选择）：';
+                }
+                $lines[] = "- {$line}";
+            }
+        }
+
+        foreach ($this->topChoiceLines($questionMap) as $i => $line) {
+            if ($i === 0) {
+                $lines[] = '各题多数选择（匿名聚合，帮你讲「大家多数怎么选」）：';
+            }
+            $lines[] = "- {$line}";
+        }
+
+        return $lines;
+    }
+
+    /**
+     * 提问业主自己的登记：把答案的 key/选项换算成题面文字。
+     *
+     * @param  array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}>  $questionMap
+     * @return array<int, string>
+     */
+    private function myRegistrationLines(array $questionMap): array
+    {
+        $stance = $this->matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
+            ->where('resident_id', $this->asker->id)
+            ->first();
+
+        $answers = $stance?->payload['answers'] ?? null;
+        if (! is_array($answers)) {
+            return [];
+        }
+
+        $lines = [];
+        foreach ($answers as $key => $value) {
+            $question = $questionMap[$key] ?? null;
+            if ($question === null) {
+                continue;
+            }
+
+            if ($question['type'] === 'text') {
+                if (($text = trim((string) $value)) !== '') {
+                    $lines[] = "{$question['text']}→{$text}";
+                }
+
+                continue;
+            }
+
+            $choices = array_filter(
+                array_map('strval', (array) $value),
+                fn (string $choice): bool => $choice !== '',
+            );
+            if ($choices !== []) {
+                $lines[] = "{$question['text']}→".implode('、', $choices);
+            }
+        }
+
+        return array_values($lines);
+    }
+
+    /**
+     * 各题多数选择：匿名聚合每道选择题的最高票选项。
+     *
+     * @param  array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}>  $questionMap
+     * @return array<int, string>
+     */
+    private function topChoiceLines(array $questionMap): array
+    {
+        $registrations = $this->matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
+            ->get()
+            ->map(fn (Stance $stance): array => is_array($stance->payload['answers'] ?? null)
+                ? $stance->payload['answers']
+                : []);
+
+        if ($registrations->isEmpty()) {
+            return [];
+        }
+
+        $lines = [];
+        foreach ($questionMap as $key => $question) {
+            if ($question['type'] === 'text') {
+                continue;
+            }
+
+            $counts = [];
+            foreach ($registrations as $answers) {
+                foreach ((array) ($answers[$key] ?? null) as $choice) {
+                    if (($choice = (string) $choice) !== '') {
+                        $counts[$choice] = ($counts[$choice] ?? 0) + 1;
+                    }
+                }
+            }
+
+            if ($counts === []) {
+                continue;
+            }
+
+            arsort($counts);
+            $top = (string) array_key_first($counts);
+            $lines[] = "{$question['text']}→多数选「{$top}」（{$counts[$top]} 人）";
+        }
+
+        return array_values($lines);
     }
 }

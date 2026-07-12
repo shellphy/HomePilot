@@ -12,6 +12,7 @@ Page({
 
   data: {
     id: null,
+    title: '',
     modules: [],
     moduleIndex: 0,
     current: null,
@@ -19,11 +20,31 @@ Page({
     picked: {}, // {'题key::选项': true}，WXML 不能调 indexOf，用查表渲染选中态
     needProfile: false, // 该征集要求档案完整且当前缺失 → 先去完善个人资料
     submitting: false,
+    aiChatShow: false, // AI 答疑半屏面板（每道题「问 AI」呼出）
   },
 
   onLoad(query) {
     this.setData({ id: Number(query.id) });
     this.reload();
+  },
+
+  // 答题现场每道题的「问 AI」：把题面直接写进问题，AI 顺着这道题讲该怎么选
+  askQuestion(event) {
+    const text = event.currentTarget.dataset.text;
+    this.openAiChat({
+      matterId: this.data.id,
+      matterTitle: this.data.title,
+      question: `「${text}」这道题是什么意思？我家该怎么选？`,
+    });
+  },
+
+  openAiChat(options) {
+    this.setData({ aiChatShow: true });
+    this.selectComponent('#aiChat').open(options);
+  },
+
+  onAiChatLeave() {
+    if (this.data.aiChatShow) this.setData({ aiChatShow: false });
   },
 
   // 从「个人资料」页回来时重查门槛
@@ -38,6 +59,7 @@ Page({
       const [census, me] = await Promise.all([matters.getCensus(this.data.id), getMe()]);
       const answers = census.answers || {};
       this.setData({
+        title: census.title,
         // 空模块是管理端「先建模块再逐题添加」的中间态，作答时跳过
         modules: census.modules
           .filter((module) => (module.questions || []).length)
