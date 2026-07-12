@@ -1,5 +1,5 @@
 // 事项与表态的服务层：页面不拼 URL，只表达意图
-const { request } = require('../request');
+const { request, streamRequest } = require('../request');
 
 function listMatters() {
   return request('/matters');
@@ -76,11 +76,13 @@ function draftGlossary(term, category) {
   return request('/glossary/draft', { method: 'POST', data: { term, category } });
 }
 
-// 业主侧 AI 答疑：带事项上下文的多轮对话，conversation_id 续聊
-function aiChat(id, question, conversationId) {
-  return request(`/matters/${id}/ai-chat`, {
+// 业主侧 AI 答疑：带事项上下文的多轮对话，conversation_id 续聊。
+// 流式返回，onDelta 收增量文字；返回 { abort, promise } 供停止/收尾。
+function aiChatStream(id, question, conversationId, { onDelta } = {}) {
+  return streamRequest(`/matters/${id}/ai-chat`, {
     method: 'POST',
     data: { question, conversation_id: conversationId || null },
+    onDelta,
   });
 }
 
@@ -123,7 +125,7 @@ module.exports = {
   getCensus,
   saveCensus,
   draftGlossary,
-  aiChat,
+  aiChatStream,
   getQuestions,
   askQuestion,
   echoQuestion,

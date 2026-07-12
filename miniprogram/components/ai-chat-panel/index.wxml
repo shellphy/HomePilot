@@ -9,11 +9,15 @@
 
   <scroll-view class="chat-body" scroll-y scroll-into-view="{{scrollTo}}" scroll-with-animation>
     <view wx:for="{{messages}}" wx:key="index" class="bubble-row {{item.role === 'user' ? 'bubble-row-me' : ''}}">
-      <view class="bubble {{item.role === 'user' ? 'bubble-me' : 'bubble-ai'}}">{{item.text}}</view>
-    </view>
-
-    <view wx:if="{{sending}}" class="bubble-row">
-      <view class="bubble bubble-ai bubble-typing">正在想，可能要等上一会儿…</view>
+      <view class="bubble {{item.role === 'user' ? 'bubble-me' : 'bubble-ai'}}">
+        <!-- 流式 AI 气泡：还没吐字时显示等待文案，正在打字时文末带光标 -->
+        <block wx:if="{{index === streamingIndex && !item.text}}">
+          <text class="bubble-typing">正在想，可能要等上一会儿…</text>
+        </block>
+        <block wx:else>
+          <text>{{item.text}}</text><text wx:if="{{index === streamingIndex}}" class="type-caret"></text>
+        </block>
+      </view>
     </view>
 
     <view wx:if="{{remaining !== null && remaining <= 5}}" class="chat-quota">今天还能问 {{remaining}} 次</view>
@@ -21,7 +25,7 @@
   </scroll-view>
 
   <!-- 空对话时把预设问题以「猜你想问」摆在输入框上方，业主挑一条即发送，不用自己憋问题 -->
-  <view wx:if="{{!messages.length && !sending && presets.length}}" class="chat-presets">
+  <view wx:if="{{!messages.length && !busy && presets.length}}" class="chat-presets">
     <view class="chat-presets-title">猜你想问</view>
     <view class="chat-presets-list">
       <view
@@ -31,7 +35,8 @@
         hover-class="chat-preset-hover"
         data-q="{{item}}"
         bind:tap="pickPreset"
-      >{{item}}</view>
+        >{{item}}</view
+      >
     </view>
   </view>
 
@@ -46,9 +51,9 @@
       bind:input="onInput"
       bind:confirm="send"
     />
-    <view class="chat-send {{input || sending ? '' : 'chat-send-off'}}" bind:tap="send">
-      <text wx:if="{{!sending}}">发送</text>
-      <text wx:else>…</text>
+    <view class="chat-send {{busy ? 'chat-send-stop' : (input ? '' : 'chat-send-off')}}" bind:tap="onSendTap">
+      <view wx:if="{{busy}}" class="stop-icon" />
+      <text wx:else>发送</text>
     </view>
   </view>
 </view>

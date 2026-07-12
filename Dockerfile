@@ -16,9 +16,8 @@ COPY resources ./resources
 COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
-# ---- PHP-FPM 应用镜像 ----
-FROM php:8.5-fpm-alpine AS app
-COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+# ---- FrankenPHP 应用镜像（Caddy 内嵌 PHP，一个进程替代 php-fpm + nginx，原生流式支持 SSE）----
+FROM dunglas/frankenphp:php8.5 AS app
 RUN install-php-extensions pdo_sqlite bcmath intl zip pcntl opcache
 
 WORKDIR /var/www/html
@@ -27,19 +26,21 @@ COPY . .
 COPY --from=vendor /app/vendor ./vendor
 COPY --from=assets /app/public/build ./public/build
 
-RUN mkdir -p storage/app/public storage/logs \
+# 非 root 运行：相关目录归 www-data；具名卷首次创建继承此属主，运行期无需再 chown
+RUN mkdir -p storage/app/public storage/logs storage/database \
         storage/framework/cache/data storage/framework/sessions storage/framework/views \
+        /data/caddy /config/caddy \
     && composer dump-autoload --optimize --classmap-authoritative --no-dev \
-    && chown -R www-data:www-data storage bootstrap/cache
+    && chown -R www-data:www-data storage bootstrap/cache /data /config
 
-COPY docker/php.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["entrypoint.sh"]
-CMD ["php-fpm"]
+# 让非 root 的 www-data 也能绑定 80/443
+RUN setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
 
-# ---- Nginx 镜像（自带 public 静态文件，与 app 同路径）----
-FROM nginx:alpine AS web
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=app /var/www/html/public /var/www/html/public
+USER www-data
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]

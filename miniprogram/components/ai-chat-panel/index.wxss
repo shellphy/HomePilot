@@ -59,6 +59,22 @@
 .bubble-typing {
   color: var(--text-muted);
 }
+/* 打字机光标：跟在流式文字末尾闪烁 */
+.type-caret {
+  display: inline-block;
+  width: 8rpx;
+  height: 30rpx;
+  margin-left: 4rpx;
+  vertical-align: -4rpx;
+  border-radius: 2rpx;
+  background: var(--brand);
+  animation: caret-blink 1s steps(1) infinite;
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
 .chat-quota {
   text-align: center;
   font-size: 22rpx;
@@ -131,4 +147,16 @@
 }
 .chat-send-off {
   background: var(--line-dark);
+}
+/* 生成中：发送键变停止键，居中一个方块停止图标 */
+.chat-send-stop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stop-icon {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 6rpx;
+  background: #fff;
 }

@@ -13,16 +13,16 @@ Page({
     joined: false,
     isInitiator: false,
     myReview: null,
-    contacts: [],          // 牵头人视角：同意共享的参与者联系方式（互通阶段）
+    contacts: [], // 牵头人视角：同意共享的参与者联系方式（互通阶段）
     initiatorContact: null, // 参与者视角：牵头人联系方式（互通阶段且自己同意过共享）
-    canRespond: false,      // 被认证的治理类相关方成员：可发官方回应
-    isParty: false,         // 相关方身份不参与接龙，改为解释 + 切回业主入口
-    partyLabel: '',         // 当前相关方身份的显示名（解释文案用）
-    myShareContact: false,  // 我报名时的联系方式共享意愿（成团后补开共享的入口据此显示）
-    myJoinStage: '',        // 我的承诺档位（团购分意向/确认）：接龙中的意向登记者看到「确认参团」入口
+    canRespond: false, // 被认证的治理类相关方成员：可发官方回应
+    isParty: false, // 相关方身份不参与接龙，改为解释 + 切回业主入口
+    partyLabel: '', // 当前相关方身份的显示名（解释文案用）
+    myShareContact: false, // 我报名时的联系方式共享意愿（成团后补开共享的入口据此显示）
+    myJoinStage: '', // 我的承诺档位（团购分意向/确认）：接龙中的意向登记者看到「确认参团」入口
     communityName: '小区', // 兜底文案，实际名称由 /options 下发
-    aiChatShow: false,      // AI 答疑半屏面板（ai-quick-ask / 术语弹层通过页面方法呼出）
-    dockReserve: 0,         // 吸底操作条实测高度（px），据此精确预留底部空间，见 onDockMeasure
+    aiChatShow: false, // AI 答疑半屏面板（ai-quick-ask / 术语弹层通过页面方法呼出）
+    dockReserve: 0, // 吸底操作条实测高度（px），据此精确预留底部空间，见 onDockMeasure
   },
 
   // 详情组件量出吸底操作条实际高度后上报：按需精确预留，避免遮挡或大片空白
@@ -38,7 +38,11 @@ Page({
   },
 
   onAiChatLeave() {
-    if (this.data.aiChatShow) this.setData({ aiChatShow: false });
+    if (!this.data.aiChatShow) return;
+    // 关闭面板顺手中断在途的流式回答，别让它在后台继续跑
+    const panel = this.selectComponent('#aiChat');
+    if (panel) panel.close();
+    this.setData({ aiChatShow: false });
   },
 
   onLoad(query) {
@@ -68,11 +72,7 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [res, me, options] = await Promise.all([
-        matters.getMatter(this.data.id),
-        getMe(),
-        profile.getOptions(),
-      ]);
+      const [res, me, options] = await Promise.all([matters.getMatter(this.data.id), getMe(), profile.getOptions()]);
       if (options.community && options.community.name) {
         this.setData({ communityName: options.community.name });
       }
