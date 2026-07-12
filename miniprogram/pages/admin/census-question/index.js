@@ -56,18 +56,7 @@ Page({
   reload() {
     return this.runLoad(async () => {
       const res = await matters.getMatter(this.data.id);
-      // 后端只对管理员下发原始 payload：拿不到就挡住，避免非管理员误编丢字段（见交付报告后端后续项）
-      if (res.data.payload === undefined) {
-        wx.showModal({
-          title: '暂不可编辑问卷',
-          content: '问卷题目的编辑目前仅对管理员开放，其他发起人的编辑入口待后端支持。',
-          showCancel: false,
-          success: () => wx.navigateBack(),
-        });
-        return;
-      }
       const payload = res.data.payload || {};
-      // 保留征集的其它 payload 字段，保存题目时一并回传（见 census-module 同款注释）
       this._preserved = {
         pitch: payload.pitch || '',
         purpose: payload.purpose || '',

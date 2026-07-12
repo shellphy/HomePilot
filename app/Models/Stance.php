@@ -61,10 +61,9 @@ class Stance extends Model
         $this->update(['payload' => $payload]);
     }
 
-    /** 接龙的承诺档位；只有团购分两档，其余类型不写 stage、报名即确认。 */
-    public function joinStageValue(): string
+    public function joinStageValue(): ?string
     {
-        return $this->payload['stage'] ?? self::JOIN_STAGE_CONFIRMED;
+        return $this->payload['stage'] ?? null;
     }
 
     /** @return BelongsTo<Matter, $this> */

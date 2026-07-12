@@ -34,10 +34,10 @@ test('a groupbuy carries a three-part glossary card (explain, judge, caution)', 
     ]);
 });
 
-test('legacy two-field glossary entries are still accepted and returned as-is', function () {
+test('glossary entries require the complete decision card shape', function () {
     Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3 栋']));
 
-    $response = $this->postJson('/api/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'groupbuy',
         'category' => '门窗',
         'title' => '门窗团购',
@@ -45,12 +45,10 @@ test('legacy two-field glossary entries are still accepted and returned as-is', 
         'glossary' => [
             ['term' => '断桥铝', 'explain' => '铝合金中间隔一层隔热条'],
         ],
-    ])->assertCreated();
-
-    $this->getJson('/api/matters/'.$response->json('data.id'))
-        ->assertSuccessful()
-        ->assertJsonPath('data.glossary.0.term', '断桥铝')
-        ->assertJsonMissingPath('data.glossary.0.judge');
+    ])->assertJsonValidationErrors([
+        'glossary.0.judge',
+        'glossary.0.caution',
+    ]);
 });
 
 test('glossary judge and caution are length-capped', function () {
@@ -76,7 +74,7 @@ test('admin can edit the three-part glossary through the admin form', function (
         'category' => $matter->category,
         'target_count' => $matter->target_count,
         'glossary' => [
-            ['term' => '双转子压缩机', 'explain' => '两个转子轮流做功', 'caution' => '问清压缩机具体型号，答不上来的要警惕'],
+            ['term' => '双转子压缩机', 'explain' => '两个转子轮流做功', 'judge' => '', 'caution' => '问清压缩机具体型号，答不上来的要警惕'],
         ],
     ])->assertSuccessful();
 

@@ -23,7 +23,10 @@ class StanceFactory extends Factory
             'matter_id' => Matter::factory(),
             'resident_id' => Resident::factory(),
             'mode' => Stance::MODE_JOIN,
-            'payload' => null,
+            'payload' => [
+                'share_contact' => true,
+                'stage' => Stance::JOIN_STAGE_CONFIRMED,
+            ],
         ];
     }
 

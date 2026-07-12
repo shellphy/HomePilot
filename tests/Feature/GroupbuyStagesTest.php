@@ -64,12 +64,12 @@ test('an intent left hanging after the deal closes stays an intent', function ()
         ->and($join->payload['stage'])->toBe(Stance::JOIN_STAGE_INTENT);
 });
 
-test('legacy joins without a stage count as confirmed', function () {
+test('groupbuy joins without a stage are not counted as confirmed', function () {
     $matter = Matter::factory()->done()->create();
     Stance::factory()->for($matter, 'matter')->create(['payload' => ['share_contact' => true]]);
 
     Sanctum::actingAs(Resident::factory()->create());
-    $this->getJson("/api/matters/{$matter->id}")->assertJsonPath('data.confirmed_count', 1);
+    $this->getJson("/api/matters/{$matter->id}")->assertJsonPath('data.confirmed_count', 0);
 });
 
 test('only confirmed participants can review a done groupbuy', function () {

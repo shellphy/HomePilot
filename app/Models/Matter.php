@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Enums\MatterReviewStatus;
-use App\Matters\MatterType;
-use App\Matters\MatterTypeRegistry;
 use Database\Factories\MatterFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -126,11 +124,6 @@ class Matter extends Model
         ])->save();
     }
 
-    public function typeDef(): MatterType
-    {
-        return MatterTypeRegistry::for($this->type);
-    }
-
     public function payloadValue(string $key, mixed $default = null): mixed
     {
         return $this->payload[$key] ?? $default;
@@ -181,15 +174,17 @@ class Matter extends Model
     }
 
     /**
-     * 确认参团的接龙（不含仅登记意向的）；只有团购写 stage，其余类型的接龙报名即确认。
+     * 确认参团的接龙；只有团购按承诺档位筛选，其余类型报名即确认。
      *
      * @return HasMany<Stance, $this>
      */
     public function confirmedJoins(): HasMany
     {
-        return $this->joins()->where(fn ($query) => $query
-            ->whereNull('payload->stage')
-            ->orWhere('payload->stage', '!=', Stance::JOIN_STAGE_INTENT));
+        $joins = $this->joins();
+
+        return $this->type === 'groupbuy'
+            ? $joins->where('payload->stage', Stance::JOIN_STAGE_CONFIRMED)
+            : $joins;
     }
 
     /**

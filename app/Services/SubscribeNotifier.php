@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Matters\MatterType;
+use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\MatterUpdate;
 use App\Models\Party;
@@ -24,17 +25,11 @@ class SubscribeNotifier
 
     public function __construct(private WeChat $weChat) {}
 
-    /**
-     * 过审公示 → 通知发起人。
-     */
     public function matterApproved(Matter $matter): void
     {
         $this->notifyMatter($matter, [$matter->initiator], '已公示', '审核已通过，全小区可见');
     }
 
-    /**
-     * 驳回/撤下 → 通知发起人，理由随消息带到。
-     */
     public function matterRejected(Matter $matter): void
     {
         $reason = $matter->reject_reason;
@@ -50,7 +45,7 @@ class SubscribeNotifier
         $this->notifyMatter(
             $matter,
             [...$this->participants($matter), $matter->initiator],
-            $matter->typeDef()->stateLabel($matter->state),
+            MatterTypeRegistry::for($matter->type)->stateLabel($matter->state),
             $this->stateHint($matter),
             except: $actor,
         );
@@ -72,9 +67,6 @@ class SubscribeNotifier
         );
     }
 
-    /**
-     * 成交公示 → 通知成交名单（确认参团的参与者）。
-     */
     public function dealPosted(Matter $matter): void
     {
         $recipients = $matter->confirmedJoins()->with('resident')->get()
@@ -100,9 +92,6 @@ class SubscribeNotifier
         $this->notifyMatter($matter, [$matter->initiator], $word, $joiner->displayName().$verb, except: $joiner);
     }
 
-    /**
-     * 新评价 → 通知发起人（发起人给自己的事项评价不通知）。
-     */
     public function reviewed(Matter $matter, Stance $review): void
     {
         $rating = (int) ($review->payload['rating'] ?? 0);
@@ -147,7 +136,7 @@ class SubscribeNotifier
                 $recipient,
                 'pages/matter/index?id='.$matter->id,
                 $matter->title,
-                $matter->typeDef()->label(),
+                MatterTypeRegistry::for($matter->type)->label(),
                 $stateWord,
                 $hint,
             ));
@@ -184,7 +173,7 @@ class SubscribeNotifier
         return match ($matter->state) {
             'done', 'resolved' => '尘埃落定，点击查看结果',
             'closed' => '已结束，感谢参与',
-            MatterType::ABORT_STATE => '这件事按「'.$matter->typeDef()->stateLabel($matter->state).'」收场了',
+            MatterType::ABORT_STATE => '这件事按「'.MatterTypeRegistry::for($matter->type)->stateLabel($matter->state).'」收场了',
             default => '有新进展，点击查看详情',
         };
     }
