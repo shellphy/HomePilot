@@ -95,7 +95,7 @@ class CensusController extends Controller
         // 授权标记随答案一起进 payload：本次带了就更新，没带则沿用上次选择（默认 false）
         if ($request->has('visible_to_initiator')) {
             $payload['visible_to_initiator'] = $request->boolean('visible_to_initiator');
-        } elseif (array_key_exists('visible_to_initiator', $stance?->payload ?? [])) {
+        } elseif ($stance !== null && array_key_exists('visible_to_initiator', $stance->payload ?? [])) {
             $payload['visible_to_initiator'] = (bool) $stance->payload['visible_to_initiator'];
         }
 
@@ -163,7 +163,7 @@ class CensusController extends Controller
 
         return collect(is_array($answers) ? $answers : [])
             ->map(fn (mixed $value, int|string $key): array => [
-                'question' => $questions[$key]['text'] ?? $key,
+                'question' => (string) ($questions[$key]['text'] ?? $key),
                 'answer' => is_array($value) ? implode('、', $value) : (string) $value,
             ])
             ->values();

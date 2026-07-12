@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Matters\MatterType;
 use App\Models\Matter;
+use App\Models\Resident;
 use App\Models\Stance;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -18,11 +19,16 @@ class MatterResource extends JsonResource
      * payload 按类型平铺为顶层字段：groupbuy 的 pitch/perk/terms/glossary/final_terms/final_note、
      * notice 的 body——小程序端不感知 payload 这个实现细节。
      *
-     * @return array<string, mixed>
+     * @return array<int|string, mixed>
      */
     public function toArray(Request $request): array
     {
         $type = $this->typeDef();
+
+        // 管理员或发起人本人可看编辑用的原始 payload；用 instanceof 收窄到 Resident（auth 联合类型里 User 无 is_admin）
+        $user = $request->user();
+        $canEdit = ($user instanceof Resident && $user->is_admin)
+            || ($user !== null && $this->initiator_id === $user->id);
 
         return [
             'id' => $this->id,
@@ -83,7 +89,7 @@ class MatterResource extends JsonResource
             // 编辑表单要用的原始 payload（含 census 的 modules/purpose）+ 全部状态 + 署名/创建时间：
             // 管理员或发起人本人可见（业主/商家发起 census 后要能读回自己的问卷去编辑）
             $this->mergeWhen(
-                (bool) ($request->user()?->is_admin || ($request->user() && $this->initiator_id === $request->user()->id)),
+                $canEdit,
                 fn (): array => [
                     'payload' => $this->payload ?? (object) [],
                     'all_states' => $type->allStates(),

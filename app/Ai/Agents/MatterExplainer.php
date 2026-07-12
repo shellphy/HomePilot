@@ -236,7 +236,7 @@ PROMPT.$this->matterContext();
             }
         }
 
-        return array_values($lines);
+        return $lines;
     }
 
     /**
@@ -282,6 +282,6 @@ PROMPT.$this->matterContext();
             $lines[] = "{$question['text']}→多数选「{$top}」（{$counts[$top]} 人）";
         }
 
-        return array_values($lines);
+        return $lines;
     }
 }
