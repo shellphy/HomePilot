@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\MatterReviewStatus;
 use App\Events\MatterApproved;
 use App\Events\MatterRejected;
 use App\Events\MatterStateChanged;
@@ -28,7 +29,7 @@ class MatterAdminController extends Controller
     public function index(Request $request): JsonResponse
     {
         $matters = Matter::query()
-            ->when($request->boolean('pending'), fn ($query) => $query->where('is_approved', false))
+            ->when($request->boolean('pending'), fn ($query) => $query->where('review_status', MatterReviewStatus::Pending->value))
             ->with(['initiator', 'initiatorParty'])
             ->withCount('joins')
             ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
@@ -36,8 +37,9 @@ class MatterAdminController extends Controller
             ->get();
 
         return response()->json([
+            // 只数真正待处理的（驳回态在等发起人修改，不占管理员的队列徽标）
             'data' => $matters->map(fn (Matter $matter): array => $this->present($matter)),
-            'pending_count' => Matter::where('is_approved', false)->count(),
+            'pending_count' => Matter::where('review_status', MatterReviewStatus::Pending->value)->count(),
         ]);
     }
 
@@ -67,7 +69,8 @@ class MatterAdminController extends Controller
             'title' => $validated['title'],
             'category' => $validated['category'] ?? '',
             'state' => $validated['state'] ?? MatterTypeRegistry::for($typeKey)->initialState(),
-            'is_approved' => $validated['is_approved'] ?? true,
+            // 管理员代发默认直接公示；显式传 is_approved=false 则进待审核队列
+            'review_status' => ($validated['is_approved'] ?? true) ? MatterReviewStatus::Approved : MatterReviewStatus::Pending,
             'target_count' => $validated['target_count'] ?? 0,
             'related_matter_id' => $validated['related_matter_id'] ?? null,
             'payload' => $this->payloadFrom($validated, $typeKey),
@@ -85,11 +88,10 @@ class MatterAdminController extends Controller
 
         $previousState = $matter->state;
 
-        $matter->update([
+        $attributes = [
             'title' => $validated['title'],
             'category' => $validated['category'] ?? $matter->category,
             'state' => $validated['state'] ?? $matter->state,
-            'is_approved' => $validated['is_approved'] ?? $matter->is_approved,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
             // 显式传 null 表示解除挂靠/去署名，键缺失才保留原值
             'related_matter_id' => array_key_exists('related_matter_id', $validated)
@@ -99,7 +101,20 @@ class MatterAdminController extends Controller
                 ? $validated['initiator_party_id']
                 : $matter->initiator_party_id,
             'payload' => array_merge($matter->payload ?? [], $this->payloadFrom($validated, $matter->type)),
-        ]);
+        ];
+
+        // 「是否公示」开关：勾上→通过公示；把已公示的撤下→回待审核；
+        // 待审/驳回态只编辑其它字段时保持原状态，不误清驳回理由
+        if (array_key_exists('is_approved', $validated)) {
+            if ($validated['is_approved']) {
+                $attributes['review_status'] = MatterReviewStatus::Approved;
+                $attributes['reject_reason'] = '';
+            } elseif ($matter->is_approved) {
+                $attributes['review_status'] = MatterReviewStatus::Pending;
+            }
+        }
+
+        $matter->update($attributes);
 
         if ($matter->state !== $previousState) {
             $admin = $this->resident($request);
@@ -121,25 +136,22 @@ class MatterAdminController extends Controller
         ]);
 
         $wasApproved = $matter->is_approved;
-        $matter->update([
-            'is_approved' => $validated['is_approved'],
-            'payload' => array_merge($matter->payload ?? [], [
-                'reject_reason' => $validated['is_approved'] ? '' : ($validated['reason'] ?? ''),
-            ]),
-        ]);
 
-        // 审核结果对发起人是关键动态：喂给「我的」页未读红点。
-        // 驳回时待审事项的 is_approved 本来就是 false，不能只看变化——每次驳回（理由可能更新）都记
-        if ($matter->is_approved !== $wasApproved || ! $matter->is_approved) {
-            $matter->recordActivity($this->resident($request));
+        if ($validated['is_approved']) {
+            $matter->approve();
+        } else {
+            $matter->reject($validated['reason'] ?? '');
         }
 
+        // 审核结果对发起人是关键动态：喂给「我的」页未读红点。
+        // 通过只在状态真的翻正时记；驳回每次都记（理由可能更新）。
         if ($matter->is_approved && ! $wasApproved) {
+            $matter->recordActivity($this->resident($request));
             MatterApproved::dispatch($matter);
         }
 
-        // 每次驳回都通知（理由可能更新），与上面红点的口径一致
         if (! $matter->is_approved) {
+            $matter->recordActivity($this->resident($request));
             MatterRejected::dispatch($matter);
         }
 
@@ -223,6 +235,9 @@ class MatterAdminController extends Controller
             // 管理端可选全部状态（含旁路终态），作为纠错通道
             'states' => $type->allStates(),
             'is_approved' => $matter->is_approved,
+            'review_status' => $matter->review_status->value,
+            'review_status_label' => $matter->review_status->label(),
+            'reject_reason' => $matter->reject_reason,
             'target_count' => $matter->target_count,
             'initiator' => $this->initiatorLabel($matter),
             'initiator_party_id' => $matter->initiator_party_id,

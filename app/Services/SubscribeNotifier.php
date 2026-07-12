@@ -37,7 +37,7 @@ class SubscribeNotifier
      */
     public function matterRejected(Matter $matter): void
     {
-        $reason = (string) $matter->payloadValue('reject_reason', '');
+        $reason = $matter->reject_reason;
 
         $this->notifyMatter($matter, [$matter->initiator], '未过审', $reason !== '' ? $reason : '可修改内容后重新提交');
     }

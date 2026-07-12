@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\MatterReviewStatus;
 use App\Events\MatterDealPosted;
 use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
@@ -192,7 +193,7 @@ class MatterController extends Controller
             'category' => $validated['category'] ?? '',
             // 初始状态由类型的状态机决定，不接受客户端指定
             'state' => $type->initialState(),
-            'is_approved' => false,
+            // review_status 默认 pending：业主自发的事项一律先进审核队列
             'target_count' => $validated['target_count'] ?? 0,
             'payload' => $type->payloadFrom($validated),
         ]);
@@ -219,21 +220,29 @@ class MatterController extends Controller
 
         $previousState = $matter->state;
 
-        // 保留成交公示等不在编辑表单里的 payload 字段；被驳回的事项编辑即重新提交（清掉驳回理由）
-        $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated), ['reject_reason' => '']);
+        // 保留成交公示等不在编辑表单里的 payload 字段
+        $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated));
 
         // 发起时锁定的键（如方案型开关）编辑不可改，纠错走管理端
         foreach ($type->lockedPayloadKeys() as $lockedKey) {
             $payload[$lockedKey] = $matter->payloadValue($lockedKey);
         }
 
-        $matter->update([
+        $attributes = [
             'title' => $validated['title'],
             'category' => $validated['category'] ?? $matter->category,
             'state' => $validated['state'] ?? $matter->state,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
             'payload' => $payload,
-        ]);
+        ];
+
+        // 被驳回的事项，发起人编辑保存即重新提交审核：打回待审、清掉驳回理由
+        if ($matter->review_status === MatterReviewStatus::Rejected) {
+            $attributes['review_status'] = MatterReviewStatus::Pending;
+            $attributes['reject_reason'] = '';
+        }
+
+        $matter->update($attributes);
 
         if ($matter->state !== $previousState) {
             $matter->recordActivity($resident);
