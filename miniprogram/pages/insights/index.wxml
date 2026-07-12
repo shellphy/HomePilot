@@ -2,7 +2,7 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="card">
       <view class="hero-num">{{residents}} <text class="hero-sub">位邻居已进入这个空间</text></view>
-      <view class="hero-cap">数据都做了匿名聚合，明细只有管理员能看到</view>
+      <view class="hero-cap">数据都做了匿名聚合，个人明细不对外公示</view>
     </view>
 
     <!-- 进行中的征集：大卡（进度 + 头牌数据 + 参与按钮），点卡片看完整数据 -->

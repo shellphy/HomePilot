@@ -129,7 +129,7 @@ Page({
         this.clearDirty();
         wx.showModal({
           title: '已提交',
-          content: '管理员通常会在 24 小时内完成审核，通过后就会出现在小区页里。你是这个团购的团长，可以在「我的」里随时查看和管理它。',
+          content: '通常 24 小时内完成审核，通过后就会出现在小区页里。你是这个团购的团长，可以在「我的」里随时查看和管理它。',
           showCancel: false,
           confirmText: '好的',
           success: () => wx.navigateBack(),

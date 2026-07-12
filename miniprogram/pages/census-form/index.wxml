@@ -4,7 +4,7 @@
     <block wx:if="{{needProfile}}">
       <view class="card gate">
         <view class="gate-title">参与前先完善个人资料</view>
-        <view class="gate-sub">这项征集的名单以「楼栋 + 昵称」公示，需要你先选好楼栋号并授权手机号（在「我的 · 个人资料」里随时可改，手机号仅管理员可见）。</view>
+        <view class="gate-sub">这项征集的名单以「楼栋 + 昵称」公示，需要你先选好楼栋号并授权手机号（在「我的 · 个人资料」里随时可改，手机号不会公示）。</view>
         <t-button theme="primary" block size="large" style="width: 100%" bind:tap="goProfile">去完善资料</t-button>
       </view>
     </block>
