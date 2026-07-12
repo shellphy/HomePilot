@@ -55,15 +55,13 @@ Page({
         getMe(),
       ]);
       const notices = res.data.filter((matter) => matter.type === 'notice');
-      const all = res.data.filter((matter) => matter.type !== 'notice');
+      // 征集(census)不进小区信息流：它整条归「数据」tab（进行中+往期+聚合都在那），此处不重复陈列
+      const all = res.data.filter((matter) => matter.type !== 'notice' && matter.type !== 'census');
       const doings = all.filter((matter) => !CLOSED.includes(matter.state));
       const finished = all.filter((matter) => CLOSED.includes(matter.state)).map((matter) => ({
         id: matter.id,
-        type: matter.type,
         title: matter.title,
-        note: matter.type === 'census'
-          ? `${matter.register_count} 人登记 · ${matter.state_label}`
-          : `${matter.join_count} 人 · ${matter.state_label}`,
+        note: `${matter.join_count} 人 · ${matter.state_label}`,
       }));
       // 张罗入口按身份分流：业主看 user_initiatable，已认证商家看 merchant_initiatable，
       // 其余相关方（物业等）没有发起入口（他们的参与方式是官方回应）
@@ -84,14 +82,9 @@ Page({
     });
   },
 
-  // 收尾行点进各自的落点：征集看数据公示，其余看事项详情
+  // 收尾行点进事项详情（征集已归「数据」tab，不在此列）
   goFinished(e) {
-    const { id, type } = e.currentTarget.dataset;
-    wx.navigateTo({
-      url: type === 'census'
-        ? `/pages/census-insights/index?id=${id}`
-        : `/pages/matter/index?id=${id}`,
-    });
+    wx.navigateTo({ url: `/pages/matter/index?id=${e.currentTarget.dataset.id}` });
   },
 
   goParties() {

@@ -35,7 +35,6 @@
     <view class="feed-head">大家正在张罗的事</view>
     <block wx:for="{{doings}}" wx:key="id">
       <groupbuy-card wx:if="{{item.type === 'groupbuy'}}" matter="{{item}}" />
-      <census-card wx:elif="{{item.type === 'census'}}" matter="{{item}}" />
       <matter-card wx:else matter="{{item}}" />
     </block>
     <!-- 空态：号召和行动放在同一处，别让人读完还得回头找顶部入口 -->
@@ -56,7 +55,6 @@
           wx:for="{{finished}}"
           wx:key="id"
           data-id="{{item.id}}"
-          data-type="{{item.type}}"
           bind:tap="goFinished"
         >
           <text class="drow-title">{{item.title}}</text>
