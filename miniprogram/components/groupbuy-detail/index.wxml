@@ -12,15 +12,32 @@
     <view class="meter-fill" style="width: {{percent}}%"></view>
   </view>
   <!-- 两段表态：接龙中还挂着的意向，等本人回来确认才计入成团人数 -->
-  <view wx:if="{{matter.state === 'open' && intentCount}}" class="head-intent">另有 {{intentCount}} 人登记过意向，确认参团后才计入人数</view>
-  <view wx:if="{{matter.needs_survey}}" class="head-survey">按户出方案的团购：报名后商家逐户沟通需求（如上门量房），你家的方案和报价单独谈</view>
+  <view wx:if="{{matter.state === 'open' && intentCount}}" class="head-intent"
+    >另有 {{intentCount}} 人登记过意向，确认参团后才计入人数</view
+  >
+  <view wx:if="{{matter.needs_survey}}" class="head-survey"
+    >按户出方案的团购：报名后商家逐户沟通需求（如上门量房），你家的方案和报价单独谈</view
+  >
   <view wx:if="{{matter.perk}}" class="head-perk">{{matter.perk}}</view>
 </view>
 
 <view class="card" wx:if="{{matter.pitch}}">
   <view class="kicker">发起人的话</view>
-  <view class="pitch">“<text wx:for="{{pitchSegments}}" wx:for-item="seg" wx:key="index" class="{{seg.term ? 'term-hit' : ''}}" data-term="{{seg.term}}" bind:tap="showGlossary">{{seg.text}}</text>”</view>
-  <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人' : '本团发起人'}}</view>
+  <view class="pitch"
+    >“<text
+      wx:for="{{pitchSegments}}"
+      wx:for-item="seg"
+      wx:key="index"
+      class="{{seg.term ? 'term-hit' : ''}}"
+      data-term="{{seg.term}}"
+      bind:tap="showGlossary"
+      >{{seg.text}}</text
+    >”</view
+  >
+  <view class="pitch-sign" wx:if="{{matter.initiator_name}}"
+    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人'
+    : '本团发起人'}}</view
+  >
 </view>
 
 <view class="card" wx:if="{{matter.glossary.length}}">
@@ -44,50 +61,77 @@
   <view class="term-row" wx:for="{{termRows}}" wx:key="label">
     <text class="term-label">{{item.label}}</text>
     <view class="term-value">
-      <text wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index" class="{{seg.term ? 'term-hit' : ''}}" data-term="{{seg.term}}" bind:tap="showGlossary">{{seg.text}}</text>
+      <text
+        wx:for="{{item.segments}}"
+        wx:for-item="seg"
+        wx:key="index"
+        class="{{seg.term ? 'term-hit' : ''}}"
+        data-term="{{seg.term}}"
+        bind:tap="showGlossary"
+        >{{seg.text}}</text
+      >
     </view>
   </view>
 </view>
-
-<!-- AI 快捷提问：点预设问题直接把问题连同本团购的上下文提交给 AI -->
-<ai-quick-ask wx:if="{{matter.is_approved}}" matter-id="{{matter.id}}" matter-title="{{matter.title}}" questions="{{quickQuestions}}" />
 
 <view class="card deal-card" wx:if="{{finalRows.length}}">
   <view class="kicker">成交公示 · 最终条件</view>
   <view class="term-row" wx:for="{{finalRows}}" wx:key="label">
     <text class="term-label">{{item.label}}</text>
     <view class="term-value">
-      <text wx:for="{{item.segments}}" wx:for-item="seg" wx:key="index" class="{{seg.term ? 'term-hit' : ''}}" data-term="{{seg.term}}" bind:tap="showGlossary">{{seg.text}}</text>
+      <text
+        wx:for="{{item.segments}}"
+        wx:for-item="seg"
+        wx:key="index"
+        class="{{seg.term ? 'term-hit' : ''}}"
+        data-term="{{seg.term}}"
+        bind:tap="showGlossary"
+        >{{seg.text}}</text
+      >
     </view>
   </view>
   <view class="deal-note" wx:if="{{matter.final_note}}">{{matter.final_note}}</view>
 </view>
 
 <!-- 驳回是「需要你处理」的负面结果，用红系；排队等待保持橙色中性 -->
-<view class="card pending-tip {{matter.review_status === 'rejected' ? 'pending-tip-reject' : ''}}" wx:if="{{matter.review_status !== 'approved'}}">
-  <block wx:if="{{matter.review_status === 'rejected'}}">已被驳回：{{matter.reject_reason}}（修改后保存即重新提交审核）</block>
+<view
+  class="card pending-tip {{matter.review_status === 'rejected' ? 'pending-tip-reject' : ''}}"
+  wx:if="{{matter.review_status !== 'approved'}}"
+>
+  <block wx:if="{{matter.review_status === 'rejected'}}"
+    >已被驳回：{{matter.reject_reason}}（修改后保存即重新提交审核）</block
+  >
   <block wx:else>待审核，通过后就会出现在小区页里（只有你自己能看到这个页面）</block>
 </view>
 
 <!-- 联系互通阶段（标品团成团后；方案型团从谈判中开始）：参团者见团长 -->
 <view class="card deal-card" wx:if="{{initiatorContact}}">
-  <view class="kicker">联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '沟通需求、谈方案' : '建群与对接'}}</view>
+  <view class="kicker"
+    >联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '沟通需求、谈方案' : '建群与对接'}}</view
+  >
   <view class="term-row">
     <text class="term-label">{{initiatorContact.name}}</text>
-    <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="onPhoneTap">{{initiatorContact.phone}} 拨打/复制</text>
+    <text class="term-value" data-phone="{{initiatorContact.phone}}" bind:tap="onPhoneTap"
+      >{{initiatorContact.phone}} 拨打/复制</text
+    >
   </view>
 </view>
 
 <!-- 互通阶段没共享联系方式的参团者：解释互通是双向对等的，给补开入口 -->
 <view class="card deal-card" wx:if="{{matter.contacts_open && joined && !isInitiator && !myShareContact}}">
-  <view class="kicker">联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '沟通需求、谈方案' : '建群与对接'}}</view>
+  <view class="kicker"
+    >联系团长 · {{matter.needs_survey && matter.state !== 'done' ? '沟通需求、谈方案' : '建群与对接'}}</view
+  >
   <view class="share-note">你报名时没有开启联系方式共享，你和团长现在互相看不到对方电话。</view>
   <t-button theme="light" size="medium" block style="width: 100%" bind:tap="enableShare">开启共享，与团长互通</t-button>
 </view>
 
 <!-- 联系互通阶段：团长见同意共享的参团者 -->
 <view class="card deal-card" wx:if="{{isInitiator && contacts.length}}">
-  <view class="kicker">{{matter.needs_survey && matter.state !== 'done' ? '报名联系名单（' + contacts.length + '）· 仅你可见，用于逐户沟通方案' : '参团联系名单（' + contacts.length + '）· 仅你可见，用于建群对接'}}</view>
+  <view class="kicker"
+    >{{matter.needs_survey && matter.state !== 'done' ? '报名联系名单（' + contacts.length + '）·
+    仅你可见，用于逐户沟通方案' : '参团联系名单（' + contacts.length + '）· 仅你可见，用于建群对接'}}</view
+  >
   <view class="term-row" wx:for="{{contacts}}" wx:key="phone">
     <text class="term-label">{{item.name}}</text>
     <text class="term-value" data-phone="{{item.phone}}" bind:tap="onPhoneTap">{{item.phone}} 拨打/复制</text>
@@ -98,15 +142,51 @@
   <view class="kicker">发起人操作（这个团购由你负责）</view>
   <view class="leader-btns">
     <!-- 主操作单独占一整行做视觉锚点：成团后是成交公示，其余时候是发进度 -->
-    <t-button wx:if="{{matter.state === 'done'}}" class="leader-btn-primary" theme="primary" size="medium" block style="width: 100%" bind:tap="goDeal">成交公示</t-button>
-    <t-button wx:else class="leader-btn-primary" theme="primary" size="medium" block style="width: 100%" bind:tap="goProgress">发布进度</t-button>
+    <t-button
+      wx:if="{{matter.state === 'done'}}"
+      class="leader-btn-primary"
+      theme="primary"
+      size="medium"
+      block
+      style="width: 100%"
+      bind:tap="goDeal"
+      >成交公示</t-button
+    >
+    <t-button
+      wx:else
+      class="leader-btn-primary"
+      theme="primary"
+      size="medium"
+      block
+      style="width: 100%"
+      bind:tap="goProgress"
+      >发布进度</t-button
+    >
     <!-- 次操作等宽两列对齐，落单的自动撑满整行，不再高低错落 -->
     <view class="leader-btns-sub">
-      <t-button wx:if="{{matter.state === 'done'}}" class="leader-btn" theme="light" size="medium" block bind:tap="goProgress">发布进度</t-button>
-      <t-button wx:if="{{nextState}}" class="leader-btn" theme="light" size="medium" block bind:tap="flipState">推进到「{{nextState.label}}」</t-button>
+      <t-button
+        wx:if="{{matter.state === 'done'}}"
+        class="leader-btn"
+        theme="light"
+        size="medium"
+        block
+        bind:tap="goProgress"
+        >发布进度</t-button
+      >
+      <t-button wx:if="{{nextState}}" class="leader-btn" theme="light" size="medium" block bind:tap="flipState"
+        >推进到「{{nextState.label}}」</t-button
+      >
       <t-button class="leader-btn" theme="light" size="medium" block bind:tap="goEdit">编辑团购</t-button>
       <!-- 收场出口：人数不够/没谈成时给个体面台阶，别让失败的团挂成僵尸 -->
-      <t-button wx:if="{{nextState && matter.abort_state}}" class="leader-btn abort-btn" theme="light" size="medium" block bind:tap="abortMatter">按「{{matter.abort_state.label}}」收场</t-button>
+      <t-button
+        wx:if="{{nextState && matter.abort_state}}"
+        class="leader-btn abort-btn"
+        theme="light"
+        size="medium"
+        block
+        bind:tap="abortMatter"
+        >按「{{matter.abort_state.label}}」收场</t-button
+      >
     </view>
   </view>
 </view>
@@ -157,7 +237,14 @@
         bind:input="onReviewInput"
         maxlength="500"
       />
-      <t-button theme="light" size="medium" block style="width: 100%" loading="{{submittingReview}}" bind:tap="submitReview">
+      <t-button
+        theme="light"
+        size="medium"
+        block
+        style="width: 100%"
+        loading="{{submittingReview}}"
+        bind:tap="submitReview"
+      >
         {{myReview ? '更新评价' : '发布评价'}}
       </t-button>
     </view>
@@ -179,12 +266,26 @@
     <view class="cta-share">
       <text class="cta-share-text">条件谈定了。你登记过意向，确认参团后才计入成团人数</text>
     </view>
-    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="confirmJoin">确认参团</t-button>
-    <t-button theme="default" variant="outline" block size="medium" class="cta-secondary" style="width: 100%" bind:tap="toggleJoin">这次不参加了</t-button>
+    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="confirmJoin"
+      >确认参团</t-button
+    >
+    <t-button
+      theme="default"
+      variant="outline"
+      block
+      size="medium"
+      class="cta-secondary"
+      style="width: 100%"
+      bind:tap="toggleJoin"
+      >这次不参加了</t-button
+    >
   </block>
   <block wx:else>
     <view class="cta-share" wx:if="{{!joined}}">
-      <text class="cta-share-text">{{matter.needs_survey && intentPhase ? '同意团长/商家联系我沟通需求、出方案（手机号仅双方可见）' : '成团后与团长互通手机号（仅双方可见）'}}</text>
+      <text class="cta-share-text"
+        >{{matter.needs_survey && intentPhase ? '同意团长/商家联系我沟通需求、出方案（手机号仅双方可见）' :
+        '成团后与团长互通手机号（仅双方可见）'}}</text
+      >
       <switch checked="{{shareContact}}" bind:change="onShareContactChange" color="#06ae56" />
     </view>
     <!-- 已在名单里时主动作变成「取消 xx」：中性描边样式说明这是次要动作，点击有确认弹窗兜底。
@@ -197,7 +298,9 @@
       style="width: 100%"
       loading="{{submitting}}"
       bind:tap="toggleJoin"
-    >{{joined ? (myJoinStage === 'intent' ? '取消登记' : '取消参团') : (intentPhase ? (matter.needs_survey ? '我感兴趣，等我的方案' : '我感兴趣，登记意向') : '确认参团')}}</t-button>
+      >{{joined ? (myJoinStage === 'intent' ? '取消登记' : '取消参团') : (intentPhase ? (matter.needs_survey ?
+      '我感兴趣，等我的方案' : '我感兴趣，登记意向') : '确认参团')}}</t-button
+    >
   </block>
 </view>
 
@@ -221,6 +324,8 @@
       <text class="gl-line-text">{{activeTerm.caution}}</text>
     </view>
     <view class="term-pop-source">来自本团购的「买前必懂」，由发起人整理</view>
-    <t-button theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi">问 AI：我家该怎么选</t-button>
+    <t-button theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi"
+      >问 AI：我家该怎么选</t-button
+    >
   </view>
 </t-popup>

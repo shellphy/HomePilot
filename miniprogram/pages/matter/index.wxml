@@ -42,6 +42,15 @@
     </block>
   </page-status>
 
+  <!-- AI 答疑悬浮入口：固定在右下角，随吸底操作条高度上浮避让（仅已过审的团购/活动） -->
+  <ai-quick-ask
+    wx:if="{{matter && matter.is_approved && (matter.type === 'groupbuy' || matter.type === 'activity')}}"
+    matter-id="{{matter.id}}"
+    matter-title="{{matter.title}}"
+    questions="{{quickQuestions}}"
+    bottom-offset="{{dockReserve}}"
+  />
+
   <!-- AI 答疑半屏面板：page-container 原生支持返回手势关闭，业主不离开正在看的事项 -->
   <page-container
     show="{{aiChatShow}}"

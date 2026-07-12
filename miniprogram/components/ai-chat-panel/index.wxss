@@ -59,6 +59,12 @@
 .bubble-typing {
   color: var(--text-muted);
 }
+/* markdown 气泡：rich-text 继承气泡字号行高，块级元素间距由内联 style 控制 */
+.bubble-md {
+  display: inline;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
 /* 打字机光标：跟在流式文字末尾闪烁 */
 .type-caret {
   display: inline-block;

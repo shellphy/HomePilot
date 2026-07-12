@@ -4,6 +4,7 @@
 // 会话与消息缓存在本地（服务端有完整历史，缓存只为回来能接着看）；
 // AI 解释概念不代表承诺，涉及商家承诺的引导去向团长/商家提问。
 const matters = require('../../utils/api/matters');
+const { mdToHtml } = require('../../utils/markdown');
 
 const CACHE_LIMIT = 40; // 本地只留最近几十条，够回看即可
 const TYPE_INTERVAL = 24; // 打字机每帧间隔（ms）
@@ -39,7 +40,7 @@ Component({
       this.setData({
         matterId,
         matterTitle: matterTitle || '',
-        messages: cache.messages || [],
+        messages: this.withRenderedNodes(cache.messages || []),
         presets: questions || [],
         input: question || '',
         busy: false,
@@ -64,6 +65,13 @@ Component({
       return `ai-chat:${matterId}`;
     },
 
+    // 给 AI 气泡预渲染 markdown 节点（rich-text 用）；用户气泡保持纯文本
+    withRenderedNodes(messages) {
+      return messages.map((message) =>
+        message.role === 'ai' ? { ...message, nodes: mdToHtml(message.text) } : message,
+      );
+    },
+
     onInput(event) {
       this.setData({ input: event.detail.value });
     },
@@ -82,7 +90,7 @@ Component({
       if (!question || this.data.busy) return;
 
       // 追加提问气泡与一个待填充的 AI 气泡（先空着，收到首个 delta 前显示「正在想」）
-      const messages = [...this.data.messages, { role: 'user', text: question }, { role: 'ai', text: '' }];
+      const messages = [...this.data.messages, { role: 'user', text: question }, { role: 'ai', text: '', nodes: '' }];
       const streamingIndex = messages.length - 1;
       this.streamingIndex = streamingIndex;
       this.fullText = '';
@@ -141,8 +149,10 @@ Component({
         // 落后越多每帧显示越多，避免网络突发一大段时打字机拖太久
         const step = Math.max(2, Math.ceil(backlog / 16));
         this.shownLen = Math.min(this.fullText.length, this.shownLen + step);
+        const shown = this.fullText.slice(0, this.shownLen);
         this.setData({
-          [`messages[${this.streamingIndex}].text`]: this.fullText.slice(0, this.shownLen),
+          [`messages[${this.streamingIndex}].text`]: shown,
+          [`messages[${this.streamingIndex}].nodes`]: mdToHtml(shown),
         });
         this.scrollToBottom();
       } else if (!this.receiving) {
@@ -202,7 +212,8 @@ Component({
     persist(messages) {
       wx.setStorageSync(this.cacheKey(this.data.matterId), {
         conversationId: this.conversationId,
-        messages: messages.slice(-CACHE_LIMIT),
+        // 只存 role/text，nodes 是从 text 渲染出来的派生值，回来时重新渲染即可
+        messages: messages.slice(-CACHE_LIMIT).map(({ role, text }) => ({ role, text })),
       });
     },
 

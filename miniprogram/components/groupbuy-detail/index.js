@@ -16,21 +16,21 @@ Component({
     joined: Boolean,
     isInitiator: Boolean,
     myReview: Object,
-    contacts: Array,          // 团长视角：同意共享的参团者联系方式（成团后）
+    contacts: Array, // 团长视角：同意共享的参团者联系方式（成团后）
     initiatorContact: Object, // 参团者视角：团长联系方式（成团后且自己同意过共享）
-    isParty: Boolean,         // 相关方身份不参与接龙，报名区改为解释 + 切回业主入口
-    partyLabel: String,       // 当前相关方身份的显示名（解释文案用）
-    myShareContact: Boolean,  // 我报名时的共享意愿：成团后没共享的看不到团长电话，给补开入口
-    myJoinStage: String,      // 我的承诺档位（intent=登记意向 / confirmed=确认参团）
+    isParty: Boolean, // 相关方身份不参与接龙，报名区改为解释 + 切回业主入口
+    partyLabel: String, // 当前相关方身份的显示名（解释文案用）
+    myShareContact: Boolean, // 我报名时的共享意愿：成团后没共享的看不到团长电话，给补开入口
+    myJoinStage: String, // 我的承诺档位（intent=登记意向 / confirmed=确认参团）
   },
 
   data: {
     pillClass: '',
     percent: 0,
-    nextState: null,   // 状态机的下一站（终态时为 null）
+    nextState: null, // 状态机的下一站（终态时为 null）
     nextIsFinal: false, // 下一站是否终态：终态不可回退，确认弹窗要说清后果
     intentPhase: false, // 意向阶段（意向征集/谈判中）：报名只是登记兴趣，量词用「感兴趣」
-    intentCount: 0,     // 登记过意向、还没确认参团的人数（接龙中提醒团长）
+    intentCount: 0, // 登记过意向、还没确认参团的人数（接龙中提醒团长）
     needConfirm: false, // 我登记过意向且已进入接龙中：给「确认参团」入口
     reviews: [],
     reviewRating: 0,
@@ -62,25 +62,29 @@ Component({
         headNoun = '报名过';
       }
       const glossaryTerms = (matter.glossary || []).map((entry) => entry.term);
-      // AI 快捷提问的预设：贴着「刚看完条款在犹豫」的那一刻出
-      const quickQuestions = matter.needs_survey
-        ? ['我家的情况该怎么选配置？', '商家来沟通时该问什么？', '现在登记还是再等等？']
-        : ['条款里哪条最影响总价？', '我家的情况适合参加吗？', '现在参加还是再等等？'];
-      this.setData({
-        quickQuestions,
-        pillClass: pillClass(matter.state),
-        percent: joinPercent(matter),
-        pitchSegments: splitByTerms(matter.pitch, glossaryTerms),
-        termRows: (matter.terms || []).map((row) => ({ label: row.label, segments: splitByTerms(row.value, glossaryTerms) })),
-        finalRows: (matter.final_terms || []).map((row) => ({ label: row.label, segments: splitByTerms(row.value, glossaryTerms) })),
-        nextState,
-        nextIsFinal: !!nextState && stateIndex + 2 === states.length,
-        intentPhase: matter.state === 'seeking' || matter.state === 'negotiating',
-        intentCount: Math.max(0, (matter.join_count || 0) - (matter.confirmed_count || 0)),
-        headCount: confirmedPhase && matter.confirmed_count != null ? matter.confirmed_count : matter.join_count,
-        headNoun,
-        reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
-      }, () => this.measureDock());
+      this.setData(
+        {
+          pillClass: pillClass(matter.state),
+          percent: joinPercent(matter),
+          pitchSegments: splitByTerms(matter.pitch, glossaryTerms),
+          termRows: (matter.terms || []).map((row) => ({
+            label: row.label,
+            segments: splitByTerms(row.value, glossaryTerms),
+          })),
+          finalRows: (matter.final_terms || []).map((row) => ({
+            label: row.label,
+            segments: splitByTerms(row.value, glossaryTerms),
+          })),
+          nextState,
+          nextIsFinal: !!nextState && stateIndex + 2 === states.length,
+          intentPhase: matter.state === 'seeking' || matter.state === 'negotiating',
+          intentCount: Math.max(0, (matter.join_count || 0) - (matter.confirmed_count || 0)),
+          headCount: confirmedPhase && matter.confirmed_count != null ? matter.confirmed_count : matter.join_count,
+          headNoun,
+          reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
+        },
+        () => this.measureDock(),
+      );
     },
     'matter.state, joined, myJoinStage': function (state, joined, myJoinStage) {
       this.setData({ needConfirm: !!joined && myJoinStage === 'intent' && state === 'open' }, () => this.measureDock());
@@ -359,7 +363,8 @@ Component({
 
       wx.showModal({
         title: `按「${matter.abort_state.label}」收场？`,
-        content: '这个团购将关闭报名、封存名单，不开放评价和联系方式互通，且不能再改回来（弄错了需要联系管理员）。没谈成不丢人，给邻居一个交代比挂着强。',
+        content:
+          '这个团购将关闭报名、封存名单，不开放评价和联系方式互通，且不能再改回来（弄错了需要联系管理员）。没谈成不丢人，给邻居一个交代比挂着强。',
         confirmText: '确认收场',
         cancelText: '再想想',
         confirmColor: '#e34d59',

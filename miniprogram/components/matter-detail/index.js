@@ -14,19 +14,19 @@ Component({
     matter: Object,
     joined: Boolean,
     isInitiator: Boolean,
-    myReview: Object,    // 我的评价（结束后可修改）
+    myReview: Object, // 我的评价（结束后可修改）
     canRespond: Boolean, // 被认证的治理类相关方成员：可发官方回应
-    isParty: Boolean,    // 相关方身份不参与接龙，参与区改为解释 + 切回业主入口
-    partyLabel: String,  // 当前相关方身份的显示名（解释文案用）
-    contacts: Array,          // 发起人视角：同意共享的参与者联系方式（互通阶段，如活动报名中）
+    isParty: Boolean, // 相关方身份不参与接龙，参与区改为解释 + 切回业主入口
+    partyLabel: String, // 当前相关方身份的显示名（解释文案用）
+    contacts: Array, // 发起人视角：同意共享的参与者联系方式（互通阶段，如活动报名中）
     initiatorContact: Object, // 参与者视角：发起人联系方式（互通阶段且自己同意过共享）
-    myShareContact: Boolean,  // 我加入时的共享意愿：没共享的看不到发起人电话，给补开入口
+    myShareContact: Boolean, // 我加入时的共享意愿：没共享的看不到发起人电话，给补开入口
   },
 
   data: {
     pillClass: '',
     meta: {},
-    nextState: null,   // 状态机的下一站（终态时为 null）
+    nextState: null, // 状态机的下一站（终态时为 null）
     nextIsFinal: false, // 下一站是否终态：终态不可回退，确认弹窗要说清后果
     submitting: false,
     reviews: [],
@@ -44,14 +44,21 @@ Component({
       const states = stateOptions(matter.states);
       const stateIndex = states.findIndex((state) => state.value === matter.state);
       const nextState = stateIndex >= 0 ? states[stateIndex + 1] || null : null;
-      this.setData({
-        quickQuestions: ['这个活动的安排帮我讲讲？', '参加前要准备什么？'],
-        pillClass: pillClass(matter.state),
-        meta: TYPE_META[matter.type] || { joinCta: '参与', joinedCta: '取消参与', foot: '人已参与', roster: '参与名单' },
-        nextState,
-        nextIsFinal: !!nextState && stateIndex + 2 === states.length,
-        reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
-      }, () => this.measureDock());
+      this.setData(
+        {
+          pillClass: pillClass(matter.state),
+          meta: TYPE_META[matter.type] || {
+            joinCta: '参与',
+            joinedCta: '取消参与',
+            foot: '人已参与',
+            roster: '参与名单',
+          },
+          nextState,
+          nextIsFinal: !!nextState && stateIndex + 2 === states.length,
+          reviews: (matter.reviews || []).map((review) => ({ ...review, stars: starsOf(review.rating) })),
+        },
+        () => this.measureDock(),
+      );
     },
     myReview(myReview) {
       this.setData({
