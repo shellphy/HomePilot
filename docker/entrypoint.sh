@@ -1,8 +1,8 @@
 #!/bin/sh
 set -e
 
-# 仅在启动 php-fpm 服务时做初始化；docker compose run 执行的一次性命令直接放行
-if [ "$1" != "php-fpm" ]; then
+# 仅在启动 FrankenPHP 服务时做初始化；docker compose run 执行的一次性命令直接放行
+if [ "$1" != "frankenphp" ]; then
     exec "$@"
 fi
 
@@ -13,11 +13,10 @@ if [ -z "$APP_KEY" ]; then
     exit 1
 fi
 
-# SQLite 数据库文件在具名卷里，首次启动时创建并交给 php-fpm 工作进程读写
+# SQLite 库文件在具名卷里，首次启动创建（卷目录已是 www-data 属主）
 if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ] && [ -n "$DB_DATABASE" ]; then
     mkdir -p "$(dirname "$DB_DATABASE")"
     [ -f "$DB_DATABASE" ] || touch "$DB_DATABASE"
-    chown -R www-data:www-data "$(dirname "$DB_DATABASE")"
 fi
 
 php artisan migrate --force

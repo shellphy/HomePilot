@@ -1,0 +1,41 @@
+{
+	# 自动 HTTPS 想收证书到期通知就填邮箱：
+	# email you@example.com
+	log {
+		output stderr
+		format console
+	}
+	# PHP 调优内联在此，CLI 用内置默认即可，无需 php.ini 文件
+	frankenphp {
+		php_ini output_buffering Off
+		php_ini upload_max_filesize 15M
+		php_ini post_max_size 20M
+		php_ini memory_limit 256M
+		# 生产硬化（不用主 php.ini，这几项自己兜）
+		php_ini display_errors Off
+		php_ini display_startup_errors Off
+		php_ini log_errors On
+		php_ini expose_php Off
+		# 代码打包进镜像、运行期不变，关掉 opcache 时间戳校验
+		php_ini opcache.validate_timestamps 0
+		php_ini opcache.memory_consumption 128
+		php_ini opcache.max_accelerated_files 20000
+	}
+}
+
+# SERVER_NAME 即 HTTPS 开关：`:80` 纯 HTTP；域名则自动签发 HTTPS + 80→443 跳转
+{$SERVER_NAME::80} {
+	root * /var/www/html/public
+
+	# 不开压缩：SSE 分块 + gzip 在小程序端解析不可靠
+	# 用户上传直接从共享卷提供，免 storage:link
+	handle_path /storage/* {
+		root * /var/www/html/storage/app/public
+		file_server
+	}
+
+	@build path /build/*
+	header @build Cache-Control "public, max-age=31536000, immutable"
+
+	php_server
+}
