@@ -32,11 +32,15 @@ Page({
 
   // 答题现场每道题的「问 AI」：把题面直接写进问题，AI 顺着这道题讲该怎么选
   askQuestion(event) {
-    const text = event.currentTarget.dataset.text;
+    const { qkey, text } = event.currentTarget.dataset;
+    const currentAnswer = this.data.answers[qkey];
+    const selected = currentAnswer === undefined
+      ? ''
+      : `我当前选择的是「${(Array.isArray(currentAnswer) ? currentAnswer : [currentAnswer]).join('、')}」。`;
     this.openAiChat({
       matterId: this.data.id,
       matterTitle: this.data.title,
-      question: `「${text}」这道题是什么意思？我家该怎么选？`,
+      question: `我正在回答「${text}」。${selected}请结合我家情况告诉我怎么选；信息不足时，只问我一个最关键的问题。`,
     });
   },
 

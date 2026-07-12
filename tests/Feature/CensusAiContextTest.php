@@ -19,11 +19,13 @@ function censusWithAnswers(): array
             'modules' => [[
                 'key' => 'm1',
                 'title' => '柜体',
+                'intro' => '先确定柜体材料，再比较价格。',
                 'questions' => [
                     [
                         'key' => 'q1',
                         'text' => '柜体倾向哪种板材？',
                         'type' => 'single',
+                        'note' => '板材影响环保、防潮和预算。',
                         'options' => ['颗粒板', '多层实木'],
                         'option_notes' => ['便宜，环保看等级', '贵约三成，更防潮'],
                     ],
@@ -63,7 +65,10 @@ test('census ai context carries purpose, questions, option notes, my answer and 
 
     expect($instructions)
         ->toContain('开团前先摸清大家想装什么') // 发起目的
+        ->toContain('模块：柜体')
+        ->toContain('先确定柜体材料，再比较价格。')
         ->toContain('柜体倾向哪种板材？')       // 题面
+        ->toContain('板材影响环保、防潮和预算。')
         ->toContain('多层实木｜贵约三成，更防潮') // 选项 + 解释
         ->toContain('柜体倾向哪种板材？→多层实木') // 提问业主自己的选择（换算成题面文字）
         ->toContain('希望环保达标')               // 我填空题的答案
@@ -80,6 +85,32 @@ test('census ai context omits my registration for a resident who has not answere
     expect($instructions)
         ->toContain('柜体倾向哪种板材？')
         ->not->toContain('提问业主的登记');
+});
+
+test('census ai context includes every question without truncation', function () {
+    $questions = collect(range(1, 28))->map(fn (int $number): array => [
+        'key' => "q{$number}",
+        'text' => "第 {$number} 道硬装题",
+        'type' => 'single',
+        'note' => "第 {$number} 道说明",
+        'options' => ['需要', '不需要'],
+    ])->all();
+
+    $census = Matter::factory()->create([
+        'type' => 'census',
+        'payload' => ['modules' => [[
+            'key' => 'hard_finish',
+            'title' => '硬装',
+            'questions' => $questions,
+        ]]],
+    ]);
+
+    $instructions = (string) (new MatterExplainer($census))->instructions();
+
+    expect($instructions)
+        ->toContain('第 1 道硬装题')
+        ->toContain('第 28 道硬装题')
+        ->toContain('第 28 道说明');
 });
 
 test('groupbuy ai context is unaffected by the census branch', function () {
