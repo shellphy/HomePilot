@@ -32,12 +32,17 @@ class CensusType extends MatterType
     {
         return [
             'pitch' => ['nullable', 'string', 'max:1000'],
+            // 发起目的：自由文本，发起者写为什么发这次征集，给参与者看；不枚举、不驱动分支
+            'purpose' => ['nullable', 'string', 'max:1000'],
         ];
     }
 
     public function payloadFrom(array $validated): array
     {
-        return ['pitch' => $validated['pitch'] ?? ''];
+        return [
+            'pitch' => $validated['pitch'] ?? '',
+            'purpose' => $validated['purpose'] ?? '',
+        ];
     }
 
     /** 征集由管理端发起。 */

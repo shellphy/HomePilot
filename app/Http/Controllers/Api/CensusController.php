@@ -32,6 +32,7 @@ class CensusController extends Controller
             'title' => $matter->title,
             'state' => $matter->state,
             'pitch' => $matter->payloadValue('pitch', ''),
+            'purpose' => $matter->payloadValue('purpose', ''),
             'modules' => $matter->payloadValue('modules', []),
             'collects_contact' => (bool) $matter->payloadValue('collects_contact', false),
             'answers' => $stance?->payload['answers'] ?? (object) [],

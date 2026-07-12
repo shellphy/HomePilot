@@ -77,6 +77,12 @@
       <textarea class="fin farea" auto-height maxlength="1000" value="{{pitch}}" data-field="pitch" bind:input="onInput" />
     </view>
 
+    <!-- 征集专属：发起目的（给参与者看，为什么发这次征集） -->
+    <view class="card" wx:if="{{type === 'census'}}">
+      <view class="q-title">发起目的<text class="q-note">给参与者看，为什么发这次征集</text></view>
+      <textarea class="fin farea" auto-height maxlength="1000" value="{{purpose}}" data-field="purpose" bind:input="onInput" />
+    </view>
+
     <!-- 团购专属条目列表 -->
     <block wx:if="{{type === 'groupbuy'}}">
       <view class="card">

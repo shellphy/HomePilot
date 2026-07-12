@@ -21,6 +21,7 @@ Page({
     // 按类型使用的 payload 字段
     body: '',
     pitch: '',
+    purpose: '', // 仅征集：发起目的自由文本
     perk: '',
     needsSurvey: false, // 团购：按户出方案（业主端发起时锁定，管理端作为纠错通道可改）
     collectsContact: false,
@@ -61,6 +62,7 @@ Page({
         targetCount: matter.target_count ? String(matter.target_count) : '',
         body: payload.body || '',
         pitch: payload.pitch || '',
+        purpose: payload.purpose || '',
         perk: payload.perk || '',
         needsSurvey: !!payload.needs_survey,
         collectsContact: !!payload.collects_contact,
@@ -199,7 +201,10 @@ Page({
       payload.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
       payload.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
     }
-    if (data.type === 'census') payload.collects_contact = data.collectsContact;
+    if (data.type === 'census') {
+      payload.collects_contact = data.collectsContact;
+      payload.purpose = data.purpose.trim();
+    }
 
     const body = {
       title: data.title.trim(),

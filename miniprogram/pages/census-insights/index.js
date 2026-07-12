@@ -74,6 +74,7 @@ Page({
           title: census.title,
           state: census.state,
           pitch: census.pitch,
+          purpose: census.purpose || '',
           initiatorParty: census.initiator_party || null,
           registered: census.registered_count,
           myAnswered: Object.keys(census.answers || {}).length,

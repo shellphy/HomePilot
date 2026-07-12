@@ -5,6 +5,7 @@
         <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
         <!-- 署名调研三不变量之二：亮明发起方、结果对全小区公开（第三个是管理员审核） -->
         <view class="hero-sign" wx:if="{{block.initiatorParty}}">由 {{block.initiatorParty.label}} · {{block.initiatorParty.name}} 发起，聚合结果对全小区公开</view>
+        <view class="hero-cap" wx:if="{{block.purpose}}">{{block.purpose}}</view>
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
       </view>
 
