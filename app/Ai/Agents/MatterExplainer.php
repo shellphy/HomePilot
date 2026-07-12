@@ -2,6 +2,7 @@
 
 namespace App\Ai\Agents;
 
+use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
@@ -50,7 +51,7 @@ PROMPT.$this->matterContext();
     private function matterContext(): string
     {
         $settings = app(CommunitySettings::class);
-        $type = $this->matter->typeDef();
+        $type = MatterTypeRegistry::for($this->matter->type);
 
         $lines = [
             '',

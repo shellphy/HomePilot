@@ -61,8 +61,8 @@ class GroupbuyType extends MatterType
             'glossary' => ['nullable', 'array'],
             'glossary.*.term' => ['required', 'string', 'max:30'],
             'glossary.*.explain' => ['required', 'string', 'max:300'],
-            'glossary.*.judge' => ['sometimes', 'nullable', 'string', 'max:300'],
-            'glossary.*.caution' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'glossary.*.judge' => ['present', 'nullable', 'string', 'max:300'],
+            'glossary.*.caution' => ['present', 'nullable', 'string', 'max:300'],
         ];
     }
 

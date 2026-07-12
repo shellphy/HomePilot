@@ -6,6 +6,7 @@ use App\Events\MatterReviewed;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReviewResource;
+use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
@@ -21,7 +22,7 @@ class ReviewController extends Controller
     public function store(Request $request, Matter $matter): JsonResponse
     {
         $resident = $this->resident($request);
-        $type = $matter->typeDef();
+        $type = MatterTypeRegistry::for($matter->type);
 
         abort_unless($type->reviewOpen($matter), 422, '还没到评价阶段');
         abort_unless($type->isParticipant($matter, $resident), 403, '只有参与的业主可以评价');

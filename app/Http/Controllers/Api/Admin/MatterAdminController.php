@@ -7,6 +7,7 @@ use App\Events\MatterApproved;
 use App\Events\MatterRejected;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
+use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
@@ -130,7 +131,7 @@ class MatterAdminController extends Controller
      */
     private function present(Matter $matter): array
     {
-        $type = $matter->typeDef();
+        $type = MatterTypeRegistry::for($matter->type);
 
         return [
             'id' => $matter->id,

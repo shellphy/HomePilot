@@ -59,7 +59,7 @@ Page({
     return this.runLoad(async () => {
       const [me, res] = await Promise.all([getMe(), matters.getMatter(this.data.id)]);
       const matter = res.data;
-      const payload = matter.payload || {}; // 原始 payload 仅管理员可见（含 modules/purpose 等）
+      const payload = matter.payload || {};
       this.setData({
         isAdmin: !!me.is_admin,
         type: matter.type,
@@ -78,7 +78,6 @@ Page({
         needsSurvey: !!matter.needs_survey,
         terms: matter.terms || [],
         glossary: matter.glossary || [],
-        // 征集的发起目的/联系方式开关与问卷模块目前只在管理员的 payload 里下发
         purpose: payload.purpose || '',
         collectsContact: !!payload.collects_contact,
         moduleCount: (payload.modules || []).length,

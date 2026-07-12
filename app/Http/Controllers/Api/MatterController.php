@@ -39,8 +39,8 @@ class MatterController extends Controller
                 ->where('resident_id', $resident->id)])
             ->latest()
             ->get()
-            ->filter(fn (Matter $matter): bool => $matter->typeDef()->visibleInList($matter))
-            ->sortBy(fn (Matter $matter): int => $matter->typeDef()->sortWeight($matter))
+            ->filter(fn (Matter $matter): bool => MatterTypeRegistry::for($matter->type)->visibleInList($matter))
+            ->sortBy(fn (Matter $matter): int => MatterTypeRegistry::for($matter->type)->sortWeight($matter))
             ->values();
 
         return MatterResource::collection($matters);
@@ -119,7 +119,7 @@ class MatterController extends Controller
      */
     private function contactExchange(Matter $matter, Resident $resident, ?Stance $myJoin): array
     {
-        $type = $matter->typeDef();
+        $type = MatterTypeRegistry::for($matter->type);
 
         if (! $type->contactsOpen($matter)) {
             return ['contacts' => [], 'initiator_contact' => null];
@@ -201,9 +201,7 @@ class MatterController extends Controller
                 : $party?->id,
             'title' => $validated['title'],
             'category' => $validated['category'] ?? '',
-            // 初始状态由类型的状态机决定，不接受客户端指定
             'state' => $type->initialState(),
-            // review_status 默认 pending：业主自发的事项一律先进审核队列
             'target_count' => $validated['target_count'] ?? 0,
             'payload' => $type->payloadFrom($validated),
         ]);
@@ -221,14 +219,13 @@ class MatterController extends Controller
         $isAdmin = $resident->is_admin;
         abort_unless($isAdmin || $matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
 
-        $type = $matter->typeDef();
+        $type = MatterTypeRegistry::for($matter->type);
         $rules = array_merge($this->rulesFor($matter->type), [
             'state' => ['sometimes', Rule::in(array_keys($type->allStates()))],
         ]);
 
         if ($isAdmin) {
             $rules['initiator_party_id'] = ['sometimes', 'nullable', Rule::exists('parties', 'id')];
-            // 管理端「公示到小区页」开关：勾上→通过公示，撤下→回待审核（审核态仍以 review_status 落地）
             $rules['is_approved'] = ['sometimes', 'boolean'];
         }
 
@@ -241,7 +238,6 @@ class MatterController extends Controller
 
         $previousState = $matter->state;
 
-        // 保留成交公示等不在编辑表单里的 payload 字段
         $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated));
 
         // 发起时锁定的键（如方案型开关）发起人编辑不可改，纠错走管理端
@@ -260,7 +256,6 @@ class MatterController extends Controller
         ];
 
         if ($isAdmin) {
-            // 显式传 null 表示去署名，键缺失才保留原值
             $updateData['initiator_party_id'] = array_key_exists('initiator_party_id', $validated)
                 ? $validated['initiator_party_id']
                 : $matter->initiator_party_id;
@@ -314,7 +309,7 @@ class MatterController extends Controller
         abort_unless($matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
 
         $validated = $request->validate([
-            'state' => ['required', Rule::in(array_keys($matter->typeDef()->allStates()))],
+            'state' => ['required', Rule::in(array_keys(MatterTypeRegistry::for($matter->type)->allStates()))],
         ]);
 
         if ($validated['state'] !== $matter->state) {
@@ -371,7 +366,7 @@ class MatterController extends Controller
      */
     private function guardTransition(Matter $matter, string $to): void
     {
-        $type = $matter->typeDef();
+        $type = MatterTypeRegistry::for($matter->type);
 
         abort_if(
             $type->isFinalState($matter->state),

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Events\MatterJoined;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
+use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
@@ -29,7 +30,7 @@ class JoinController extends Controller
         $request->validate(['share_contact' => ['sometimes', 'boolean']]);
         $shareContact = $request->boolean('share_contact', true);
 
-        $type = $matter->typeDef();
+        $type = MatterTypeRegistry::for($matter->type);
 
         // 已在名单里的只是变更共享意愿：接龙关闭后（如已成团）也允许——
         // 没共享的参与者事后想联系团长，得留一条自助补开共享的路
@@ -91,7 +92,7 @@ class JoinController extends Controller
      */
     public function destroy(Request $request, Matter $matter): JsonResponse
     {
-        abort_unless($matter->typeDef()->allowsJoin($matter), 422, '报名已截止，名单已封存不能自行退出；确有变动请联系牵头人或管理员');
+        abort_unless(MatterTypeRegistry::for($matter->type)->allowsJoin($matter), 422, '报名已截止，名单已封存不能自行退出；确有变动请联系牵头人或管理员');
 
         $matter->joins()->whereBelongsTo($this->resident($request), 'resident')->delete();
 
