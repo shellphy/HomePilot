@@ -43,7 +43,10 @@ function censusWithAnswers(): array
     $census->stances()->create([
         'resident_id' => $asker->id,
         'mode' => Stance::MODE_REGISTER,
-        'payload' => ['answers' => ['q1' => '多层实木', 'q2' => '希望环保达标']],
+        'payload' => [
+            'answers' => ['q1' => '多层实木', 'q2' => '希望环保达标'],
+            'ai_report' => ['headline' => '重视环保与防潮'],
+        ],
     ]);
 
     // 另外两户也登记，让「多数选择」有可聚合的数据
@@ -72,6 +75,7 @@ test('census ai context carries purpose, questions, option notes, my answer and 
         ->toContain('多层实木｜贵约三成，更防潮') // 选项 + 解释
         ->toContain('柜体倾向哪种板材？→多层实木') // 提问业主自己的选择（换算成题面文字）
         ->toContain('希望环保达标')               // 我填空题的答案
+        ->toContain('重视环保与防潮')             // 已生成报告可继续追问
         ->toContain('多数选「颗粒板」（2 人）');   // 匿名聚合的多数选择
 });
 

@@ -3,44 +3,62 @@
 use App\Models\Matter;
 use App\Models\Stance;
 
-test('it seeds both primer censuses with valid question schemas and example answers', function () {
+test('it seeds exactly five renovation questionnaires with valid schemas and example answers', function () {
     $this->seed();
 
+    $expectedQuestionCounts = [
+        '硬装怎么做 · 答题即入门' => 28,
+        '中央空调怎么选 · 答题即入门' => 11,
+        '全屋定制怎么选 · 答题即入门' => 24,
+        '软装怎么搭 · 答题即入门' => 19,
+        '全屋需求摸底 · 说说你家怎么住' => 26,
+    ];
+
     $censuses = Matter::query()
-        ->whereIn('title', ['硬装怎么做 · 答题即入门', '中央空调怎么选 · 答题即入门'])
+        ->whereIn('title', array_keys($expectedQuestionCounts))
         ->get()
         ->keyBy('title');
 
-    expect($censuses)->toHaveCount(2);
+    expect($censuses)->toHaveCount(5)
+        ->and(Matter::query()->where('title', '装修意向摸底 · 全小区征集中')->exists())->toBeFalse();
 
-    foreach ($censuses as $census) {
+    foreach ($censuses as $title => $census) {
         $questions = collect($census->payload['modules'])
             ->flatMap(fn (array $module): array => $module['questions']);
 
-        expect($questions->pluck('key')->duplicates())->toBeEmpty();
+        expect($questions)->toHaveCount($expectedQuestionCounts[$title])
+            ->and($questions->pluck('key')->duplicates())->toBeEmpty();
 
         $questions->each(function (array $question): void {
-            expect($question)->toHaveKeys(['key', 'text', 'type', 'options'])
-                ->and($question['options'])->not->toBeEmpty();
+            expect($question)->toHaveKeys(['key', 'text', 'type']);
+
+            if ($question['type'] !== 'text') {
+                expect($question)->toHaveKey('options')
+                    ->and($question['options'])->not->toBeEmpty();
+            }
 
             if (isset($question['option_notes'])) {
                 expect($question['option_notes'])->toHaveCount(count($question['options']));
             }
         });
 
-        $validOptions = $questions->mapWithKeys(
-            fn (array $question): array => [$question['key'] => $question['options']],
-        );
+        $questionMap = $questions->keyBy('key');
 
         Stance::query()
             ->where('matter_id', $census->id)
             ->where('mode', Stance::MODE_REGISTER)
-            ->each(function (Stance $stance) use ($validOptions): void {
+            ->each(function (Stance $stance) use ($questionMap): void {
                 foreach ($stance->payload['answers'] as $key => $answer) {
-                    expect($validOptions)->toHaveKey($key);
+                    expect($questionMap)->toHaveKey($key);
+
+                    if ($questionMap[$key]['type'] === 'text') {
+                        expect($answer)->toBeString()->not->toBeEmpty();
+
+                        continue;
+                    }
 
                     foreach ((array) $answer as $selectedOption) {
-                        expect($validOptions[$key])->toContain($selectedOption);
+                        expect($questionMap[$key]['options'])->toContain($selectedOption);
                     }
                 }
             });
