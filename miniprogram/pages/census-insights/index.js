@@ -19,9 +19,8 @@ Page({
   data: {
     censusId: null,
     block: null,
-    quickQuestions: ['题目里的选项是什么意思？', '我家该按什么标准选？'],
     showTextAdmin: false, // 管理员且问卷含填空题：露出「文本题明细与归纳」入口
-    aiChatShow: false, // AI 答疑半屏面板（ai-quick-ask 通过页面方法呼出）
+    aiChatShow: false, // AI 答疑半屏面板（「结合我的登记帮我分析」入口经 askAnalysis 呼出）
   },
 
   // 快捷提问组件经 getCurrentPages 调到这里：半屏弹出 AI 面板
@@ -118,5 +117,4 @@ Page({
   goConsented() {
     wx.navigateTo({ url: `/pages/census-consented/index?id=${this.data.censusId}` });
   },
-
 });

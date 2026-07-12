@@ -4,6 +4,19 @@ const profile = require('../../utils/api/profile');
 const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
+// AI 悬浮入口的「猜你想问」预设：贴着「刚看完、正在犹豫」的那一刻出，按类型/阶段给
+function presetQuestions(matter) {
+  if (matter.type === 'activity') {
+    return ['这个活动的安排帮我讲讲？', '参加前要准备什么？'];
+  }
+  if (matter.type === 'groupbuy') {
+    return matter.needs_survey
+      ? ['我家的情况该怎么选配置？', '商家来沟通时该问什么？', '现在登记还是再等等？']
+      : ['条款里哪条最影响总价？', '我家的情况适合参加吗？', '现在参加还是再等等？'];
+  }
+  return [];
+}
+
 Page({
   behaviors: [load],
 
@@ -23,6 +36,7 @@ Page({
     communityName: '小区', // 兜底文案，实际名称由 /options 下发
     aiChatShow: false, // AI 答疑半屏面板（ai-quick-ask / 术语弹层通过页面方法呼出）
     dockReserve: 0, // 吸底操作条实测高度（px），据此精确预留底部空间，见 onDockMeasure
+    quickQuestions: [], // AI 悬浮入口的预设问题，随 matter 类型/阶段变化
   },
 
   // 详情组件量出吸底操作条实际高度后上报：按需精确预留，避免遮挡或大片空白
@@ -84,6 +98,7 @@ Page({
       const GOVERNANCE_TYPES = ['property', 'developer', 'committee'];
       this.setData({
         matter: res.data,
+        quickQuestions: presetQuestions(res.data),
         joined: res.joined,
         isInitiator: res.data.initiator_id === me.id,
         myReview: res.my_review || null,

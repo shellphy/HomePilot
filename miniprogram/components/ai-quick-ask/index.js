@@ -1,4 +1,4 @@
-// AI 答疑入口：决策现场只留一个醒目的 AI 图标，不把预设问题铺在页面上占地方。
+// AI 答疑入口：右下角固定悬浮的胶囊按钮，不占正文版面。
 // 点开半屏面板后，预设问题以「猜你想问」出现在输入框上方，让业主自己挑或直接打字。
 Component({
   options: {
@@ -9,6 +9,10 @@ Component({
     matterId: Number,
     matterTitle: String,
     questions: Array, // 透传给面板做「猜你想问」，入口本身不展示
+    bottomOffset: {
+      type: Number,
+      value: 0, // 宿主吸底操作条实测高度（px），据此上浮避让；无吸底条时为 0
+    },
   },
 
   methods: {

@@ -14,8 +14,13 @@
         <block wx:if="{{index === streamingIndex && !item.text}}">
           <text class="bubble-typing">正在想，可能要等上一会儿…</text>
         </block>
+        <!-- AI 回答按 markdown 渲染（rich-text）；用户提问保持纯文本 -->
+        <block wx:elif="{{item.role === 'ai'}}">
+          <rich-text class="bubble-md" nodes="{{item.nodes}}"></rich-text
+          ><text wx:if="{{index === streamingIndex}}" class="type-caret"></text>
+        </block>
         <block wx:else>
-          <text>{{item.text}}</text><text wx:if="{{index === streamingIndex}}" class="type-caret"></text>
+          <text>{{item.text}}</text>
         </block>
       </view>
     </view>
