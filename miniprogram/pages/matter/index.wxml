@@ -1,4 +1,4 @@
-<view class="page-body detail-body {{matter.join_open ? 'detail-body-docked' : ''}}">
+<view class="page-body detail-body" style="{{dockReserve ? 'padding-bottom:' + dockReserve + 'px' : ''}}">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <block wx:if="{{matter}}">
       <notice-detail wx:if="{{matter.type === 'notice'}}" matter="{{matter}}" />
@@ -15,6 +15,7 @@
         my-share-contact="{{myShareContact}}"
         my-join-stage="{{myJoinStage}}"
         bind:refresh="reload"
+        bind:dockmeasure="onDockMeasure"
       />
       <matter-detail
         wx:else
@@ -29,6 +30,7 @@
         initiator-contact="{{initiatorContact}}"
         my-share-contact="{{myShareContact}}"
         bind:refresh="reload"
+        bind:dockmeasure="onDockMeasure"
       />
 
       <!-- 大家都在问：疑问沉淀给后来的人（团购/活动开放；公告没疑问场景，维权容易变质） -->
