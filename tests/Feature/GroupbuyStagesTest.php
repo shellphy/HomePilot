@@ -165,11 +165,11 @@ test('admins can correct the survey flag through the admin channel', function ()
     $matter = Matter::factory()->survey()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->putJson("/api/admin/matters/{$matter->id}", [
+    $this->putJson("/api/matters/{$matter->id}", [
         'title' => $matter->title,
         'category' => $matter->category,
         'target_count' => $matter->target_count,
-        'payload' => ['needs_survey' => false],
+        'needs_survey' => false,
     ])->assertSuccessful();
 
     expect($matter->refresh()->payloadValue('needs_survey'))->toBeFalse();

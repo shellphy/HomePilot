@@ -7,20 +7,18 @@ use Laravel\Sanctum\Sanctum;
 test('admin saves per-option explanations alongside the options', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $response = $this->postJson('/api/admin/matters', [
+    $response = $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '定制柜摸底',
-        'payload' => [
-            'modules' => [[
-                'title' => '柜体',
-                'questions' => [[
-                    'text' => '柜体倾向哪种板材？',
-                    'type' => 'single',
-                    'options' => ['颗粒板', '多层实木', '还没概念'],
-                    'option_notes' => ['便宜，环保看等级，主流选择', '贵约三成，更防潮', ''],
-                ]],
+        'modules' => [[
+            'title' => '柜体',
+            'questions' => [[
+                'text' => '柜体倾向哪种板材？',
+                'type' => 'single',
+                'options' => ['颗粒板', '多层实木', '还没概念'],
+                'option_notes' => ['便宜，环保看等级，主流选择', '贵约三成，更防潮', ''],
             ]],
-        ],
+        ]],
     ])->assertCreated();
 
     $question = Matter::find($response->json('data.id'))->payloadValue('modules')[0]['questions'][0];
@@ -58,19 +56,17 @@ test('option explanations ship to residents with the census schema', function ()
 test('overlong option explanations are rejected', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '定制柜摸底',
-        'payload' => [
-            'modules' => [[
-                'title' => '柜体',
-                'questions' => [[
-                    'text' => '板材？',
-                    'type' => 'single',
-                    'options' => ['颗粒板', '多层实木'],
-                    'option_notes' => [str_repeat('长', 101), ''],
-                ]],
+        'modules' => [[
+            'title' => '柜体',
+            'questions' => [[
+                'text' => '板材？',
+                'type' => 'single',
+                'options' => ['颗粒板', '多层实木'],
+                'option_notes' => [str_repeat('长', 101), ''],
             ]],
-        ],
-    ])->assertJsonValidationErrors(['payload.modules.0.questions.0.option_notes.0']);
+        ]],
+    ])->assertJsonValidationErrors(['modules.0.questions.0.option_notes.0']);
 });

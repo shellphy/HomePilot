@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/matters/{matter}', [MatterController::class, 'show']);
     Route::post('/matters', [MatterController::class, 'store']);
     Route::put('/matters/{matter}', [MatterController::class, 'update']);
+    Route::delete('/matters/{matter}', [MatterController::class, 'destroy']);
     Route::put('/matters/{matter}/state', [MatterController::class, 'updateState']);
     Route::put('/matters/{matter}/deal', [MatterController::class, 'updateDeal']);
     Route::post('/matters/{matter}/join', [JoinController::class, 'store']);
@@ -71,11 +72,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // 管理端（管理员=被授权的成员，php artisan admin:grant）：审核、发布、明细、认证、设置
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/matters', [MatterAdminController::class, 'index']);
-        Route::post('/matters', [MatterAdminController::class, 'store']);
-        Route::get('/matters/{matter}', [MatterAdminController::class, 'show']);
-        Route::put('/matters/{matter}', [MatterAdminController::class, 'update']);
         Route::put('/matters/{matter}/approve', [MatterAdminController::class, 'approve']);
-        Route::delete('/matters/{matter}', [MatterAdminController::class, 'destroy']);
         Route::get('/matters/{matter}/registrations', [MatterAdminController::class, 'registrations']);
         Route::get('/matters/{matter}/census-text', [CensusSummaryAdminController::class, 'show']);
         Route::put('/matters/{matter}/census-summary', [CensusSummaryAdminController::class, 'update']);

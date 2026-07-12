@@ -74,7 +74,7 @@ test('admin-managed types have no abort escape hatch', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     $notice = Matter::factory()->notice()->create();
-    $this->putJson("/api/admin/matters/{$notice->id}", [
+    $this->putJson("/api/matters/{$notice->id}", [
         'title' => $notice->title,
         'state' => 'aborted',
     ])->assertUnprocessable();
@@ -84,7 +84,7 @@ test('admins can rescue an aborted matter back onto the track', function () {
     $matter = Matter::factory()->aborted()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->putJson("/api/admin/matters/{$matter->id}", [
+    $this->putJson("/api/matters/{$matter->id}", [
         'title' => $matter->title,
         'category' => $matter->category,
         'target_count' => $matter->target_count,

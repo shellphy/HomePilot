@@ -7,10 +7,10 @@ use Laravel\Sanctum\Sanctum;
 test('a census stores a free-text purpose in its payload', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $response = $this->postJson('/api/admin/matters', [
+    $response = $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '需求摸底',
-        'payload' => ['purpose' => '开团前先摸清大家想装什么'],
+        'purpose' => '开团前先摸清大家想装什么',
     ])->assertCreated();
 
     expect(Matter::find($response->json('data.id'))->payloadValue('purpose'))

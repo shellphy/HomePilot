@@ -81,7 +81,7 @@ class MatterController extends Controller
     {
         $resident = $this->resident($request);
 
-        abort_unless($matter->is_approved || $matter->initiator_id === $resident->id, 404);
+        abort_unless($matter->is_approved || $matter->initiator_id === $resident->id || $resident->is_admin, 404);
 
         $matter
             ->loadCount(['joins', 'confirmedJoins'])
@@ -151,11 +151,13 @@ class MatterController extends Controller
 
     /**
      * 发起事项：业主可发起（类型需允许）；已认证商家可发起团购/活动（带商家署名）；
-     * 其余相关方身份不发起（治理方走官方回应，公告/征集由管理端发布）。管理员审核后公示。
+     * 其余相关方身份不发起（治理方走官方回应）。管理员不受发起权/身份/楼栋护栏限制，
+     * 可代发任何类型并显式署名（物业/业委会的调研）。两条路径都进待审，管理员审核后公示。
      */
     public function store(Request $request): JsonResponse
     {
         $resident = $this->resident($request);
+        $isAdmin = $resident->is_admin;
         $party = $resident->affiliatedParty;
 
         $typeKey = $request->validate([
@@ -163,27 +165,39 @@ class MatterController extends Controller
         ])['type'];
 
         $type = MatterTypeRegistry::for($typeKey);
-        abort_unless($type->userInitiatable(), 403, '该类型的事项由管理员发布');
 
-        if ($party !== null) {
-            abort_unless($party->type === Party::TYPE_MERCHANT, 403, '该身份不发起事项，如需张罗请切回业主身份');
-            abort_unless($party->is_listed, 403, '商家发起需先由管理员认证，请联系管理员');
-            abort_unless($type->merchantInitiatable(), 403, '商家可以发起团购和活动');
+        if (! $isAdmin) {
+            abort_unless($type->userInitiatable(), 403, '该类型的事项由管理员发布');
+
+            if ($party !== null) {
+                abort_unless($party->type === Party::TYPE_MERCHANT, 403, '该身份不发起事项，如需张罗请切回业主身份');
+                abort_unless($party->is_listed, 403, '商家发起需先由管理员认证，请联系管理员');
+                abort_unless($type->merchantInitiatable(), 403, '商家可以发起团购和活动');
+            }
+
+            // 牵头人自己也要上「楼栋 + 昵称」的公示名单，和报名一样先选楼栋号
+            if ($party === null && $resident->unit_label === '') {
+                throw ValidationException::withMessages([
+                    'profile' => '发起前请先在「我的 · 个人资料」里选好楼栋号',
+                ]);
+            }
         }
 
-        // 牵头人自己也要上「楼栋 + 昵称」的公示名单，和报名一样先选楼栋号
-        if ($party === null && $resident->unit_label === '') {
-            throw ValidationException::withMessages([
-                'profile' => '发起前请先在「我的 · 个人资料」里选好楼栋号',
-            ]);
+        $rules = $this->rulesFor($typeKey);
+
+        if ($isAdmin) {
+            // 署名发起：管理员代建的调研可亮明发起方
+            $rules['initiator_party_id'] = ['sometimes', 'nullable', Rule::exists('parties', 'id')];
         }
 
-        $validated = $request->validate($this->rulesFor($typeKey));
+        $validated = $request->validate($rules);
 
         $matter = Matter::create([
             'type' => $typeKey,
             'initiator_id' => $resident->id,
-            'initiator_party_id' => $party?->id,
+            'initiator_party_id' => $isAdmin
+                ? ($validated['initiator_party_id'] ?? null)
+                : $party?->id,
             'title' => $validated['title'],
             'category' => $validated['category'] ?? '',
             // 初始状态由类型的状态机决定，不接受客户端指定
@@ -197,19 +211,28 @@ class MatterController extends Controller
     }
 
     /**
-     * 编辑：只有发起人本人；类型不可变。
+     * 编辑：发起人本人或管理员；类型不可变。管理员为纠错通道——绕过顺序流转守卫
+     * 与发起时锁定的键，并可改署名；发起人只能沿状态机推进，锁定键不可动。
      */
     public function update(Request $request, Matter $matter): JsonResponse
     {
         $resident = $this->resident($request);
-        abort_unless($matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
+        $isAdmin = $resident->is_admin;
+        abort_unless($isAdmin || $matter->initiator_id === $resident->id, 403, '只有发起人可以操作');
 
         $type = $matter->typeDef();
-        $validated = $request->validate(array_merge($this->rulesFor($matter->type), [
+        $rules = array_merge($this->rulesFor($matter->type), [
             'state' => ['sometimes', Rule::in(array_keys($type->allStates()))],
-        ]));
+        ]);
 
-        if (($validated['state'] ?? $matter->state) !== $matter->state) {
+        if ($isAdmin) {
+            $rules['initiator_party_id'] = ['sometimes', 'nullable', Rule::exists('parties', 'id')];
+        }
+
+        $validated = $request->validate($rules);
+
+        // 发起人受顺序流转守卫（跳步/回退/终态回退都拦），管理员绕过（Rule::in 仍拦非法值）
+        if (! $isAdmin && ($validated['state'] ?? $matter->state) !== $matter->state) {
             $this->guardTransition($matter, $validated['state']);
         }
 
@@ -218,18 +241,29 @@ class MatterController extends Controller
         // 保留成交公示等不在编辑表单里的 payload 字段；被驳回的事项编辑即重新提交（清掉驳回理由）
         $payload = array_merge($matter->payload ?? [], $type->payloadFrom($validated), ['reject_reason' => '']);
 
-        // 发起时锁定的键（如方案型开关）编辑不可改，纠错走管理端
-        foreach ($type->lockedPayloadKeys() as $lockedKey) {
-            $payload[$lockedKey] = $matter->payloadValue($lockedKey);
+        // 发起时锁定的键（如方案型开关）发起人编辑不可改，纠错走管理端
+        if (! $isAdmin) {
+            foreach ($type->lockedPayloadKeys() as $lockedKey) {
+                $payload[$lockedKey] = $matter->payloadValue($lockedKey);
+            }
         }
 
-        $matter->update([
+        $updateData = [
             'title' => $validated['title'],
             'category' => $validated['category'] ?? $matter->category,
             'state' => $validated['state'] ?? $matter->state,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
             'payload' => $payload,
-        ]);
+        ];
+
+        if ($isAdmin) {
+            // 显式传 null 表示去署名，键缺失才保留原值
+            $updateData['initiator_party_id'] = array_key_exists('initiator_party_id', $validated)
+                ? $validated['initiator_party_id']
+                : $matter->initiator_party_id;
+        }
+
+        $matter->update($updateData);
 
         if ($matter->state !== $previousState) {
             $matter->recordActivity($resident);
@@ -237,6 +271,18 @@ class MatterController extends Controller
         }
 
         return response()->json(['data' => MatterResource::make($matter)]);
+    }
+
+    /**
+     * 删除事项（管理员纠错通道，软删除，表态一并保留）。
+     */
+    public function destroy(Request $request, Matter $matter): JsonResponse
+    {
+        abort_unless($this->resident($request)->is_admin, 403);
+
+        $matter->delete();
+
+        return response()->json(['deleted' => true]);
     }
 
     /**
