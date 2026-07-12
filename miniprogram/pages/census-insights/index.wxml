@@ -4,7 +4,9 @@
       <view class="card">
         <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
         <!-- 署名调研三不变量之二：亮明发起方、结果对全小区公开（第三个是管理员审核） -->
-        <view class="hero-sign" wx:if="{{block.initiatorParty}}">由 {{block.initiatorParty.label}} · {{block.initiatorParty.name}} 发起，聚合结果对全小区公开</view>
+        <view class="hero-sign" wx:if="{{block.initiatorParty}}"
+          >由 {{block.initiatorParty.label}} · {{block.initiatorParty.name}} 发起，聚合结果对全小区公开</view
+        >
         <view class="hero-cap" wx:if="{{block.purpose}}">{{block.purpose}}</view>
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
       </view>
@@ -36,17 +38,12 @@
               </view>
               <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
             </view>
-            <view class="theme-foot" wx:if="{{question.themes.length}}">归纳自 {{block.registered}} 份登记的文字反馈</view>
+            <view class="theme-foot" wx:if="{{question.themes.length}}"
+              >归纳自 {{block.registered}} 份登记的文字反馈</view
+            >
           </view>
         </view>
       </block>
-
-      <!-- AI 快捷提问放在主按钮上方：主操作永远压轴在底部 -->
-      <ai-quick-ask
-        matter-id="{{censusId}}"
-        matter-title="{{block.title}}"
-        questions="{{quickQuestions}}"
-      />
 
       <!-- 宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
            外部 class 在 virtualHost 渲染下不一定作用到按钮盒子 -->
@@ -57,7 +54,8 @@
         size="large"
         style="width: 100%; margin-bottom: 12rpx"
         bind:tap="goCensusForm"
-      >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
+        >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button
+      >
 
       <!-- 发起者本人入口：邻居主动勾选授权给你看的登记明细 -->
       <view class="card admin-entry" wx:if="{{block.isInitiator}}" hover-class="frow-hover" bind:tap="goConsented">
@@ -76,7 +74,6 @@
         <text class="frow-arrow">›</text>
       </view>
     </block>
-
   </page-status>
 
   <!-- AI 答疑半屏面板：page-container 原生支持返回手势关闭 -->

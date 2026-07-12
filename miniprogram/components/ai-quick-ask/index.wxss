@@ -1,41 +1,32 @@
-/* 决策现场的 AI 入口：浅绿卡 + 渐变绿徽标，在一堆白卡里跳出来但不吵，一行高不占地方 */
-.ai-entry {
+/* AI 答疑悬浮入口：右下角胶囊 FAB，品牌绿渐变 + 白 sparkle，浮在正文与吸底操作条之上。
+   bottom 由宿主实测的吸底条高度（bottomOffset）驱动，随之上浮避让，见 index.wxml */
+.ai-fab {
+  position: fixed;
+  right: 24rpx;
+  z-index: 20;
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  background: var(--brand-bg);
-  border-radius: 24rpx;
-  padding: 20rpx 26rpx;
-  margin-bottom: 20rpx;
+  gap: 8rpx;
+  padding: 14rpx 28rpx 14rpx 16rpx;
+  border-radius: 44rpx;
+  background-image: linear-gradient(135deg, var(--brand-deep), var(--brand));
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.16);
 }
-.ai-entry-hover {
-  opacity: 0.85;
+.ai-fab-hover {
+  opacity: 0.9;
 }
-
-/* 渐变绿徽标 + 白 sparkle：绿色取自 --brand（容器控色），SVG 内白色是图标本身、非主题色。
-   双层背景：上层 sparkle 图标，下层 135deg 品牌深→浅渐变（与 community 页头同约定） */
-.ai-entry-badge {
+/* 白 sparkle：SVG 内白色是图标本身、非主题色（与原入口徽标同一图形） */
+.ai-fab-badge {
   flex-shrink: 0;
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 3c.4 4.4 1.6 5.6 6 6-4.4.4-5.6 1.6-6 6-.4-4.4-1.6-5.6-6-6 4.4-.4 5.6-1.6 6-6z'/%3E%3Cpath fill='%23ffffff' d='M18.6 13c.16 1.8.76 2.4 2.4 2.6-1.64.16-2.24.76-2.4 2.4-.16-1.64-.76-2.24-2.4-2.4 1.64-.2 2.24-.8 2.4-2.6z'/%3E%3C/svg%3E"), linear-gradient(135deg, var(--brand-deep), var(--brand));
-  background-repeat: no-repeat, no-repeat;
-  background-position: center, center;
-  background-size: 34rpx, cover;
+  width: 40rpx;
+  height: 40rpx;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 3c.4 4.4 1.6 5.6 6 6-4.4.4-5.6 1.6-6 6-.4-4.4-1.6-5.6-6-6 4.4-.4 5.6-1.6 6-6z'/%3E%3Cpath fill='%23ffffff' d='M18.6 13c.16 1.8.76 2.4 2.4 2.6-1.64.16-2.24.76-2.4 2.4-.16-1.64-.76-2.24-2.4-2.4 1.64-.2 2.24-.8 2.4-2.6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
 }
-
-.ai-entry-title {
-  flex: 1;
-  min-width: 0;
-  font-size: 30rpx;
+.ai-fab-text {
+  font-size: 28rpx;
   font-weight: 600;
-  color: var(--brand-deep);
-}
-
-.ai-entry-arrow {
-  flex-shrink: 0;
-  font-size: 36rpx;
-  line-height: 1;
-  color: var(--brand);
+  color: #fff;
 }

@@ -1,5 +1,9 @@
-<view class="ai-entry" hover-class="ai-entry-hover" bind:tap="open">
-  <view class="ai-entry-badge"></view>
-  <view class="ai-entry-title">问问 AI</view>
-  <view class="ai-entry-arrow">›</view>
+<view
+  class="ai-fab"
+  hover-class="ai-fab-hover"
+  style="bottom: calc({{bottomOffset}}px + 24rpx + env(safe-area-inset-bottom))"
+  bind:tap="open"
+>
+  <view class="ai-fab-badge"></view>
+  <text class="ai-fab-text">问问 AI</text>
 </view>
