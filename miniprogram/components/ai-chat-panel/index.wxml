@@ -24,6 +24,22 @@
     <view id="chat-bottom" class="chat-anchor"></view>
   </scroll-view>
 
+  <!-- 空对话时把预设问题以「猜你想问」摆在输入框上方，业主挑一条即发送，不用自己憋问题 -->
+  <view wx:if="{{!messages.length && !busy && presets.length}}" class="chat-presets">
+    <view class="chat-presets-title">猜你想问</view>
+    <view class="chat-presets-list">
+      <view
+        wx:for="{{presets}}"
+        wx:key="*this"
+        class="chat-preset"
+        hover-class="chat-preset-hover"
+        data-q="{{item}}"
+        bind:tap="pickPreset"
+        >{{item}}</view
+      >
+    </view>
+  </view>
+
   <view class="chat-input-bar">
     <textarea
       class="chat-input"

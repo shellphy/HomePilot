@@ -10,7 +10,7 @@ use Laravel\Sanctum\Sanctum;
 
 test('approving a matter fires the approved event once', function () {
     Event::fake([MatterApproved::class]);
-    $matter = Matter::factory()->create(['is_approved' => false]);
+    $matter = Matter::factory()->pending()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     $this->putJson("/api/admin/matters/{$matter->id}/approve", ['is_approved' => true])->assertSuccessful();

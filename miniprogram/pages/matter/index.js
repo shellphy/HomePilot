@@ -22,6 +22,13 @@ Page({
     myJoinStage: '', // 我的承诺档位（团购分意向/确认）：接龙中的意向登记者看到「确认参团」入口
     communityName: '小区', // 兜底文案，实际名称由 /options 下发
     aiChatShow: false, // AI 答疑半屏面板（ai-quick-ask / 术语弹层通过页面方法呼出）
+    dockReserve: 0, // 吸底操作条实测高度（px），据此精确预留底部空间，见 onDockMeasure
+  },
+
+  // 详情组件量出吸底操作条实际高度后上报：按需精确预留，避免遮挡或大片空白
+  onDockMeasure(e) {
+    const height = (e.detail && e.detail.height) || 0;
+    if (height !== this.data.dockReserve) this.setData({ dockReserve: height });
   },
 
   // 子组件（快捷提问/术语弹层）经 getCurrentPages 调到这里：半屏弹出 AI 面板

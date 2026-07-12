@@ -68,10 +68,20 @@
         <text class="frow-arrow">›</text>
       </view>
 
+      <!-- 已驳回的事项在编辑器里也要一眼可辨（否则和「待审核」一样只是个关闭的开关），理由回显；
+           改理由走审核列表，这里打开公示即通过 -->
+      <view class="frow" wx:if="{{reviewStatus === 'rejected'}}">
+        <view class="frow-main">
+          <view class="row-title">当前审核状态</view>
+          <view class="row-sub row-sub-reject">已驳回：{{rejectReason}}</view>
+        </view>
+        <view class="pill pill-reject">已驳回</view>
+      </view>
+
       <view class="frow">
         <view class="frow-main">
           <view class="row-title">公示到小区页</view>
-          <view class="row-sub">关闭则对业主隐藏（相当于撤下/待审核）</view>
+          <view class="row-sub">关闭则对业主隐藏（撤下，回到待审核）</view>
         </view>
         <switch checked="{{isApproved}}" data-field="isApproved" bind:change="onSwitch" color="#06ae56" />
       </view>

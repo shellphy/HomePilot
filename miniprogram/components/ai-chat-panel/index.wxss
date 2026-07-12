@@ -84,6 +84,35 @@
 .chat-anchor {
   height: 2rpx;
 }
+/* 「猜你想问」：空对话时贴着输入框上方，点一条即发送。和输入区同白底连成一块 */
+.chat-presets {
+  background: #fff;
+  padding: 20rpx 24rpx 6rpx;
+  border-top: 1rpx solid var(--line);
+}
+.chat-presets-title {
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  color: var(--text-muted);
+  margin-bottom: 16rpx;
+}
+.chat-presets-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+.chat-preset {
+  background: var(--brand-bg);
+  color: var(--brand-deep);
+  border-radius: 16rpx;
+  padding: 14rpx 24rpx;
+  font-size: 26rpx;
+}
+.chat-preset-hover {
+  opacity: 0.7;
+}
+
 /* 输入区：多行输入 + 圆形感发送键，未输入时置灰 */
 .chat-input-bar {
   display: flex;

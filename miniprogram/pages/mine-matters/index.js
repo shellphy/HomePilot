@@ -1,7 +1,6 @@
 // 我参与的 / 我牵头的事项列表
 const matters = require('../../utils/api/matters');
 const { markSeen } = require('../../utils/me');
-const { pillClass } = require('../../utils/constants');
 const load = require('../../behaviors/load');
 
 Page({
@@ -25,9 +24,8 @@ Page({
   reload() {
     return this.runLoad(async () => {
       const res = this.data.kind === 'mine' ? await matters.listMine() : await matters.listJoined();
-      this.setData({
-        matters: res.data.map((matter) => ({ ...matter, pillClass: pillClass(matter.state) })),
-      });
+      // mine 列表的胶囊按 review_status 渲染（见 wxml），不再预算 pillClass
+      this.setData({ matters: res.data });
       // 看过列表即已读：清掉「我的」页对应红点（失败不影响浏览）
       markSeen(this.data.kind).catch(() => {});
     });

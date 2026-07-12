@@ -23,7 +23,7 @@ class PartyController extends Controller
     {
         $parties = Party::where('is_listed', true)
             ->where('type', Party::TYPE_MERCHANT)
-            ->withCount(['initiatedMatters as matter_count' => fn ($query) => $query->where('is_approved', true)])
+            ->withCount(['initiatedMatters as matter_count' => fn ($query) => $query->approved()])
             ->withCount(['initiatedMatters as deal_count' => fn ($query) => $query->where('type', 'groupbuy')->where('state', 'done')])
             ->orderByDesc('deal_count')
             ->get();
@@ -95,7 +95,7 @@ class PartyController extends Controller
                 'images' => $party->images ?? [],
                 'is_listed' => $party->is_listed,
                 'phone' => $owner?->phone,
-                'matter_count' => $party->initiatedMatters()->where('is_approved', true)->count(),
+                'matter_count' => $party->initiatedMatters()->approved()->count(),
                 'deal_count' => $party->initiatedMatters()->where('type', 'groupbuy')->where('state', 'done')->count(),
                 'review_count' => $reviews->count(),
                 'rating' => $reviews->isEmpty()

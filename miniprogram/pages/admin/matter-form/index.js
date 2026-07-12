@@ -17,6 +17,9 @@ Page({
     states: {},        // {key: label}，编辑时用于状态流转
     stateKeys: [],
     isApproved: true,
+    reviewStatus: '',      // pending / rejected / approved：编辑时回显当前审核态
+    reviewStatusLabel: '',
+    rejectReason: '',
     targetCount: '',
     // 按类型使用的 payload 字段
     body: '',
@@ -61,6 +64,9 @@ Page({
         states: matter.states,
         stateKeys: Object.keys(matter.states),
         isApproved: matter.is_approved,
+        reviewStatus: matter.review_status,
+        reviewStatusLabel: matter.review_status_label,
+        rejectReason: matter.reject_reason || '',
         targetCount: matter.target_count ? String(matter.target_count) : '',
         body: payload.body || '',
         pitch: payload.pitch || '',
