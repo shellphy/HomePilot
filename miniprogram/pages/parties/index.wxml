@@ -1,6 +1,6 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <view class="hint intro">名录里的商家都通过了管理员认证，评价全部来自参过团的业主。</view>
+    <view class="hint intro">名录里的商家都通过了认证，评价全部来自参过团的业主。</view>
 
     <view class="card party" hover-class="card-hover" wx:for="{{parties}}" wx:key="id" data-id="{{item.id}}" bind:tap="goDetail">
       <view class="party-row">

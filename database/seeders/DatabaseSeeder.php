@@ -145,7 +145,6 @@ class DatabaseSeeder extends Seeder
             'state' => 'open',
             'category' => '中央空调',
             'title' => '中央空调需求摸底',
-            'related_matter_id' => $hvac->id,
             'payload' => [
                 'pitch' => '答 3 道题帮团长摸清全小区的需求口径，谈判更有底气；结果匿名聚合公示。',
                 'modules' => [[

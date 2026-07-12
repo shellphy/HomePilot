@@ -38,6 +38,16 @@ Page({
     this.setData({ aiChatShow: false });
   },
 
+  // 答完的主入口：带上「我的登记」让 AI 做整体分析，比 quick-ask 更突出
+  askAnalysis() {
+    const { block, censusId } = this.data;
+    this.openAiChat({
+      matterId: censusId,
+      matterTitle: block.title,
+      question: '根据我这次的登记，帮我做个整体分析：我的选择说明我家更适合什么？还有哪些该注意的？',
+    });
+  },
+
   onLoad(query) {
     this.setData({ censusId: Number(query.id) });
   },
@@ -76,8 +86,9 @@ Page({
           title: census.title,
           state: census.state,
           pitch: census.pitch,
-          relatedMatter: census.related_matter || null,
+          purpose: census.purpose || '',
           initiatorParty: census.initiator_party || null,
+          isInitiator: !!census.is_initiator, // 我是发起者本人 → 露出「邻居授权给你看的登记」入口
           registered: census.registered_count,
           myAnswered: Object.keys(census.answers || {}).length,
           sections: census.aggregates.map((module) => ({
@@ -104,9 +115,8 @@ Page({
     wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
   },
 
-  // 配套征集的回链：跳回它服务的那个团购
-  goRelatedMatter() {
-    const related = this.data.block && this.data.block.relatedMatter;
-    if (related) wx.navigateTo({ url: `/pages/matter/index?id=${related.id}` });
+  goConsented() {
+    wx.navigateTo({ url: `/pages/census-consented/index?id=${this.data.censusId}` });
   },
+
 });

@@ -13,7 +13,6 @@ test('admin routes reject ordinary members', function (string $method, string $u
     $this->json($method, $uri)->assertForbidden();
 })->with([
     ['GET', '/api/admin/matters'],
-    ['POST', '/api/admin/matters'],
     ['GET', '/api/admin/parties'],
     ['GET', '/api/admin/settings'],
     ['PUT', '/api/admin/settings'],
@@ -53,23 +52,61 @@ test('admin sees the pending queue and approves matters onto the feed', function
     expect($pending->refresh()->is_approved)->toBeTrue();
 });
 
+test('admin publishes and takes down a matter via the edit form switch', function () {
+    $pending = Matter::factory()->pending()->create(['type' => 'notice', 'title' => '公告', 'payload' => ['body' => '正文']]);
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    // 勾上「公示到小区页」→ 通过公示
+    $this->putJson("/api/matters/{$pending->id}", [
+        'title' => '公告',
+        'body' => '正文',
+        'is_approved' => true,
+    ])->assertSuccessful()
+        ->assertJsonPath('data.review_status', 'approved');
+
+    // 撤下（关闭开关）→ 回到待审核
+    $this->putJson("/api/matters/{$pending->id}", [
+        'title' => '公告',
+        'body' => '正文',
+        'is_approved' => false,
+    ])->assertSuccessful()
+        ->assertJsonPath('data.review_status', 'pending');
+});
+
+test('non-admin initiator cannot flip the approval switch', function () {
+    $resident = Resident::factory()->create(['unit_label' => '1栋']);
+    $matter = Matter::factory()->pending()->create([
+        'type' => 'notice',
+        'title' => '公告',
+        'initiator_id' => $resident->id,
+        'payload' => ['body' => '正文'],
+    ]);
+    Sanctum::actingAs($resident);
+
+    // 发起人下发 is_approved 也不生效：审核态由校验丢弃，仍是待审核
+    $this->putJson("/api/matters/{$matter->id}", [
+        'title' => '公告',
+        'body' => '正文',
+        'is_approved' => true,
+    ])->assertSuccessful();
+
+    expect($matter->refresh()->is_approved)->toBeFalse();
+});
+
 test('admin publishes a census with a questionnaire and missing keys are generated', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $response = $this->postJson('/api/admin/matters', [
+    $response = $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '车位需求摸底',
-        'state' => 'open',
-        'payload' => [
-            'pitch' => '统计有多少户需要车位',
-            'collects_contact' => false,
-            'modules' => [[
-                'title' => '基础',
-                'questions' => [
-                    ['text' => '需要几个车位？', 'type' => 'single', 'options' => ['0 个', '1 个', '2 个']],
-                ],
-            ]],
-        ],
+        'pitch' => '统计有多少户需要车位',
+        'collects_contact' => false,
+        'modules' => [[
+            'title' => '基础',
+            'questions' => [
+                ['text' => '需要几个车位？', 'type' => 'single', 'options' => ['0 个', '1 个', '2 个']],
+            ],
+        ]],
     ])->assertCreated();
 
     $module = $response->json('data.payload.modules.0');
@@ -100,15 +137,13 @@ test('admin edits keep existing question keys and unrelated payload fields', fun
     ]);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->putJson("/api/admin/matters/{$census->id}", [
+    $this->putJson("/api/matters/{$census->id}", [
         'title' => $census->title,
-        'payload' => [
-            'modules' => [[
-                'key' => 'basic',
-                'title' => '基础',
-                'questions' => [['key' => 'q1', 'text' => '改了题面', 'type' => 'single', 'options' => ['A', 'B', 'C']]],
-            ]],
-        ],
+        'modules' => [[
+            'key' => 'basic',
+            'title' => '基础',
+            'questions' => [['key' => 'q1', 'text' => '改了题面', 'type' => 'single', 'options' => ['A', 'B', 'C']]],
+        ]],
     ])->assertSuccessful()
         ->assertJsonPath('data.payload.modules.0.questions.0.key', 'q1')
         ->assertJsonPath('data.payload.final_note', '别的字段');
@@ -117,15 +152,13 @@ test('admin edits keep existing question keys and unrelated payload fields', fun
 test('census questionnaires must have valid structure', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '坏问卷',
-        'payload' => [
-            'modules' => [[
-                'title' => '基础',
-                'questions' => [['text' => '只有一个选项', 'type' => 'single', 'options' => ['唯一']]],
-            ]],
-        ],
+        'modules' => [[
+            'title' => '基础',
+            'questions' => [['text' => '只有一个选项', 'type' => 'single', 'options' => ['唯一']]],
+        ]],
     ])->assertUnprocessable();
 });
 
@@ -204,7 +237,7 @@ test('admin deletes a matter', function () {
     $matter = Matter::factory()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->deleteJson("/api/admin/matters/{$matter->id}")->assertSuccessful();
+    $this->deleteJson("/api/matters/{$matter->id}")->assertSuccessful();
 
     // 软删除：对外消失，但库里可恢复
     expect(Matter::find($matter->id))->toBeNull()
@@ -214,33 +247,29 @@ test('admin deletes a matter', function () {
 test('census schema accepts text questions without options and keeps question notes', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '装修探店摸底',
-        'payload' => [
-            'modules' => [[
-                'title' => '探店情况',
-                'questions' => [
-                    ['text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司'], 'note' => '去过门店或约过量房都算'],
-                    ['text' => '踩过什么坑？', 'type' => 'text'],
-                ],
-            ]],
-        ],
+        'modules' => [[
+            'title' => '探店情况',
+            'questions' => [
+                ['text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司'], 'note' => '去过门店或约过量房都算'],
+                ['text' => '踩过什么坑？', 'type' => 'text'],
+            ],
+        ]],
     ])
         ->assertCreated()
         ->assertJsonPath('data.payload.modules.0.questions.0.note', '去过门店或约过量房都算')
         ->assertJsonPath('data.payload.modules.0.questions.1.type', 'text');
 
     // 选择题仍必须带至少两个选项
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '坏问卷',
-        'payload' => [
-            'modules' => [[
-                'title' => '模块',
-                'questions' => [['text' => '单选没给选项', 'type' => 'single']],
-            ]],
-        ],
+        'modules' => [[
+            'title' => '模块',
+            'questions' => [['text' => '单选没给选项', 'type' => 'single']],
+        ]],
     ])->assertUnprocessable();
 });
 
@@ -262,20 +291,20 @@ test('admin publishing a groupbuy requires the same category and target count as
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     // 两条创建路径校验强度一致：管理员代发的团购同样必须有品类与目标人数
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'groupbuy',
         'title' => '中央空调团购',
     ])->assertUnprocessable()->assertJsonValidationErrors(['category', 'target_count']);
 
     // 团购没有「不设目标」：目标人数是去谈价的筹码，管理端也至少 1 人
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'groupbuy',
         'title' => '中央空调团购',
         'category' => '中央空调',
         'target_count' => 0,
     ])->assertUnprocessable()->assertJsonValidationErrors(['target_count']);
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'groupbuy',
         'title' => '中央空调团购',
         'category' => '中央空调',
@@ -287,35 +316,35 @@ test('admin payload fields share the member form field limits', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     // payload 规则直接复用业主端 payloadRules：上限一致，不再各改各的漂移开
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'groupbuy',
         'title' => '门窗团购',
         'category' => '门窗',
         'target_count' => 20,
-        'payload' => ['perk' => str_repeat('优', 150)],
-    ])->assertUnprocessable()->assertJsonValidationErrors(['payload.perk']);
+        'perk' => str_repeat('优', 150),
+    ])->assertUnprocessable()->assertJsonValidationErrors(['perk']);
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'groupbuy',
         'title' => '门窗团购',
         'category' => '门窗',
         'target_count' => 20,
-        'payload' => ['glossary' => [['term' => '断桥铝', 'explain' => str_repeat('解', 400)]]],
-    ])->assertUnprocessable()->assertJsonValidationErrors(['payload.glossary.0.explain']);
+        'glossary' => [['term' => '断桥铝', 'explain' => str_repeat('解', 400)]],
+    ])->assertUnprocessable()->assertJsonValidationErrors(['glossary.0.explain']);
 });
 
 test('admin notices require a body', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     // 公告的 body 规则同样来自类型定义（required）：没正文的公告业主端没法看
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'notice',
         'title' => '停水通知',
-    ])->assertUnprocessable()->assertJsonValidationErrors(['payload.body']);
+    ])->assertUnprocessable()->assertJsonValidationErrors(['body']);
 
-    $this->postJson('/api/admin/matters', [
+    $this->postJson('/api/matters', [
         'type' => 'notice',
         'title' => '停水通知',
-        'payload' => ['body' => '周三上午 9 点到 12 点全小区停水，请提前储水。'],
+        'body' => '周三上午 9 点到 12 点全小区停水，请提前储水。',
     ])->assertCreated();
 });

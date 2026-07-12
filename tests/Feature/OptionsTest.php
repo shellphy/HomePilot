@@ -13,5 +13,5 @@ test('options ship community identity, form choices and initiatable matter types
 
     expect($types->firstWhere('key', 'groupbuy')['user_initiatable'])->toBeTrue()
         ->and($types->firstWhere('key', 'notice')['user_initiatable'])->toBeFalse()
-        ->and($types->firstWhere('key', 'census')['user_initiatable'])->toBeFalse();
+        ->and($types->firstWhere('key', 'census')['user_initiatable'])->toBeTrue();
 });

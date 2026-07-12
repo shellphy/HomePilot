@@ -92,9 +92,9 @@
       </view>
     </block>
 
-    <view class="privacy">手机号和房号仅管理员可见，用于必要时联系；不会出现在任何公示名单里。</view>
-    <view class="privacy" wx:if="{{identity === 'merchant'}}">商家身份对全小区公开。通过管理员认证后，你可以带「已认证」标识发起团购和活动，并进入商家名录；商家身份不参与业主接龙，想参与随时切回业主身份。</view>
-    <view class="privacy" wx:elif="{{identity !== 'resident'}}">这个身份对全小区公开。通过管理员认证后，你可以在事项进展里发布官方回应；这个身份不参与业主接龙，想参与随时切回业主身份。</view>
+    <view class="privacy">手机号和房号不会公示，仅必要时用于联系你。</view>
+    <view class="privacy" wx:if="{{identity === 'merchant'}}">商家身份对全小区公开。通过认证后，你可以带「已认证」标识发起团购和活动，并进入商家名录；商家身份不参与业主接龙，想参与随时切回业主身份。</view>
+    <view class="privacy" wx:elif="{{identity !== 'resident'}}">这个身份对全小区公开。通过认证后，你可以在事项进展里发布官方回应；这个身份不参与业主接龙，想参与随时切回业主身份。</view>
 
     <view class="footer-bar">
       <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">保存</t-button>

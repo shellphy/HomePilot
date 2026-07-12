@@ -12,18 +12,41 @@ Page({
 
   data: {
     id: null,
+    title: '',
     modules: [],
     moduleIndex: 0,
     current: null,
     answers: {},
     picked: {}, // {'题key::选项': true}，WXML 不能调 indexOf，用查表渲染选中态
     needProfile: false, // 该征集要求档案完整且当前缺失 → 先去完善个人资料
+    initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的登记」勾选
+    visibleToInitiator: false, // 是否把匿名破例给这个发起者本人看（默认关）
     submitting: false,
+    aiChatShow: false, // AI 答疑半屏面板（每道题「问 AI」呼出）
   },
 
   onLoad(query) {
     this.setData({ id: Number(query.id) });
     this.reload();
+  },
+
+  // 答题现场每道题的「问 AI」：把题面直接写进问题，AI 顺着这道题讲该怎么选
+  askQuestion(event) {
+    const text = event.currentTarget.dataset.text;
+    this.openAiChat({
+      matterId: this.data.id,
+      matterTitle: this.data.title,
+      question: `「${text}」这道题是什么意思？我家该怎么选？`,
+    });
+  },
+
+  openAiChat(options) {
+    this.setData({ aiChatShow: true });
+    this.selectComponent('#aiChat').open(options);
+  },
+
+  onAiChatLeave() {
+    if (this.data.aiChatShow) this.setData({ aiChatShow: false });
   },
 
   // 从「个人资料」页回来时重查门槛
@@ -38,6 +61,7 @@ Page({
       const [census, me] = await Promise.all([matters.getCensus(this.data.id), getMe()]);
       const answers = census.answers || {};
       this.setData({
+        title: census.title,
         // 空模块是管理端「先建模块再逐题添加」的中间态，作答时跳过
         modules: census.modules
           .filter((module) => (module.questions || []).length)
@@ -59,6 +83,9 @@ Page({
         answers,
         picked: this.buildPicked(answers),
         needProfile: census.collects_contact && (!me.unit_label || !me.phone),
+        initiatorParty: census.initiator_party || null,
+        // 回填上次选择：改登记时保持勾选状态，默认关
+        visibleToInitiator: !!census.my_visible_to_initiator,
       });
       this.showModule(0);
     });
@@ -91,6 +118,12 @@ Page({
     this.setData({ answers, picked: this.buildPicked(answers) });
   },
 
+  // 「让发起者看到我的登记」：默认关，只在末模块露出，勾选把匿名破例给署名发起方本人
+  toggleVisible() {
+    this.markDirty();
+    this.setData({ visibleToInitiator: !this.data.visibleToInitiator });
+  },
+
   // 填空题：输入即记，空白视为未作答（提交时过滤）
   onText(event) {
     this.markDirty();
@@ -106,6 +139,20 @@ Page({
       });
     });
     return picked;
+  },
+
+  // 全量已作答的题（跨模块，空白/未答过滤掉）：末模块只改授权、无新答案时用它补齐请求
+  buildCleanAnswers() {
+    const out = {};
+    this.data.modules.forEach((module) => {
+      module.questions.forEach((question) => {
+        const value = this.data.answers[question.key];
+        if (value !== undefined && (typeof value !== 'string' || value.trim() !== '')) {
+          out[question.key] = typeof value === 'string' ? value.trim() : value;
+        }
+      });
+    });
+    return out;
   },
 
   async next() {
@@ -128,12 +175,21 @@ Page({
       }
     });
 
+    const isLast = moduleIndex + 1 >= modules.length;
+
     this.setData({ submitting: true });
     try {
       // 答完最后一个模块顺手收一次订阅授权：征集收尾的通知才有额度可推（中间模块不打扰）
-      if (moduleIndex + 1 >= modules.length) await requestSubscribe();
-      if (Object.keys(moduleAnswers).length) {
-        await matters.saveCensus(id, { answers: moduleAnswers });
+      if (isLast) await requestSubscribe();
+
+      // 末模块带上授权勾选：即便这一模块没新答案，也要把 flag 落库（补齐全量答案满足后端校验）
+      const payload = { answers: moduleAnswers };
+      if (isLast && this.data.initiatorParty) {
+        payload.visible_to_initiator = this.data.visibleToInitiator;
+        if (!Object.keys(moduleAnswers).length) payload.answers = this.buildCleanAnswers();
+      }
+      if (Object.keys(payload.answers).length) {
+        await matters.saveCensus(id, payload);
         invalidateMe(); // 「我的」页展示答题进度，需要重新拉
       }
       this.clearDirty(); // 当前模块已落库，返回不再拦

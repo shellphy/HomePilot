@@ -98,7 +98,7 @@ Page({
     wx.navigateTo({ url: '/pages/parties/index' });
   },
 
-  // 张罗点事：类型清单来自服务端，团购走专属表单，其余走通用表单
+  // 张罗点事：类型清单来自服务端，所有类型走统一创作表单（带 type 参数）
   goCreate() {
     if (this.data.merchantUnlisted) {
       // 给「联系管理员」一个具体落点：联系方式由社区设置下发
@@ -117,11 +117,7 @@ Page({
       itemList: types.map((type) => `发起${type.label}`),
       success: ({ tapIndex }) => {
         const picked = types[tapIndex];
-        wx.navigateTo({
-          url: picked.key === 'groupbuy'
-            ? '/pages/groupbuy-form/index'
-            : `/pages/matter-form/index?type=${picked.key}`,
-        });
+        wx.navigateTo({ url: `/pages/admin/matter-form/index?type=${picked.key}` });
       },
     });
   },

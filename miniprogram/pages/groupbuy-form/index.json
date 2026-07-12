@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "发起团购",
-  "usingComponents": {
-    "page-status": "/components/page-status/index"
-  }
-}

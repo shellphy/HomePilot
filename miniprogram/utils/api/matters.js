@@ -17,21 +17,20 @@ function getMatter(id) {
   return request(`/matters/${id}`);
 }
 
-function createGroupbuy(data) {
-  return request('/matters', { method: 'POST', data: { type: 'groupbuy', ...data } });
-}
-
-function updateGroupbuy(id, data) {
-  return request(`/matters/${id}`, { method: 'PUT', data });
-}
-
-// 通用事项（活动/互助/维权）的发起与编辑
+// 统一创作：所有类型（团购/活动/互助/维权/征集/公告）的发起。
+// data 里的内容字段（title/category/target_count/pitch/perk/terms/glossary/
+// purpose/collects_contact/body/needs_survey/modules 等）都走顶层，不包 payload。
 function createMatter(type, data) {
   return request('/matters', { method: 'POST', data: { type, ...data } });
 }
 
 function updateMatter(id, data) {
   return request(`/matters/${id}`, { method: 'PUT', data });
+}
+
+// 删除事项（后端按 is_admin 授权）
+function deleteMatter(id) {
+  return request(`/matters/${id}`, { method: 'DELETE' });
 }
 
 function flipState(id, state) {
@@ -69,6 +68,11 @@ function getCensus(id) {
 
 function saveCensus(id, data) {
   return request(`/matters/${id}/census`, { method: 'PUT', data });
+}
+
+// 发起者视图：主动勾选授权的参与者明细（后端限发起者本人/管理员可看）
+function getCensusConsented(id) {
+  return request(`/matters/${id}/census-consented`);
 }
 
 // 「买前必懂」AI 起草：返回三段草稿（是什么/怎么选/避坑），由填表人校订后提交
@@ -112,10 +116,9 @@ module.exports = {
   listMine,
   listJoined,
   getMatter,
-  createGroupbuy,
-  updateGroupbuy,
   createMatter,
   updateMatter,
+  deleteMatter,
   flipState,
   publishDeal,
   join,
@@ -124,6 +127,7 @@ module.exports = {
   postUpdate,
   getCensus,
   saveCensus,
+  getCensusConsented,
   draftGlossary,
   aiChatStream,
   getQuestions,
