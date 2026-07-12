@@ -1,7 +1,11 @@
-/* 有底部固定操作区时的预留高度走行内 style（见 index.wxml）：
-   操作区高度可变（互通开关行 / 团购确认双按钮）且悬浮在安全区之上，
-   行内样式优先级最高，避免最后一屏内容（如「我要提问」）被操作区遮住。
-   无操作区时用这里的基础值即可。 */
 .detail-body {
   padding-bottom: 40rpx;
+}
+/* 有底部固定操作区（matter.join_open）时预留够高再叠加安全区，避免最后一屏
+   内容（如「我要提问」）被操作区遮住。操作区高度可变（互通开关行 / 团购确认
+   双按钮），按最高那种留量。
+   用独立修饰类 + 源码顺序覆盖：本项目 WXSS 不支持 .a.b 复合选择器（全端只用
+   .chip-on 这类独立类），env()/calc() 也只能写在 wxss、不能进行内 style。 */
+.detail-body-docked {
+  padding-bottom: calc(380rpx + env(safe-area-inset-bottom));
 }
