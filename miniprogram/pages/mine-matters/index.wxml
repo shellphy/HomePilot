@@ -6,8 +6,8 @@
           <view class="row-title">{{item.title}}</view>
           <view class="row-sub">{{item.type_label}} · {{item.state_label}} · {{item.join_count}} 人参与</view>
         </view>
-        <view wx:if="{{kind === 'mine'}}" class="pill {{item.is_approved ? 'pill-open' : 'pill-negotiating'}}">
-          {{item.is_approved ? '已公示' : '待审核'}}
+        <view wx:if="{{kind === 'mine'}}" class="pill {{item.review_status === 'approved' ? 'pill-open' : (item.review_status === 'rejected' ? 'pill-aborted' : 'pill-negotiating')}}">
+          {{item.review_status_label}}
         </view>
         <text wx:else class="muted">›</text>
       </view>

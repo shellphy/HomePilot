@@ -21,7 +21,10 @@ return new class extends Migration
             $table->string('title', 60);
             $table->string('category', 30)->default('');
             $table->string('state', 20); // 类型内状态机，由 MatterType 定义
-            $table->boolean('is_approved')->default(false);
+            // 审核状态（与 state 正交）：pending 待审核 / approved 已公示 / rejected 已驳回
+            $table->string('review_status', 20)->default('pending');
+            // 驳回理由：仅 rejected 态有值，发起人在详情页看到，编辑重提后清空
+            $table->string('reject_reason', 200)->default('');
             $table->unsignedInteger('target_count')->default(0);
             $table->json('payload')->nullable(); // groupbuy: pitch/perk/terms/glossary/final_terms/final_note；notice: body
             // 事项之间的从属关联：征集挂到团购上（配套摸底问卷），团购详情页展示问卷入口
@@ -34,7 +37,7 @@ return new class extends Migration
             // 软删除：误删可从库里恢复，表态/动态一并保留（级联只在真删时发生）
             $table->softDeletes();
 
-            $table->index(['type', 'is_approved']);
+            $table->index(['type', 'review_status']);
         });
     }
 

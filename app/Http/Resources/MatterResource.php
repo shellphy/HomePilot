@@ -46,6 +46,8 @@ class MatterResource extends JsonResource
                 ? ['value' => MatterType::ABORT_STATE, 'label' => $type->abortLabel()]
                 : null,
             'is_approved' => $this->is_approved,
+            'review_status' => $this->review_status->value,
+            'review_status_label' => $this->review_status->label(),
             'target_count' => $this->target_count,
             // 表态阶段开关（由类型状态机决定），小程序端据此渲染报名/评价区，不自行推断状态
             'join_open' => $type->allowsJoin($this->resource),
@@ -67,7 +69,7 @@ class MatterResource extends JsonResource
             'body' => $this->payloadValue('body', ''),
             'published_on' => $this->created_at?->format('m-d'),
             // 被驳回时给发起人看的理由（未审核的事项只有发起人能打开详情）
-            'reject_reason' => $this->payloadValue('reject_reason', ''),
+            'reject_reason' => $this->reject_reason,
             // 名单不对外公示的类型（如维权联名）：对外只给计数，明细仅牵头人可见
             'roster_hidden' => ! $type->rosterPublic($this->resource),
             'roster' => $this->whenLoaded(

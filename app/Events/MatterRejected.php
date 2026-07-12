@@ -7,7 +7,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * 事项被驳回/撤下（理由在 payload.reject_reason，发起人编辑后即重新提交）。
+ * 事项被驳回/撤下（理由在 reject_reason 列，发起人编辑后即重新提交）。
  */
 class MatterRejected
 {

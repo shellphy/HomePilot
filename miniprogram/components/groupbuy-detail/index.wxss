@@ -205,12 +205,22 @@
 }
 
 .leader-ops {
-  border: 2rpx dashed var(--brand);
+  border: 2rpx solid var(--brand);
 }
+/* 主操作占整行、次操作两列对齐：竖排容器夹一层两列子容器 */
 .leader-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.leader-btns-sub {
   display: flex;
   flex-wrap: wrap;
   gap: 16rpx;
+}
+/* 等宽两列；flex-grow 让落单的按钮撑满整行，避免半格空缺 */
+.leader-btn {
+  flex: 1 1 calc(50% - 8rpx);
 }
 
 .roster-row {

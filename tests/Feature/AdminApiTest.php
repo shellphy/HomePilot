@@ -36,7 +36,7 @@ test('the admin:grant command grants and revokes by id or phone', function () {
 });
 
 test('admin sees the pending queue and approves matters onto the feed', function () {
-    $pending = Matter::factory()->create(['is_approved' => false, 'title' => '待审核的团']);
+    $pending = Matter::factory()->pending()->create(['title' => '待审核的团']);
     Matter::factory()->open()->create();
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
@@ -247,10 +247,9 @@ test('census schema accepts text questions without options and keeps question no
 test('the admin queue signs matters with the initiator party snapshot', function () {
     $merchant = Resident::factory()->merchant('青城中央空调')->create();
     $merchant->affiliatedParty->update(['is_listed' => true]);
-    Matter::factory()->create([
+    Matter::factory()->pending()->create([
         'initiator_id' => $merchant->id,
         'initiator_party_id' => $merchant->affiliated_party_id,
-        'is_approved' => false,
     ]);
 
     Sanctum::actingAs(Resident::factory()->admin()->create());

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\MatterReviewStatus;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
@@ -70,7 +71,7 @@ test('the groupbuy detail carries its attached census with the register count', 
 
 test('an unapproved census stays off the groupbuy detail', function () {
     $groupbuy = Matter::factory()->create();
-    attachedCensus($groupbuy, ['is_approved' => false]);
+    attachedCensus($groupbuy, ['review_status' => MatterReviewStatus::Pending]);
 
     Sanctum::actingAs(Resident::factory()->create());
 

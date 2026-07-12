@@ -13,6 +13,7 @@
     <view class="chips filter-chips">
       <view class="chip {{stateFilter === '' ? 'chip-on' : ''}}" data-state="" bind:tap="pickState">全部状态</view>
       <view class="chip {{stateFilter === 'pending' ? 'chip-on' : ''}}" data-state="pending" bind:tap="pickState">待审核</view>
+      <view class="chip {{stateFilter === 'rejected' ? 'chip-on' : ''}}" data-state="rejected" bind:tap="pickState">已驳回</view>
       <view class="chip {{stateFilter === 'approved' ? 'chip-on' : ''}}" data-state="approved" bind:tap="pickState">已公示</view>
     </view>
 
@@ -23,8 +24,23 @@
           <!-- 按户出方案的团联系互通提前到谈判中，审核时值得一眼看到 -->
           <view class="row-sub">{{item.type_label}}{{item.payload.needs_survey ? '（按户出方案）' : ''}} · {{item.state_label}} · {{item.initiator}}</view>
           <view class="row-sub" wx:if="{{item.join_count || item.register_count}}">{{item.join_count ? item.join_count + ' 人参与' : ''}}{{item.join_count && item.register_count ? ' · ' : ''}}{{item.register_count ? item.register_count + ' 人登记' : ''}}</view>
+          <!-- 已驳回：回显理由，和「待审核」区分开，也方便二次沟通 -->
+          <view class="row-sub row-sub-reject" wx:if="{{item.review_status === 'rejected'}}">已驳回：{{item.reject_reason}}</view>
         </view>
-        <block wx:if="{{!item.is_approved}}">
+        <!-- 三态互斥：待审核给通过/驳回；已驳回只剩「通过」翻案，驳回态由胶囊表达；已公示只读 -->
+        <block wx:if="{{item.review_status === 'approved'}}">
+          <view class="pill pill-open">已公示</view>
+        </block>
+        <block wx:elif="{{item.review_status === 'rejected'}}">
+          <view class="pill pill-reject">已驳回</view>
+          <view
+            class="approve-btn"
+            hover-class="approve-btn-hover"
+            data-id="{{item.id}}"
+            catch:tap="approve"
+          >通过</view>
+        </block>
+        <block wx:else>
           <view
             class="approve-btn approve-btn-reject"
             hover-class="approve-btn-hover"
@@ -38,7 +54,6 @@
             catch:tap="approve"
           >通过</view>
         </block>
-        <view wx:else class="pill pill-open">已公示</view>
       </view>
 
       <view wx:if="{{!matters.length}}" class="hint">{{stateFilter === 'pending' ? '没有待审核的事项' : '这个筛选下没有事项'}}</view>

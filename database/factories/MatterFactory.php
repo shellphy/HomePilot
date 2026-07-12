@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\MatterReviewStatus;
 use App\Models\Matter;
 use App\Models\Resident;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,7 +25,7 @@ class MatterFactory extends Factory
             'title' => fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗']).'团购',
             'category' => fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗']),
             'state' => 'seeking',
-            'is_approved' => true,
+            'review_status' => MatterReviewStatus::Approved,
             'target_count' => fake()->numberBetween(10, 40),
             'payload' => [
                 'pitch' => fake()->sentence(),
@@ -67,7 +68,15 @@ class MatterFactory extends Factory
 
     public function pending(): static
     {
-        return $this->state(fn (): array => ['is_approved' => false]);
+        return $this->state(fn (): array => ['review_status' => MatterReviewStatus::Pending]);
+    }
+
+    public function rejected(string $reason = '需要补充信息'): static
+    {
+        return $this->state(fn (): array => [
+            'review_status' => MatterReviewStatus::Rejected,
+            'reject_reason' => $reason,
+        ]);
     }
 
     public function activity(): static
