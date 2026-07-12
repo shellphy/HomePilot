@@ -296,14 +296,15 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 36rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, #f6f6f3 72%, rgba(246, 246, 243, 0));
+  /* 顶部留足内边距，配合更晚的渐变收口，让互通提示行落在纯色背景上、与上方内容拉开距离 */
+  padding: 44rpx 24rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, #f6f6f3 88%, rgba(246, 246, 243, 0));
 }
 .cta-share {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16rpx;
+  margin-bottom: 20rpx;
 }
 .cta-share-text {
   font-size: 24rpx;
