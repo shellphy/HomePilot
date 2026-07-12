@@ -129,8 +129,7 @@
 <!-- 联系互通阶段：团长见同意共享的参团者 -->
 <view class="card deal-card" wx:if="{{isInitiator && contacts.length}}">
   <view class="kicker"
-    >{{matter.needs_survey && matter.state !== 'done' ? '报名联系名单（' + contacts.length + '）·
-    仅你可见，用于逐户沟通方案' : '参团联系名单（' + contacts.length + '）· 仅你可见，用于建群对接'}}</view
+    >{{matter.needs_survey && matter.state !== 'done' ? '报名联系名单（' + contacts.length + '）· 仅你可见，用于逐户沟通方案' : '参团联系名单（' + contacts.length + '）· 仅你可见，用于建群对接'}}</view
   >
   <view class="term-row" wx:for="{{contacts}}" wx:key="phone">
     <text class="term-label">{{item.name}}</text>
