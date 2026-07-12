@@ -14,8 +14,8 @@
       <!-- 已登记就给整体分析主入口：带「我的选择」上下文，比 quick-ask 更突出 -->
       <view class="card ai-analysis" wx:if="{{block.myAnswered}}" hover-class="frow-hover" bind:tap="askAnalysis">
         <view class="ai-analysis-copy">
-          <view class="ai-analysis-title">生成我的装修需求报告</view>
-          <view class="ai-analysis-sub">把选择整理成决策、待确认项和给商家的需求清单</view>
+          <view class="ai-analysis-title">生成{{block.reportPresentation.report_title || '我的问卷总结'}}</view>
+          <view class="ai-analysis-sub">把选择整理成决策、待确认项和可分享的沟通清单</view>
         </view>
         <text class="frow-arrow">›</text>
       </view>

@@ -43,7 +43,11 @@ test('a resident generates and reuses a structured census report', function () {
 
     $first = $this->postJson("/api/matters/{$matter->id}/census-report")
         ->assertSuccessful()
-        ->assertJsonStructure(['report' => ['headline', 'overview', 'priorities', 'decisions', 'open_questions', 'red_flags', 'merchant_brief']]);
+        ->assertJsonStructure([
+            'report' => ['headline', 'overview', 'priorities', 'decisions', 'open_questions', 'risks', 'share_brief'],
+            'presentation' => ['profile_label', 'report_title', 'risk_label', 'brief_label', 'share_button_label', 'share_disclaimer'],
+        ])
+        ->assertJsonPath('presentation.report_title', '我的问卷总结');
 
     $this->postJson("/api/matters/{$matter->id}/census-report")
         ->assertSuccessful()

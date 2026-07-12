@@ -81,6 +81,7 @@ Page({
           state: census.state,
           pitch: census.pitch,
           purpose: census.purpose || '',
+          reportPresentation: census.report_presentation || {},
           initiatorParty: census.initiator_party || null,
           isInitiator: !!census.is_initiator, // 我是发起者本人 → 露出「邻居授权给你看的登记」入口
           registered: census.registered_count,

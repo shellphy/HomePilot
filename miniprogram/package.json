@@ -1,7 +1,7 @@
 {
   "name": "homepilot-miniprogram",
   "version": "0.1.0",
-  "description": "本小区装修团购小程序",
+  "description": "小区协作与社区事务小程序",
   "scripts": {
     "lint": "eslint . --ext .js",
     "lint:fix": "eslint . --ext .js --fix",
