@@ -7,6 +7,8 @@ use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
 use Illuminate\Support\Str;
+use Laravel\Ai\Responses\StructuredAgentResponse;
+use RuntimeException;
 
 class GenerateCensusReport
 {
@@ -33,7 +35,11 @@ class GenerateCensusReport
             'answers' => $answers,
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
 
-        $report = (new CensusReportGenerator)->prompt($prompt)->toArray();
+        $response = (new CensusReportGenerator)->prompt($prompt);
+        if (! $response instanceof StructuredAgentResponse) {
+            throw new RuntimeException('AI 未返回结构化需求报告');
+        }
+        $report = $response->toArray();
         $payload = $stance->payload ?? [];
         $payload['ai_report'] = $report;
         $payload['ai_report_answers_hash'] = $answerHash;
