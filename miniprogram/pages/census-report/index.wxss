@@ -1,3 +1,69 @@
+.registration-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+.registration-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.registration-count,
+.registration-module-count {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.registration-module {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.registration-module-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 104rpx;
+}
+.registration-module-title {
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.registration-arrow {
+  font-size: 38rpx;
+  line-height: 1;
+  color: var(--text-muted);
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+.registration-arrow-open {
+  transform: rotate(-90deg);
+}
+.registration-answers {
+  border-top: 1rpx solid var(--line);
+}
+.registration-answer {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.registration-answer:last-child {
+  border-bottom: 0;
+}
+.registration-question {
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.registration-value {
+  margin-top: 8rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 1.55;
+}
+.content-heading {
+  padding: 10rpx 8rpx 16rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+}
 .report-empty { padding: 36rpx 28rpx; }
 .empty-title { font-size: 34rpx; font-weight: 700; margin-bottom: 16rpx; }
 .empty-copy { color: var(--text-secondary); font-size: 25rpx; line-height: 1.7; margin-bottom: 28rpx; }
@@ -12,7 +78,7 @@
 .item-copy { color: var(--text-secondary); font-size: 24rpx; line-height: 1.6; margin-top: 6rpx; }
 .item-action { background: var(--brand-bg); color: var(--brand-deep); border-radius: 10rpx; padding: 12rpx 16rpx; font-size: 23rpx; margin-top: 10rpx; }
 .decision-head { display: flex; justify-content: space-between; gap: 18rpx; font-size: 25rpx; font-weight: 600; }
-.choice { color: var(--brand-deep); text-align: right; }
+.choice { color: var(--brand-deep); text-align: left; }
 .warning-card { border-left: 6rpx solid #e09f3e; }
 .merchant-card { border: 1rpx solid var(--brand); }
 .bullet { font-size: 25rpx; line-height: 1.65; margin-bottom: 10rpx; }

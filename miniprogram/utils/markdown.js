@@ -4,6 +4,7 @@
 // 样式一律走内联 style：rich-text 子节点的 class 在组件里不一定生效，内联最稳。
 
 const CODE_MARK = String.fromCharCode(0); // 占位标记，正常文本不会出现，避免与文中内容撞车
+const TYPING_CARET = '<span style="color:#8a8f98;font-weight:400">▍</span>';
 
 function escapeHtml(text) {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -44,11 +45,22 @@ function isBlockStart(line) {
 
 const HEADING_SIZES = [34, 32, 30, 29, 28, 28];
 
+// 光标必须进入 rich-text 的最后一个文本块，放在组件外会被块级段落挤到下一行。
+function appendTypingCaret(html) {
+  const closingTags = ['</p>', '</li>', '</pre>', '</div>'];
+  const insertionAt = Math.max(...closingTags.map((tag) => html.lastIndexOf(tag)));
+
+  return insertionAt >= 0
+    ? `${html.slice(0, insertionAt)}${TYPING_CARET}${html.slice(insertionAt)}`
+    : `${html}${TYPING_CARET}`;
+}
+
 /**
  * @param {string} text 原始 Markdown 文本
+ * @param {boolean} typing 是否在最后一个文字右侧显示流式光标
  * @returns {string} 供 rich-text nodes 使用的 HTML 字符串
  */
-function mdToHtml(text) {
+function mdToHtml(text, typing = false) {
   if (!text) {
     return '';
   }
@@ -121,7 +133,9 @@ function mdToHtml(text) {
     }
   }
 
-  return out.join('');
+  const html = out.join('');
+
+  return typing ? appendTypingCaret(html) : html;
 }
 
 module.exports = { mdToHtml };

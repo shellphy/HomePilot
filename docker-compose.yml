@@ -42,13 +42,13 @@ services:
       - caddy-data:/data
       - caddy-config:/config
 
-  # 队列消费者：ShouldQueue 的通知监听器（微信订阅消息）靠它落地。
+  # 队列消费者：微信订阅消息与 AI 报告生成任务都靠它落地。
   # 复用 app 镜像，只把启动命令换成 queue:work；app 容器负责迁移，故 depends_on。
   worker:
     <<: *app-base
     depends_on:
       - app
-    command: php artisan queue:work --tries=3 --sleep=3 --max-time=3600
+    command: php artisan queue:work --tries=3 --timeout=90 --sleep=3 --max-time=3600
 
 volumes:
   storage-uploads:

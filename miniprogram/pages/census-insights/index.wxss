@@ -38,7 +38,7 @@
 }
 .bar-label {
   width: 190rpx;
-  text-align: right;
+  text-align: left;
   color: var(--text-secondary);
   flex-shrink: 0;
 }
@@ -102,23 +102,57 @@
   margin-top: 4rpx;
 }
 
-/* 整体分析主入口：品牌底色，比常规卡片更抢眼 */
-.ai-analysis {
+/* 个人登记入口固定在统计内容之前 */
+.my-registration-entry {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: var(--brand-bg);
   border: 1rpx solid var(--brand);
 }
-.ai-analysis-title {
+.my-registration-title {
   font-size: 27rpx;
   font-weight: 600;
   color: var(--brand-deep);
 }
-.ai-analysis-sub {
+.my-registration-sub {
   font-size: 22rpx;
   color: var(--text-secondary);
   margin-top: 4rpx;
+}
+
+.stats-section {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.stats-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 108rpx;
+}
+.stats-section-title {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.stats-section-count {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.stats-section-arrow {
+  font-size: 38rpx;
+  line-height: 1;
+  color: var(--text-muted);
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+.stats-section-arrow-open {
+  transform: rotate(-90deg);
+}
+.stats-section-content {
+  padding: 22rpx 0 4rpx;
+  border-top: 1rpx solid var(--line);
 }
 
 .admin-entry {
@@ -135,4 +169,3 @@
   color: var(--text-muted);
   margin-top: 4rpx;
 }
-

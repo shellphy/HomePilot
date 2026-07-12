@@ -1,19 +1,3 @@
-.hero-num {
-  font-size: 56rpx;
-  font-weight: 700;
-}
-.hero-sub {
-  font-size: 26rpx;
-  font-weight: 400;
-  color: var(--text-muted);
-}
-.hero-cap {
-  font-size: 24rpx;
-  color: var(--text-secondary);
-  margin: 6rpx 0 20rpx;
-}
-
-
 .feed-head {
   font-size: 26rpx;
   font-weight: 600;

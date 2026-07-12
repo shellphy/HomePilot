@@ -4,7 +4,7 @@
     <block wx:if="{{needProfile}}">
       <view class="card gate">
         <view class="gate-title">参与前先完善个人资料</view>
-        <view class="gate-sub">这项征集的名单以「楼栋 + 昵称」公示，需要你先选好楼栋号并授权手机号（在「我的 · 个人资料」里随时可改，手机号不会公示）。</view>
+        <view class="gate-sub">填写前需要先选好楼栋号并授权手机号，可在「我的 · 个人资料」里随时修改。</view>
         <t-button theme="primary" block size="large" style="width: 100%" bind:tap="goProfile">去完善资料</t-button>
       </view>
     </block>
@@ -14,16 +14,10 @@
         <view class="ai-preview-head">
           <view class="ai-preview-mark">AI</view>
           <view>
-            <view class="ai-preview-title">答完后，生成「{{reportPresentation.report_title || '我的问卷总结'}}」</view>
-            <view class="ai-preview-sub">不是只有匿名统计，还会根据你的每一道答案生成个人总结</view>
+            <view class="ai-preview-title">答完后，AI 帮你整理「{{reportPresentation.report_title || '我的问卷总结'}}」</view>
+            <view class="ai-preview-sub">根据你的回答生成个人总结</view>
           </view>
         </view>
-        <view class="ai-preview-points">
-          <text>明确选择与优先级</text>
-          <text>风险与待确认项</text>
-          <text>可分享的沟通清单</text>
-        </view>
-        <view class="ai-preview-foot">完成整份问卷后，可在结果页一键生成、继续问 AI 或安全分享。AI 只依据你的答案整理，不替你做决定。</view>
       </view>
 
       <view class="step-bar">

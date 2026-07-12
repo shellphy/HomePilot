@@ -215,7 +215,7 @@
 </view>
 
 <view class="card" wx:if="{{matter.roster.length}}">
-  <view class="kicker">报名接龙 · 楼栋 + 昵称对外可见</view>
+  <view class="kicker">报名接龙</view>
   <view class="roster-row" wx:for="{{matter.roster}}" wx:key="index">
     <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>
     <text>{{item}}</text>

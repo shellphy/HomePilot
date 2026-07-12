@@ -46,5 +46,5 @@
 }
 .aa {
   font-size: 24rpx;
-  text-align: right;
+  text-align: left;
 }

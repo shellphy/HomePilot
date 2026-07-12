@@ -5,5 +5,5 @@
   bind:tap="open"
 >
   <view class="ai-fab-badge"></view>
-  <text class="ai-fab-text">问问 AI</text>
+  <text class="ai-fab-text">问AI</text>
 </view>

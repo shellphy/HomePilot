@@ -84,7 +84,7 @@ Component({
         this.setData({ editorVisible: false, editorText: '' });
         this.fetchQuestions();
       } catch (error) {
-        if (!guardProfileError(error, '提问会以「楼栋 + 昵称」公示，请先在个人资料里选好楼栋号。')) {
+        if (!guardProfileError(error, '提问前请先在个人资料里选好楼栋号。')) {
           wx.showToast({ title: error.message, icon: 'none' });
         }
       } finally {

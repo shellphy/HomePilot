@@ -41,7 +41,7 @@ Page({
     this.openAiChat({
       matterId: this.data.id,
       matterTitle: this.data.title,
-      question: `我正在回答「${text}」。${selected}请结合我家情况告诉我怎么选；信息不足时，只问我一个最关键的问题。`,
+      question: `我正在回答「${text}」。${selected}请结合我的情况告诉我怎么选；信息不足时，只问我一个最关键的问题。`,
     });
   },
 
@@ -204,18 +204,17 @@ Page({
         this.showModule(moduleIndex + 1);
       } else {
         wx.showModal({
-          title: '答完了，去看 AI 总结',
-          content: 'AI 可以把你的选择整理成重点、风险、待确认项和可分享的沟通清单；聚合统计仍只展示匿名结果。',
+          title: '登记完成',
+          content: '可以查看刚才填写的答案，并生成一份 AI 总结。',
           showCancel: false,
-          confirmText: '查看结果',
-          // 从公示页进来的走返回（onShow 自会刷新），避免栈里叠两张公示页；其他入口 redirect 过去看结果
+          confirmText: '查看我的登记',
           success: () => {
             const pages = getCurrentPages();
             const prev = pages[pages.length - 2];
-            if (prev && prev.route === 'pages/census-insights/index') {
+            if (prev && prev.route === 'pages/census-report/index') {
               wx.navigateBack();
             } else {
-              wx.redirectTo({ url: `/pages/census-insights/index?id=${id}` });
+              wx.redirectTo({ url: `/pages/census-report/index?id=${id}` });
             }
           },
         });
