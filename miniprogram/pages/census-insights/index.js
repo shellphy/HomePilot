@@ -21,7 +21,7 @@ Page({
     block: null,
     quickQuestions: ['题目里的选项是什么意思？', '我家该按什么标准选？'],
     showTextAdmin: false, // 管理员且问卷含填空题：露出「文本题明细与归纳」入口
-    aiChatShow: false,    // AI 答疑半屏面板（ai-quick-ask 通过页面方法呼出）
+    aiChatShow: false, // AI 答疑半屏面板（ai-quick-ask 通过页面方法呼出）
   },
 
   // 快捷提问组件经 getCurrentPages 调到这里：半屏弹出 AI 面板
@@ -31,7 +31,11 @@ Page({
   },
 
   onAiChatLeave() {
-    if (this.data.aiChatShow) this.setData({ aiChatShow: false });
+    if (!this.data.aiChatShow) return;
+    // 关闭面板顺手中断在途的流式回答，别让它在后台继续跑
+    const panel = this.selectComponent('#aiChat');
+    if (panel) panel.close();
+    this.setData({ aiChatShow: false });
   },
 
   onLoad(query) {
@@ -62,13 +66,11 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [census, me] = await Promise.all([
-        matters.getCensus(this.data.censusId),
-        getMe(),
-      ]);
+      const [census, me] = await Promise.all([matters.getCensus(this.data.censusId), getMe()]);
       wx.setNavigationBarTitle({ title: census.title });
-      const hasTextQuestions = (census.modules || [])
-        .some((module) => (module.questions || []).some((question) => question.type === 'text'));
+      const hasTextQuestions = (census.modules || []).some((module) =>
+        (module.questions || []).some((question) => question.type === 'text'),
+      );
       this.setData({
         block: {
           title: census.title,

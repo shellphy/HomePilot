@@ -6,14 +6,19 @@ use App\Ai\Agents\MatterExplainer;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
+use Laravel\Ai\Streaming\Events\TextDelta;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
 /**
  * 业主侧 AI 答疑（多轮）：带着事项上下文回答，conversation_id 续聊。
  * AI 解释概念、不代表承诺；涉及商家具体承诺的引导去向团长/商家提问留档。
+ *
+ * 回答以 SSE（text/event-stream）逐字下发，让前端打字机式渲染、并支持中途停止：
+ * 每个 `data:` 帧是一段 JSON——{delta} 增量文字、{error} 出错、
+ * {done, conversation_id, remaining_today} 收尾（会话此刻才落库）。
  */
 class MatterAiChatController extends Controller
 {
@@ -22,7 +27,7 @@ class MatterAiChatController extends Controller
     /** 每人每天的提问上限：模型便宜，限额从宽，只防脚本刷接口。 */
     private const DAILY_LIMIT = 100;
 
-    public function store(Request $request, Matter $matter): JsonResponse
+    public function store(Request $request, Matter $matter): StreamedResponse
     {
         $resident = $this->resident($request);
 
@@ -43,19 +48,45 @@ class MatterAiChatController extends Controller
         $agent = new MatterExplainer($matter, $resident);
         $conversationId = $validated['conversation_id'] ?? null;
 
-        try {
-            $response = ($conversationId !== null
-                ? $agent->continue($conversationId, as: $resident)
-                : $agent->forUser($resident)
-            )->prompt($validated['question']);
-        } catch (Throwable) {
-            abort(502, 'AI 暂时不可用，请稍后再试');
-        }
+        $stream = ($conversationId !== null
+            ? $agent->continue($conversationId, as: $resident)
+            : $agent->forUser($resident)
+        )->stream($validated['question']);
 
-        return response()->json(['data' => [
-            'answer' => $response->text,
-            'conversation_id' => $response->conversationId,
-            'remaining_today' => RateLimiter::remaining($rateKey, self::DAILY_LIMIT),
-        ]]);
+        return response()->stream(function () use ($stream, $rateKey) {
+            try {
+                foreach ($stream as $event) {
+                    if ($event instanceof TextDelta && $event->delta !== '') {
+                        yield $this->frame(['delta' => $event->delta]);
+                    }
+                }
+            } catch (Throwable) {
+                yield $this->frame(['error' => 'AI 暂时不可用，请稍后再试']);
+
+                return;
+            }
+
+            // 迭代结束后 RememberConversation 中间件才写库并回填 conversation_id
+            yield $this->frame([
+                'done' => true,
+                'conversation_id' => $stream->conversationId,
+                'remaining_today' => RateLimiter::remaining($rateKey, self::DAILY_LIMIT),
+            ]);
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no', // 让 nginx 等反代不缓冲，逐帧透传
+        ]);
+    }
+
+    /**
+     * 拼一帧 SSE 事件（Laravel 的流式响应会在每次 yield 后自动冲刷）。
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function frame(array $payload): string
+    {
+        return 'data: '.json_encode($payload, JSON_UNESCAPED_UNICODE)."\n\n";
     }
 }
