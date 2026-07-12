@@ -48,7 +48,7 @@ services:
     <<: *app-base
     depends_on:
       - app
-    command: php artisan queue:work --tries=3 --timeout=90 --sleep=3 --max-time=3600
+    command: php artisan queue:work --tries=3 --timeout=180 --sleep=3 --max-time=3600
 
 volumes:
   storage-uploads:

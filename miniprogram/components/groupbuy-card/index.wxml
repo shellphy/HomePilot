@@ -11,6 +11,5 @@
   </view>
   <view class="gcard-foot">
     <text><text class="gcard-num">{{footCount}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} 人{{footNoun}}</text>
-    <text class="muted">查看详情 ›</text>
   </view>
 </view>

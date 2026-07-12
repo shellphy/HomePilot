@@ -21,7 +21,7 @@
   color: #ffffff;
   background: linear-gradient(135deg, #176bff 0%, #7258e8 100%);
   border-radius: 24rpx;
-  box-shadow: 0 14rpx 36rpx rgba(38, 86, 204, 0.22);
+  box-shadow: 0 10rpx 28rpx rgba(38, 86, 204, 0.16);
 }
 .ai-report-preview::after {
   position: absolute;
@@ -64,7 +64,11 @@
   color: rgba(255, 255, 255, 0.78);
 }
 .step-bar {
-  padding: 4rpx 8rpx 24rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 24rpx;
+  background: var(--brand-bg);
+  border-left: 6rpx solid var(--brand);
+  border-radius: 16rpx;
 }
 .step-text {
   font-size: 26rpx;
@@ -78,6 +82,63 @@
   font-size: 23rpx;
   color: var(--text-muted);
   margin-top: 14rpx;
+  line-height: 1.6;
+}
+
+.question-card {
+  padding: 28rpx;
+  border: 1rpx solid #e2e7e3;
+  box-shadow: 0 4rpx 16rpx rgba(25, 54, 38, 0.04);
+}
+.q-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+}
+.q-index {
+  flex-shrink: 0;
+  width: 40rpx;
+  height: 40rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 40rpx;
+  color: #ffffff;
+  text-align: center;
+  background: var(--brand);
+  border-radius: 50%;
+}
+.q-title {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 600;
+  line-height: 1.55;
+  margin-bottom: 0;
+}
+.question-card .q-explain {
+  padding: 14rpx 18rpx;
+  margin-bottom: 18rpx;
+  color: var(--text-secondary);
+  background: #f7f8f7;
+  border-radius: 12rpx;
+}
+.question-card .q-note {
+  display: inline-block;
+  padding: 2rpx 10rpx;
+  color: var(--text-secondary);
+  background: #eef1ef;
+  border-radius: 999rpx;
+}
+.question-card .chips {
+  gap: 14rpx;
+}
+.question-card .chip {
+  background: #fafbfa;
+  border-color: #dfe5e1;
+}
+.question-card .chip-on {
+  color: var(--brand-deep);
+  background: var(--brand-bg);
+  border: 2rpx solid var(--brand);
 }
 
 /* 末模块的授权勾选：明确是把匿名破例给具体发起方看，默认关 */
@@ -123,19 +184,15 @@
   margin-top: 8rpx;
 }
 
-.skip-note {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--text-muted);
-  padding-top: 20rpx;
-}
-
 /* 每道题的「问 AI」入口：轻量小字，不抢答题主线 */
 .ask-ai {
   display: inline-block;
+  padding: 6rpx 14rpx;
   font-size: 22rpx;
-  color: var(--brand);
-  margin: 6rpx 0 16rpx;
+  color: var(--info);
+  background: var(--info-bg);
+  border-radius: 999rpx;
+  margin: 12rpx 0 18rpx 54rpx;
 }
 
 /* 带解释的选项：竖排行，配色语义与 chip 一致 */
@@ -145,14 +202,14 @@
   gap: 14rpx;
 }
 .opt {
-  border: 1rpx solid var(--line);
-  background: var(--bg-page);
+  border: 1rpx solid #dfe5e1;
+  background: #fafbfa;
   border-radius: 16rpx;
   padding: 18rpx 26rpx;
 }
 .opt-on {
   background: var(--brand-bg);
-  border-color: var(--brand);
+  border: 2rpx solid var(--brand);
 }
 .opt-label {
   font-size: 26rpx;

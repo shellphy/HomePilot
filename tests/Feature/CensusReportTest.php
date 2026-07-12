@@ -7,6 +7,7 @@ use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\Attributes\Timeout as AiTimeout;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Sanctum\Sanctum;
 
@@ -170,4 +171,16 @@ test('a resident cannot read another residents report', function () {
     Sanctum::actingAs(Resident::factory()->create());
 
     $this->getJson("/api/matters/{$matter->id}/census-report")->assertNotFound();
+});
+
+test('report generation timeouts allow slow structured responses to finish', function () {
+    $agentTimeout = (new ReflectionClass(CensusReportGenerator::class))
+        ->getAttributes(AiTimeout::class)[0]
+        ->newInstance()
+        ->value;
+    $job = new GenerateCensusReportJob(1, 'answer-hash');
+
+    expect($agentTimeout)->toBe(150)
+        ->and($job->timeout)->toBe(180)
+        ->and(config('queue.connections.database.retry_after'))->toBe(240);
 });

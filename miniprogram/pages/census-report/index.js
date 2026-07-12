@@ -81,7 +81,7 @@ Page({
       this.applyReport(data);
       if (data.generation_status === 'pending') this.startPolling();
       const presentation = data.presentation || {};
-      wx.setNavigationBarTitle({ title: this.data.token ? (presentation.report_title || '问卷总结') : '我的登记' });
+      wx.setNavigationBarTitle({ title: this.data.token ? (presentation.report_title || '问卷总结') : '我的问卷' });
     });
   },
 
@@ -103,6 +103,10 @@ Page({
 
   goEdit() {
     wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
+  },
+
+  goStats() {
+    wx.navigateTo({ url: `/pages/census-insights/index?id=${this.data.censusId}` });
   },
 
   applyReport(data) {
@@ -184,7 +188,7 @@ Page({
     this.selectComponent('#aiChat').open({
       matterId: this.data.censusId,
       matterTitle: this.data.title,
-      question: '结合我的需求报告，先指出最需要我尽快确认的一件事，并告诉我怎么确认。',
+      question: '结合我的问卷总结，先指出最需要我尽快确认的一件事，并告诉我怎么确认。',
     });
   },
 

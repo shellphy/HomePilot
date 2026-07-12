@@ -9,7 +9,7 @@ use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[Timeout(60)]
+#[Timeout(150)]
 class CensusReportGenerator implements Agent, HasStructuredOutput
 {
     use Promptable;
