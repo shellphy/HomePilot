@@ -70,6 +70,26 @@ function saveCensus(id, data) {
   return request(`/matters/${id}/census`, { method: 'PUT', data });
 }
 
+function getCensusReport(id) {
+  return request(`/matters/${id}/census-report`);
+}
+
+function generateCensusReport(id) {
+  return request(`/matters/${id}/census-report`, { method: 'POST' });
+}
+
+function shareCensusReport(id) {
+  return request(`/matters/${id}/census-report/share`, { method: 'POST' });
+}
+
+function revokeCensusReport(id) {
+  return request(`/matters/${id}/census-report/share`, { method: 'DELETE' });
+}
+
+function getSharedCensusReport(token) {
+  return request(`/census-reports/${token}`);
+}
+
 // 发起者视图：主动勾选授权的参与者明细（后端限发起者本人/管理员可看）
 function getCensusConsented(id) {
   return request(`/matters/${id}/census-consented`);
@@ -127,6 +147,11 @@ module.exports = {
   postUpdate,
   getCensus,
   saveCensus,
+  getCensusReport,
+  generateCensusReport,
+  shareCensusReport,
+  revokeCensusReport,
+  getSharedCensusReport,
   getCensusConsented,
   draftGlossary,
   aiChatStream,

@@ -39,12 +39,7 @@ Page({
 
   // 答完的主入口：带上「我的登记」让 AI 做整体分析，比 quick-ask 更突出
   askAnalysis() {
-    const { block, censusId } = this.data;
-    this.openAiChat({
-      matterId: censusId,
-      matterTitle: block.title,
-      question: '根据我这次的登记，帮我做个整体分析：我的选择说明我家更适合什么？还有哪些该注意的？',
-    });
+    wx.navigateTo({ url: `/pages/census-report/index?id=${this.data.censusId}` });
   },
 
   onLoad(query) {

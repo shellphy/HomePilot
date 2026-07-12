@@ -201,6 +201,15 @@ PROMPT.$this->matterContext();
                 }
                 $lines[] = "- {$line}";
             }
+
+            $reportStance = $this->matter->stances()
+                ->where('mode', Stance::MODE_REGISTER)
+                ->where('resident_id', $this->asker->id)
+                ->first();
+            $report = $reportStance?->payload['ai_report'] ?? null;
+            if (is_array($report)) {
+                $lines[] = '已生成的个人装修需求报告：'.json_encode($report, JSON_UNESCAPED_UNICODE);
+            }
         }
 
         foreach ($this->topChoiceLines($questionMap) as $i => $line) {
