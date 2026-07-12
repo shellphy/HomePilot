@@ -1,6 +1,33 @@
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 
+function formatAnswer(value) {
+  return Array.isArray(value) ? value.join('、') : String(value || '');
+}
+
+function registrationModules(census, currentModules = []) {
+  const answers = census.answers || {};
+  const expanded = Object.fromEntries(currentModules.map((module) => [module.key, module.expanded]));
+
+  return (census.modules || [])
+    .map((module) => ({
+      key: module.key || module.title,
+      title: module.title,
+      questions: (module.questions || [])
+        .filter((question) => answers[question.key] !== undefined)
+        .map((question) => ({
+          key: question.key,
+          text: question.text,
+          answer: formatAnswer(answers[question.key]),
+        })),
+    }))
+    .filter((module) => module.questions.length)
+    .map((module, index) => ({
+      ...module,
+      expanded: expanded[module.key] === undefined ? index === 0 : expanded[module.key],
+    }));
+}
+
 Page({
   behaviors: [load],
 
@@ -13,12 +40,21 @@ Page({
     shareEnabled: false,
     shareToken: '',
     generating: false,
+    generationStatus: 'idle',
+    generationError: '',
+    registrationModules: [],
+    answeredCount: 0,
+    censusState: '',
     aiChatShow: false,
     presentation: {},
   },
 
   onLoad(query) {
+    this.pageActive = true;
     this.setData({ censusId: Number(query.id || 0), token: query.token || '' });
+  },
+
+  onShow() {
     this.reload();
   },
 
@@ -26,15 +62,47 @@ Page({
     this.reload().finally(() => wx.stopPullDownRefresh());
   },
 
+  onUnload() {
+    this.pageActive = false;
+    this.stopPolling();
+  },
+
   reload() {
     return this.runLoad(async () => {
       const data = this.data.token
         ? await matters.getSharedCensusReport(this.data.token)
-        : await matters.getCensusReport(this.data.censusId);
+        : await Promise.all([
+          matters.getCensusReport(this.data.censusId),
+          matters.getCensus(this.data.censusId),
+        ]).then(([report, census]) => {
+          this.applyRegistration(census);
+          return report;
+        });
       this.applyReport(data);
+      if (data.generation_status === 'pending') this.startPolling();
       const presentation = data.presentation || {};
-      wx.setNavigationBarTitle({ title: presentation.report_title || '我的问卷总结' });
+      wx.setNavigationBarTitle({ title: this.data.token ? (presentation.report_title || '问卷总结') : '我的登记' });
     });
+  },
+
+  applyRegistration(census) {
+    this.setData({
+      registrationModules: registrationModules(census, this.data.registrationModules),
+      answeredCount: Object.keys(census.answers || {}).length,
+      censusState: census.state || '',
+    });
+  },
+
+  toggleRegistrationModule(event) {
+    const index = Number(event.currentTarget.dataset.index);
+    const modules = this.data.registrationModules.map((module, moduleIndex) =>
+      moduleIndex === index ? { ...module, expanded: !module.expanded } : module,
+    );
+    this.setData({ registrationModules: modules });
+  },
+
+  goEdit() {
+    wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
   },
 
   applyReport(data) {
@@ -45,6 +113,9 @@ Page({
       shareEnabled: !!data.share_enabled,
       shareToken: data.share_token || this.data.token || '',
       presentation: data.presentation || {},
+      generationStatus: data.generation_status || (data.report ? 'completed' : 'idle'),
+      generationError: data.generation_error || '',
+      generating: data.generation_status === 'pending',
     });
   },
 
@@ -52,11 +123,39 @@ Page({
     if (this.data.generating) return;
     this.setData({ generating: true });
     try {
-      this.applyReport(await matters.generateCensusReport(this.data.censusId));
+      const data = await matters.generateCensusReport(this.data.censusId);
+      this.applyReport(data);
+      if (data.generation_status === 'pending') this.startPolling();
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
       this.setData({ generating: false });
+    }
+  },
+
+  startPolling() {
+    if (!this.pageActive) return;
+    this.stopPolling();
+    this.pollTimer = setTimeout(() => this.pollReport(), 2000);
+  },
+
+  stopPolling() {
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
+    }
+  },
+
+  async pollReport() {
+    try {
+      const data = await matters.getCensusReport(this.data.censusId);
+      this.applyReport(data);
+      if (data.generation_status === 'pending') {
+        this.startPolling();
+      } else if (data.generation_status === 'failed') {
+        wx.showToast({ title: data.generation_error || '生成失败，请稍后重试', icon: 'none' });
+      }
+    } catch {
+      if (this.pageActive) this.startPolling();
     }
   },
 

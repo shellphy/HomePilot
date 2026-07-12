@@ -115,7 +115,7 @@
 
 <view class="card" wx:if="{{matter.roster.length}}">
   <view class="kicker"
-    >{{meta.roster}} · {{matter.roster_hidden ? '不对外公示，仅你可见' : '楼栋 + 昵称对外可见'}}</view
+    >{{meta.roster}}{{matter.roster_hidden ? ' · 仅你可见' : ''}}</view
   >
   <view class="roster-row" wx:for="{{matter.roster}}" wx:key="index">
     <text class="roster-idx">{{index + 1 < 10 ? '0' + (index + 1) : index + 1}}</text>

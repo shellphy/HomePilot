@@ -275,7 +275,7 @@ Page({
         }
       }
     } catch (error) {
-      if (!guardProfileError(error, '你发起后就是这件事的牵头人，也会以「楼栋 + 昵称」出现在公示名单里，请先在个人资料里选好楼栋号。')) {
+      if (!guardProfileError(error, '发起前请先在个人资料里选好楼栋号。')) {
         wx.showToast({ title: error.message, icon: 'none' });
       }
       // 只在失败时复位：成功分支保持 loading 直到离开页面，堵住 toast 里的二次提交

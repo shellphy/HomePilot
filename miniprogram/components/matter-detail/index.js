@@ -178,7 +178,7 @@ Component({
 
     // 业主没选楼栋号会被后端拦下（errors.profile）：引导去个人资料补全，回来即可加入
     handleJoinError(error) {
-      if (!guardProfileError(error, '名单以「楼栋 + 昵称」记录，加入前请先在个人资料里选好楼栋号。')) {
+      if (!guardProfileError(error, '加入前请先在个人资料里选好楼栋号。')) {
         wx.showToast({ title: error.message, icon: 'none' });
       }
     },

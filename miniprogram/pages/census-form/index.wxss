@@ -63,30 +63,6 @@
   line-height: 1.55;
   color: rgba(255, 255, 255, 0.78);
 }
-.ai-preview-points {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10rpx;
-  margin-top: 22rpx;
-}
-.ai-preview-points text {
-  padding: 8rpx 14rpx;
-  font-size: 21rpx;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1rpx solid rgba(255, 255, 255, 0.22);
-  border-radius: 999rpx;
-}
-.ai-preview-foot {
-  position: relative;
-  z-index: 1;
-  margin-top: 18rpx;
-  font-size: 21rpx;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.84);
-}
-
 .step-bar {
   padding: 4rpx 8rpx 24rpx;
 }

@@ -152,7 +152,7 @@ Component({
         const shown = this.fullText.slice(0, this.shownLen);
         this.setData({
           [`messages[${this.streamingIndex}].text`]: shown,
-          [`messages[${this.streamingIndex}].nodes`]: mdToHtml(shown),
+          [`messages[${this.streamingIndex}].nodes`]: mdToHtml(shown, true),
         });
         this.scrollToBottom();
       } else if (!this.receiving) {
@@ -173,6 +173,8 @@ Component({
       // 停止时若 AI 一个字都没吐出来，去掉那个空气泡（提问保留在会话里）
       if (messages[idx] && messages[idx].role === 'ai' && !messages[idx].text) {
         messages = messages.slice(0, idx);
+      } else if (messages[idx] && messages[idx].role === 'ai') {
+        messages[idx] = { ...messages[idx], nodes: mdToHtml(messages[idx].text) };
       }
       this.streamingIndex = -1;
       this.setData({ messages, busy: false, streamingIndex: -1 });

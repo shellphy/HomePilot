@@ -11,51 +11,55 @@
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
       </view>
 
-      <!-- 已登记就给整体分析主入口：带「我的选择」上下文，比 quick-ask 更突出 -->
-      <view class="card ai-analysis" wx:if="{{block.myAnswered}}" hover-class="frow-hover" bind:tap="askAnalysis">
-        <view class="ai-analysis-copy">
-          <view class="ai-analysis-title">生成{{block.reportPresentation.report_title || '我的问卷总结'}}</view>
-          <view class="ai-analysis-sub">把选择整理成决策、待确认项和可分享的沟通清单</view>
+      <!-- 个人登记入口固定在聚合内容前，不必滑到页面底部 -->
+      <view class="card my-registration-entry" wx:if="{{block.myAnswered}}" hover-class="frow-hover" bind:tap="goMyRegistration">
+        <view>
+          <view class="my-registration-title">查看我的登记</view>
+          <view class="my-registration-sub">已回答 {{block.myAnswered}} 题 · 查看答案和 AI 总结</view>
         </view>
         <text class="frow-arrow">›</text>
       </view>
-
-      <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
-        <view class="card" wx:if="{{section.questions.length}}">
-          <view class="kicker">{{section.title}}</view>
-          <view class="qa" wx:for="{{section.questions}}" wx:for-item="question" wx:key="text">
-            <view class="qa-text">{{question.text}}</view>
-            <view class="bar" wx:for="{{question.bars}}" wx:key="label">
-              <view class="bar-label">{{item.label}}</view>
-              <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
-              <view class="bar-value">{{item.count}}</view>
-            </view>
-            <!-- 填空题：管理员归纳后的匿名主题（原文永不公示） -->
-            <view class="theme" wx:for="{{question.themes}}" wx:for-item="theme" wx:key="title">
-              <view class="theme-head">
-                <text class="theme-title">{{theme.title}}</text>
-                <text class="theme-count">{{theme.count}} 条</text>
-              </view>
-              <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
-            </view>
-            <view class="theme-foot" wx:if="{{question.themes.length}}"
-              >归纳自 {{block.registered}} 份登记的文字反馈</view
-            >
-          </view>
-        </view>
-      </block>
-
-      <!-- 宽度用 style 直传：TDesign 模板会把 style 显式转发到内部按钮根节点，
-           外部 class 在 virtualHost 渲染下不一定作用到按钮盒子 -->
       <t-button
-        wx:if="{{block.state === 'open'}}"
+        wx:elif="{{block.state === 'open'}}"
         theme="primary"
         block
         size="large"
-        style="width: 100%; margin-bottom: 12rpx"
+        style="width: 100%; margin-bottom: 24rpx"
         bind:tap="goCensusForm"
-        >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button
-      >
+      >参与登记</t-button>
+
+      <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
+        <view class="card stats-section" wx:if="{{section.questions.length}}">
+          <view class="stats-section-head" data-index="{{index}}" bind:tap="toggleSection">
+            <view>
+              <view class="stats-section-title">{{section.title}}</view>
+              <view class="stats-section-count">{{section.questions.length}} 题</view>
+            </view>
+            <text class="stats-section-arrow {{section.expanded ? 'stats-section-arrow-open' : ''}}">›</text>
+          </view>
+          <view wx:if="{{section.expanded}}" class="stats-section-content">
+            <view class="qa" wx:for="{{section.questions}}" wx:for-item="question" wx:key="text">
+              <view class="qa-text">{{question.text}}</view>
+              <view class="bar" wx:for="{{question.bars}}" wx:key="label">
+                <view class="bar-label">{{item.label}}</view>
+                <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
+                <view class="bar-value">{{item.count}}</view>
+              </view>
+              <!-- 填空题：管理员归纳后的匿名主题（原文永不公示） -->
+              <view class="theme" wx:for="{{question.themes}}" wx:for-item="theme" wx:key="title">
+                <view class="theme-head">
+                  <text class="theme-title">{{theme.title}}</text>
+                  <text class="theme-count">{{theme.count}} 条</text>
+                </view>
+                <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
+              </view>
+              <view class="theme-foot" wx:if="{{question.themes.length}}"
+                >归纳自 {{block.registered}} 份登记的文字反馈</view
+              >
+            </view>
+          </view>
+        </view>
+      </block>
 
       <!-- 发起者本人入口：邻居主动勾选授权给你看的登记明细 -->
       <view class="card admin-entry" wx:if="{{block.isInitiator}}" hover-class="frow-hover" bind:tap="goConsented">

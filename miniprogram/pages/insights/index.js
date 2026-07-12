@@ -20,7 +20,6 @@ Page({
   behaviors: [load],
 
   data: {
-    residents: 0,
     openCards: [], // 进行中的征集大卡
     pastItems: [], // 已结束的往期列表
     communityName: '',
@@ -84,7 +83,6 @@ Page({
         }));
 
       this.setData({
-        residents: stats.residents,
         openCards,
         pastItems,
         communityName: (options.community && options.community.name) || '',
@@ -96,7 +94,9 @@ Page({
     wx.navigateTo({ url: `/pages/census-insights/index?id=${event.currentTarget.dataset.id}` });
   },
 
-  goCensusForm(event) {
-    wx.navigateTo({ url: `/pages/census-form/index?id=${event.currentTarget.dataset.id}` });
+  goRegistration(event) {
+    const { id, answered } = event.currentTarget.dataset;
+    const page = answered ? 'census-report' : 'census-form';
+    wx.navigateTo({ url: `/pages/${page}/index?id=${id}` });
   },
 });

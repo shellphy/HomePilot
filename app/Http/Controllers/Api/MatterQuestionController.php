@@ -70,7 +70,7 @@ class MatterQuestionController extends Controller
         // 提问与接龙同一公示口径：楼栋 + 昵称
         if ($resident->unit_label === '') {
             throw ValidationException::withMessages([
-                'profile' => '提问会以「楼栋 + 昵称」公示，请先在「我的 · 个人资料」里选好楼栋号',
+                'profile' => '提问前请先在「我的 · 个人资料」里选好楼栋号',
             ]);
         }
 

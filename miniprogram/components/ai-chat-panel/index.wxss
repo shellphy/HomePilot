@@ -28,18 +28,24 @@
 .chat-body {
   flex: 1;
   min-height: 0;
-  padding: 24rpx;
+  /* 右侧多留一点空间给原生滚动条，避免压到访客消息气泡 */
+  padding: 24rpx 32rpx 24rpx 24rpx;
   box-sizing: border-box;
 }
 .bubble-row {
   display: flex;
+  /* AI 气泡右侧保留呼吸空间，长回复不会横跨整个消息区 */
+  padding-right: 48rpx;
   margin-bottom: 20rpx;
 }
 .bubble-row-me {
   justify-content: flex-end;
+  /* 访客气泡收窄并避开右侧滚动条 */
+  padding-right: 8rpx;
+  padding-left: 56rpx;
 }
 .bubble {
-  max-width: 82%;
+  max-width: 78%;
   padding: 20rpx 26rpx;
   border-radius: 20rpx;
   font-size: 28rpx;
@@ -64,22 +70,6 @@
   display: inline;
   font-size: 28rpx;
   line-height: 1.7;
-}
-/* 打字机光标：跟在流式文字末尾闪烁 */
-.type-caret {
-  display: inline-block;
-  width: 8rpx;
-  height: 30rpx;
-  margin-left: 4rpx;
-  vertical-align: -4rpx;
-  border-radius: 2rpx;
-  background: var(--brand);
-  animation: caret-blink 1s steps(1) infinite;
-}
-@keyframes caret-blink {
-  50% {
-    opacity: 0;
-  }
 }
 .chat-quota {
   text-align: center;

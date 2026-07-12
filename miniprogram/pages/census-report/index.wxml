@@ -1,14 +1,49 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <block wx:if="{{!token}}">
+      <view class="card registration-summary">
+        <view>
+          <view class="registration-title">我的登记</view>
+          <view class="registration-count">已回答 {{answeredCount}} 题</view>
+        </view>
+        <t-button wx:if="{{censusState === 'open'}}" theme="light" size="medium" bind:tap="goEdit">修改登记</t-button>
+      </view>
+
+      <view class="card registration-module" wx:for="{{registrationModules}}" wx:key="key">
+        <view class="registration-module-head" data-index="{{index}}" bind:tap="toggleRegistrationModule">
+          <view>
+            <view class="registration-module-title">{{item.title}}</view>
+            <view class="registration-module-count">{{item.questions.length}} 题</view>
+          </view>
+          <text class="registration-arrow {{item.expanded ? 'registration-arrow-open' : ''}}">›</text>
+        </view>
+        <view wx:if="{{item.expanded}}" class="registration-answers">
+          <view class="registration-answer" wx:for="{{item.questions}}" wx:for-item="question" wx:key="key">
+            <view class="registration-question">{{question.text}}</view>
+            <view class="registration-value">{{question.answer}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="content-heading">AI 总结</view>
+    </block>
+
     <block wx:if="{{!token && !report}}">
       <view class="card report-empty">
-        <view class="empty-title">把答卷变成真正能用的需求报告</view>
-        <view class="empty-copy">{{presentation.empty_description}}</view>
-        <t-button theme="primary" block size="large" loading="{{generating}}" bind:tap="generate">生成我的报告</t-button>
+        <view class="empty-title">{{generationStatus === 'pending' ? 'AI 正在生成报告' : (generationStatus === 'failed' ? '报告生成失败' : '把答卷变成真正能用的需求报告')}}</view>
+        <view class="empty-copy">{{generationStatus === 'pending' ? '生成会在后台继续，稍后自动显示结果' : (generationError || presentation.empty_description)}}</view>
+        <t-button
+          theme="primary"
+          block
+          size="large"
+          loading="{{generating}}"
+          disabled="{{generationStatus === 'pending'}}"
+          bind:tap="generate"
+        >{{generationStatus === 'failed' ? '重新生成' : '生成我的报告'}}</t-button>
       </view>
     </block>
 
-    <block wx:elif="{{report}}">
+    <block wx:if="{{report}}">
       <view class="report-hero">
         <view class="report-kicker">{{presentation.profile_label}}</view>
         <view class="report-title">{{report.headline}}</view>
