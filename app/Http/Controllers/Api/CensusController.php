@@ -26,6 +26,7 @@ class CensusController extends Controller
     {
         abort_unless($matter->type === 'census', 404);
 
+        $resident = $this->resident($request);
         $stance = $this->stanceOf($matter, $request);
 
         return response()->json([
@@ -43,6 +44,10 @@ class CensusController extends Controller
                 'label' => $matter->initiatorParty->typeLabel(),
                 'name' => $matter->initiatorParty->name,
             ] : null,
+            // 我是不是这份征集的发起者本人（决定要不要露出「看邻居授权登记」入口）
+            'is_initiator' => $matter->initiator_id === $resident->id,
+            // 我这次登记有没有勾选「让发起者看到我的登记」（回填勾选框，改登记时保持上次选择）
+            'my_visible_to_initiator' => (bool) ($stance?->payload['visible_to_initiator'] ?? false),
         ]);
     }
 
@@ -64,16 +69,20 @@ class CensusController extends Controller
             ]);
         }
 
-        /** @var array<string, mixed> $answers */
-        $answers = $request->validate(['answers' => ['required', 'array']]);
+        /** @var array{answers: array<string, mixed>, visible_to_initiator?: bool} $validated */
+        $validated = $request->validate([
+            'answers' => ['required', 'array'],
+            // 参与者主动授权：勾选后本份征集的发起者本人能看到我的信息+逐题答案（默认关）
+            'visible_to_initiator' => ['sometimes', 'boolean'],
+        ]);
 
         $questions = collect($matter->payloadList('modules'))
             ->flatMap(fn (array $module): array => $module['questions'] ?? [])
             ->keyBy('key');
-        $this->validateAnswers($answers['answers'], $questions);
+        $this->validateAnswers($validated['answers'], $questions);
 
         $stance = $this->stanceOf($matter, $request);
-        $merged = array_merge($stance?->payload['answers'] ?? [], $answers['answers']);
+        $merged = array_merge($stance?->payload['answers'] ?? [], $validated['answers']);
 
         // 必答题在合并后必须齐全（保证基础模块先答）
         foreach ($questions as $key => $question) {
@@ -82,13 +91,21 @@ class CensusController extends Controller
             }
         }
 
+        $payload = ['answers' => $merged];
+        // 授权标记随答案一起进 payload：本次带了就更新，没带则沿用上次选择（默认 false）
+        if ($request->has('visible_to_initiator')) {
+            $payload['visible_to_initiator'] = $request->boolean('visible_to_initiator');
+        } elseif (array_key_exists('visible_to_initiator', $stance?->payload ?? [])) {
+            $payload['visible_to_initiator'] = (bool) $stance->payload['visible_to_initiator'];
+        }
+
         if ($stance) {
-            $stance->reviseTo(['answers' => $merged]);
+            $stance->reviseTo($payload);
         } else {
             $stance = $matter->stances()->create([
                 'resident_id' => $resident->id,
                 'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => $merged],
+                'payload' => $payload,
             ]);
         }
 
@@ -97,6 +114,59 @@ class CensusController extends Controller
             'total' => $questions->count(),
             'registered_count' => $matter->stances()->where('mode', Stance::MODE_REGISTER)->count(),
         ], $stance->wasRecentlyCreated ? 201 : 200);
+    }
+
+    /**
+     * 发起者视图：只列出主动勾选「让发起者看到我的登记」的参与者，
+     * 含显示名、手机号（限收联系方式的征集且业主已授权）、逐题答案（换算成题面文字）。
+     * 匿名破例仅对本份征集的发起者本人开放；管理员始终可看全部（走 admin registrations）。
+     */
+    public function consented(Request $request, Matter $matter): JsonResponse
+    {
+        abort_unless($matter->type === 'census', 404);
+
+        $resident = $this->resident($request);
+        abort_unless($matter->initiator_id === $resident->id || $resident->is_admin, 403);
+
+        $questions = collect($matter->payloadList('modules'))
+            ->flatMap(fn (array $module): array => $module['questions'] ?? [])
+            ->keyBy('key');
+
+        $collectsContact = (bool) $matter->payloadValue('collects_contact', false);
+
+        $consented = $matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
+            ->where('payload->visible_to_initiator', true)
+            ->with('resident')
+            ->latest()
+            ->get()
+            ->map(fn (Stance $stance): array => [
+                'id' => $stance->id,
+                'name' => $stance->resident->displayName(),
+                'phone' => $collectsContact ? $stance->resident->phone : '',
+                'created_at' => $stance->created_at?->format('Y-m-d H:i'),
+                'answers' => $this->readableAnswers($stance, $questions),
+            ]);
+
+        return response()->json(['data' => $consented]);
+    }
+
+    /**
+     * 把一份登记的答案 key 换算成题面文字（多选顿号连接，填空出原文）。
+     *
+     * @param  Collection<array-key, array<string, mixed>>  $questions
+     * @return Collection<int, array{question: string, answer: string}>
+     */
+    private function readableAnswers(Stance $stance, Collection $questions): Collection
+    {
+        $answers = $stance->payload['answers'] ?? [];
+
+        return collect(is_array($answers) ? $answers : [])
+            ->map(fn (mixed $value, int|string $key): array => [
+                'question' => $questions[$key]['text'] ?? $key,
+                'answer' => is_array($value) ? implode('、', $value) : (string) $value,
+            ])
+            ->values();
     }
 
     private function stanceOf(Matter $matter, Request $request): ?Stance

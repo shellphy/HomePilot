@@ -59,6 +59,15 @@
         bind:tap="goCensusForm"
       >{{block.myAnswered ? '更新我的登记（已答 ' + block.myAnswered + ' 题）' : '参与登记（2 分钟）'}}</t-button>
 
+      <!-- 发起者本人入口：邻居主动勾选授权给你看的登记明细 -->
+      <view class="card admin-entry" wx:if="{{block.isInitiator}}" hover-class="frow-hover" bind:tap="goConsented">
+        <view>
+          <view class="admin-entry-title">邻居授权给你看的登记</view>
+          <view class="admin-entry-sub">勾选了「让发起者看到我的登记」的邻居 · 含联系方式与逐题回答</view>
+        </view>
+        <text class="frow-arrow">›</text>
+      </view>
+
       <view class="card admin-entry" wx:if="{{showTextAdmin}}" hover-class="frow-hover" bind:tap="goTextAdmin">
         <view>
           <view class="admin-entry-title">文本题明细与归纳</view>

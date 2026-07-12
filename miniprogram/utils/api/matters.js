@@ -70,6 +70,11 @@ function saveCensus(id, data) {
   return request(`/matters/${id}/census`, { method: 'PUT', data });
 }
 
+// 发起者视图：主动勾选授权的参与者明细（后端限发起者本人/管理员可看）
+function getCensusConsented(id) {
+  return request(`/matters/${id}/census-consented`);
+}
+
 // 「买前必懂」AI 起草：返回三段草稿（是什么/怎么选/避坑），由填表人校订后提交
 function draftGlossary(term, category) {
   return request('/glossary/draft', { method: 'POST', data: { term, category } });
@@ -120,6 +125,7 @@ module.exports = {
   postUpdate,
   getCensus,
   saveCensus,
+  getCensusConsented,
   draftGlossary,
   aiChat,
   getQuestions,

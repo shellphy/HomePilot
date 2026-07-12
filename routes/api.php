@@ -53,6 +53,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/matters/{matter}/updates', [MatterUpdateController::class, 'store']);
     Route::get('/matters/{matter}/census', [CensusController::class, 'show']);
     Route::put('/matters/{matter}/census', [CensusController::class, 'store']);
+    // 发起者视图：主动勾选授权的参与者明细（非 admin，授权收窄到发起者本人）
+    Route::get('/matters/{matter}/census-consented', [CensusController::class, 'consented']);
 
     // 「买前必懂」AI 起草（发起/编辑团购表单用，草稿经人工校订后随事项提交）
     Route::post('/glossary/draft', [GlossaryDraftController::class, 'store']);

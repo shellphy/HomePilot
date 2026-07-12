@@ -86,6 +86,7 @@ Page({
           pitch: census.pitch,
           purpose: census.purpose || '',
           initiatorParty: census.initiator_party || null,
+          isInitiator: !!census.is_initiator, // 我是发起者本人 → 露出「邻居授权给你看的登记」入口
           registered: census.registered_count,
           myAnswered: Object.keys(census.answers || {}).length,
           sections: census.aggregates.map((module) => ({
@@ -110,6 +111,10 @@ Page({
 
   goCensusForm() {
     wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
+  },
+
+  goConsented() {
+    wx.navigateTo({ url: `/pages/census-consented/index?id=${this.data.censusId}` });
   },
 
 });

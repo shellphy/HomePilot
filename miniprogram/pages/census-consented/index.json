@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "邻居授权登记",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}
