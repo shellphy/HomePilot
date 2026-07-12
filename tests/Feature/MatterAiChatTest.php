@@ -4,8 +4,40 @@ use App\Ai\Agents\MatterExplainer;
 use App\Models\Matter;
 use App\Models\Resident;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Testing\TestResponse;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Sanctum\Sanctum;
+
+/**
+ * 把 SSE 流拆成事件数组：每个 `data:` 帧是一段 JSON。
+ *
+ * @return list<array<string, mixed>>
+ */
+function sseEvents(TestResponse $response): array
+{
+    return collect(explode("\n\n", $response->streamedContent()))
+        ->map(fn (string $frame) => trim($frame))
+        ->filter(fn (string $frame) => str_starts_with($frame, 'data:'))
+        ->map(fn (string $frame) => json_decode(trim(substr($frame, 5)), true))
+        ->filter()
+        ->values()
+        ->all();
+}
+
+/** 拼接流里所有 delta，得到完整回答。 */
+function sseAnswer(TestResponse $response): string
+{
+    return collect(sseEvents($response))
+        ->pluck('delta')
+        ->filter()
+        ->join('');
+}
+
+/** 取收尾帧（带 conversation_id / remaining_today）。 */
+function sseDone(TestResponse $response): array
+{
+    return collect(sseEvents($response))->firstWhere('done', true) ?? [];
+}
 
 test('a resident asks the ai about a groupbuy and can follow up in the same conversation', function () {
     MatterExplainer::fake(['一台外机带四个内机。', '三房两厅通常够用。']);
@@ -16,18 +48,18 @@ test('a resident asks the ai about a groupbuy and can follow up in the same conv
         'question' => '1 拖 4 是什么意思？',
     ])->assertSuccessful();
 
-    expect($first->json('data.answer'))->toBe('一台外机带四个内机。')
-        ->and($first->json('data.conversation_id'))->not->toBeNull()
-        ->and($first->json('data.remaining_today'))->toBe(99);
+    expect(sseAnswer($first))->toBe('一台外机带四个内机。')
+        ->and(sseDone($first)['conversation_id'])->not->toBeNull()
+        ->and(sseDone($first)['remaining_today'])->toBe(99);
 
     $second = $this->postJson("/api/matters/{$matter->id}/ai-chat", [
         'question' => '那我家三房够吗？',
-        'conversation_id' => $first->json('data.conversation_id'),
+        'conversation_id' => sseDone($first)['conversation_id'],
     ])->assertSuccessful();
 
     // fake 在续聊路径下按默认响应兜底，这里只关心会话延续与有回答
-    expect($second->json('data.answer'))->toBeString()->not->toBeEmpty()
-        ->and($second->json('data.conversation_id'))->toBe($first->json('data.conversation_id'));
+    expect(sseAnswer($second))->toBeString()->not->toBeEmpty()
+        ->and(sseDone($second)['conversation_id'])->toBe(sseDone($first)['conversation_id']);
 
     MatterExplainer::assertPrompted(fn (AgentPrompt $prompt) => $prompt->contains('1 拖 4'));
 });
