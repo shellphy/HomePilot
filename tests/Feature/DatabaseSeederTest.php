@@ -49,6 +49,12 @@ test('it seeds both primer censuses with valid question schemas and example answ
     $hardFinishQuestions = collect($censuses['硬装怎么做 · 答题即入门']->payload['modules'])
         ->flatMap(fn (array $module): array => $module['questions']);
 
-    expect($hardFinishQuestions)->toHaveCount(26)
-        ->and($hardFinishQuestions->pluck('key'))->toContain('handover_check', 'soundproofing', 'lighting');
+    expect($hardFinishQuestions)->toHaveCount(28)
+        ->and($hardFinishQuestions->pluck('key'))->toContain(
+            'handover_check',
+            'trade_coordination',
+            'soundproofing',
+            'tile_layout_acceptance',
+            'lighting',
+        );
 });
