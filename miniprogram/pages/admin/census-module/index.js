@@ -1,5 +1,5 @@
-// 管理端 · 问卷模块：标题/引言 + 该模块的题目列表
-const admin = require('../../../utils/api/admin');
+// 问卷模块：标题/引言 + 该模块的题目列表。走统一 /matters 接口。
+const matters = require('../../../utils/api/matters');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
 
@@ -28,8 +28,26 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const res = await admin.getMatter(this.data.id);
-      const modules = res.data.payload.modules || [];
+      const res = await matters.getMatter(this.data.id);
+      // 后端只对管理员下发原始 payload：拿不到就挡住，避免非管理员误编丢字段（见交付报告后端后续项）
+      if (res.data.payload === undefined) {
+        wx.showModal({
+          title: '暂不可编辑问卷',
+          content: '问卷题目的编辑目前仅对管理员开放，其他发起人的编辑入口待后端支持。',
+          showCancel: false,
+          success: () => wx.navigateBack(),
+        });
+        return;
+      }
+      const payload = res.data.payload || {};
+      // 保留征集的其它 payload 字段（pitch/purpose/collects_contact），保存模块时一并回传，
+      // 否则后端 payloadFrom 会把没传的键重置掉
+      this._preserved = {
+        pitch: payload.pitch || '',
+        purpose: payload.purpose || '',
+        collects_contact: !!payload.collects_contact,
+      };
+      const modules = payload.modules || [];
       const current = this.data.mi >= 0 ? modules[this.data.mi] : null;
       this.setData({
         matterTitle: res.data.title,
@@ -73,9 +91,10 @@ Page({
 
     this.setData({ submitting: true });
     try {
-      await admin.updateMatter(id, {
+      await matters.updateMatter(id, {
         title: this.data.matterTitle,
-        payload: { modules: next },
+        ...this._preserved,
+        modules: next,
       });
       this.clearDirty();
       if (mi < 0) {
@@ -107,9 +126,10 @@ Page({
         const next = [...this.data.modules];
         next.splice(this.data.mi, 1);
         try {
-          await admin.updateMatter(this.data.id, {
+          await matters.updateMatter(this.data.id, {
             title: this.data.matterTitle,
-            payload: { modules: next },
+            ...this._preserved,
+            modules: next,
           });
           this.clearDirty(); // 模块已删，未保存的编辑不必再拦返回
           wx.showToast({ title: '已删除', icon: 'success' });

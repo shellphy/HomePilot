@@ -6,8 +6,6 @@
     "pages/matter/index",
     "pages/census-insights/index",
     "pages/census-form/index",
-    "pages/groupbuy-form/index",
-    "pages/matter-form/index",
     "pages/matter-update/index",
     "pages/groupbuy-deal/index",
     "pages/mine-matters/index",

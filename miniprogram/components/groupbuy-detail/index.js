@@ -295,7 +295,7 @@ Component({
     // ---- 以下仅发起人可见的操作 ----
 
     goEdit() {
-      wx.navigateTo({ url: `/pages/groupbuy-form/index?id=${this.data.matter.id}` });
+      wx.navigateTo({ url: `/pages/admin/matter-form/index?id=${this.data.matter.id}` });
     },
 
     goProgress() {

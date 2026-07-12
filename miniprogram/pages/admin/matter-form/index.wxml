@@ -17,12 +17,20 @@
           <text class="frow-label">阶梯优惠</text>
           <input class="frow-input" value="{{perk}}" maxlength="100" data-field="perk" bind:input="onInput" />
         </view>
-        <view class="frow">
+        <!-- 按户出方案：发起时可选；发起后对团长锁定（改联系互通的隐私承诺），管理员可纠错 -->
+        <view class="frow" wx:if="{{!id || isAdmin}}">
           <view class="frow-main">
             <view class="row-title">按户出方案</view>
-            <view class="row-sub">中央空调、全屋定制这类非标品：商家逐户沟通需求（如上门量房）单独报价，报名者手机号从「谈判中」起与团长互通。团长发起后自己不能改；中途翻转会改变对报名邻居的隐私承诺，确认弄错了才在这里改</view>
+            <view class="row-sub">中央空调、全屋定制这类非标品：商家逐户沟通需求（如上门量房）单独报价，报名者手机号从「谈判中」起与团长互通。发起后不可再改，中途翻转会改变对报名邻居的隐私承诺</view>
           </view>
           <switch checked="{{needsSurvey}}" data-field="needsSurvey" bind:change="onSwitch" color="#06ae56" />
+        </view>
+        <view class="frow" wx:elif="{{needsSurvey}}">
+          <view class="frow-main">
+            <view class="row-title">按户出方案</view>
+            <view class="row-sub">发起时已选定，不可修改</view>
+          </view>
+          <text class="frow-value">已开启</text>
         </view>
       </block>
 
@@ -33,8 +41,8 @@
         <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
       </view>
 
-      <!-- 状态流转：单选走 action-sheet，与资料页「身份」同一套交互 -->
-      <view class="frow" wx:if="{{stateKeys.length}}" hover-class="frow-hover" bind:tap="chooseState">
+      <!-- 状态流转（管理动作）：单选走 action-sheet，与资料页「身份」同一套交互 -->
+      <view class="frow" wx:if="{{isAdmin && stateKeys.length}}" hover-class="frow-hover" bind:tap="chooseState">
         <text class="frow-label">状态</text>
         <text class="frow-value">{{states[state]}}</text>
         <text class="frow-arrow">›</text>
@@ -48,8 +56,8 @@
         <switch checked="{{collectsContact}}" data-field="collectsContact" bind:change="onSwitch" color="#06ae56" />
       </view>
 
-      <!-- 署名发起：物业/业委会/商家想做的调研，代建后亮明发起方，结果对全小区公开 -->
-      <view class="frow" wx:if="{{type === 'census'}}" hover-class="frow-hover" bind:tap="chooseInitiatorParty">
+      <!-- 署名发起（管理动作）：物业/业委会/商家想做的调研，代建后亮明发起方，结果对全小区公开 -->
+      <view class="frow" wx:if="{{isAdmin && type === 'census'}}" hover-class="frow-hover" bind:tap="chooseInitiatorParty">
         <view class="frow-main">
           <view class="row-title">署名发起方</view>
           <view class="row-sub">物业/业委会/商家的调研在此署名，业主看得到是谁想了解什么</view>
@@ -58,13 +66,6 @@
         <text class="frow-arrow">›</text>
       </view>
 
-      <view class="frow">
-        <view class="frow-main">
-          <view class="row-title">公示到小区页</view>
-          <view class="row-sub">关闭则对业主隐藏（相当于撤下/待审核）</view>
-        </view>
-        <switch checked="{{isApproved}}" data-field="isApproved" bind:change="onSwitch" color="#06ae56" />
-      </view>
     </view>
 
     <!-- 长文本：公告正文 / 说明 -->
@@ -119,14 +120,14 @@
         </view>
         <text class="row-arrow">›</text>
       </view>
-      <view class="row" hover-class="row-hover" bind:tap="goRegistrations">
+      <view class="row" wx:if="{{isAdmin}}" hover-class="row-hover" bind:tap="goRegistrations">
         <view class="row-main">
           <view class="row-title">登记明细</view>
           <view class="row-sub">含楼栋、房号、联系方式，仅管理员可见</view>
         </view>
         <text class="row-arrow">›</text>
       </view>
-      <view class="row" hover-class="row-hover" bind:tap="goCensusText">
+      <view class="row" wx:if="{{isAdmin}}" hover-class="row-hover" bind:tap="goCensusText">
         <view class="row-main">
           <view class="row-title">文本题归纳</view>
           <view class="row-sub">把填空回答归纳成主题后发布到公示面</view>
@@ -135,11 +136,11 @@
       </view>
     </view>
 
-    <!-- 危险操作与吸底的保存拉开距离，避免误触 -->
-    <t-button wx:if="{{id}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这件事项</t-button>
+    <!-- 删除（管理动作）：与吸底的保存拉开距离，避免误触 -->
+    <t-button wx:if="{{isAdmin && id}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这件事项</t-button>
 
     <view class="footer-bar">
-      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : '发布'}}</t-button>
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : (isAdmin ? '发布' : '提交审核')}}</t-button>
     </view>
   </page-status>
 </view>

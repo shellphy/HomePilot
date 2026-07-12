@@ -1,7 +1,13 @@
-// 管理端 · 事项发布/编辑：所有类型共用，按类型显示对应字段
+// 统一创作/编辑事项：所有身份共用一套表单与 /matters 接口，按类型显示对应内容字段。
+// 内容字段（标题/说明/品类/目标数/团购条件/征集设置/问卷入口）人人可编辑；
+// 状态流转、公示开关、署名发起方、登记明细/文本题归纳、删除等管理动作按 is_admin 显示。
+const matters = require('../../../utils/api/matters');
 const admin = require('../../../utils/api/admin');
+const { getMe } = require('../../../utils/me');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
+const { guardProfileError } = require('../../../utils/profile-guard');
+const { requestSubscribe } = require('../../../utils/subscribe');
 const { draftGlossaryRow } = require('../../../utils/glossary-draft');
 
 Page({
@@ -11,14 +17,15 @@ Page({
     id: null,
     type: 'notice',
     typeLabel: '',
+    isAdmin: false, // 管理动作（状态/公示/署名/明细/删除）的显示开关
     title: '',
     category: '',
     state: '',
-    states: {},        // {key: label}，编辑时用于状态流转
+    states: {},        // {key: label}，编辑时用于状态流转（管理员用全部状态含旁路终态）
     stateKeys: [],
     isApproved: true,
     targetCount: '',
-    // 按类型使用的 payload 字段
+    // 按类型使用的内容字段
     body: '',
     pitch: '',
     purpose: '', // 仅征集：发起目的自由文本
@@ -37,7 +44,7 @@ Page({
   onLoad(query) {
     const id = query.id ? Number(query.id) : null;
     this.setData({ id, type: query.type || 'notice' });
-    wx.setNavigationBarTitle({ title: id ? '编辑事项' : '发布事项' });
+    wx.setNavigationBarTitle({ title: id ? '编辑' : '发起' });
     if (!id) this.setData({ loaded: true });
   },
 
@@ -47,28 +54,32 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const res = await admin.getMatter(this.data.id);
+      const [me, res] = await Promise.all([getMe(), matters.getMatter(this.data.id)]);
       const matter = res.data;
-      const payload = matter.payload || {};
+      const payload = matter.payload || {}; // 原始 payload 仅管理员可见（含 modules/purpose 等）
       this.setData({
+        isAdmin: !!me.is_admin,
         type: matter.type,
         typeLabel: matter.type_label,
         title: matter.title,
         category: matter.category || '',
-        state: matter.state,
-        states: matter.states,
-        stateKeys: Object.keys(matter.states),
-        isApproved: matter.is_approved,
         targetCount: matter.target_count ? String(matter.target_count) : '',
-        body: payload.body || '',
-        pitch: payload.pitch || '',
+        // 内容字段一律读平铺（对所有人可见），不依赖管理员专属的 payload
+        body: matter.body || '',
+        pitch: matter.pitch || '',
+        perk: matter.perk || '',
+        needsSurvey: !!matter.needs_survey,
+        terms: matter.terms || [],
+        glossary: matter.glossary || [],
+        // 征集的发起目的/联系方式开关与问卷模块目前只在管理员的 payload 里下发
         purpose: payload.purpose || '',
-        perk: payload.perk || '',
-        needsSurvey: !!payload.needs_survey,
         collectsContact: !!payload.collects_contact,
-        terms: payload.terms || [],
-        glossary: payload.glossary || [],
         moduleCount: (payload.modules || []).length,
+        // 管理动作用到的字段（非管理员不下发）
+        state: matter.state,
+        states: matter.all_states || matter.states || {},
+        stateKeys: Object.keys(matter.all_states || matter.states || {}),
+        isApproved: matter.is_approved,
         initiatorPartyId: matter.initiator_party_id || null,
       });
       wx.setNavigationBarTitle({ title: `编辑${matter.type_label}` });
@@ -177,11 +188,37 @@ Page({
     wx.navigateTo({ url: `/pages/admin/census-text/index?id=${this.data.id}` });
   },
 
+  // 收敛按类型的内容字段为一份顶层 body（不包 payload，后端 payloadFrom 自行归拢）
+  buildContent() {
+    const { data } = this;
+    const content = { title: data.title.trim() };
+    if (data.type === 'notice') {
+      content.body = data.body.trim();
+    } else {
+      content.pitch = data.pitch.trim();
+    }
+    if (data.type !== 'notice' && data.type !== 'census') {
+      content.target_count = data.targetCount ? Number(data.targetCount) : 0;
+    }
+    if (data.type === 'groupbuy') {
+      content.category = data.category.trim();
+      content.perk = data.perk.trim();
+      content.needs_survey = data.needsSurvey;
+      content.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
+      content.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
+    }
+    if (data.type === 'census') {
+      content.purpose = data.purpose.trim();
+      content.collects_contact = data.collectsContact;
+    }
+    return content;
+  },
+
   async submit() {
     const { data } = this;
     if (data.submitting) return;
     if (!data.title.trim()) return wx.showToast({ title: '先填标题', icon: 'none' });
-    // 与后端规则（业主端同一份）对齐，别等 422 才发现
+    // 与后端规则对齐，别等 422 才发现
     if (data.type === 'notice' && !data.body.trim()) {
       return wx.showToast({ title: '公告得有正文', icon: 'none' });
     }
@@ -192,52 +229,48 @@ Page({
       }
     }
 
-    const payload = {};
-    if (data.type === 'notice') payload.body = data.body.trim();
-    if (data.type !== 'notice') payload.pitch = data.pitch.trim();
-    if (data.type === 'groupbuy') {
-      payload.perk = data.perk.trim();
-      payload.needs_survey = data.needsSurvey;
-      payload.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
-      payload.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
-    }
-    if (data.type === 'census') {
-      payload.collects_contact = data.collectsContact;
-      payload.purpose = data.purpose.trim();
-    }
-
-    const body = {
-      title: data.title.trim(),
-      category: data.category.trim(),
-      is_approved: data.isApproved,
-      ...(data.state ? { state: data.state } : {}),
-      ...(data.targetCount ? { target_count: Number(data.targetCount) } : { target_count: 0 }),
+    const body = this.buildContent();
+    // 管理动作字段只在管理员编辑时下发（后端也按 is_admin 授权）；
+    // 审核发布是独立动作（走待审列表），创建一律进待审，这里不设 is_approved
+    if (data.isAdmin) {
+      if (data.state) body.state = data.state;
       // 显式传 null 表示去署名（后端按键是否存在区分）
-      ...(data.type === 'census' ? { initiator_party_id: data.initiatorPartyId } : {}),
-      payload,
-    };
+      if (data.type === 'census') body.initiator_party_id = data.initiatorPartyId;
+    }
 
     this.setData({ submitting: true });
     try {
+      // 提交顺手收一次订阅授权：审核结果/新报名的通知才有额度可推
+      await requestSubscribe();
       if (data.id) {
-        await admin.updateMatter(data.id, body);
+        await matters.updateMatter(data.id, body);
         this.clearDirty();
         wx.showToast({ title: '已保存', icon: 'success' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
-        const res = await admin.createMatter({ type: data.type, ...body });
+        const res = await matters.createMatter(data.type, body);
         this.clearDirty();
-        // 新发布的征集顺路去配问卷，其余类型直接返回
         if (data.type === 'census') {
+          // 征集顺路去配问卷（发起人本人也能读回 payload 编辑，见 MatterResource）
           wx.redirectTo({ url: `/pages/admin/census-schema/index?id=${res.data.id}` });
-        } else {
+        } else if (data.isAdmin) {
           wx.showToast({ title: '已发布', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
+        } else {
+          wx.showModal({
+            title: '已提交',
+            content: '通常 24 小时内完成审核，通过后就会出现在小区页里。这件事由你牵头，可以在「我的」里随时查看和管理它。',
+            showCancel: false,
+            confirmText: '好的',
+            success: () => wx.navigateBack(),
+          });
         }
       }
     } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-    } finally {
+      if (!guardProfileError(error, '你发起后就是这件事的牵头人，也会以「楼栋 + 昵称」出现在公示名单里，请先在个人资料里选好楼栋号。')) {
+        wx.showToast({ title: error.message, icon: 'none' });
+      }
+      // 只在失败时复位：成功分支保持 loading 直到离开页面，堵住 toast 里的二次提交
       this.setData({ submitting: false });
     }
   },
@@ -251,7 +284,7 @@ Page({
       success: async ({ confirm }) => {
         if (!confirm) return;
         try {
-          await admin.deleteMatter(this.data.id);
+          await matters.deleteMatter(this.data.id);
           this.clearDirty();
           wx.showToast({ title: '已删除', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);

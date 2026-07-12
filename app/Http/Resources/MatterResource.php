@@ -78,13 +78,17 @@ class MatterResource extends JsonResource
             ),
             'updates' => MatterUpdateResource::collection($this->whenLoaded('updates')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
-            // 管理端编辑表单要用的原始 payload + 全部状态 + 署名/创建时间，仅管理员可见
-            $this->mergeWhen((bool) $request->user()?->is_admin, fn (): array => [
-                'payload' => $this->payload ?? (object) [],
-                'all_states' => $type->allStates(),
-                'initiator_party_id' => $this->initiator_party_id,
-                'created_at' => $this->created_at?->format('Y-m-d H:i'),
-            ]),
+            // 编辑表单要用的原始 payload（含 census 的 modules/purpose）+ 全部状态 + 署名/创建时间：
+            // 管理员或发起人本人可见（业主/商家发起 census 后要能读回自己的问卷去编辑）
+            $this->mergeWhen(
+                (bool) ($request->user()?->is_admin || ($request->user() && $this->initiator_id === $request->user()->id)),
+                fn (): array => [
+                    'payload' => $this->payload ?? (object) [],
+                    'all_states' => $type->allStates(),
+                    'initiator_party_id' => $this->initiator_party_id,
+                    'created_at' => $this->created_at?->format('Y-m-d H:i'),
+                ]
+            ),
         ];
     }
 }

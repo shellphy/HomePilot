@@ -1,5 +1,5 @@
-// 管理端 · 题目编辑：题干 / 注释 / 单选多选填空 / 必答 / 选项（一行一个）
-const admin = require('../../../utils/api/admin');
+// 题目编辑：题干 / 注释 / 单选多选填空 / 必答 / 选项（一行一个）。走统一 /matters 接口。
+const matters = require('../../../utils/api/matters');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
 
@@ -55,8 +55,25 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const res = await admin.getMatter(this.data.id);
-      const modules = res.data.payload.modules || [];
+      const res = await matters.getMatter(this.data.id);
+      // 后端只对管理员下发原始 payload：拿不到就挡住，避免非管理员误编丢字段（见交付报告后端后续项）
+      if (res.data.payload === undefined) {
+        wx.showModal({
+          title: '暂不可编辑问卷',
+          content: '问卷题目的编辑目前仅对管理员开放，其他发起人的编辑入口待后端支持。',
+          showCancel: false,
+          success: () => wx.navigateBack(),
+        });
+        return;
+      }
+      const payload = res.data.payload || {};
+      // 保留征集的其它 payload 字段，保存题目时一并回传（见 census-module 同款注释）
+      this._preserved = {
+        pitch: payload.pitch || '',
+        purpose: payload.purpose || '',
+        collects_contact: !!payload.collects_contact,
+      };
+      const modules = payload.modules || [];
       const question = this.data.qi >= 0 ? modules[this.data.mi].questions[this.data.qi] : null;
       this.setData({
         matterTitle: res.data.title,
@@ -113,7 +130,7 @@ Page({
 
     this.setData({ submitting: true });
     try {
-      await admin.updateMatter(id, { title: this.data.matterTitle, payload: { modules: next } });
+      await matters.updateMatter(id, { title: this.data.matterTitle, ...this._preserved, modules: next });
       this.clearDirty();
       // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
       wx.showToast({ title: '已保存', icon: 'success' });
@@ -136,9 +153,10 @@ Page({
         const next = this.data.modules.map((module) => ({ ...module, questions: [...module.questions] }));
         next[this.data.mi].questions.splice(this.data.qi, 1);
         try {
-          await admin.updateMatter(this.data.id, {
+          await matters.updateMatter(this.data.id, {
             title: this.data.matterTitle,
-            payload: { modules: next },
+            ...this._preserved,
+            modules: next,
           });
           this.clearDirty(); // 题目已删，未保存的编辑不必再拦返回
           wx.showToast({ title: '已删除', icon: 'success' });

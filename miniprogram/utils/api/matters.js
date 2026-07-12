@@ -17,21 +17,20 @@ function getMatter(id) {
   return request(`/matters/${id}`);
 }
 
-function createGroupbuy(data) {
-  return request('/matters', { method: 'POST', data: { type: 'groupbuy', ...data } });
-}
-
-function updateGroupbuy(id, data) {
-  return request(`/matters/${id}`, { method: 'PUT', data });
-}
-
-// 通用事项（活动/互助/维权）的发起与编辑
+// 统一创作：所有类型（团购/活动/互助/维权/征集/公告）的发起。
+// data 里的内容字段（title/category/target_count/pitch/perk/terms/glossary/
+// purpose/collects_contact/body/needs_survey/modules 等）都走顶层，不包 payload。
 function createMatter(type, data) {
   return request('/matters', { method: 'POST', data: { type, ...data } });
 }
 
 function updateMatter(id, data) {
   return request(`/matters/${id}`, { method: 'PUT', data });
+}
+
+// 删除事项（后端按 is_admin 授权）
+function deleteMatter(id) {
+  return request(`/matters/${id}`, { method: 'DELETE' });
 }
 
 function flipState(id, state) {
@@ -110,10 +109,9 @@ module.exports = {
   listMine,
   listJoined,
   getMatter,
-  createGroupbuy,
-  updateGroupbuy,
   createMatter,
   updateMatter,
+  deleteMatter,
   flipState,
   publishDeal,
   join,
