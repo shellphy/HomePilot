@@ -69,7 +69,6 @@ class MatterAdminController extends Controller
             'state' => $validated['state'] ?? MatterTypeRegistry::for($typeKey)->initialState(),
             'is_approved' => $validated['is_approved'] ?? true,
             'target_count' => $validated['target_count'] ?? 0,
-            'related_matter_id' => $validated['related_matter_id'] ?? null,
             'payload' => $this->payloadFrom($validated, $typeKey),
         ]);
 
@@ -91,10 +90,7 @@ class MatterAdminController extends Controller
             'state' => $validated['state'] ?? $matter->state,
             'is_approved' => $validated['is_approved'] ?? $matter->is_approved,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
-            // 显式传 null 表示解除挂靠/去署名，键缺失才保留原值
-            'related_matter_id' => array_key_exists('related_matter_id', $validated)
-                ? $validated['related_matter_id']
-                : $matter->related_matter_id,
+            // 显式传 null 表示去署名，键缺失才保留原值
             'initiator_party_id' => array_key_exists('initiator_party_id', $validated)
                 ? $validated['initiator_party_id']
                 : $matter->initiator_party_id,
@@ -226,7 +222,6 @@ class MatterAdminController extends Controller
             'target_count' => $matter->target_count,
             'initiator' => $this->initiatorLabel($matter),
             'initiator_party_id' => $matter->initiator_party_id,
-            'related_matter_id' => $matter->related_matter_id,
             'join_count' => (int) ($matter->joins_count ?? 0),
             'register_count' => (int) ($matter->register_count ?? 0),
             'payload' => $matter->payload ?? (object) [],
@@ -262,8 +257,6 @@ class MatterAdminController extends Controller
 
         if ($typeKey === 'census') {
             $rules += [
-                // 配套问卷：征集可挂到一个团购上，团购详情页展示问卷入口
-                'related_matter_id' => ['sometimes', 'nullable', Rule::exists('matters', 'id')->where('type', 'groupbuy')->whereNull('deleted_at')],
                 // 署名发起：物业/业委会/商家想做的调研由管理员代建并亮明发起方，结果对全小区公开
                 'initiator_party_id' => ['sometimes', 'nullable', Rule::exists('parties', 'id')],
                 'payload.collects_contact' => ['sometimes', 'boolean'],

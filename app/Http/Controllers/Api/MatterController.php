@@ -91,10 +91,6 @@ class MatterController extends Controller
                 'joins' => fn ($query) => $query->with('resident')->oldest(),
                 'updates' => fn ($query) => $query->with('authorParty')->latest('happened_on'),
                 'reviews' => fn ($query) => $query->with('resident')->latest(),
-                // 配套摸底问卷（挂在本团购上的征集）：详情页给入口与参与热度
-                'attachedCensus' => fn ($query) => $query->withCount([
-                    'stances as register_count' => fn ($stances) => $stances->where('mode', Stance::MODE_REGISTER),
-                ]),
             ]);
 
         $myReview = $matter->reviews->firstWhere('resident_id', $resident->id);

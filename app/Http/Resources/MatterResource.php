@@ -78,13 +78,6 @@ class MatterResource extends JsonResource
             ),
             'updates' => MatterUpdateResource::collection($this->whenLoaded('updates')),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
-            // 配套摸底问卷：答题本身就是低门槛的概念建立，聚合结果给团长当谈判依据
-            'attached_census' => $this->whenLoaded('attachedCensus', fn () => $this->attachedCensus ? [
-                'id' => $this->attachedCensus->id,
-                'title' => $this->attachedCensus->title,
-                'state' => $this->attachedCensus->state,
-                'register_count' => (int) ($this->attachedCensus->register_count ?? 0),
-            ] : null),
         ];
     }
 }

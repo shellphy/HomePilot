@@ -74,7 +74,6 @@ Page({
           title: census.title,
           state: census.state,
           pitch: census.pitch,
-          relatedMatter: census.related_matter || null,
           initiatorParty: census.initiator_party || null,
           registered: census.registered_count,
           myAnswered: Object.keys(census.answers || {}).length,
@@ -102,9 +101,4 @@ Page({
     wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
   },
 
-  // 配套征集的回链：跳回它服务的那个团购
-  goRelatedMatter() {
-    const related = this.data.block && this.data.block.relatedMatter;
-    if (related) wx.navigateTo({ url: `/pages/matter/index?id=${related.id}` });
-  },
 });

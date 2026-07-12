@@ -48,16 +48,6 @@
         <switch checked="{{collectsContact}}" data-field="collectsContact" bind:change="onSwitch" color="#06ae56" />
       </view>
 
-      <!-- 配套问卷：挂到团购上，团购详情页展示问卷入口，结果给团长当谈判依据 -->
-      <view class="frow" wx:if="{{type === 'census'}}" hover-class="frow-hover" bind:tap="chooseRelatedMatter">
-        <view class="frow-main">
-          <view class="row-title">挂到团购</view>
-          <view class="row-sub">挂上后，那个团购的详情页会出现这份问卷的入口</view>
-        </view>
-        <text class="frow-value">{{relatedMatterTitle || '不挂靠'}}</text>
-        <text class="frow-arrow">›</text>
-      </view>
-
       <!-- 署名发起：物业/业委会/商家想做的调研，代建后亮明发起方，结果对全小区公开 -->
       <view class="frow" wx:if="{{type === 'census'}}" hover-class="frow-hover" bind:tap="chooseInitiatorParty">
         <view class="frow-main">

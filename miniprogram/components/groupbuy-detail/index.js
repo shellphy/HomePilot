@@ -232,12 +232,6 @@ Component({
       }
     },
 
-    // 配套摸底问卷入口：进入征集公示面（答题/看聚合结果都在那里）
-    goAttachedCensus() {
-      const census = this.data.matter.attached_census;
-      if (census) wx.navigateTo({ url: `/pages/census-insights/index?id=${census.id}` });
-    },
-
     // 就地解释：点中文案里的术语，弹出「买前必懂」对应的决策卡
     showGlossary(event) {
       const { term } = event.currentTarget.dataset;

@@ -23,13 +23,6 @@
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}">—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人' : '本团发起人'}}</view>
 </view>
 
-<!-- 配套摸底问卷：答几道选择题就能建立概念，聚合结果给团长当谈判依据 -->
-<view class="card census-attach" wx:if="{{matter.attached_census}}" hover-class="frow-hover" bind:tap="goAttachedCensus">
-  <view class="kicker">配套摸底 · {{matter.attached_census.state === 'open' ? '顺手答几题' : '已结束'}}</view>
-  <view class="census-attach-title">{{matter.attached_census.title}}</view>
-  <view class="census-attach-sub">{{matter.attached_census.register_count ? matter.attached_census.register_count + ' 位邻居已参与 · ' : ''}}{{matter.attached_census.state === 'open' ? '答完看全小区匿名结果，也帮团长摸清大家的需求去谈判' : '看看邻居们怎么选的'}} ›</view>
-</view>
-
 <view class="card" wx:if="{{matter.glossary.length}}">
   <view class="kicker">买前必懂 · 看完再决定</view>
   <view class="gl" wx:for="{{matter.glossary}}" wx:key="term">
@@ -73,7 +66,7 @@
 <!-- 驳回是「需要你处理」的负面结果，用红系；排队等待保持橙色中性 -->
 <view class="card pending-tip {{matter.reject_reason ? 'pending-tip-reject' : ''}}" wx:if="{{!matter.is_approved}}">
   <block wx:if="{{matter.reject_reason}}">已被驳回：{{matter.reject_reason}}（修改后保存即重新提交审核）</block>
-  <block wx:else>待管理员审核，通过后才会出现在小区页里（只有你自己能看到这个页面）</block>
+  <block wx:else>待审核，通过后就会出现在小区页里（只有你自己能看到这个页面）</block>
 </view>
 
 <!-- 联系互通阶段（标品团成团后；方案型团从谈判中开始）：参团者见团长 -->

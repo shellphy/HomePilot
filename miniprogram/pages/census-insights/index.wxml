@@ -6,7 +6,6 @@
         <!-- 署名调研三不变量之二：亮明发起方、结果对全小区公开（第三个是管理员审核） -->
         <view class="hero-sign" wx:if="{{block.initiatorParty}}">由 {{block.initiatorParty.label}} · {{block.initiatorParty.name}} 发起，聚合结果对全小区公开</view>
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
-        <view class="related-link" wx:if="{{block.relatedMatter}}" hover-class="frow-hover" bind:tap="goRelatedMatter">配套于团购「{{block.relatedMatter.title}}」，结果帮团长谈判 ›</view>
       </view>
 
       <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
@@ -27,7 +26,7 @@
               </view>
               <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
             </view>
-            <view class="theme-foot" wx:if="{{question.themes.length}}">由管理员归纳自 {{block.registered}} 份登记的文字反馈</view>
+            <view class="theme-foot" wx:if="{{question.themes.length}}">归纳自 {{block.registered}} 份登记的文字反馈</view>
           </view>
         </view>
       </block>
