@@ -21,7 +21,8 @@
     "pages/admin/census-module/index",
     "pages/admin/census-question/index",
     "pages/admin/parties/index",
-    "pages/admin/settings/index"
+    "pages/admin/settings/index",
+    "pages/admin/admins/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",
