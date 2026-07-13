@@ -6,12 +6,13 @@
           <view class="registration-title">我的问卷</view>
           <view class="registration-count">已回答 {{answeredCount}} 题</view>
         </view>
-        <view class="questionnaire-status">已提交</view>
       </view>
       <view class="questionnaire-actions">
-        <view class="questionnaire-action" bind:tap="goReport">AI 总结</view>
-        <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
         <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
+        <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
+        <view class="questionnaire-action {{reportStatus === 'pending' ? 'questionnaire-action-busy' : ''}}" bind:tap="onSummaryTap"
+          >{{reportStatus === 'pending' ? 'AI 总结中' : (reportStatus === 'completed' ? '查看 AI 总结' : 'AI 总结')}}</view
+        >
       </view>
     </view>
 

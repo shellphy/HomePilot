@@ -34,16 +34,6 @@
   font-size: 22rpx;
   color: var(--text-muted);
 }
-.questionnaire-status {
-  flex-shrink: 0;
-  padding: 6rpx 14rpx;
-  font-size: 21rpx;
-  font-weight: 600;
-  color: var(--brand-deep);
-  background: #ffffff;
-  border: 1rpx solid var(--brand);
-  border-radius: 999rpx;
-}
 .questionnaire-actions {
   display: flex;
   gap: 16rpx;
@@ -59,6 +49,10 @@
   background: #ffffff;
   border: 1rpx solid var(--brand);
   border-radius: 14rpx;
+}
+.questionnaire-action-busy {
+  color: var(--text-muted);
+  border-color: var(--line);
 }
 .content-heading {
   padding: 14rpx 8rpx 16rpx;

@@ -39,14 +39,26 @@ Page({
     censusState: '',
     initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的问卷」授权
     visibleToInitiator: false, // 是否把匿名破例授权给这个发起者本人（默认关）
+    reportStatus: 'idle', // AI 总结：idle 未生成 / pending 生成中 / completed 可查看 / failed 失败
   },
 
   onLoad(query) {
+    this.pageActive = true;
     this.setData({ censusId: Number(query.id || 0) });
   },
 
   onShow() {
+    this.pageActive = true;
     this.reload();
+  },
+
+  onHide() {
+    this.stopPolling();
+  },
+
+  onUnload() {
+    this.pageActive = false;
+    this.stopPolling();
   },
 
   onPullDownRefresh() {
@@ -56,14 +68,80 @@ Page({
   reload() {
     return this.runLoad(async () => {
       const census = await matters.getCensus(this.data.censusId);
+      const answeredCount = Object.keys(census.answers || {}).length;
       this.setData({
         answerModules: answerModules(census, this.data.answerModules),
-        answeredCount: Object.keys(census.answers || {}).length,
+        answeredCount,
         censusState: census.state || '',
         initiatorParty: census.initiator_party || null,
         visibleToInitiator: !!census.my_visible_to_initiator,
       });
+      if (answeredCount > 0) {
+        const report = await matters.getCensusReport(this.data.censusId);
+        this.applyReportStatus(report.generation_status);
+      }
     });
+  },
+
+  // AI 总结按钮：未生成时点了就开始总结，生成中不可点，完成后点开查看
+  onSummaryTap() {
+    if (this.data.reportStatus === 'pending') {
+      return;
+    }
+    if (this.data.reportStatus === 'completed') {
+      wx.navigateTo({ url: `/pages/census-report/index?id=${this.data.censusId}` });
+      return;
+    }
+    this.startSummary();
+  },
+
+  async startSummary() {
+    this.setData({ reportStatus: 'pending' });
+    try {
+      const report = await matters.generateCensusReport(this.data.censusId);
+      this.applyReportStatus(report.generation_status);
+    } catch (error) {
+      this.setData({ reportStatus: 'failed' });
+      wx.showToast({ title: error.message, icon: 'none' });
+    }
+  },
+
+  applyReportStatus(status) {
+    this.setData({ reportStatus: status || 'idle' });
+    if (status === 'pending') {
+      this.startPolling();
+    }
+  },
+
+  startPolling() {
+    if (!this.pageActive) {
+      return;
+    }
+    this.stopPolling();
+    this.pollTimer = setTimeout(() => this.pollReport(), 2000);
+  },
+
+  stopPolling() {
+    if (this.pollTimer) {
+      clearTimeout(this.pollTimer);
+      this.pollTimer = null;
+    }
+  },
+
+  async pollReport() {
+    try {
+      const report = await matters.getCensusReport(this.data.censusId);
+      this.setData({ reportStatus: report.generation_status || 'idle' });
+      if (report.generation_status === 'pending') {
+        this.startPolling();
+      } else if (report.generation_status === 'failed') {
+        wx.showToast({ title: report.generation_error || '生成失败，请稍后重试', icon: 'none' });
+      }
+    } catch {
+      if (this.pageActive) {
+        this.startPolling();
+      }
+    }
   },
 
   // 授权开关：开启是把联系方式+逐题答案交给发起者，先二次确认；关闭随时、无摩擦
@@ -104,10 +182,6 @@ Page({
         moduleIndex === index ? { ...module, expanded: !module.expanded } : module,
       ),
     });
-  },
-
-  goReport() {
-    wx.navigateTo({ url: `/pages/census-report/index?id=${this.data.censusId}` });
   },
 
   goStats() {

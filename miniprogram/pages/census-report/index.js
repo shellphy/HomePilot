@@ -68,6 +68,19 @@ Page({
     }
   },
 
+  // 按最新答案重新生成：发起后退回「我的问卷」，那边按钮变「AI 总结中」跟进进度
+  async regenerate() {
+    if (this.data.generating) return;
+    this.setData({ generating: true });
+    try {
+      await matters.generateCensusReport(this.data.censusId);
+      wx.navigateBack();
+    } catch (error) {
+      wx.showToast({ title: error.message, icon: 'none' });
+      this.setData({ generating: false });
+    }
+  },
+
   startPolling() {
     if (!this.pageActive) return;
     this.stopPolling();
