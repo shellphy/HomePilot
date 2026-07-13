@@ -141,41 +141,6 @@
   border: 2rpx solid var(--brand);
 }
 
-/* 末模块的授权勾选：明确是把匿名破例给具体发起方看，默认关 */
-.consent {
-  display: flex;
-  align-items: flex-start;
-  gap: 18rpx;
-  background: #ffffff;
-  border-radius: 20rpx;
-  padding: 24rpx 26rpx;
-  margin-bottom: 16rpx;
-}
-.consent-box {
-  flex-shrink: 0;
-  width: 40rpx;
-  height: 40rpx;
-  border: 1rpx solid var(--line-dark);
-  border-radius: 10rpx;
-  color: #fff;
-  font-size: 26rpx;
-  text-align: center;
-  line-height: 40rpx;
-}
-.consent-box-on {
-  background: var(--brand);
-  border-color: var(--brand);
-}
-.consent-title {
-  font-size: 26rpx;
-  font-weight: 600;
-}
-.consent-sub {
-  font-size: 22rpx;
-  color: var(--text-muted);
-  line-height: 1.6;
-  margin-top: 6rpx;
-}
 
 /* 按钮的 flex 占比走 style 直传（外部 class 在 virtualHost 组件上不可靠） */
 .nav-btns {

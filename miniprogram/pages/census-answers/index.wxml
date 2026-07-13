@@ -15,6 +15,15 @@
       </view>
     </view>
 
+    <!-- 授权发起者查看：署名发起方才出现，看着自己的答案冷静决定，默认关、随时可改 -->
+    <view wx:if="{{initiatorParty}}" class="card consent-card">
+      <view class="consent-row">
+        <view class="consent-title">让「{{initiatorParty.label}} · {{initiatorParty.name}}」看到我的问卷</view>
+        <switch checked="{{visibleToInitiator}}" color="#06ae56" bindchange="toggleConsent" />
+      </view>
+      <view class="consent-sub">开启后 TA 能看到你的联系方式和每道题的回答；不开启只计入匿名统计。</view>
+    </view>
+
     <view class="content-heading">
       <view class="content-heading-title">我的回答</view>
     </view>

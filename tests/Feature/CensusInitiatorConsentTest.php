@@ -55,6 +55,31 @@ test('checking the box stores visible_to_initiator on my stance', function () {
     expect($stance->payload['visible_to_initiator'])->toBeTrue();
 });
 
+test('the consent endpoint toggles visibility without touching answers', function () {
+    $census = signedCensus();
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->putJson("/api/matters/{$census->id}/census", ['answers' => consentAnswers()])->assertCreated();
+
+    $this->putJson("/api/matters/{$census->id}/census/consent", ['visible_to_initiator' => true])
+        ->assertSuccessful()
+        ->assertJsonPath('visible_to_initiator', true);
+
+    $stance = Stance::where('mode', Stance::MODE_REGISTER)->sole();
+    expect($stance->payload['visible_to_initiator'])->toBeTrue()
+        ->and($stance->payload['answers'])->not->toBeEmpty();
+
+    $this->putJson("/api/matters/{$census->id}/census/consent", ['visible_to_initiator' => false])->assertSuccessful();
+    expect($stance->refresh()->payload['visible_to_initiator'])->toBeFalse();
+});
+
+test('the consent endpoint requires an existing registration', function () {
+    $census = signedCensus();
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->putJson("/api/matters/{$census->id}/census/consent", ['visible_to_initiator' => true])
+        ->assertStatus(422);
+});
+
 test('without the flag the registration stays anonymous by default', function () {
     $census = signedCensus();
     Sanctum::actingAs(Resident::factory()->create());
