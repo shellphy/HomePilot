@@ -44,5 +44,12 @@
   word-break: break-word;
 }
 
+.report-by {
+  margin: 12rpx 0;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+
 .actions { display: flex; gap: 16rpx; }
 .actions t-button { flex: 1; }

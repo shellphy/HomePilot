@@ -14,10 +14,12 @@
         <t-button theme="primary" block size="large" bind:tap="generate"
           >{{generationStatus === 'failed' ? '重新生成' : '生成'}}</t-button
         >
+        <view class="report-by">将由 DeepSeek 大模型生成，仅供参考</view>
       </view>
     </block>
 
     <block wx:if="{{report}}">
+      <view class="report-by">由 DeepSeek 大模型生成，仅供参考</view>
       <view class="card">
         <rich-text class="report-md" nodes="{{reportNodes}}"></rich-text>
       </view>
