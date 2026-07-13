@@ -1,9 +1,9 @@
 <view class="card mcard" hover-class="card-hover" bind:tap="goDetail">
-  <view class="mcard-row">
+  <view class="mcard-meta">
     <view class="mcard-tag mcard-tag-{{matter.type}}">{{matter.type_label}}</view>
-    <view class="mcard-title">{{matter.title}}</view>
     <view class="pill {{pillClass}}">{{matter.state_label}}</view>
   </view>
+  <view class="mcard-title">{{matter.title}}</view>
   <view wx:if="{{matter.initiator_party}}" class="merchant-line">{{matter.initiator_party.name}} · 已认证{{matter.initiator_party.label}}发起</view>
   <view wx:if="{{matter.pitch}}" class="mcard-pitch">{{matter.pitch}}</view>
   <view wx:if="{{matter.starts_on}}" class="muted">{{matter.starts_on}}{{matter.location ? ' · ' + matter.location : ''}}</view>
