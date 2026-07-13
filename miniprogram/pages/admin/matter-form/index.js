@@ -250,7 +250,13 @@ Page({
 
   async submit() {
     const { data } = this;
-    if (data.submitting) return;
+    // TODO 调试:定位「编辑保存点击无反应」,查明后删除这些日志
+    console.log('[matter-form] submit 触发', {
+      submitting: data.submitting, type: data.type, id: data.id, title: data.title,
+      startDate: data.startDate, startTime: data.startTime, location: data.location,
+      publishedNow: data.publishedNow, isAdmin: data.isAdmin,
+    });
+    if (data.submitting) { console.log('[matter-form] 已在提交中,忽略本次点击'); return; }
     if (!data.title.trim()) return wx.showToast({ title: '先填标题', icon: 'none' });
     // 与后端规则对齐，别等 422 才发现
     if (data.type === 'notice' && !data.body.trim()) {
@@ -263,10 +269,12 @@ Page({
       }
     }
     if (['activity', 'aid'].includes(data.type) && (!data.startDate || !data.startTime || !data.location.trim())) {
+      console.log('[matter-form] 拦截:活动/互助缺时间或地点', { startDate: data.startDate, startTime: data.startTime, location: data.location });
       return wx.showToast({ title: '请填写时间和地点', icon: 'none' });
     }
 
     const body = this.buildContent();
+    console.log('[matter-form] 校验通过,准备提交', body);
     // 管理动作字段只在管理员编辑时下发（后端也按 is_admin 授权）
     if (data.isAdmin) {
       if (data.state) body.state = data.state;
@@ -279,30 +287,36 @@ Page({
 
     // 改动已公示的事项会重新送审、暂时从小区页撤下，保存前先确认一次
     if (data.id && data.publishedNow) {
+      console.log('[matter-form] 已公示,弹「重新审核」确认框');
       const confirmed = await new Promise((resolve) => {
         wx.showModal({
           title: '保存后需要重新审核',
           content: '这件事已经公示。保存修改后会重新送审、暂时从小区页撤下，通过后再公示。',
           confirmText: '保存并送审',
           cancelText: '再改改',
-          success: ({ confirm }) => resolve(confirm),
-          fail: () => resolve(false),
+          success: (res) => { console.log('[matter-form] 确认框 success', res); resolve(res.confirm); },
+          fail: (err) => { console.log('[matter-form] 确认框 fail', err); resolve(false); },
         });
       });
-      if (!confirmed) return;
+      if (!confirmed) { console.log('[matter-form] 用户取消送审'); return; }
     }
 
+    console.log('[matter-form] 置 submitting=true,进入提交');
     this.setData({ submitting: true });
     try {
       // 提交顺手收一次订阅授权：审核结果/新报名的通知才有额度可推
-      if (data.type !== 'census') await requestSubscribe();
+      if (data.type !== 'census') { console.log('[matter-form] 请求订阅授权…'); await requestSubscribe(); console.log('[matter-form] 订阅授权已返回'); }
       if (data.id) {
+        console.log('[matter-form] 发起 updateMatter 网络请求', data.id);
         await matters.updateMatter(data.id, body);
+        console.log('[matter-form] updateMatter 成功');
         this.clearDirty();
         wx.showToast({ title: data.publishedNow ? '已送重新审核' : '已保存', icon: 'none' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
+        console.log('[matter-form] 发起 createMatter 网络请求');
         const res = await matters.createMatter(data.type, body);
+        console.log('[matter-form] createMatter 成功', res);
         this.clearDirty();
         if (data.type === 'census') {
           wx.showToast({ title: '基础信息已保存', icon: 'success' });
@@ -321,6 +335,7 @@ Page({
         }
       }
     } catch (error) {
+      console.error('[matter-form] 提交失败', error);
       if (!guardProfileError(error, '发起前请先在个人资料里选好楼栋号。')) {
         wx.showToast({ title: error.message, icon: 'none' });
       }
