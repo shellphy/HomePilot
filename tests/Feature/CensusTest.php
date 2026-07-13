@@ -44,6 +44,27 @@ function basicAnswers(array $overrides = []): array
     ], $overrides);
 }
 
+test('me flags an unanswered open census and clears it after answering', function () {
+    $census = Matter::factory()->create([
+        'type' => 'census',
+        'state' => 'open',
+        'payload' => [
+            'modules' => [[
+                'key' => 'm',
+                'title' => '基础',
+                'questions' => [['key' => 'q1', 'text' => '需要吗？', 'type' => 'single', 'options' => ['要', '不要']]],
+            ]],
+        ],
+    ]);
+    Matter::factory()->create(['type' => 'census', 'state' => 'closed']); // 已结束不提示
+
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->getJson('/api/me')->assertJsonPath('data.has_unanswered_census', true);
+
+    $this->putJson("/api/matters/{$census->id}/census", ['answers' => ['q1' => '要']])->assertCreated();
+    $this->getJson('/api/me')->assertJsonPath('data.has_unanswered_census', false);
+});
+
 test('the census ships its schema, my answers and aggregates', function () {
     $census = renovationCensus();
     $resident = Resident::factory()->create();

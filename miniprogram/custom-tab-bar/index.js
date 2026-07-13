@@ -1,15 +1,16 @@
 const { getMe } = require('../utils/me');
 
+const TABS = [
+  { icon: 'home', value: 'community', label: '小区' },
+  { icon: 'chart-bar', value: 'insights', label: '数据' },
+  { icon: 'user', value: 'my', label: '我的' },
+];
+
 Component({
   data: {
     value: '',
-    list: [
-      { icon: 'home', value: 'community', label: '小区' },
-      { icon: 'chart-bar', value: 'insights', label: '数据' },
-      { icon: 'user', value: 'my', label: '我的' },
-    ],
-    // 「我的」tab 红点：我牵头的/我参与的有没看过的新动态（进对应列表即读）
-    myBadge: null,
+    // 红点：数据 tab = 有我没答的进行中征集；我的 tab = 我牵头/参与的有新动态
+    list: TABS,
   },
 
   lifetimes: {
@@ -27,9 +28,14 @@ Component({
     // 每次所在 tab 页展示时按缓存的 /me 刷新红点（未登录/请求失败时不打扰）
     show() {
       getMe()
-        .then((me) => this.setData({
-          myBadge: (me.has_mine_updates || me.has_joined_updates) ? { dot: true } : null,
-        }))
+        .then((me) => {
+          const dot = { dot: true };
+          const badgeFor = {
+            insights: me.has_unanswered_census ? dot : null,
+            my: (me.has_mine_updates || me.has_joined_updates) ? dot : null,
+          };
+          this.setData({ list: TABS.map((tab) => ({ ...tab, badge: badgeFor[tab.value] || null })) });
+        })
         .catch(() => {});
     },
   },
