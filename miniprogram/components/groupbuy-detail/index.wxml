@@ -52,14 +52,6 @@
   <view class="gl" wx:for="{{matter.glossary}}" wx:key="term">
     <view class="gl-term">{{item.term}}</view>
     <view class="gl-explain">{{item.explain}}</view>
-    <view class="gl-line" wx:if="{{item.judge}}">
-      <text class="gl-tag">怎么选</text>
-      <text class="gl-line-text">{{item.judge}}</text>
-    </view>
-    <view class="gl-line gl-line-caution" wx:if="{{item.caution}}">
-      <text class="gl-tag gl-tag-caution">避坑</text>
-      <text class="gl-line-text">{{item.caution}}</text>
-    </view>
   </view>
 </view>
 
@@ -325,14 +317,6 @@
   <view class="term-pop" wx:if="{{activeTerm}}">
     <view class="term-pop-title">{{activeTerm.term}}</view>
     <view class="gl-explain">{{activeTerm.explain}}</view>
-    <view class="gl-line" wx:if="{{activeTerm.judge}}">
-      <text class="gl-tag">怎么选</text>
-      <text class="gl-line-text">{{activeTerm.judge}}</text>
-    </view>
-    <view class="gl-line" wx:if="{{activeTerm.caution}}">
-      <text class="gl-tag gl-tag-caution">避坑</text>
-      <text class="gl-line-text">{{activeTerm.caution}}</text>
-    </view>
     <view class="term-pop-source">来自本团购的「买前必懂」，由发起人整理</view>
     <t-button theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi"
       >问 AI：我家该怎么选</t-button

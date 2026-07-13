@@ -101,31 +101,6 @@
   color: var(--text-secondary);
   line-height: 1.65;
 }
-/* 决策卡的「怎么选 / 避坑」行：小标签 + 正文，标签配色走语义色 */
-.gl-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 10rpx;
-  margin-top: 10rpx;
-}
-.gl-tag {
-  flex-shrink: 0;
-  font-size: 20rpx;
-  line-height: 1.5;
-  padding: 2rpx 10rpx;
-  border-radius: 6rpx;
-  color: var(--info);
-  background: var(--info-bg);
-}
-.gl-tag-caution {
-  color: var(--warn);
-  background: var(--warn-bg);
-}
-.gl-line-text {
-  font-size: 24rpx;
-  color: var(--text-secondary);
-  line-height: 1.65;
-}
 /* 文案里命中「买前必懂」术语的段：可点，虚线下划线示意可展开 */
 .term-hit {
   color: var(--info);

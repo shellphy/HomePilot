@@ -152,7 +152,7 @@ class MatterQuestionController extends Controller
 
         $glossary[] = [
             'term' => $validated['term'],
-            'explain' => Str::limit((string) $question->answer, 297),
+            'explain' => Str::limit((string) $question->answer, 497),
         ];
         $matter->update(['payload' => array_merge($matter->payload ?? [], ['glossary' => $glossary])]);
 

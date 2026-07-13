@@ -298,7 +298,7 @@ test('admin payload fields share the member form field limits', function () {
         'title' => '门窗团购',
         'category' => '门窗',
         'target_count' => 20,
-        'glossary' => [['term' => '断桥铝', 'explain' => str_repeat('解', 400)]],
+        'glossary' => [['term' => '断桥铝', 'explain' => str_repeat('解', 501)]],
     ])->assertUnprocessable()->assertJsonValidationErrors(['glossary.0.explain']);
 });
 

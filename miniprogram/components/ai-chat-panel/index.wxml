@@ -12,7 +12,7 @@
       <view class="bubble {{item.role === 'user' ? 'bubble-me' : 'bubble-ai'}}">
         <!-- 流式 AI 气泡：还没吐字时显示等待文案，正在打字时文末带光标 -->
         <block wx:if="{{index === streamingIndex && !item.text}}">
-          <text class="bubble-typing">正在想，可能要等上一会儿…</text>
+          <text class="bubble-typing">正在思考中</text>
         </block>
         <!-- AI 回答按 markdown 渲染（rich-text）；用户提问保持纯文本 -->
         <block wx:elif="{{item.role === 'ai'}}">
