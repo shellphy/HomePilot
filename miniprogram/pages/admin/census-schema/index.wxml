@@ -5,7 +5,6 @@
       <text class="schema-edit" bind:tap="editBasics" hover-class="schema-edit-hover">编辑基础信息 ›</text>
     </view>
 
-    <!-- 审核态用醒目横幅顶到题目上方，别再缩在页尾的灰色小字里 -->
     <view
       class="schema-banner {{reviewStatus === 'pending' ? 'schema-banner-pending' : 'schema-banner-done'}}"
       wx:if="{{reviewStatus && reviewStatus !== 'draft'}}"

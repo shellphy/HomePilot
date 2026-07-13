@@ -10,7 +10,6 @@ function presetQuestions(matter) {
     return ['这个活动的安排帮我讲讲？', '参加前要准备什么？'];
   }
   if (matter.type === 'groupbuy') {
-    // 顺着这个团购的实际品类问，别用一套写死的通用问题（更不绑定某个行业）
     const topic = matter.category || '这个团购';
     return matter.needs_survey
       ? [`${topic}我的情况适合怎么选？`, '和商家沟通报价时该确认什么？', '现在登记还是再等等？']

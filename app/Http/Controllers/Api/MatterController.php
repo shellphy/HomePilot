@@ -486,8 +486,7 @@ class MatterController extends Controller
             [
                 'title' => ['required', 'string', 'max:60'],
                 'starts_at' => ['sometimes', 'nullable', 'date'],
-                // 开始时间与报名截止各自独立：团购的报名窗口本就常晚于开始时间，
-                // 且开始时间可留空——旧的 before_or_equal:starts_at 会把这些正常场景全拦下
+                // 开始时间与报名截止各自独立：团购报名窗口常晚于开始时间，开始时间也可留空
                 'registration_deadline_at' => ['sometimes', 'nullable', 'date'],
                 'location' => ['sometimes', 'nullable', 'string', 'max:120'],
             ],

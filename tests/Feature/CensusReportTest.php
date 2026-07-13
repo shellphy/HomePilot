@@ -154,7 +154,7 @@ test('report generation timeouts allow slow structured responses to finish', fun
         ->value;
     $job = new GenerateCensusReportJob(1, 'answer-hash');
 
-    // agent < job < 队列 retry_after，逐层留富余，报告实测一分多钟也不会被判超时/重复处理
+    // agent < job < 队列 retry_after，逐层留富余
     expect($agentTimeout)->toBe(240)
         ->and($job->timeout)->toBe(300)
         ->and(config('queue.connections.database.retry_after'))->toBe(360);

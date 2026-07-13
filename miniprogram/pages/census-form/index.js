@@ -191,7 +191,6 @@ Page({
       if (moduleIndex + 1 < modules.length) {
         this.showModule(moduleIndex + 1);
       } else {
-        // 答完直接进「我的问卷」，不再多弹一层确认框
         wx.showToast({ title: '问卷完成', icon: 'success' });
         const pages = getCurrentPages();
         const prev = pages[pages.length - 2];

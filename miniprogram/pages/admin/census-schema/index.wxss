@@ -56,7 +56,6 @@
   flex-shrink: 0;
 }
 
-/* 审核态横幅：顶在题目上方、成块显示，替代原来页尾的灰色小字 */
 .schema-banner {
   display: flex;
   flex-direction: column;

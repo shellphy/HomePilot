@@ -16,7 +16,7 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 3;
 
-    // 报告实测要一分多钟，超时留足富余（须 < 队列 retry_after，避免重复处理）
+    // 须 < 队列 retry_after，避免超时重复处理
     public int $timeout = 300;
 
     /** @var list<int> */
