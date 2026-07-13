@@ -294,8 +294,8 @@ Page({
           content: '这件事已经公示。保存修改后会重新送审、暂时从小区页撤下，通过后再公示。',
           confirmText: '保存并送审',
           cancelText: '再改改',
-          success: ({ confirm }) => resolve(confirm),
-          fail: () => resolve(false),
+          success: (res) => { console.log('[matter-form] 确认框 success', res); resolve(res.confirm); },
+          fail: (err) => { console.log('[matter-form] 确认框 fail', err); resolve(false); },
         });
       });
       if (!confirmed) { console.log('[matter-form] 用户取消送审'); return; }
