@@ -47,23 +47,31 @@ class CensusOverviewController extends Controller
         return response()->json(['data' => $matters]);
     }
 
-    /** @param array<int, array<string, mixed>> $aggregates */
+    /**
+     * @param  array<int, array{title: string, questions: array<int, array<string, mixed>>}>  $aggregates
+     * @return array{question: string, label: string, count: int}|null
+     */
     private function topAnswer(array $aggregates): ?array
     {
-        $question = collect($aggregates)
-            ->flatMap(fn (array $module): array => $module['questions'] ?? [])
-            ->first(fn (array $item): bool => collect($item['counts'] ?? [])->isNotEmpty());
+        foreach ($aggregates as $module) {
+            foreach ($module['questions'] as $question) {
+                $counts = $question['counts'] ?? null;
 
-        if ($question === null) {
-            return null;
+                if (! is_array($counts) || $counts === []) {
+                    continue;
+                }
+
+                /** @var array<string, int> $counts */
+                $label = array_key_first($counts);
+
+                return [
+                    'question' => (string) $question['text'],
+                    'label' => $label,
+                    'count' => $counts[$label],
+                ];
+            }
         }
 
-        $counts = collect($question['counts']);
-
-        return [
-            'question' => $question['text'],
-            'label' => (string) $counts->keys()->first(),
-            'count' => (int) $counts->first(),
-        ];
+        return null;
     }
 }

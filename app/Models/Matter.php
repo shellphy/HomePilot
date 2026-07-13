@@ -29,6 +29,8 @@ use Illuminate\Support\Carbon;
  * @property int $target_count
  * @property array<string, mixed>|null $payload
  * @property Carbon|null $last_activity_at
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $registration_deadline_at
  * @property int|null $last_activity_resident_id
  * @property-read Resident|null $initiator
  * @property-read Party|null $initiatorParty

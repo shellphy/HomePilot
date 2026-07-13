@@ -9,46 +9,68 @@ class CensusAggregator
 {
     public const MINIMUM_PUBLIC_RESPONSES = 5;
 
-    /** @return array<int, array<string, mixed>> */
+    /** @return array<int, array{title: string, questions: array<int, array<string, mixed>>}> */
     public function for(Matter $matter): array
     {
         $stances = $matter->relationLoaded('stances')
             ? $matter->stances->where('mode', Stance::MODE_REGISTER)
             : $matter->stances()->where('mode', Stance::MODE_REGISTER)->get();
         $allAnswers = $stances->map(fn (Stance $stance): array => $stance->payload['answers'] ?? []);
-        $summaries = $matter->payloadValue('text_summaries', []);
+        $rawSummaries = $matter->payloadValue('text_summaries', []);
+        $summaries = is_array($rawSummaries) ? $rawSummaries : [];
+        $aggregates = [];
 
-        return collect($matter->payloadList('modules'))
-            ->map(fn (array $module): array => [
-                'title' => $module['title'] ?? '',
-                'questions' => collect($module['questions'] ?? [])
-                    ->map(function (array $question) use ($allAnswers, $summaries): ?array {
-                        if (($question['type'] ?? '') === 'text') {
-                            $summary = $summaries[$question['key']] ?? null;
+        foreach ($matter->payloadList('modules') as $module) {
+            if (! is_array($module)) {
+                continue;
+            }
 
-                            return ($summary['published'] ?? false) ? [
-                                'key' => $question['key'],
-                                'text' => $question['text'],
-                                'themes' => $summary['themes'],
-                            ] : null;
-                        }
+            $rawQuestions = $module['questions'] ?? [];
+            $questions = is_array($rawQuestions) ? $rawQuestions : [];
+            $presentedQuestions = [];
 
-                        $values = $allAnswers
-                            ->map(fn (array $answers) => $answers[$question['key']] ?? null)
-                            ->filter()
-                            ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
+            foreach ($questions as $question) {
+                if (! is_array($question)) {
+                    continue;
+                }
 
-                        return [
-                            'key' => $question['key'],
-                            'text' => $question['text'],
-                            'counts' => $values->countBy()->sortDesc(),
+                $key = (string) ($question['key'] ?? '');
+                $text = (string) ($question['text'] ?? '');
+
+                if (($question['type'] ?? '') === 'text') {
+                    $summary = $summaries[$key] ?? null;
+
+                    if (is_array($summary) && ($summary['published'] ?? false)) {
+                        $presentedQuestions[] = [
+                            'key' => $key,
+                            'text' => $text,
+                            'themes' => is_array($summary['themes'] ?? null) ? $summary['themes'] : [],
                         ];
-                    })
+                    }
+
+                    continue;
+                }
+
+                $values = $allAnswers
+                    ->map(fn (array $answers) => $answers[$key] ?? null)
                     ->filter()
-                    ->values()
-                    ->all(),
-            ])
-            ->values()
-            ->all();
+                    ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
+
+                /** @var array<string, int> $counts */
+                $counts = $values->countBy()->sortDesc()->all();
+                $presentedQuestions[] = [
+                    'key' => $key,
+                    'text' => $text,
+                    'counts' => $counts,
+                ];
+            }
+
+            $aggregates[] = [
+                'title' => (string) ($module['title'] ?? ''),
+                'questions' => $presentedQuestions,
+            ];
+        }
+
+        return $aggregates;
     }
 }
