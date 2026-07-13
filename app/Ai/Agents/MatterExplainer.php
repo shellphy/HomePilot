@@ -35,6 +35,9 @@ class MatterExplainer implements Agent, Conversational, HasTools
      */
     private const RENOVATION_CATEGORIES = ['装修', '装修公司', '中央空调', '全屋定制', '软装', '地暖', '门窗'];
 
+    /**
+     * @param  array<string, mixed>|null  $draftAnswers  问 AI 时随请求带上的当前（可能未保存）答案，覆盖已存答案
+     */
     public function __construct(public Matter $matter, public ?Resident $asker = null, public ?array $draftAnswers = null) {}
 
     /**
