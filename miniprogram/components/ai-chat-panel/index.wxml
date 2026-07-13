@@ -10,13 +10,31 @@
   <scroll-view class="chat-body" scroll-y scroll-into-view="{{scrollTo}}" scroll-with-animation>
     <view wx:for="{{messages}}" wx:key="index" class="bubble-row {{item.role === 'user' ? 'bubble-row-me' : ''}}">
       <view class="bubble {{item.role === 'user' ? 'bubble-me' : 'bubble-ai'}}">
-        <!-- 流式 AI 气泡：还没吐字时显示等待文案，正在打字时文末带光标 -->
-        <block wx:if="{{index === streamingIndex && !item.text}}">
-          <text class="bubble-typing">正在思考中</text>
-        </block>
-        <!-- AI 回答按 markdown 渲染（rich-text）；用户提问保持纯文本 -->
-        <block wx:elif="{{item.role === 'ai'}}">
-          <rich-text class="bubble-md" nodes="{{item.nodes}}"></rich-text>
+        <!-- AI 气泡：联网检索词在最上，答案居中，命中来源在最下；用户提问保持纯文本 -->
+        <block wx:if="{{item.role === 'ai'}}">
+          <view wx:if="{{item.searches.length}}" class="bubble-search">
+            <view wx:for="{{item.searches}}" wx:for-item="query" wx:key="*this" class="bubble-search-line">
+              <text class="bubble-search-ico">🔍</text>
+              <text>联网检索 · {{query}}</text>
+            </view>
+          </view>
+          <!-- 还没吐字时显示等待文案，联网检索过则提示在整理结果 -->
+          <text wx:if="{{index === streamingIndex && !item.text}}" class="bubble-typing"
+            >{{item.searches.length ? '正在整理检索结果' : '正在思考中'}}</text
+          >
+          <rich-text wx:else class="bubble-md" nodes="{{item.nodes}}"></rich-text>
+          <view wx:if="{{item.sources.length}}" class="bubble-sources">
+            <view class="bubble-sources-title">参考来源</view>
+            <view
+              wx:for="{{item.sources}}"
+              wx:for-item="source"
+              wx:key="url"
+              class="bubble-source"
+              data-url="{{source.url}}"
+              bind:tap="copySource"
+              >{{source.title || source.url}}</view
+            >
+          </view>
         </block>
         <block wx:else>
           <text>{{item.text}}</text>

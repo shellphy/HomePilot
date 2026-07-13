@@ -120,7 +120,7 @@ function indexOfFrameBoundary(bytes) {
 // 每个 delta 交给 onDelta 回调（打字机式渲染）。返回 { abort, promise }：
 // - abort() 中断请求（配合前端的停止按钮）；
 // - promise 成功时解析为 { conversationId, remaining, aborted }，出错时 reject。
-function streamRequest(path, { method = 'POST', data, onDelta } = {}) {
+function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSource } = {}) {
   const state = { task: null, aborted: false };
 
   const abort = () => {
@@ -152,6 +152,10 @@ function streamRequest(path, { method = 'POST', data, onDelta } = {}) {
               streamError = new Error(event.error);
             } else if (event.delta && onDelta) {
               onDelta(event.delta);
+            } else if (event.searching && onSearching) {
+              onSearching(event.searching);
+            } else if (event.source && onSource) {
+              onSource(event.source);
             } else if (event.done) {
               result.conversationId = event.conversation_id || null;
               result.remaining = event.remaining_today === undefined ? null : event.remaining_today;

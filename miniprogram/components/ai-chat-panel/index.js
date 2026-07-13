@@ -90,7 +90,11 @@ Component({
       if (!question || this.data.busy) return;
 
       // 追加提问气泡与一个待填充的 AI 气泡（先空着，收到首个 delta 前显示「正在想」）
-      const messages = [...this.data.messages, { role: 'user', text: question }, { role: 'ai', text: '', nodes: '' }];
+      const messages = [
+        ...this.data.messages,
+        { role: 'user', text: question },
+        { role: 'ai', text: '', nodes: '', searches: [], sources: [] },
+      ];
       const streamingIndex = messages.length - 1;
       this.streamingIndex = streamingIndex;
       this.fullText = '';
@@ -106,6 +110,8 @@ Component({
           this.fullText += delta;
           this.startTyping();
         },
+        onSearching: (query) => this.addSearch(query),
+        onSource: (source) => this.addSource(source),
       });
 
       this.stream.promise
@@ -121,6 +127,30 @@ Component({
         .catch((error) => {
           this.failRound(error);
         });
+    },
+
+    // 联网检索：把这一轮用到的检索词记在当前 AI 气泡上，答案里标明「联网参考过什么」
+    addSearch(query) {
+      const idx = this.streamingIndex;
+      if (idx < 0) return;
+      const searches = (this.data.messages[idx].searches || []).concat(query);
+      this.setData({ [`messages[${idx}].searches`]: searches });
+      this.scrollToBottom();
+    },
+
+    // 命中来源：附在答案下，点一下复制链接（小程序里不便直接打开外链）
+    addSource(source) {
+      const idx = this.streamingIndex;
+      if (idx < 0 || !source || !source.url) return;
+      const sources = this.data.messages[idx].sources || [];
+      if (sources.some((item) => item.url === source.url)) return;
+      this.setData({ [`messages[${idx}].sources`]: sources.concat(source) });
+      this.scrollToBottom();
+    },
+
+    copySource(event) {
+      const { url } = event.currentTarget.dataset;
+      if (url) wx.setClipboardData({ data: url });
     },
 
     // 停止：中断请求并冻结打字机，保留已经显示出来的文字
@@ -214,8 +244,10 @@ Component({
     persist(messages) {
       wx.setStorageSync(this.cacheKey(this.data.matterId), {
         conversationId: this.conversationId,
-        // 只存 role/text，nodes 是从 text 渲染出来的派生值，回来时重新渲染即可
-        messages: messages.slice(-CACHE_LIMIT).map(({ role, text }) => ({ role, text })),
+        // 只存 role/text 与联网检索词/来源，nodes 是从 text 渲染出来的派生值，回来时重新渲染即可
+        messages: messages
+          .slice(-CACHE_LIMIT)
+          .map(({ role, text, searches, sources }) => ({ role, text, searches, sources })),
       });
     },
 

@@ -71,6 +71,45 @@
   font-size: 28rpx;
   line-height: 1.7;
 }
+/* 联网检索词：答案上方一行灰字，说明这轮 AI 联网查过什么 */
+.bubble-search {
+  margin-bottom: 12rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx dashed var(--line);
+}
+.bubble-search-line {
+  display: flex;
+  gap: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.bubble-search-line + .bubble-search-line {
+  margin-top: 6rpx;
+}
+.bubble-search-ico {
+  flex-shrink: 0;
+}
+/* 参考来源：答案下方可点，点一下复制链接 */
+.bubble-sources {
+  margin-top: 14rpx;
+  padding-top: 12rpx;
+  border-top: 1rpx dashed var(--line);
+}
+.bubble-sources-title {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  margin-bottom: 8rpx;
+}
+.bubble-source {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--info);
+  word-break: break-all;
+}
+.bubble-source + .bubble-source {
+  margin-top: 4rpx;
+}
 .chat-quota {
   text-align: center;
   font-size: 22rpx;
