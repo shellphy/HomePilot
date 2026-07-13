@@ -2,13 +2,13 @@
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 
-function toBars(counts) {
-  const entries = Object.entries(counts || {});
-  const max = Math.max(1, ...entries.map(([, count]) => count));
-  return entries.map(([label, count]) => ({
+// 条形按总参与人数归一：100% = 全员都选了这项，百分比可直读
+function toBars(counts, total) {
+  const denom = Math.max(1, total || 0);
+  return Object.entries(counts || {}).map(([label, count]) => ({
     label,
     count,
-    percent: Math.round((count / max) * 100),
+    percent: Math.min(100, Math.round((count / denom) * 100)),
   }));
 }
 
@@ -86,7 +86,7 @@ Page({
           questions: module.questions
             .map((question) => ({
               text: question.text,
-              bars: question.counts ? toBars(question.counts) : [],
+              bars: question.counts ? toBars(question.counts, census.registered_count) : [],
             }))
             .filter((question) => question.bars.length),
         }))

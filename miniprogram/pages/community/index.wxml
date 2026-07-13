@@ -3,7 +3,7 @@
     <!-- 小区门户头 -->
     <view class="portal">
       <view class="portal-name">{{community.name}}</view>
-      <view class="portal-sub">{{community.slogan}} · {{community.sub_slogan}}</view>
+      <view class="portal-sub" wx:if="{{community.slogan || community.sub_slogan}}">{{community.slogan}}{{community.slogan && community.sub_slogan ? ' · ' : ''}}{{community.sub_slogan}}</view>
       <view class="portal-stats">
         <!-- 只做氛围数字：去数据页走底部 tab，不在这里塞重复入口 -->
         <view class="pstat">

@@ -263,6 +263,11 @@
 </view>
 
 <view class="cta-dock" wx:if="{{matter.join_open && !isParty}}">
+  <!-- 一眼看清「占没占上名额」：确认参团=占了，登记意向≠占 -->
+  <view class="cta-standing" wx:if="{{joined && !needConfirm}}">
+    <text wx:if="{{myJoinStage === 'confirmed'}}">✓ 你已确认参团，名额已占</text>
+    <text wx:else class="cta-standing-intent">你登记了意向，还没占名额 · 条件谈定后需「确认参团」</text>
+  </view>
   <!-- 登记过意向、条件已谈定：确认参团是此刻唯一的主动作 -->
   <block wx:if="{{needConfirm}}">
     <view class="cta-share">
