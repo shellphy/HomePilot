@@ -152,3 +152,27 @@ test('a consenting participant sees the initiator contact after the deal, a decl
         ->assertJsonPath('initiator_contact', null)
         ->assertJsonPath('my_share_contact', false);
 });
+
+test('an initiator can search-ready contact roster data and record follow-up notes', function () {
+    $initiator = Resident::factory()->create();
+    $participant = Resident::factory()->inUnit('8栋')->create(['nickname' => '小陈', 'phone' => '13811112222']);
+    $matter = Matter::factory()->done()->for($initiator, 'initiator')->create();
+    $stance = Stance::factory()->for($matter, 'matter')->for($participant, 'resident')->create([
+        'payload' => ['share_contact' => true, 'stage' => Stance::JOIN_STAGE_CONFIRMED],
+    ]);
+    Sanctum::actingAs($initiator);
+
+    $this->getJson("/api/matters/{$matter->id}")
+        ->assertJsonPath('contact_roster.0.name', '8栋 小陈')
+        ->assertJsonPath('contact_roster.0.contact_status', 'pending');
+
+    $this->putJson("/api/matters/{$matter->id}/participants/{$stance->id}", [
+        'contact_status' => 'contacted',
+        'leader_note' => '已进群，周三量房',
+    ])->assertSuccessful();
+
+    expect($stance->refresh()->payload)->toMatchArray([
+        'contact_status' => 'contacted',
+        'leader_note' => '已进群，周三量房',
+    ]);
+});

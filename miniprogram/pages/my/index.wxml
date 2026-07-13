@@ -41,6 +41,16 @@
       </view>
     </view>
 
+    <view class="list">
+      <view class="row" hover-class="row-hover" bind:tap="retrySubscribe">
+        <text class="row-title">事项消息提醒</text>
+        <view class="row-right">
+          <text class="row-note">{{subscribeStatus === 'accept' ? '已开启' : (subscribeStatus === 'disabled' || subscribeStatus === 'reject' ? '未开启，点此重试' : '点此检查')}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 管理员功能（is_admin 由 admin:grant 授权），直接平铺不做二级入口 -->
     <view class="list" wx:if="{{me.is_admin}}">
       <view class="row" hover-class="row-hover" bind:tap="goAdminMatters">

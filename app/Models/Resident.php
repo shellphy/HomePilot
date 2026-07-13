@@ -60,7 +60,7 @@ class Resident extends Authenticatable
      */
     public function hasMineUpdates(): bool
     {
-        return $this->unseenActivityQuery($this->mine_seen_at)
+        return $this->unseenActivityQuery()
             ->whereBelongsTo($this, 'initiator')
             ->exists();
     }
@@ -70,24 +70,27 @@ class Resident extends Authenticatable
      */
     public function hasJoinedUpdates(): bool
     {
-        return $this->unseenActivityQuery($this->joined_seen_at)
+        return $this->unseenActivityQuery()
             ->approved()
             ->whereHas('joins', fn ($query) => $query->whereBelongsTo($this, 'resident'))
             ->exists();
     }
 
     /**
-     * @param  Carbon|null  $seenAt
      * @return Builder<Matter>
      */
-    private function unseenActivityQuery($seenAt)
+    private function unseenActivityQuery(): Builder
     {
         return Matter::query()
             ->whereNotNull('last_activity_at')
-            ->when($seenAt, fn ($query) => $query->where('last_activity_at', '>', $seenAt))
             ->where(fn ($query) => $query
                 ->whereNull('last_activity_resident_id')
-                ->orWhere('last_activity_resident_id', '!=', $this->id));
+                ->orWhere('last_activity_resident_id', '!=', $this->id))
+            ->where(fn ($query) => $query
+                ->whereDoesntHave('reads', fn ($read) => $read->where('resident_id', $this->id))
+                ->orWhereHas('reads', fn ($read) => $read
+                    ->where('resident_id', $this->id)
+                    ->whereColumn('matter_reads.seen_at', '<', 'matters.last_activity_at')));
     }
 
     /**
@@ -114,6 +117,12 @@ class Resident extends Authenticatable
     public function stances(): HasMany
     {
         return $this->hasMany(Stance::class);
+    }
+
+    /** @return HasMany<MatterRead, $this> */
+    public function matterReads(): HasMany
+    {
+        return $this->hasMany(MatterRead::class);
     }
 
     /**

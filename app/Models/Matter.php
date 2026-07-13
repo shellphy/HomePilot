@@ -29,6 +29,8 @@ use Illuminate\Support\Carbon;
  * @property int $target_count
  * @property array<string, mixed>|null $payload
  * @property Carbon|null $last_activity_at
+ * @property Carbon|null $starts_at
+ * @property Carbon|null $registration_deadline_at
  * @property int|null $last_activity_resident_id
  * @property-read Resident|null $initiator
  * @property-read Party|null $initiatorParty
@@ -52,6 +54,9 @@ class Matter extends Model
         'reject_reason',
         'target_count',
         'payload',
+        'starts_at',
+        'registration_deadline_at',
+        'location',
     ];
 
     /**
@@ -71,7 +76,27 @@ class Matter extends Model
             'review_status' => MatterReviewStatus::class,
             'payload' => 'array',
             'last_activity_at' => 'datetime',
+            'starts_at' => 'datetime',
+            'registration_deadline_at' => 'datetime',
         ];
+    }
+
+    public function registrationHasClosed(): bool
+    {
+        return $this->registration_deadline_at !== null && $this->registration_deadline_at->isPast();
+    }
+
+    public function hasUnreadActivityFor(Resident $resident): bool
+    {
+        if ($this->last_activity_at === null || $this->last_activity_resident_id === $resident->id) {
+            return false;
+        }
+
+        $read = $this->relationLoaded('reads')
+            ? $this->reads->firstWhere('resident_id', $resident->id)
+            : $this->reads()->whereBelongsTo($resident, 'resident')->first();
+
+        return $read === null || $read->seen_at->lt($this->last_activity_at);
     }
 
     /**
@@ -201,6 +226,12 @@ class Matter extends Model
     public function updates(): HasMany
     {
         return $this->hasMany(MatterUpdate::class);
+    }
+
+    /** @return HasMany<MatterRead, $this> */
+    public function reads(): HasMany
+    {
+        return $this->hasMany(MatterRead::class);
     }
 
     /**

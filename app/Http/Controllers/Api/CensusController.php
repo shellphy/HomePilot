@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Stance;
+use App\Services\CensusAggregator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -20,7 +21,10 @@ class CensusController extends Controller
 {
     use ResolvesResident;
 
-    public function __construct(private CensusReportPresentation $presentation) {}
+    public function __construct(
+        private CensusReportPresentation $presentation,
+        private CensusAggregator $aggregator,
+    ) {}
 
     /**
      * 下发问卷 schema + 我的答案 + 匿名聚合。
@@ -32,6 +36,10 @@ class CensusController extends Controller
         $resident = $this->resident($request);
         $stance = $this->stanceOf($matter, $request);
 
+        $registeredCount = $matter->stances()->where('mode', Stance::MODE_REGISTER)->count();
+        $aggregatesVisible = $registeredCount >= CensusAggregator::MINIMUM_PUBLIC_RESPONSES
+            && ($stance !== null || $matter->state !== 'open');
+
         return response()->json([
             'title' => $matter->title,
             'state' => $matter->state,
@@ -41,8 +49,10 @@ class CensusController extends Controller
             'modules' => $matter->payloadValue('modules', []),
             'collects_contact' => (bool) $matter->payloadValue('collects_contact', false),
             'answers' => $stance?->payload['answers'] ?? (object) [],
-            'registered_count' => $matter->stances()->where('mode', Stance::MODE_REGISTER)->count(),
-            'aggregates' => $this->aggregates($matter),
+            'registered_count' => $registeredCount,
+            'aggregates_visible' => $aggregatesVisible,
+            'aggregates_minimum' => CensusAggregator::MINIMUM_PUBLIC_RESPONSES,
+            'aggregates' => $aggregatesVisible ? $this->aggregator->for($matter) : [],
             // 署名发起（物业/业委会/商家的调研）：亮明身份是开放发起权的前提
             'initiator_party' => $matter->initiatorParty ? [
                 'label' => $matter->initiatorParty->typeLabel(),
@@ -204,62 +214,5 @@ class CensusController extends Controller
                 throw ValidationException::withMessages(['answers' => "「{$question['text']}」的答案无效"]);
             }
         }
-    }
-
-    /**
-     * 匿名聚合：每道题的选项计数（公示面数据源）。
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    private function aggregates(Matter $matter): array
-    {
-        $allAnswers = $matter->stances()
-            ->where('mode', Stance::MODE_REGISTER)
-            ->get()
-            ->map(fn (Stance $stance): array => $stance->payload['answers'] ?? []);
-
-        $summaries = $matter->payloadValue('text_summaries', []);
-
-        return collect($matter->payloadList('modules'))
-            ->map(function (array $module) use ($allAnswers, $summaries): array {
-                $questions = $module['questions'] ?? [];
-
-                return [
-                    'title' => $module['title'] ?? '',
-                    // 选择题统计选项计数；填空题不出原文，只有管理员发布过人工归纳（主题+条数）才进公示面
-                    'questions' => collect(is_array($questions) ? $questions : [])
-                        ->map(function (array $question) use ($allAnswers, $summaries): ?array {
-                            if (($question['type'] ?? '') === 'text') {
-                                $summary = $summaries[$question['key']] ?? null;
-
-                                if (! ($summary['published'] ?? false)) {
-                                    return null;
-                                }
-
-                                return [
-                                    'key' => $question['key'],
-                                    'text' => $question['text'],
-                                    'themes' => $summary['themes'],
-                                ];
-                            }
-
-                            $values = $allAnswers
-                                ->map(fn (array $answers) => $answers[$question['key']] ?? null)
-                                ->filter()
-                                ->flatMap(fn ($value): array => is_array($value) ? $value : [$value]);
-
-                            return [
-                                'key' => $question['key'],
-                                'text' => $question['text'],
-                                'counts' => $values->countBy()->sortDesc(),
-                            ];
-                        })
-                        ->filter()
-                        ->values()
-                        ->all(),
-                ];
-            })
-            ->values()
-            ->all();
     }
 }

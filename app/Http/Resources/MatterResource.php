@@ -70,6 +70,15 @@ class MatterResource extends JsonResource
             'final_note' => $this->payloadValue('final_note', ''),
             'body' => $this->payloadValue('body', ''),
             'published_on' => $this->created_at?->format('m-d'),
+            'starts_at' => $this->starts_at?->toIso8601String(),
+            'starts_on' => $this->starts_at?->format('m-d H:i'),
+            'registration_deadline_at' => $this->registration_deadline_at?->toIso8601String(),
+            'registration_deadline_on' => $this->registration_deadline_at?->format('m-d H:i'),
+            'registration_closed' => $this->registrationHasClosed(),
+            'location' => $this->location,
+            'has_unread_updates' => $user instanceof Resident && $this->last_activity_at !== null
+                ? $this->hasUnreadActivityFor($user)
+                : false,
             'reject_reason' => $this->reject_reason,
             'roster_hidden' => ! $type->rosterPublic($this->resource),
             'roster' => $this->whenLoaded(

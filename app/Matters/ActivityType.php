@@ -60,7 +60,7 @@ class ActivityType extends MatterType
 
     public function allowsJoin(Matter $matter): bool
     {
-        return $matter->state === 'open';
+        return $matter->state === 'open' && $this->registrationOpen($matter);
     }
 
     /**
@@ -69,7 +69,7 @@ class ActivityType extends MatterType
      */
     public function contactsOpen(Matter $matter): bool
     {
-        return $matter->state === 'open';
+        return $matter->state === 'open' && $this->registrationOpen($matter);
     }
 
     /** 活动结束后开放评价：口碑沉淀不只属于团购（商家办的活动也计入其档案）。 */

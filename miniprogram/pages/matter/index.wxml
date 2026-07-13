@@ -9,6 +9,7 @@
         is-initiator="{{isInitiator}}"
         my-review="{{myReview}}"
         contacts="{{contacts}}"
+        contact-roster="{{contactRoster}}"
         initiator-contact="{{initiatorContact}}"
         is-party="{{isParty}}"
         party-label="{{partyLabel}}"

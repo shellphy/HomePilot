@@ -49,6 +49,7 @@ test('the census ships its schema, my answers and aggregates', function () {
     $census = renovationCensus();
     $resident = Resident::factory()->create();
     Stance::factory()->censusAnswers()->for($census, 'matter')->for($resident, 'resident')->create();
+    Stance::factory()->count(4)->censusAnswers()->for($census, 'matter')->create();
     Sanctum::actingAs($resident);
 
     $this->getJson("/api/matters/{$census->id}/census")
@@ -57,7 +58,7 @@ test('the census ships its schema, my answers and aggregates', function () {
         ->assertJsonPath('pitch', '摸一摸全小区的装修意向')
         ->assertJsonPath('modules.0.key', 'basic')
         ->assertJsonPath('collects_contact', true)
-        ->assertJsonPath('registered_count', 1)
+        ->assertJsonPath('registered_count', 5)
         ->assertJsonPath('aggregates.0.title', '基础登记');
 });
 
@@ -205,6 +206,10 @@ test('text questions accept free-form answers but stay out of the public aggrega
     $this->putJson("/api/matters/{$census->id}/census", [
         'answers' => ['visited' => ['A 公司'], 'pitfall' => '定金说随时退，合同里却写不退，签约前要问清'],
     ])->assertCreated();
+    Stance::factory()->count(4)->for($census, 'matter')->create([
+        'mode' => Stance::MODE_REGISTER,
+        'payload' => ['answers' => ['visited' => ['A 公司']]],
+    ]);
 
     // 公示聚合只有选择题；填空题的原文不出现在公开面
     $aggregates = $this->getJson("/api/matters/{$census->id}/census")

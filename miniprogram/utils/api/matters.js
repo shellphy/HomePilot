@@ -17,6 +17,18 @@ function getMatter(id) {
   return request(`/matters/${id}`);
 }
 
+function markMatterSeen(id) {
+  return request(`/matters/${id}/seen`, { method: 'POST' });
+}
+
+function listCensusOverview() {
+  return request('/censuses/overview');
+}
+
+function updateParticipant(id, stanceId, data) {
+  return request(`/matters/${id}/participants/${stanceId}`, { method: 'PUT', data });
+}
+
 // 统一创作：所有类型（团购/活动/互助/维权/征集/公告）的发起。
 // data 里的内容字段（title/category/target_count/pitch/perk/terms/glossary/
 // purpose/collects_contact/body/needs_survey/modules 等）都走顶层，不包 payload。
@@ -136,6 +148,9 @@ module.exports = {
   listMine,
   listJoined,
   getMatter,
+  markMatterSeen,
+  listCensusOverview,
+  updateParticipant,
   createMatter,
   updateMatter,
   deleteMatter,

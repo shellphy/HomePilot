@@ -112,6 +112,8 @@ Page({
           isInitiator: !!census.is_initiator, // 我是发起者本人 → 露出「邻居授权给你看的问卷」入口
           registered: census.registered_count,
           myAnswered: Object.keys(census.answers || {}).length,
+          aggregatesVisible: census.aggregates_visible,
+          aggregatesMinimum: census.aggregates_minimum,
           sections,
         },
         showTextAdmin: !!me.is_admin && hasTextQuestions,

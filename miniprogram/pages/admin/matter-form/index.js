@@ -10,6 +10,12 @@ const { guardProfileError } = require('../../../utils/profile-guard');
 const { requestSubscribe } = require('../../../utils/subscribe');
 const { draftGlossaryRow } = require('../../../utils/glossary-draft');
 
+function splitDateTime(value) {
+  if (!value) return { date: '', time: '' };
+  const normalized = value.replace('T', ' ');
+  return { date: normalized.slice(0, 10), time: normalized.slice(11, 16) };
+}
+
 Page({
   behaviors: [load, dirty],
 
@@ -28,6 +34,11 @@ Page({
     reviewStatusLabel: '',
     rejectReason: '',
     targetCount: '',
+    startDate: '',
+    startTime: '',
+    deadlineDate: '',
+    deadlineTime: '',
+    location: '',
     // 按类型使用的内容字段
     body: '',
     pitch: '',
@@ -60,6 +71,8 @@ Page({
       const [me, res] = await Promise.all([getMe(), matters.getMatter(this.data.id)]);
       const matter = res.data;
       const payload = matter.payload || {};
+      const start = splitDateTime(matter.starts_at);
+      const deadline = splitDateTime(matter.registration_deadline_at);
       this.setData({
         isAdmin: !!me.is_admin,
         type: matter.type,
@@ -71,6 +84,11 @@ Page({
         reviewStatusLabel: matter.review_status_label,
         rejectReason: matter.reject_reason || '',
         targetCount: matter.target_count ? String(matter.target_count) : '',
+        startDate: start.date,
+        startTime: start.time,
+        deadlineDate: deadline.date,
+        deadlineTime: deadline.time,
+        location: matter.location || '',
         // 内容字段一律读平铺（对所有人可见），不依赖管理员专属的 payload
         body: matter.body || '',
         pitch: matter.pitch || '',
@@ -145,6 +163,11 @@ Page({
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
+  onPicker(event) {
+    this.markDirty();
+    this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
+  },
+
   chooseState() {
     const { states, stateKeys } = this.data;
     wx.showActionSheet({
@@ -206,6 +229,13 @@ Page({
     if (data.type !== 'notice' && data.type !== 'census') {
       content.target_count = data.targetCount ? Number(data.targetCount) : 0;
     }
+    if (['groupbuy', 'activity', 'aid'].includes(data.type)) {
+      content.starts_at = data.startDate && data.startTime ? `${data.startDate} ${data.startTime}` : null;
+      content.registration_deadline_at = data.deadlineDate && data.deadlineTime
+        ? `${data.deadlineDate} ${data.deadlineTime}`
+        : null;
+      content.location = data.location.trim();
+    }
     if (data.type === 'groupbuy') {
       content.category = data.category.trim();
       content.perk = data.perk.trim();
@@ -233,6 +263,9 @@ Page({
       if (!data.targetCount || Number(data.targetCount) < 1) {
         return wx.showToast({ title: '请填写目标人数', icon: 'none' });
       }
+    }
+    if (['activity', 'aid'].includes(data.type) && (!data.startDate || !data.startTime || !data.location.trim())) {
+      return wx.showToast({ title: '请填写时间和地点', icon: 'none' });
     }
 
     const body = this.buildContent();

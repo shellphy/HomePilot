@@ -55,6 +55,7 @@ class MatterController extends Controller
 
         $matters = Matter::approved()
             ->whereHas('joins', fn ($query) => $query->whereBelongsTo($resident, 'resident'))
+            ->with(['reads' => fn ($query) => $query->whereBelongsTo($resident, 'resident')])
             ->withCount(['joins', 'confirmedJoins'])
             ->latest()
             ->get();
@@ -67,7 +68,9 @@ class MatterController extends Controller
      */
     public function mine(Request $request): AnonymousResourceCollection
     {
-        $matters = Matter::whereBelongsTo($this->resident($request), 'initiator')
+        $resident = $this->resident($request);
+        $matters = Matter::whereBelongsTo($resident, 'initiator')
+            ->with(['reads' => fn ($query) => $query->whereBelongsTo($resident, 'resident')])
             ->withCount(['joins', 'confirmedJoins'])
             ->latest()
             ->get();
@@ -111,18 +114,35 @@ class MatterController extends Controller
             ]);
     }
 
+    public function markSeen(Request $request, Matter $matter): JsonResponse
+    {
+        $resident = $this->resident($request);
+        abort_unless(
+            $matter->initiator_id === $resident->id
+                || $matter->joins()->whereBelongsTo($resident, 'resident')->exists(),
+            403,
+        );
+
+        $matter->reads()->updateOrCreate(
+            ['resident_id' => $resident->id],
+            ['seen_at' => now()],
+        );
+
+        return response()->json(['seen' => true]);
+    }
+
     /**
      * 联系方式互通（进入 contactsOpen 阶段后）：
      * 牵头人 ↔ 同意共享的参与者，双向、仅限双方，手机号不进入任何公示面。
      *
-     * @return array{contacts: array<int, array{name: string, phone: string}>, initiator_contact: array{name: string, phone: string}|null}
+     * @return array{contacts: array<int, array{name: string, phone: string}>, contact_roster: array<int, array<string, mixed>>, initiator_contact: array{name: string, phone: string}|null}
      */
     private function contactExchange(Matter $matter, Resident $resident, ?Stance $myJoin): array
     {
         $type = MatterTypeRegistry::for($matter->type);
 
         if (! $type->contactsOpen($matter)) {
-            return ['contacts' => [], 'initiator_contact' => null];
+            return ['contacts' => [], 'contact_roster' => [], 'initiator_contact' => null];
         }
 
         // 牵头人视角：同意共享、档位够格（标品团只互通确认参团的）且已授权手机号的参与者
@@ -132,6 +152,21 @@ class MatterController extends Controller
                     && $type->contactEligible($matter, $join)
                     && $join->resident->phone !== '')
                 ->map(fn (Stance $join): array => ['name' => $join->resident->displayName(), 'phone' => $join->resident->phone])
+                ->values()
+                ->all()
+            : [];
+
+        $contactRoster = $matter->initiator_id === $resident->id
+            ? $matter->joins
+                ->filter(fn (Stance $join): bool => $type->contactEligible($matter, $join))
+                ->map(fn (Stance $join): array => [
+                    'stance_id' => $join->id,
+                    'name' => $join->resident->displayName(),
+                    'phone' => (bool) ($join->payload['share_contact'] ?? false) ? $join->resident->phone : '',
+                    'share_contact' => (bool) ($join->payload['share_contact'] ?? false),
+                    'contact_status' => $join->payload['contact_status'] ?? 'pending',
+                    'leader_note' => $join->payload['leader_note'] ?? '',
+                ])
                 ->values()
                 ->all()
             : [];
@@ -147,7 +182,26 @@ class MatterController extends Controller
                 ? ['name' => $initiator->displayName(), 'phone' => $initiator->phone]
                 : null;
 
-        return ['contacts' => $contacts, 'initiator_contact' => $initiatorContact];
+        return ['contacts' => $contacts, 'contact_roster' => $contactRoster, 'initiator_contact' => $initiatorContact];
+    }
+
+    public function updateParticipant(Request $request, Matter $matter, Stance $stance): JsonResponse
+    {
+        $resident = $this->resident($request);
+        abort_unless($matter->initiator_id === $resident->id || $resident->is_admin, 403);
+        abort_unless($stance->matter_id === $matter->id && $stance->mode === Stance::MODE_JOIN, 404);
+
+        $validated = $request->validate([
+            'contact_status' => ['required', Rule::in(['pending', 'contacted'])],
+            'leader_note' => ['sometimes', 'nullable', 'string', 'max:100'],
+        ]);
+
+        $stance->reviseTo(array_merge($stance->payload ?? [], [
+            'contact_status' => $validated['contact_status'],
+            'leader_note' => $validated['leader_note'] ?? '',
+        ]));
+
+        return response()->json(['updated' => true]);
     }
 
     /**
@@ -204,6 +258,9 @@ class MatterController extends Controller
             'state' => $type->initialState(),
             'target_count' => $validated['target_count'] ?? 0,
             'payload' => $type->payloadFrom($validated),
+            'starts_at' => $validated['starts_at'] ?? null,
+            'registration_deadline_at' => $validated['registration_deadline_at'] ?? null,
+            'location' => $validated['location'] ?? '',
         ]);
 
         return response()->json(['data' => MatterResource::make($matter->load('initiatorParty'))], 201);
@@ -253,6 +310,11 @@ class MatterController extends Controller
             'state' => $validated['state'] ?? $matter->state,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
             'payload' => $payload,
+            'starts_at' => array_key_exists('starts_at', $validated) ? $validated['starts_at'] : $matter->starts_at,
+            'registration_deadline_at' => array_key_exists('registration_deadline_at', $validated)
+                ? $validated['registration_deadline_at']
+                : $matter->registration_deadline_at,
+            'location' => array_key_exists('location', $validated) ? ($validated['location'] ?? '') : $matter->location,
         ];
 
         if ($isAdmin) {
@@ -394,7 +456,12 @@ class MatterController extends Controller
         $type = MatterTypeRegistry::for($typeKey);
 
         return array_merge(
-            ['title' => ['required', 'string', 'max:60']],
+            [
+                'title' => ['required', 'string', 'max:60'],
+                'starts_at' => ['sometimes', 'nullable', 'date'],
+                'registration_deadline_at' => ['sometimes', 'nullable', 'date', 'before_or_equal:starts_at'],
+                'location' => ['sometimes', 'nullable', 'string', 'max:120'],
+            ],
             $type->baseRules(),
             $type->payloadRules(),
         );

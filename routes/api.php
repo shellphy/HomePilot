@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\PartyAdminController;
 use App\Http\Controllers\Api\Admin\SettingAdminController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CensusController;
+use App\Http\Controllers\Api\CensusOverviewController;
 use App\Http\Controllers\Api\CensusReportController;
 use App\Http\Controllers\Api\GlossaryDraftController;
 use App\Http\Controllers\Api\JoinController;
@@ -41,13 +42,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // 事项与表态
     Route::get('/matters', [MatterController::class, 'index']);
+    Route::get('/censuses/overview', CensusOverviewController::class);
     Route::get('/matters/mine', [MatterController::class, 'mine']);
     Route::get('/matters/joined', [MatterController::class, 'joined']);
     Route::get('/matters/{matter}', [MatterController::class, 'show']);
+    Route::post('/matters/{matter}/seen', [MatterController::class, 'markSeen']);
     Route::post('/matters', [MatterController::class, 'store']);
     Route::put('/matters/{matter}', [MatterController::class, 'update']);
     Route::delete('/matters/{matter}', [MatterController::class, 'destroy']);
     Route::put('/matters/{matter}/state', [MatterController::class, 'updateState']);
+    Route::put('/matters/{matter}/participants/{stance}', [MatterController::class, 'updateParticipant']);
     Route::put('/matters/{matter}/deal', [MatterController::class, 'updateDeal']);
     Route::post('/matters/{matter}/join', [JoinController::class, 'store']);
     Route::delete('/matters/{matter}/join', [JoinController::class, 'destroy']);

@@ -36,6 +36,15 @@ function answerText(Matter $census, string $detail): void
     ]);
 }
 
+function reachPublicAggregateThreshold(Matter $census): void
+{
+    Stance::factory()->count(5)->for($census, 'matter')->create([
+        'mode' => Stance::MODE_REGISTER,
+        'payload' => ['answers' => ['issue_types' => ['渗水']]],
+    ]);
+    $census->update(['state' => 'closed']);
+}
+
 test('census text endpoints reject ordinary members', function (string $method, string $uri) {
     $census = handoverCensus();
     Sanctum::actingAs(Resident::factory()->create());
@@ -76,6 +85,7 @@ test('census text detail is not available for non-census matters', function () {
 test('a draft summary stays off the public aggregates until published', function () {
     $census = handoverCensus();
     answerText($census, '主卧飘窗渗水');
+    reachPublicAggregateThreshold($census);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     $this->putJson("/api/admin/matters/{$census->id}/census-summary", [
@@ -102,6 +112,7 @@ test('a draft summary stays off the public aggregates until published', function
 test('a published summary shows up in public aggregates as themes, never raw answers', function () {
     $census = handoverCensus();
     answerText($census, '主卧飘窗渗水，13800138000 找我');
+    reachPublicAggregateThreshold($census);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     $this->putJson("/api/admin/matters/{$census->id}/census-summary", [
@@ -126,7 +137,7 @@ test('a published summary shows up in public aggregates as themes, never raw ans
 
     // 选择题聚合不受影响
     $choiceQuestion = collect($response->json('aggregates.0.questions'))->firstWhere('key', 'issue_types');
-    expect($choiceQuestion['counts'])->toMatchArray(['渗水' => 1]);
+    expect($choiceQuestion['counts'])->toMatchArray(['渗水' => 6]);
 });
 
 test('publishing requires at least one theme and a real text question', function () {

@@ -6,6 +6,8 @@
   </view>
   <view wx:if="{{matter.initiator_party}}" class="merchant-line">{{matter.initiator_party.name}} · 已认证{{matter.initiator_party.label}}发起</view>
   <view wx:if="{{matter.pitch}}" class="mcard-pitch">{{matter.pitch}}</view>
+  <view wx:if="{{matter.starts_on}}" class="muted">{{matter.starts_on}}{{matter.location ? ' · ' + matter.location : ''}}</view>
+  <view wx:if="{{matter.registration_deadline_on}}" class="muted">报名截止 {{matter.registration_deadline_on}}</view>
   <view class="mcard-foot">
     <text><text class="mcard-num">{{matter.join_count}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} {{foot}}</text>
   </view>
