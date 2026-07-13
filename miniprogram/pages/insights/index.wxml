@@ -72,5 +72,8 @@
         </view>
       </view>
     </block>
+
+    <!-- 全局空态：一份征集都没有时给个交代 -->
+    <view wx:if="{{!openCards.length && !pastItems.length}}" class="hint">小区还没有征集。需要摸底的事，管理员可以发起一份。</view>
   </page-status>
 </view>

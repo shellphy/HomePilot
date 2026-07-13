@@ -30,9 +30,12 @@ Page({
 
   goMatter(event) {
     const matter = this.data.matters.find((item) => item.id === event.currentTarget.dataset.id);
-    // 我牵头的问卷：公示前入口是改问卷，公示后才进数据/答题面
-    if (matter.type === 'census' && matter.review_status !== 'approved') {
-      wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${matter.id}` });
+    // 征集按状态直达对应页：公示前改问卷，公示后数据/答题面
+    if (matter.type === 'census') {
+      const url = matter.review_status === 'approved'
+        ? `/pages/census-insights/index?id=${matter.id}`
+        : `/pages/admin/census-schema/index?id=${matter.id}`;
+      wx.navigateTo({ url });
       return;
     }
     wx.navigateTo({ url: `/pages/matter/index?id=${matter.id}` });
