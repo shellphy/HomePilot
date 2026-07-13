@@ -4,6 +4,7 @@ use App\Ai\Agents\MatterExplainer;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
+use App\Settings\CommunitySettings;
 
 /**
  * 用带答案的征集构造 explainer，断言指令里带上了征集专属上下文。
@@ -116,6 +117,29 @@ test('census ai context includes every question without truncation', function ()
         ->toContain('第 1 道硬装题')
         ->toContain('第 28 道硬装题')
         ->toContain('第 28 道说明');
+});
+
+test('renovation matter injects community hard conditions', function () {
+    $settings = app(CommunitySettings::class);
+    $settings->ai_context = '每户只有一个外机位';
+    $settings->save();
+
+    $matter = Matter::factory()->create(['type' => 'groupbuy', 'category' => '中央空调']);
+
+    expect((string) (new MatterExplainer($matter))->instructions())
+        ->toContain('小区硬条件：每户只有一个外机位');
+});
+
+test('non-renovation matter omits装修 hard conditions', function () {
+    $settings = app(CommunitySettings::class);
+    $settings->ai_context = '每户只有一个外机位';
+    $settings->save();
+
+    // 活动事项（品类不在装修白名单）不该拿到装修硬条件
+    $matter = Matter::factory()->create(['type' => 'activity', 'category' => '亲子活动']);
+
+    expect((string) (new MatterExplainer($matter))->instructions())
+        ->not->toContain('小区硬条件');
 });
 
 test('groupbuy ai context is unaffected by the census branch', function () {

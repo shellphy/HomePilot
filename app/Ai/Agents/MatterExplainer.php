@@ -28,6 +28,13 @@ class MatterExplainer implements Agent, Conversational, HasTools
 {
     use Promptable, RemembersConversations, SearchesWeb;
 
+    /**
+     * 只有这些装修相关品类的事项才注入小区硬条件（ai_context）。
+     *
+     * @var list<string>
+     */
+    private const RENOVATION_CATEGORIES = ['装修', '装修公司', '中央空调', '全屋定制', '软装', '地暖', '门窗'];
+
     public function __construct(public Matter $matter, public ?Resident $asker = null) {}
 
     /**
@@ -35,8 +42,10 @@ class MatterExplainer implements Agent, Conversational, HasTools
      */
     public function instructions(): Stringable|string
     {
-        return <<<'PROMPT'
-你是社区协作小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。
+        $name = app(CommunitySettings::class)->name;
+
+        return <<<PROMPT
+你是「{$name}」小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。
 
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，居民追问时再展开。
@@ -67,7 +76,7 @@ PROMPT.$this->matterContext();
             "小区：{$settings->name}",
         ];
 
-        if ($settings->ai_context !== '') {
+        if ($settings->ai_context !== '' && in_array($this->matter->category, self::RENOVATION_CATEGORIES, true)) {
             $lines[] = "小区硬条件：{$settings->ai_context}";
         }
 
