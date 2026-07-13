@@ -3,6 +3,22 @@
   border: 1rpx solid var(--brand);
   background: linear-gradient(145deg, #ffffff, var(--brand-bg));
 }
+.consent-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+.consent-title {
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.consent-sub {
+  font-size: 22rpx;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 10rpx;
+}
 .registration-summary-head {
   display: flex;
   align-items: flex-start;

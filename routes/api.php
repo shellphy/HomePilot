@@ -58,6 +58,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/matters/{matter}/updates', [MatterUpdateController::class, 'store']);
     Route::get('/matters/{matter}/census', [CensusController::class, 'show']);
     Route::put('/matters/{matter}/census', [CensusController::class, 'store']);
+    // 「让发起者看到我的问卷」授权开关：在「查看我的问卷」页冷静态设置
+    Route::put('/matters/{matter}/census/consent', [CensusController::class, 'consent']);
     Route::get('/matters/{matter}/census-report', [CensusReportController::class, 'show']);
     Route::post('/matters/{matter}/census-report', [CensusReportController::class, 'store'])->middleware('throttle:10,1');
     // 发起者视图：主动勾选授权的参与者明细（非 admin，授权收窄到发起者本人）

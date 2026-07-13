@@ -86,6 +86,11 @@ function saveCensus(id, data) {
   return request(`/matters/${id}/census`, { method: 'PUT', data });
 }
 
+// 「让发起者看到我的问卷」授权开关：在「查看我的问卷」页冷静态设置
+function setCensusConsent(id, visible) {
+  return request(`/matters/${id}/census/consent`, { method: 'PUT', data: { visible_to_initiator: visible } });
+}
+
 function getCensusReport(id) {
   return request(`/matters/${id}/census-report`);
 }
@@ -158,6 +163,7 @@ module.exports = {
   postUpdate,
   getCensus,
   saveCensus,
+  setCensusConsent,
   getCensusReport,
   generateCensusReport,
   getCensusConsented,

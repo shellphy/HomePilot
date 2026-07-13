@@ -37,6 +37,8 @@ Page({
     answerModules: [],
     answeredCount: 0,
     censusState: '',
+    initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的问卷」授权
+    visibleToInitiator: false, // 是否把匿名破例授权给这个发起者本人（默认关）
   },
 
   onLoad(query) {
@@ -58,8 +60,41 @@ Page({
         answerModules: answerModules(census, this.data.answerModules),
         answeredCount: Object.keys(census.answers || {}).length,
         censusState: census.state || '',
+        initiatorParty: census.initiator_party || null,
+        visibleToInitiator: !!census.my_visible_to_initiator,
       });
     });
+  },
+
+  // 授权开关：开启是把联系方式+逐题答案交给发起者，先二次确认；关闭随时、无摩擦
+  toggleConsent(event) {
+    const visible = event.detail.value;
+    if (!visible) {
+      this.saveConsent(false);
+      return;
+    }
+    const party = this.data.initiatorParty;
+    wx.showModal({
+      title: '让发起者看到我的问卷？',
+      content: `开启后，「${party.label} · ${party.name}」能看到你的联系方式和每道题的回答。可随时关闭。`,
+      confirmText: '开启',
+      success: ({ confirm }) => {
+        if (confirm) this.saveConsent(true);
+        else this.setData({ visibleToInitiator: false }); // 取消：把开关拨回去
+      },
+    });
+  },
+
+  async saveConsent(visible) {
+    try {
+      await matters.setCensusConsent(this.data.censusId, visible);
+      this.setData({ visibleToInitiator: visible });
+      wx.showToast({ title: visible ? '已授权发起者查看' : '已关闭授权', icon: 'none' });
+    } catch (error) {
+      // 失败回滚开关，避免显示与后端不一致
+      this.setData({ visibleToInitiator: !visible });
+      wx.showToast({ title: error.message, icon: 'none' });
+    }
   },
 
   toggleModule(event) {

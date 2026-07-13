@@ -124,6 +124,31 @@ class CensusController extends Controller
     }
 
     /**
+     * 「让发起者看到我的问卷」授权开关：在「查看我的问卷」页冷静态设置，独立于答题提交。
+     */
+    public function consent(Request $request, Matter $matter): JsonResponse
+    {
+        abort_unless($matter->type === 'census', 404);
+
+        $validated = $request->validate([
+            'visible_to_initiator' => ['required', 'boolean'],
+        ]);
+
+        $resident = $this->resident($request);
+        $stance = $matter->stances()
+            ->where('mode', Stance::MODE_REGISTER)
+            ->where('resident_id', $resident->id)
+            ->first();
+        abort_unless($stance !== null, 422, '先参与问卷再设置授权');
+
+        $stance->reviseTo(array_merge($stance->payload ?? [], [
+            'visible_to_initiator' => $validated['visible_to_initiator'],
+        ]));
+
+        return response()->json(['visible_to_initiator' => $validated['visible_to_initiator']]);
+    }
+
+    /**
      * 发起者视图：只列出主动勾选「让发起者看到我的问卷」的参与者，
      * 含显示名、手机号（限收联系方式的征集且业主已授权）、逐题答案（换算成题面文字）。
      * 邻居授权的对象是发起者本人。
