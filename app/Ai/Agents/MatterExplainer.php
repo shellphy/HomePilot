@@ -43,9 +43,10 @@ class MatterExplainer implements Agent, Conversational, HasTools
     public function instructions(): Stringable|string
     {
         $name = app(CommunitySettings::class)->name;
+        $today = now()->format('Y 年 n 月 j 日');
 
         return <<<PROMPT
-你是「{$name}」小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。
+你是「{$name}」小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。今天是 {$today}，涉及行情、政策等时效信息以此为准、联网查证后再答，别按训练时的年份推断。
 
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，居民追问时再展开。
