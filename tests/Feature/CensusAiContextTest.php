@@ -120,7 +120,8 @@ test('census ai context includes every question without truncation', function ()
 test('groupbuy ai context is unaffected by the census branch', function () {
     $groupbuy = Matter::factory()->create([
         'title' => '中央空调团购',
-        'payload' => ['pitch' => '我自己家也装这套', 'purpose' => '不应出现'],
+        'body' => '我自己家也装这套',
+        'payload' => ['purpose' => '不应出现'],
     ]);
 
     $instructions = (string) (new MatterExplainer($groupbuy))->instructions();

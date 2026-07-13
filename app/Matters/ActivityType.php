@@ -36,14 +36,7 @@ class ActivityType extends MatterType
 
     public function payloadRules(): array
     {
-        return [
-            'pitch' => ['nullable', 'string', 'max:1000'],
-        ];
-    }
-
-    public function payloadFrom(array $validated): array
-    {
-        return ['pitch' => $validated['pitch'] ?? ''];
+        return [];
     }
 
     /** 活动办不成的收场出口：与「已结束」分开，取消的活动不开放评价。 */

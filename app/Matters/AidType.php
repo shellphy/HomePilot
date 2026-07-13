@@ -36,14 +36,7 @@ class AidType extends MatterType
 
     public function payloadRules(): array
     {
-        return [
-            'pitch' => ['nullable', 'string', 'max:1000'],
-        ];
-    }
-
-    public function payloadFrom(array $validated): array
-    {
-        return ['pitch' => $validated['pitch'] ?? ''];
+        return [];
     }
 
     /** 互助没凑成的收场出口：与「已结束」分开，取消的互助不开放评价。 */

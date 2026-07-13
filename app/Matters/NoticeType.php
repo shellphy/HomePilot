@@ -29,9 +29,13 @@ class NoticeType extends MatterType
 
     public function payloadRules(): array
     {
-        return [
-            'body' => ['required', 'string', 'max:2000'],
-        ];
+        return [];
+    }
+
+    /** 公告正文必填，篇幅比其它类型的说明更长。 */
+    public function bodyRules(): array
+    {
+        return ['required', 'string', 'max:2000'];
     }
 
     /** 公告只能由管理端发布。 */
@@ -50,11 +54,6 @@ class NoticeType extends MatterType
     public function visibleInList(Matter $matter): bool
     {
         return $matter->state === 'published';
-    }
-
-    public function payloadFrom(array $validated): array
-    {
-        return ['body' => $validated['body'] ?? ''];
     }
 
     /** 公告置顶（归档的沉底交给列表按状态过滤）。 */

@@ -28,7 +28,7 @@
   <view class="term-row" wx:if="{{matter.location}}"><text class="term-label">地点</text><text class="term-value">{{matter.location}}</text></view>
 </view>
 
-<view class="card" wx:if="{{matter.pitch}}">
+<view class="card" wx:if="{{matter.body}}">
   <view class="kicker">发起人的话</view>
   <view class="pitch"
     >“<text

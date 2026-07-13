@@ -68,8 +68,8 @@ test('the agent instructions carry the matter terms, glossary and community cons
     $matter = Matter::factory()->create([
         'title' => '中央空调团购',
         'category' => '中央空调',
+        'body' => '我自己家也装这套',
         'payload' => [
-            'pitch' => '我自己家也装这套',
             'perk' => '满 20 户送清洗',
             'terms' => [['label' => '一拖四', 'value' => '3.2 万']],
             'glossary' => [['term' => '双转子压缩机', 'explain' => '两个转子轮流做功，更省电也更静音，问清具体型号']],

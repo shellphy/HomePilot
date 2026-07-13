@@ -22,7 +22,9 @@ return new class extends Migration
             $table->string('intro', 60)->default('');
             $table->text('description')->nullable();
             $table->json('images')->nullable();
-            $table->boolean('is_listed')->default(false); // 管理员认证后进入公示商家名单
+            // 认证状态：管理员认证（approved）后进入公示名单；is_listed 由此派生
+            $table->string('review_status', 20)->default('pending');
+            $table->string('reject_reason', 200)->default('');
             $table->timestamps();
         });
     }

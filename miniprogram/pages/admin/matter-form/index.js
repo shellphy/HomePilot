@@ -40,8 +40,7 @@ Page({
     deadlineTime: '',
     location: '',
     // 按类型使用的内容字段
-    body: '',
-    pitch: '',
+    body: '', // 事项正文（公告叫「正文」，其它类型叫「说明」）
     purpose: '', // 仅征集：发起目的自由文本
     perk: '',
     needsSurvey: false, // 团购：逐人报价（业主端发起时锁定，管理端作为纠错通道可改）
@@ -91,7 +90,6 @@ Page({
         location: matter.location || '',
         // 内容字段一律读平铺（对所有人可见），不依赖管理员专属的 payload
         body: matter.body || '',
-        pitch: matter.pitch || '',
         perk: matter.perk || '',
         needsSurvey: !!matter.needs_survey,
         terms: matter.terms || [],
@@ -213,15 +211,10 @@ Page({
     wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${this.data.id}` });
   },
 
-  // 收敛按类型的内容字段为一份顶层 body（不包 payload，后端 payloadFrom 自行归拢）
+  // 收敛按类型的内容字段为一份顶层数据（不包 payload，后端 payloadFrom 自行归拢）
   buildContent() {
     const { data } = this;
-    const content = { title: data.title.trim() };
-    if (data.type === 'notice') {
-      content.body = data.body.trim();
-    } else {
-      content.pitch = data.pitch.trim();
-    }
+    const content = { title: data.title.trim(), body: data.body.trim() };
     if (data.type !== 'notice' && data.type !== 'census') {
       content.target_count = data.targetCount ? Number(data.targetCount) : 0;
     }

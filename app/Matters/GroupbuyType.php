@@ -49,7 +49,6 @@ class GroupbuyType extends MatterType
     public function payloadRules(): array
     {
         return [
-            'pitch' => ['nullable', 'string', 'max:1000'],
             'perk' => ['nullable', 'string', 'max:100'],
             // 逐人报价团购：非标准品，商家需单独和每位报名者沟通需求、单独出方案，
             // 联系互通提前到谈判中
@@ -67,7 +66,6 @@ class GroupbuyType extends MatterType
     public function payloadFrom(array $validated): array
     {
         return [
-            'pitch' => $validated['pitch'] ?? '',
             'perk' => $validated['perk'] ?? '',
             'terms' => $validated['terms'] ?? [],
             'glossary' => $validated['glossary'] ?? [],

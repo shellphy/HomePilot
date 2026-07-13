@@ -18,9 +18,9 @@
   <view class="term-row" wx:if="{{matter.location}}"><text class="term-label">地点</text><text class="term-value">{{matter.location}}</text></view>
 </view>
 
-<view class="card" wx:if="{{matter.pitch}}">
+<view class="card" wx:if="{{matter.body}}">
   <view class="kicker">发起人说</view>
-  <view class="pitch">“{{matter.pitch}}”</view>
+  <view class="pitch">“{{matter.body}}”</view>
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}"
     >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 牵头人' :
     '牵头人'}}</view

@@ -152,25 +152,17 @@
     </view>
 
     <!-- 长文本：公告正文 / 说明 -->
-    <view class="card" wx:if="{{type === 'notice'}}">
-      <view class="q-title">公告正文<text class="f-required">*</text></view>
+    <view class="card">
+      <view class="q-title">
+        {{type === 'notice' ? '公告正文' : (type === 'census' ? '征集说明' : '把事情说清楚')}}
+        <text wx:if="{{type === 'notice'}}" class="f-required">*</text>
+      </view>
       <textarea
         class="fin farea"
         auto-height
-        maxlength="2000"
+        maxlength="{{type === 'notice' ? 2000 : 1000}}"
         value="{{body}}"
         data-field="body"
-        bind:input="onInput"
-      />
-    </view>
-    <view class="card" wx:else>
-      <view class="q-title">{{type === 'census' ? '征集说明' : '把事情说清楚'}}</view>
-      <textarea
-        class="fin farea"
-        auto-height
-        maxlength="1000"
-        value="{{pitch}}"
-        data-field="pitch"
         bind:input="onInput"
       />
     </view>

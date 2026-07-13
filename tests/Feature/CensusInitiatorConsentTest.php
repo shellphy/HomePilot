@@ -17,8 +17,8 @@ function signedCensus(array $overrides = []): Matter
         'category' => '装修',
         'title' => '电梯改造需求调研',
         'initiator_party_id' => Party::factory()->create(['type' => Party::TYPE_PROPERTY, 'name' => '天青府物业服务中心'])->id,
+        'body' => '摸一摸大家的改造意愿',
         'payload' => [
-            'pitch' => '摸一摸大家的改造意愿',
             'collects_contact' => true,
             'modules' => [[
                 'key' => 'basic',
@@ -172,7 +172,6 @@ test('the initiator sees only consenting registrants with readable answers and p
 test('phone stays hidden when the census does not collect contact', function () {
     $initiator = Resident::factory()->create();
     $census = signedCensus(['initiator_id' => $initiator->id, 'payload' => [
-        'pitch' => '',
         'collects_contact' => false,
         'modules' => [[
             'key' => 'basic',

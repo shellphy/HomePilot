@@ -99,7 +99,7 @@ Page({
         block: {
           title: census.title,
           state: census.state,
-          pitch: census.pitch,
+          body: census.body,
           purpose: census.purpose || '',
           reportPresentation: census.report_presentation || {},
           initiatorParty: census.initiator_party || null,

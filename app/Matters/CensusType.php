@@ -39,7 +39,6 @@ class CensusType extends MatterType
     public function payloadRules(): array
     {
         return [
-            'pitch' => ['nullable', 'string', 'max:1000'],
             // 发起目的：自由文本，发起者写为什么发这次征集，给参与者看
             'purpose' => ['nullable', 'string', 'max:1000'],
             // 署名发起：物业/业委会/商家想做的调研由管理员代建，结果对全小区公开
@@ -69,7 +68,6 @@ class CensusType extends MatterType
     public function payloadFrom(array $validated): array
     {
         $payload = [
-            'pitch' => $validated['pitch'] ?? '',
             'purpose' => $validated['purpose'] ?? '',
         ];
 

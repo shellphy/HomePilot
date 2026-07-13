@@ -30,7 +30,7 @@ test('a signed census carries its initiator party in the community feed', functi
         'state' => 'open',
         'initiator_id' => null,
         'initiator_party_id' => $committee->id,
-        'payload' => ['pitch' => '', 'modules' => []],
+        'payload' => ['modules' => []],
     ]);
 
     Sanctum::actingAs(Resident::factory()->create());
@@ -59,7 +59,7 @@ test('admin removes the signature with an explicit null', function () {
         'state' => 'open',
         'initiator_id' => null,
         'initiator_party_id' => $property->id,
-        'payload' => ['pitch' => '', 'modules' => []],
+        'payload' => ['modules' => []],
     ]);
 
     $this->putJson('/api/matters/'.$census->id, [

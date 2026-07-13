@@ -50,7 +50,7 @@ Page({
         .map((matter) => ({
           id: matter.id,
           title: matter.title,
-          pitch: matter.pitch,
+          body: matter.body,
           registered: matter.registered,
           myAnswered: matter.my_answered,
           hasParticipationRate: stats.residents > 0,
