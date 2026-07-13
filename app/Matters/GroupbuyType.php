@@ -87,7 +87,7 @@ class GroupbuyType extends MatterType
         return (bool) $matter->payloadValue('needs_survey', false);
     }
 
-    /** 已认证商家可以发起商家直供团。 */
+    /** 已核验商家可以发起商家直供团。 */
     public function merchantInitiatable(): bool
     {
         return true;

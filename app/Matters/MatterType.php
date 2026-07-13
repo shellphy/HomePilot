@@ -51,7 +51,7 @@ abstract class MatterType
         return true;
     }
 
-    /** 已认证商家是否可以发起该类型事项（带商家署名与「已认证」标识）。 */
+    /** 已核验商家是否可以发起该类型事项（带商家署名与「已核验」标识）。 */
     public function merchantInitiatable(): bool
     {
         return false;

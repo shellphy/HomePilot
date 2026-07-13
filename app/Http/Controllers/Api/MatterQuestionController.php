@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * 「大家都在问」：针对事项的公开问答。填好资料的业主、已认证相关方都能问能答；
+ * 「大家都在问」：针对事项的公开问答。填好资料的业主、已核验相关方都能问能答；
  * 同问聚合热度，好答案可由团长沉淀成「买前必懂」词条。本人或管理员可删问答，管理员可拉黑成员。
  */
 class MatterQuestionController extends Controller
@@ -184,7 +184,7 @@ class MatterQuestionController extends Controller
         return response()->json(['data' => ['term' => $validated['term']]]);
     }
 
-    /** 能否参与(问/答)：业主按钮照显示（提交时再校验楼栋），已认证相关方放行，被拉黑不显示。 */
+    /** 能否参与(问/答)：业主按钮照显示（提交时再校验楼栋），已核验相关方放行，被拉黑不显示。 */
     private function canParticipate(Resident $resident): bool
     {
         if ($resident->isBlocked()) {
@@ -198,13 +198,13 @@ class MatterQuestionController extends Controller
         return true;
     }
 
-    /** 提交前置：拉黑挡下、相关方须已认证、业主须先填楼栋。 */
+    /** 提交前置：拉黑挡下、相关方须已核验、业主须先填楼栋。 */
     private function assertCanParticipate(Resident $resident, string $verb): void
     {
         $this->assertNotBlocked($resident);
 
         if ($resident->affiliatedParty !== null) {
-            abort_unless($resident->affiliatedParty->is_listed, 403, '相关方通过认证后才能'.$verb);
+            abort_unless($resident->affiliatedParty->is_listed, 403, '相关方通过核验后才能'.$verb);
 
             return;
         }

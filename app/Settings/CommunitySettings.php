@@ -18,7 +18,7 @@ class CommunitySettings extends Settings
 
     public string $initiator_note;
 
-    /** 管理员联系方式（商家认证引导等处展示，给"请联系管理员"一个具体的落点）。 */
+    /** 管理员联系方式（商家核验引导等处展示，给"请联系管理员"一个具体的落点）。 */
     public string $admin_contact;
 
     /** 小区硬条件（外机位/层高这类本小区独有的约束），喂给业主侧 AI 答疑当背景知识。 */

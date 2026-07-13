@@ -15,7 +15,7 @@ class MatterUpdateController extends Controller
     use ResolvesResident;
 
     /**
-     * 发布事项时间线：发起人发进展；被认证的治理类相关方（物业/开发商/业委会）发官方回应。
+     * 发布事项时间线：发起人发进展；被核验的治理类相关方（物业/开发商/业委会）发官方回应。
      */
     public function store(Request $request, Matter $matter): JsonResponse
     {
@@ -24,7 +24,7 @@ class MatterUpdateController extends Controller
         $party = $resident->affiliatedParty;
         $isOfficial = $party !== null && $party->is_listed && $party->isGovernance();
 
-        abort_unless($isInitiator || $isOfficial, 403, '只有发起人或被认证的相关方可以操作');
+        abort_unless($isInitiator || $isOfficial, 403, '只有发起人或被核验的相关方可以操作');
 
         $validated = $request->validate([
             'happened_on' => ['required', 'date'],

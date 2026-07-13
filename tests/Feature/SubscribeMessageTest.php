@@ -171,9 +171,9 @@ test('listing a party notifies its owner and only on the flip', function () {
     expect($message['touser'])->toBe($owner->openid)
         ->and($message['page'])->toBe("pages/party/index?id={$party->id}")
         ->and($message['data']['thing1']['value'])->toBe('青城中央空调')
-        ->and($message['data']['short_thing3']['value'])->toBe('认证通过');
+        ->and($message['data']['short_thing3']['value'])->toBe('核验通过');
 
-    // 重复保存已认证状态不再通知
+    // 重复保存已核验状态不再通知
     $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => true])->assertSuccessful();
     expect(sentSubscribeMessages())->toHaveCount(1);
 });
@@ -187,7 +187,7 @@ test('self-registering a party notifies the admins to certify it', function () {
     $message = sentSubscribeMessages()->sole();
     expect($message['touser'])->toBe($admin->openid)
         ->and($message['data']['thing1']['value'])->toBe('青城中央空调')
-        ->and($message['data']['short_thing3']['value'])->toBe('待认证');
+        ->and($message['data']['short_thing3']['value'])->toBe('待核验');
 });
 
 test('rejecting a party notifies its owner with the reason', function () {

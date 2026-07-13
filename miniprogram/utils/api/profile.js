@@ -23,12 +23,12 @@ function getStats() {
   return request('/stats');
 }
 
-// 已认证相关方名录（商家带成团数与评价沉淀）
+// 已核验相关方名录（商家带成团数与评价沉淀）
 function listParties() {
   return request('/parties');
 }
 
-// 相关方详情（已认证对全小区可见；未认证仅管理员与归属人可见）
+// 相关方详情（已核验对全小区可见；未核验仅管理员与归属人可见）
 function getParty(id) {
   return request(`/parties/${id}`);
 }

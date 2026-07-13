@@ -196,7 +196,7 @@ Page({
           layout_label: layoutLabel,
         });
       } else {
-        // 入驻提交顺手收一次订阅授权：认证结果的通知才有额度可推
+        // 入驻提交顺手收一次订阅授权：核验结果的通知才有额度可推
         await requestSubscribe();
         await updateMe(commonFields);
         await bindParty(identity, {

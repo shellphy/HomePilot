@@ -2,22 +2,22 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="chips filter-chips">
       <view class="chip {{statusFilter === '' ? 'chip-on' : ''}}" data-filter="" bind:tap="pickFilter">全部</view>
-      <view class="chip {{statusFilter === 'pending' ? 'chip-on' : ''}}" data-filter="pending" bind:tap="pickFilter">待认证</view>
-      <view class="chip {{statusFilter === 'approved' ? 'chip-on' : ''}}" data-filter="approved" bind:tap="pickFilter">已认证</view>
+      <view class="chip {{statusFilter === 'pending' ? 'chip-on' : ''}}" data-filter="pending" bind:tap="pickFilter">待核验</view>
+      <view class="chip {{statusFilter === 'approved' ? 'chip-on' : ''}}" data-filter="approved" bind:tap="pickFilter">已核验</view>
       <view class="chip {{statusFilter === 'rejected' ? 'chip-on' : ''}}" data-filter="rejected" bind:tap="pickFilter">未通过</view>
     </view>
     <view class="card">
       <view class="row" wx:for="{{parties}}" wx:key="id">
-        <!-- 点击查看完整档案（简介/详细介绍/照片），认证前先看资料 -->
+        <!-- 点击查看完整档案（简介/详细介绍/照片），核验前先看资料 -->
         <view class="row-main" hover-class="row-touch" data-id="{{item.id}}" bind:tap="goDetail">
           <view class="row-title">{{item.name || '未填名称'}}</view>
           <view class="row-sub">{{item.type_label}}{{item.category ? ' · ' + item.category : ''}}{{item.phone ? ' · ' + item.phone : ''}} · {{item.created_at}}</view>
           <view class="row-sub" wx:if="{{item.intro}}">{{item.intro}}</view>
           <view class="row-sub row-sub-reject" wx:if="{{item.review_status === 'rejected'}}">已驳回：{{item.reject_reason}}</view>
         </view>
-        <!-- 三态互斥：待认证给通过/驳回；未通过只剩「通过」翻案；已认证可撤下 -->
+        <!-- 三态互斥：待核验给通过/驳回；未通过只剩「通过」翻案；已核验可撤下 -->
         <block wx:if="{{item.review_status === 'approved'}}">
-          <view class="pill pill-open">已认证</view>
+          <view class="pill pill-open">已核验</view>
           <view class="approve-btn approve-btn-reject" hover-class="approve-btn-hover" data-id="{{item.id}}" catch:tap="reject">撤下</view>
         </block>
         <block wx:elif="{{item.review_status === 'rejected'}}">

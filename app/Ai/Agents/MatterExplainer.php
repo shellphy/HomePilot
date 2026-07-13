@@ -120,7 +120,7 @@ PROMPT.$this->matterContext();
 
         if ($this->matter->initiatorParty) {
             $lines[] = "发起方：{$this->matter->initiatorParty->typeLabel()}「{$this->matter->initiatorParty->name}」"
-                .($this->matter->initiatorParty->is_listed ? '（已认证）' : '（未认证）');
+                .($this->matter->initiatorParty->is_listed ? '（已核验）' : '（未核验）');
         }
 
         return implode("\n", $lines);

@@ -88,9 +88,9 @@
   </view>
 </view>
 
-<!-- 被认证的治理类相关方（物业/开发商/业委会）：官方回应入口，进展时间线里带署名 -->
+<!-- 被核验的治理类相关方（物业/开发商/业委会）：官方回应入口，进展时间线里带署名 -->
 <view class="card leader-ops" wx:if="{{canRespond && !isInitiator}}">
-  <view class="kicker">你以认证相关方身份出现，可对这件事正式回应</view>
+  <view class="kicker">你以核验相关方身份出现，可对这件事正式回应</view>
   <view class="leader-btns">
     <t-button theme="light" size="medium" bind:tap="goProgress">发布官方回应</t-button>
   </view>

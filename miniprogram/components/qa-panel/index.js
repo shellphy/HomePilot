@@ -1,5 +1,5 @@
 // 「大家都在问」：针对事项的公开问答面板。
-// 填好资料的业主、已认证相关方都能问能答；同问聚合热度。本人或管理员可删问答，管理员可拉黑成员。
+// 填好资料的业主、已核验相关方都能问能答；同问聚合热度。本人或管理员可删问答，管理员可拉黑成员。
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
 const { guardProfileError } = require('../../utils/profile-guard');

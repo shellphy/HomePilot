@@ -7,7 +7,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * 相关方认证被驳回（附理由），通知归属人改资料后重交。
+ * 相关方核验被驳回（附理由），通知归属人改资料后重交。
  */
 class PartyRejected
 {
