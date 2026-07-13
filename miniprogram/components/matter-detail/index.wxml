@@ -22,7 +22,7 @@
   <view class="kicker">发起人说</view>
   <view class="pitch">“{{matter.pitch}}”</view>
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}"
-    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 牵头人' :
+    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已核验' + matter.initiator_party.label + ' · 牵头人' :
     '牵头人'}}</view
   >
 </view>

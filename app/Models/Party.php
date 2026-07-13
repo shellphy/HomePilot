@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -24,6 +25,7 @@ use Illuminate\Support\Collection;
  * @property array<int, string>|null $images
  * @property PartyReviewStatus $review_status
  * @property string $reject_reason
+ * @property Carbon|null $reviewed_at
  * @property-read bool $is_listed 派生：review_status 是否为已认证
  */
 class Party extends Model
@@ -55,13 +57,14 @@ class Party extends Model
         self::TYPE_COMMITTEE => ['label' => '业委会', 'self_registrable' => true, 'name_hint' => '如：天青府业主委员会', 'category_label' => '', 'description_hint' => '业委会职责、如何联系、正在推进的事……'],
     ];
 
-    protected $fillable = ['type', 'name', 'category', 'intro', 'description', 'images', 'review_status', 'reject_reason'];
+    protected $fillable = ['type', 'name', 'category', 'intro', 'description', 'images', 'review_status', 'reject_reason', 'reviewed_at'];
 
     protected function casts(): array
     {
         return [
             'images' => 'array',
             'review_status' => PartyReviewStatus::class,
+            'reviewed_at' => 'datetime',
         ];
     }
 
@@ -85,6 +88,7 @@ class Party extends Model
         $this->update([
             'review_status' => PartyReviewStatus::Approved,
             'reject_reason' => '',
+            'reviewed_at' => now(),
         ]);
     }
 

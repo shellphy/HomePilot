@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "已认证商家",
+  "navigationBarTitleText": "已核验商家",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark",
   "usingComponents": {

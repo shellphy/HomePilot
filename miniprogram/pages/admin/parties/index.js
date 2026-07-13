@@ -40,19 +40,19 @@ Page({
     wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
   },
 
-  // 认证即把「已认证」身份推给全小区，先确认
+  // 核验即把「身份已核验」推给全小区，先确认
   approve(event) {
     const { id } = event.currentTarget.dataset;
     const party = this.data.all.find((item) => item.id === id);
     wx.showModal({
-      title: '认证并公示？',
-      content: `认证后「${party.name || 'TA'}」将以「已认证」身份对全小区公示`,
-      confirmText: '认证',
+      title: '核验并公示？',
+      content: `通过后「${party.name || 'TA'}」将以「身份已核验」对全小区公示`,
+      confirmText: '核验通过',
       success: async ({ confirm }) => {
         if (!confirm) return;
         try {
           await admin.reviewParty(id, true);
-          wx.showToast({ title: '已认证公示', icon: 'success' });
+          wx.showToast({ title: '已核验公示', icon: 'success' });
           this.reload();
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });

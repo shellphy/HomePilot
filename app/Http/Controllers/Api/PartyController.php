@@ -99,6 +99,7 @@ class PartyController extends Controller
                 'review_status' => $party->review_status->value,
                 'review_status_label' => $party->review_status->label(),
                 'reject_reason' => $party->reject_reason,
+                'reviewed_on' => $party->reviewed_at?->format('Y 年 m 月'),
                 'phone' => $owner?->phone,
                 'matter_count' => $party->initiatedMatters()->approved()->count(),
                 'deal_count' => $party->initiatedMatters()->where('type', 'groupbuy')->where('state', 'done')->count(),

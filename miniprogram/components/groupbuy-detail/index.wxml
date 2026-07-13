@@ -42,7 +42,7 @@
     >”</view
   >
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}"
-    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人'
+    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已核验' + matter.initiator_party.label + ' · 本团发起人'
     : '本团发起人'}}</view
   >
 </view>
