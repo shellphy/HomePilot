@@ -49,17 +49,6 @@
                 <view class="bar-track"><view class="bar-fill" style="width: {{item.percent}}%"></view></view>
                 <view class="bar-value">{{item.count}}</view>
               </view>
-              <!-- 填空题：管理员归纳后的匿名主题（原文永不公示） -->
-              <view class="theme" wx:for="{{question.themes}}" wx:for-item="theme" wx:key="title">
-                <view class="theme-head">
-                  <text class="theme-title">{{theme.title}}</text>
-                  <text class="theme-count">{{theme.count}} 条</text>
-                </view>
-                <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
-              </view>
-              <view class="theme-foot" wx:if="{{question.themes.length}}"
-                >归纳自 {{block.registered}} 份问卷的文字反馈</view
-              >
             </view>
           </view>
         </view>
@@ -70,14 +59,6 @@
         <view>
           <view class="admin-entry-title">邻居授权给你看的问卷</view>
           <view class="admin-entry-sub">勾选了「让发起者看到我的问卷」的邻居 · 含联系方式与逐题回答</view>
-        </view>
-        <text class="frow-arrow">›</text>
-      </view>
-
-      <view class="card admin-entry" wx:if="{{showTextAdmin}}" hover-class="frow-hover" bind:tap="goTextAdmin">
-        <view>
-          <view class="admin-entry-title">文本题明细与归纳</view>
-          <view class="admin-entry-sub">仅管理员可见 · 浏览文字反馈，归纳后可发布到本页</view>
         </view>
         <text class="frow-arrow">›</text>
       </view>

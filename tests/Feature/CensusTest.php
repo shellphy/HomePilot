@@ -216,13 +216,6 @@ test('text questions accept free-form answers but stay out of the public aggrega
         ->assertSuccessful()
         ->json('aggregates.0.questions');
     expect(collect($aggregates)->pluck('key')->all())->toBe(['visited']);
-
-    // 填空原文进管理端登记明细
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $this->getJson("/api/admin/matters/{$census->id}/registrations")
-        ->assertSuccessful()
-        ->assertJsonPath('data.0.answers.1.question', '踩过什么坑或有什么心得？')
-        ->assertJsonPath('data.0.answers.1.answer', '定金说随时退，合同里却写不退，签约前要问清');
 });
 
 test('blank or oversized text answers are rejected', function () {

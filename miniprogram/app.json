@@ -20,8 +20,6 @@
     "pages/admin/census-schema/index",
     "pages/admin/census-module/index",
     "pages/admin/census-question/index",
-    "pages/admin/registrations/index",
-    "pages/admin/census-text/index",
     "pages/admin/parties/index",
     "pages/admin/settings/index"
   ],

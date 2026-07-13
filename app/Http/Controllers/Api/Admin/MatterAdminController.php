@@ -14,7 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * 管理端 · 事项：审核队列与登记明细。
+ * 管理端 · 事项：审核队列与通过/驳回。
  * 创建/详情/编辑/删除已并入用户端 MatterController（按 is_admin 做字段级授权）。
  */
 class MatterAdminController extends Controller
@@ -80,43 +80,6 @@ class MatterAdminController extends Controller
         }
 
         return response()->json(['data' => $this->present($matter)]);
-    }
-
-    /**
-     * 登记明细（含楼栋/房号/手机等仅管理员可见字段），答案换算成题面文字。
-     */
-    public function registrations(Matter $matter): JsonResponse
-    {
-        $questions = collect($matter->payloadList('modules'))
-            ->flatMap(fn (array $module): array => $module['questions'] ?? [])
-            ->keyBy('key');
-
-        $registrations = $matter->stances()
-            ->where('mode', Stance::MODE_REGISTER)
-            ->with('resident')
-            ->latest()
-            ->get()
-            ->map(function (Stance $stance) use ($questions): array {
-                $answers = $stance->payload['answers'] ?? [];
-
-                return [
-                    'id' => $stance->id,
-                    'unit_label' => $stance->resident->unit_label,
-                    'room_label' => $stance->resident->room_label,
-                    'layout_label' => $stance->resident->layout_label,
-                    'nickname' => $stance->resident->nickname,
-                    'phone' => $stance->resident->phone,
-                    'created_at' => $stance->created_at?->format('Y-m-d H:i'),
-                    'answers' => collect(is_array($answers) ? $answers : [])
-                        ->map(fn (mixed $value, int|string $key): array => [
-                            'question' => $questions[$key]['text'] ?? $key,
-                            'answer' => is_array($value) ? implode('、', $value) : (string) $value,
-                        ])
-                        ->values(),
-                ];
-            });
-
-        return response()->json(['data' => $registrations]);
     }
 
     /**
