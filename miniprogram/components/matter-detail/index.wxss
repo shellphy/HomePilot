@@ -60,12 +60,9 @@
   background: var(--danger-bg);
 }
 
-.leader-ops {
-  border: 2rpx dashed var(--brand);
-}
 .leader-btns {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16rpx;
 }
 
