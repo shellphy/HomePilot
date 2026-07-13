@@ -6,14 +6,3 @@
 .q-explain-gap {
   margin-top: 24rpx;
 }
-
-.switch-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 24rpx;
-}
-.switch-label {
-  font-size: 27rpx;
-  font-weight: 600;
-}

@@ -24,8 +24,8 @@ function signedCensus(array $overrides = []): Matter
                 'key' => 'basic',
                 'title' => '基础登记',
                 'questions' => [
-                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡'], 'required' => true],
-                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖'], 'required' => true],
+                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡']],
+                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖']],
                     ['key' => 'note', 'text' => '还有什么想说的？', 'type' => 'text'],
                 ],
             ]],
@@ -153,7 +153,7 @@ test('phone stays hidden when the census does not collect contact', function () 
             'key' => 'basic',
             'title' => '基础登记',
             'questions' => [
-                ['key' => 'layout', 'text' => '户型？', 'type' => 'single', 'options' => ['107㎡'], 'required' => true],
+                ['key' => 'layout', 'text' => '户型？', 'type' => 'single', 'options' => ['107㎡']],
             ],
         ]],
     ]]);

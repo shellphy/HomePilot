@@ -7,7 +7,6 @@ use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
-use Illuminate\Support\Str;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use RuntimeException;
 
@@ -61,8 +60,6 @@ class GenerateCensusReport
         $payload['ai_report_answers_hash'] = $answerHash;
         $payload['ai_report_generated_at'] = now()->toIso8601String();
         $payload['ai_report_status'] = 'completed';
-        $payload['report_share_token'] ??= Str::random(48);
-        $payload['report_share_enabled'] ??= false;
         unset(
             $payload['ai_report_pending_hash'],
             $payload['ai_report_failed_hash'],

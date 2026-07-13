@@ -1,4 +1,4 @@
-// 题目编辑：题干 / 注释 / 单选多选填空 / 必答 / 选项（一行一个）。走统一 /matters 接口。
+// 题目编辑：题干 / 注释 / 单选多选填空 / 选项（一行一个）。走统一 /matters 接口。
 const matters = require('../../../utils/api/matters');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
@@ -42,7 +42,6 @@ Page({
     text: '',
     note: '',
     type: 'single',
-    required: false,
     optionsText: '',
     submitting: false,
   },
@@ -71,7 +70,6 @@ Page({
         text: question ? question.text : '',
         note: (question && question.note) || '',
         type: question ? question.type : 'single',
-        required: question ? !!question.required : false,
         optionsText: question ? formatOptionLines(question) : '',
       });
     });
@@ -87,13 +85,8 @@ Page({
     this.setData({ type: event.currentTarget.dataset.type });
   },
 
-  onRequired(event) {
-    this.markDirty();
-    this.setData({ required: event.detail.value });
-  },
-
   async save() {
-    const { id, mi, qi, modules, text, note, type, required, optionsText, submitting } = this.data;
+    const { id, mi, qi, modules, text, note, type, optionsText, submitting } = this.data;
     if (submitting) return;
     if (!text.trim()) return wx.showToast({ title: '先填题目', icon: 'none' });
 
@@ -101,7 +94,7 @@ Page({
     if (type !== 'text' && options.length < 2) return wx.showToast({ title: '至少两个选项，一行一个', icon: 'none' });
 
     const next = modules.map((module) => ({ ...module, questions: [...module.questions] }));
-    const question = { text: text.trim(), note: note.trim(), type, required };
+    const question = { text: text.trim(), note: note.trim(), type };
     if (type !== 'text') {
       question.options = options;
       question.option_notes = optionNotes;

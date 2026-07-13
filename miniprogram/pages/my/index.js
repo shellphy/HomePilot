@@ -3,7 +3,6 @@ const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
 const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
-const { requestSubscribe, getSubscribeStatus } = require('../../utils/subscribe');
 
 Page({
   behaviors: [load],
@@ -15,7 +14,6 @@ Page({
     censusCount: 0,
     pendingCount: 0,
     partyPendingCount: 0, // 待认证相关方（有成员但未认证）
-    subscribeStatus: 'unknown',
   },
 
   onShow() {
@@ -30,11 +28,10 @@ Page({
   reload() {
     return this.runLoad(async () => {
       // /me 强制刷新：未读红点（has_mine_updates 等）要反映最新动态，不能吃会话缓存
-      const [me, mineRes, joinedRes, subscribeStatus] = await Promise.all([
+      const [me, mineRes, joinedRes] = await Promise.all([
         getMe(true),
         matters.listMine(),
         matters.listJoined(),
-        getSubscribeStatus(),
       ]);
       const [pendingCount, partyPendingCount] = me.is_admin
         ? await Promise.all([
@@ -56,7 +53,6 @@ Page({
         joinedCount: joinedRes.data.length,
         pendingCount,
         partyPendingCount,
-        subscribeStatus,
       });
     });
   },
@@ -102,10 +98,5 @@ Page({
 
   goMine() {
     wx.navigateTo({ url: '/pages/mine-matters/index?kind=mine' });
-  },
-
-  async retrySubscribe() {
-    await requestSubscribe();
-    this.setData({ subscribeStatus: await getSubscribeStatus() });
   },
 });

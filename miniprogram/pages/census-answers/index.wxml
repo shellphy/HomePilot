@@ -1,0 +1,29 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="content-heading">
+      <view class="content-heading-title">我的回答</view>
+      <view class="content-heading-sub">共 {{answeredCount}} 题，按问卷分组查看</view>
+    </view>
+
+    <view class="card registration-module {{item.expanded ? 'registration-module-open' : ''}}" wx:for="{{answerModules}}" wx:key="key">
+      <view class="registration-module-head" data-index="{{index}}" bind:tap="toggleModule">
+        <view class="registration-module-title">{{item.title}}</view>
+        <view class="registration-module-meta">
+          <view class="registration-module-count">{{item.questions.length}} 题</view>
+          <text class="registration-arrow {{item.expanded ? 'registration-arrow-open' : ''}}">›</text>
+        </view>
+      </view>
+      <view wx:if="{{item.expanded}}" class="registration-answers">
+        <view class="registration-answer" wx:for="{{item.questions}}" wx:for-item="question" wx:for-index="questionIndex" wx:key="key">
+          <view class="registration-question-row">
+            <text class="registration-question-index">{{questionIndex + 1}}</text>
+            <view class="registration-question">{{question.text}}</view>
+          </view>
+          <view class="registration-value">{{question.answer}}</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{!answerModules.length}}" class="hint">还没有已提交的回答</view>
+  </page-status>
+</view>

@@ -7,6 +7,7 @@
     "pages/census-insights/index",
     "pages/census-form/index",
     "pages/census-report/index",
+    "pages/census-answers/index",
     "pages/census-consented/index",
     "pages/matter-update/index",
     "pages/groupbuy-deal/index",

@@ -1,0 +1,103 @@
+.content-heading {
+  padding: 14rpx 8rpx 16rpx;
+}
+.content-heading-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.content-heading-sub {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+
+.registration-module {
+  padding: 0;
+  overflow: hidden;
+  border: 1rpx solid #e3e8e4;
+  box-shadow: none;
+}
+.registration-module-open {
+  border-color: #b7ddc8;
+}
+.registration-module-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  min-height: 104rpx;
+  padding: 0 28rpx;
+  background: #fafcfb;
+}
+.registration-module-open .registration-module-head {
+  background: var(--brand-bg);
+}
+.registration-module-title {
+  flex: 1;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.registration-module-meta {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  flex-shrink: 0;
+}
+.registration-module-count {
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.registration-arrow {
+  width: 42rpx;
+  height: 42rpx;
+  font-size: 34rpx;
+  line-height: 38rpx;
+  color: var(--text-secondary);
+  text-align: center;
+  background: #ffffff;
+  border-radius: 50%;
+  transform: rotate(90deg);
+  transition: transform 0.2s ease;
+}
+.registration-arrow-open {
+  transform: rotate(-90deg);
+}
+.registration-answers {
+  padding: 8rpx 24rpx 16rpx;
+  background: #ffffff;
+  border-top: 1rpx solid #dcebe2;
+}
+.registration-answer {
+  padding: 20rpx;
+  margin-top: 14rpx;
+  background: var(--bg-page);
+  border-radius: 14rpx;
+}
+.registration-question-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+.registration-question-index {
+  flex-shrink: 0;
+  width: 34rpx;
+  height: 34rpx;
+  font-size: 20rpx;
+  line-height: 34rpx;
+  color: var(--text-secondary);
+  text-align: center;
+  background: #ffffff;
+  border-radius: 50%;
+}
+.registration-question {
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.registration-value {
+  margin: 10rpx 0 0 46rpx;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 1.55;
+  color: var(--text-primary);
+}

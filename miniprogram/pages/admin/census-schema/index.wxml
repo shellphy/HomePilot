@@ -4,6 +4,16 @@
       <view class="schema-title">{{title}}</view>
       <text class="schema-edit" bind:tap="editBasics" hover-class="schema-edit-hover">编辑基础信息 ›</text>
     </view>
+
+    <!-- 审核态用醒目横幅顶到题目上方，别再缩在页尾的灰色小字里 -->
+    <view
+      class="schema-banner {{reviewStatus === 'pending' ? 'schema-banner-pending' : 'schema-banner-done'}}"
+      wx:if="{{reviewStatus && reviewStatus !== 'draft'}}"
+    >
+      <text class="schema-banner-title">{{reviewStatus === 'pending' ? '已提交审核' : '审核状态已更新'}}</text>
+      <text class="schema-banner-sub">{{reviewStatus === 'pending' ? '通常 24 小时内完成，通过后自动公示到小区页' : '题目改动已保存'}}</text>
+    </view>
+
     <view class="card">
       <view
         class="row"
@@ -22,15 +32,11 @@
       <view wx:if="{{!modules.length}}" class="hint">还没有题目。问卷按模块组织，先添加第一个模块。</view>
     </view>
 
-    <t-button theme="light" block style="width: 100%" bind:tap="addModule">＋ 添加模块</t-button>
+    <t-button theme="primary" variant="outline" block style="width: 100%" bind:tap="addModule">＋ 添加模块</t-button>
     <view class="privacy" wx:if="{{reviewStatus === 'draft'}}"
       >这是草稿，不会进入审核队列。至少添加一道题，再提交审核。</view
     >
     <view class="privacy" wx:else>已经收到答案后，只加新题、不改老题不删选项，否则旧答案会和统计对不上。</view>
-
-    <view class="schema-status" wx:if="{{reviewStatus && reviewStatus !== 'draft'}}"
-      >{{reviewStatus === 'pending' ? '已提交审核' : '当前状态已更新'}}</view
-    >
 
     <view class="footer-bar" wx:if="{{reviewStatus === 'draft'}}">
       <t-button

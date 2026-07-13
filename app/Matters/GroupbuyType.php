@@ -51,8 +51,8 @@ class GroupbuyType extends MatterType
         return [
             'pitch' => ['nullable', 'string', 'max:1000'],
             'perk' => ['nullable', 'string', 'max:100'],
-            // 方案型团购（如中央空调、全屋定制）：非标品，商家需逐户沟通需求（如上门量房）
-            // 单独出方案，联系互通提前到谈判中
+            // 逐人报价团购：非标准品，商家需单独和每位报名者沟通需求、单独出方案，
+            // 联系互通提前到谈判中
             'needs_survey' => ['sometimes', 'boolean'],
             'terms' => ['nullable', 'array'],
             'terms.*.label' => ['required', 'string', 'max:30'],
@@ -83,7 +83,7 @@ class GroupbuyType extends MatterType
         return ['needs_survey'];
     }
 
-    /** 方案型团购：非标品（中央空调/全屋定制），每户方案与成交价不同。 */
+    /** 逐人报价团购：非标准品，每位报名者的方案与成交价各不相同。 */
     public function needsSurvey(Matter $matter): bool
     {
         return (bool) $matter->payloadValue('needs_survey', false);
@@ -124,8 +124,8 @@ class GroupbuyType extends MatterType
 
     /**
      * 联系方式互通阶段：标品团成团后才互通（建群、收款在此后发生）；
-     * 方案型团从谈判中开始（商家不先逐户沟通——量房、看户型——就出不了方案，
-     * 业主拿不到自家报价没法决定参团）。
+     * 逐人报价团从谈判中开始（商家不先单独沟通就出不了方案，
+     * 报名者拿不到自己的报价没法决定参团）。
      */
     public function contactsOpen(Matter $matter): bool
     {

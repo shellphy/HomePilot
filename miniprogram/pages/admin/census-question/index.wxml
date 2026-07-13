@@ -21,11 +21,6 @@
         <textarea class="fin farea" auto-height value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
       </block>
       <view wx:else class="q-explain q-explain-gap">填空题的回答不直接公示；可在公示页的「文本题明细与归纳」里归纳成主题后发布</view>
-
-      <view class="switch-row">
-        <view class="switch-label">必答</view>
-        <switch checked="{{required}}" bind:change="onRequired" color="#06ae56" />
-      </view>
     </view>
 
     <!-- 危险操作与吸底的保存拉开距离，避免误触（与事项表单同一约定） -->
