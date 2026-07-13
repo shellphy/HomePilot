@@ -1,8 +1,18 @@
-<view class="page-body">
+<view class="page-body {{reviewStatus === 'draft' ? 'has-footer' : ''}}">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <view class="kicker">{{title}}</view>
+    <view class="schema-head">
+      <view class="kicker">{{title}}</view>
+      <text class="schema-edit" bind:tap="editBasics">编辑基础信息 ›</text>
+    </view>
     <view class="card">
-      <view class="row" hover-class="row-hover" wx:for="{{modules}}" wx:key="key" data-mi="{{index}}" bind:tap="goModule">
+      <view
+        class="row"
+        hover-class="row-hover"
+        wx:for="{{modules}}"
+        wx:key="key"
+        data-mi="{{index}}"
+        bind:tap="goModule"
+      >
         <view class="row-main">
           <view class="row-title">{{item.title}}</view>
           <view class="row-sub">{{item.questions.length}} 道题{{item.intro ? ' · ' + item.intro : ''}}</view>
@@ -13,6 +23,26 @@
     </view>
 
     <t-button theme="light" block style="width: 100%" bind:tap="addModule">＋ 添加模块</t-button>
-    <view class="privacy">已经收到答案后，只加新题、不改老题不删选项，否则旧答案会和统计对不上。</view>
+    <view class="privacy" wx:if="{{reviewStatus === 'draft'}}"
+      >这是草稿，不会进入审核队列。至少添加一道题，再提交审核。</view
+    >
+    <view class="privacy" wx:else>已经收到答案后，只加新题、不改老题不删选项，否则旧答案会和统计对不上。</view>
+
+    <view class="schema-status" wx:if="{{reviewStatus && reviewStatus !== 'draft'}}"
+      >{{reviewStatus === 'pending' ? '已提交审核' : '当前状态已更新'}}</view
+    >
+
+    <view class="footer-bar" wx:if="{{reviewStatus === 'draft'}}">
+      <t-button
+        theme="primary"
+        block
+        size="large"
+        style="width: 100%"
+        disabled="{{!hasQuestions}}"
+        loading="{{submitting}}"
+        bind:tap="submitReview"
+        >{{hasQuestions ? '提交审核（' + questionCount + ' 道题）' : '至少添加一道题'}}</t-button
+      >
+    </view>
   </page-status>
 </view>

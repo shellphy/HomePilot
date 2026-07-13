@@ -195,7 +195,7 @@ page {
   padding: 4rpx 8rpx 20rpx;
 }
 
-/* ---- 行式表单：标签左、内容自然左对齐、细分割线（资料编辑、管理端表单共用）---- */
+/* ---- 行式表单：标签左、内容右对齐、细分割线（资料编辑、管理端表单共用）---- */
 .form-list {
   padding-top: 0;
   padding-bottom: 0;
@@ -227,14 +227,14 @@ page {
   flex: 1;
   min-width: 0;
   height: 116rpx;
-  text-align: left;
+  text-align: right;
   font-size: 28rpx;
   color: var(--text-primary);
 }
 .frow-value {
   flex: 1;
   min-width: 0;
-  text-align: left;
+  text-align: right;
   font-size: 28rpx;
   color: var(--text-primary);
   white-space: nowrap;

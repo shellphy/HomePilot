@@ -26,9 +26,7 @@ Page({
   onShareAppMessage() {
     const first = this.data.openCards[0];
     return {
-      title: first
-        ? `${first.title}｜${first.registered} 人已参与`
-        : `${this.data.communityName || '小区'} · 小区数据`,
+      title: first ? `${first.title}｜${first.registered} 人已参与` : `${this.data.communityName || '小区'} · 小区数据`,
       path: '/pages/insights/index',
     };
   },
@@ -55,7 +53,9 @@ Page({
           pitch: matter.pitch,
           registered: matter.registered,
           myAnswered: matter.my_answered,
-          percent: stats.residents
+          hasParticipationRate: stats.residents > 0,
+          totalResidents: stats.residents,
+          participationRate: stats.residents
             ? Math.min(100, Math.round((matter.registered / stats.residents) * 100))
             : 0,
           top: matter.top,
@@ -67,6 +67,7 @@ Page({
           id: matter.id,
           title: matter.title,
           note: `${matter.state_label} · ${matter.registered} 人参与`,
+          aggregatesVisible: matter.aggregates_visible,
         }));
 
       this.setData({
@@ -78,7 +79,9 @@ Page({
   },
 
   goDetail(event) {
-    wx.navigateTo({ url: `/pages/census-insights/index?id=${event.currentTarget.dataset.id}` });
+    const { id, visible } = event.currentTarget.dataset;
+    if (!visible) return;
+    wx.navigateTo({ url: `/pages/census-insights/index?id=${id}` });
   },
 
   goRegistration(event) {

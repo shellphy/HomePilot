@@ -40,6 +40,10 @@ function updateMatter(id, data) {
   return request(`/matters/${id}`, { method: 'PUT', data });
 }
 
+function submitMatterReview(id) {
+  return request(`/matters/${id}/submit-review`, { method: 'POST' });
+}
+
 // 删除事项（后端按 is_admin 授权）
 function deleteMatter(id) {
   return request(`/matters/${id}`, { method: 'DELETE' });
@@ -153,6 +157,7 @@ module.exports = {
   updateParticipant,
   createMatter,
   updateMatter,
+  submitMatterReview,
   deleteMatter,
   flipState,
   publishDeal,

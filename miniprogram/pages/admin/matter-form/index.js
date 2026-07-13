@@ -27,10 +27,10 @@ Page({
     title: '',
     category: '',
     state: '',
-    states: {},        // {key: label}，编辑时用于状态流转（管理员用全部状态含旁路终态）
+    states: {}, // {key: label}，编辑时用于状态流转（管理员用全部状态含旁路终态）
     stateKeys: [],
     isApproved: true,
-    reviewStatus: '',      // pending / rejected / approved：编辑时回显当前审核态
+    reviewStatus: '', // pending / rejected / approved：编辑时回显当前审核态
     reviewStatusLabel: '',
     rejectReason: '',
     targetCount: '',
@@ -163,9 +163,13 @@ Page({
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
-  onPicker(event) {
+  onDateTimeChange(event) {
     this.markDirty();
-    this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
+    const { name } = event.currentTarget.dataset;
+    this.setData({
+      [`${name}Date`]: event.detail.date,
+      [`${name}Time`]: event.detail.time,
+    });
   },
 
   chooseState() {
@@ -231,9 +235,8 @@ Page({
     }
     if (['groupbuy', 'activity', 'aid'].includes(data.type)) {
       content.starts_at = data.startDate && data.startTime ? `${data.startDate} ${data.startTime}` : null;
-      content.registration_deadline_at = data.deadlineDate && data.deadlineTime
-        ? `${data.deadlineDate} ${data.deadlineTime}`
-        : null;
+      content.registration_deadline_at =
+        data.deadlineDate && data.deadlineTime ? `${data.deadlineDate} ${data.deadlineTime}` : null;
       content.location = data.location.trim();
     }
     if (data.type === 'groupbuy') {
@@ -282,7 +285,7 @@ Page({
     this.setData({ submitting: true });
     try {
       // 提交顺手收一次订阅授权：审核结果/新报名的通知才有额度可推
-      await requestSubscribe();
+      if (data.type !== 'census') await requestSubscribe();
       if (data.id) {
         await matters.updateMatter(data.id, body);
         this.clearDirty();
@@ -292,7 +295,7 @@ Page({
         const res = await matters.createMatter(data.type, body);
         this.clearDirty();
         if (data.type === 'census') {
-          // 征集顺路去配问卷（发起人本人也能读回 payload 编辑，见 MatterResource）
+          wx.showToast({ title: '基础信息已保存', icon: 'success' });
           wx.redirectTo({ url: `/pages/admin/census-schema/index?id=${res.data.id}` });
         } else if (data.isAdmin) {
           wx.showToast({ title: '已发布', icon: 'success' });
@@ -300,7 +303,8 @@ Page({
         } else {
           wx.showModal({
             title: '已提交',
-            content: '通常 24 小时内完成审核，通过后就会出现在小区页里。这件事由你牵头，可以在「我的」里随时查看和管理它。',
+            content:
+              '通常 24 小时内完成审核，通过后就会出现在小区页里。这件事由你牵头，可以在「我的」里随时查看和管理它。',
             showCancel: false,
             confirmText: '好的',
             success: () => wx.navigateBack(),

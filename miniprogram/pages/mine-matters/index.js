@@ -29,6 +29,11 @@ Page({
   },
 
   goMatter(event) {
+    const matter = this.data.matters.find((item) => item.id === event.currentTarget.dataset.id);
+    if (matter && matter.type === 'census' && matter.review_status === 'draft') {
+      wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${matter.id}` });
+      return;
+    }
     wx.navigateTo({ url: `/pages/matter/index?id=${event.currentTarget.dataset.id}` });
   },
 

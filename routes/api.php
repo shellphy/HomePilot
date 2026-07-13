@@ -48,6 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/matters/{matter}', [MatterController::class, 'show']);
     Route::post('/matters/{matter}/seen', [MatterController::class, 'markSeen']);
     Route::post('/matters', [MatterController::class, 'store']);
+    Route::post('/matters/{matter}/submit-review', [MatterController::class, 'submitReview']);
     Route::put('/matters/{matter}', [MatterController::class, 'update']);
     Route::delete('/matters/{matter}', [MatterController::class, 'destroy']);
     Route::put('/matters/{matter}/state', [MatterController::class, 'updateState']);
