@@ -1,3 +1,12 @@
+/* 表单项之间留出呼吸感：上一项控件与下一项标题不再贴在一起 */
+.q-title-gap {
+  margin-top: 28rpx;
+}
+/* 填空题说明紧跟在题型选项下方，覆盖 .q-explain 默认的负上边距 */
+.q-explain-gap {
+  margin-top: 24rpx;
+}
+
 .switch-row {
   display: flex;
   align-items: center;

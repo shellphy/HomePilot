@@ -1,8 +1,8 @@
 <view class="page-body {{reviewStatus === 'draft' ? 'has-footer' : ''}}">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="schema-head">
-      <view class="kicker">{{title}}</view>
-      <text class="schema-edit" bind:tap="editBasics">编辑基础信息 ›</text>
+      <view class="schema-title">{{title}}</view>
+      <text class="schema-edit" bind:tap="editBasics" hover-class="schema-edit-hover">编辑基础信息 ›</text>
     </view>
     <view class="card">
       <view
