@@ -44,4 +44,5 @@
   word-break: break-word;
 }
 
-.actions { display: flex; flex-direction: column; gap: 16rpx; margin-bottom: 32rpx; }
+.actions { display: flex; gap: 16rpx; }
+.actions t-button { flex: 1; }
