@@ -34,7 +34,8 @@ class MatterAiChatController extends Controller
     {
         $resident = $this->resident($request);
 
-        abort_unless($matter->is_approved, 404);
+        // 公示后人人可问；公示前只有发起人能问，方便自己边办边理清
+        abort_unless($matter->is_approved || $matter->initiator_id === $resident->id, 404);
         abort_unless(in_array($matter->type, ['groupbuy', 'activity', 'census'], true), 422, '该事项不支持 AI 答疑');
 
         $validated = $request->validate([
