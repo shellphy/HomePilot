@@ -53,20 +53,20 @@ test('the deepseek-anthropic provider disables native structured output so web s
         ->and($config['use_native_structured_output'])->toBeFalse();
 });
 
-test('structured agents instruct the model to end with pure JSON', function (string $class) {
-    // 联网后 DeepSeek 以 text 收尾、不调用合成输出工具，指令必须要求最终只吐 JSON，
-    // 否则 SDK 的 text→JSON 回退无从解析。
-    $instructions = (string) makeAgent($class)->instructions();
+test('the structured drafter instructs the model to end with pure JSON', function () {
+    // GlossaryDrafter 是唯一的结构化 agent：联网后 DeepSeek 以 text 收尾、不调用合成
+    // 输出工具，指令必须要求最终只吐 JSON，否则 SDK 的 text→JSON 回退无从解析。
+    $instructions = (string) (new GlossaryDrafter)->instructions();
 
     expect($instructions)->toContain('JSON');
-})->with([
-    GlossaryDrafter::class,
-    CensusReportGenerator::class,
-]);
+});
 
-test('the conversational agent stays natural language, not JSON', function () {
-    // 答疑输出自然语言，不能被结构化指令污染。
-    $instructions = (string) (new MatterExplainer(Matter::factory()->create()))->instructions();
+test('the free-text agents stay natural language, not JSON', function (string $class) {
+    // 答疑与问卷报告输出自然语言 / Markdown，不能被结构化 JSON 指令污染。
+    $instructions = (string) makeAgent($class)->instructions();
 
     expect($instructions)->not->toContain('只包含一个符合所需字段结构的 JSON');
-});
+})->with([
+    MatterExplainer::class,
+    CensusReportGenerator::class,
+]);

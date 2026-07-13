@@ -91,7 +91,7 @@ Page({
   // 微信手机号授权组件回调：拿 code 去后端换真实绑定号码，换到即保存
   async onGetPhone(event) {
     if (!event.detail.code) {
-      // 用户点了拒绝：给一句反馈说明用途与可见范围，而不是无声无息
+      // 用户点了拒绝：给一句反馈说明用途与可见范围
       wx.showToast({ title: '未授权。手机号不会公示，仅必要时用于联系', icon: 'none' });
       return;
     }

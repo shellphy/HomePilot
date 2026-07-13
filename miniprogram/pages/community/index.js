@@ -1,11 +1,11 @@
 // 小区页：社区门户——概览、公告、正在张罗的事、数据入口。
-// 社区名称、口号、张罗类型清单全部来自 /options，前端不写死。
+// 社区名称、口号、张罗类型清单全部来自 /options。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
 const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
-// 各类型的收尾态：收尾的事不再占整卡，压成单行沉底
+// 各类型的收尾态：压成单行沉底
 const CLOSED = ['done', 'closed', 'resolved'];
 
 Page({
@@ -32,7 +32,7 @@ Page({
     wx.stopPullDownRefresh();
   },
 
-  // 社区名称只认 /options 下发（社区设置里改），没取到时用中性兜底，不写死具体小区
+  // 社区名称来自 /options（社区设置里改），没取到时用中性兜底
   onShareAppMessage() {
     const { community, activeCount } = this.data;
     return {
@@ -55,7 +55,7 @@ Page({
         getMe(),
       ]);
       const notices = res.data.filter((matter) => matter.type === 'notice');
-      // 征集(census)不进小区信息流：它整条归「数据」tab（进行中+往期+聚合都在那），此处不重复陈列
+      // 征集(census)整条归「数据」tab（进行中+往期+聚合都在那）
       const all = res.data.filter((matter) => matter.type !== 'notice' && matter.type !== 'census');
       const doings = all.filter((matter) => !CLOSED.includes(matter.state));
       const finished = all.filter((matter) => CLOSED.includes(matter.state)).map((matter) => ({

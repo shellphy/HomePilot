@@ -44,7 +44,7 @@ Page({
     pitch: '',
     purpose: '', // 仅征集：发起目的自由文本
     perk: '',
-    needsSurvey: false, // 团购：按户出方案（业主端发起时锁定，管理端作为纠错通道可改）
+    needsSurvey: false, // 团购：逐人报价（业主端发起时锁定，管理端作为纠错通道可改）
     collectsContact: false,
     terms: [],
     glossary: [],
@@ -211,14 +211,6 @@ Page({
 
   goSchema() {
     wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${this.data.id}` });
-  },
-
-  goRegistrations() {
-    wx.navigateTo({ url: `/pages/admin/registrations/index?id=${this.data.id}` });
-  },
-
-  goCensusText() {
-    wx.navigateTo({ url: `/pages/admin/census-text/index?id=${this.data.id}` });
   },
 
   // 收敛按类型的内容字段为一份顶层 body（不包 payload，后端 payloadFrom 自行归拢）

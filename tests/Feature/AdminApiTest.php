@@ -3,7 +3,6 @@
 use App\Models\Matter;
 use App\Models\Party;
 use App\Models\Resident;
-use App\Models\Stance;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
@@ -160,36 +159,6 @@ test('census questionnaires must have valid structure', function () {
             'questions' => [['text' => '只有一个选项', 'type' => 'single', 'options' => ['唯一']]],
         ]],
     ])->assertUnprocessable();
-});
-
-test('admin reads census records with contact details and resolved question text', function () {
-    $census = Matter::factory()->create([
-        'type' => 'census',
-        'state' => 'open',
-        'payload' => [
-            'modules' => [[
-                'key' => 'basic',
-                'title' => '基础',
-                'questions' => [['key' => 'q1', 'text' => '打算怎么装？', 'type' => 'single', 'options' => ['清包', '半包']]],
-            ]],
-        ],
-    ]);
-    $resident = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'phone' => '13800138000', 'room_label' => '1802']);
-    Stance::factory()->create([
-        'matter_id' => $census->id,
-        'resident_id' => $resident->id,
-        'mode' => Stance::MODE_REGISTER,
-        'payload' => ['answers' => ['q1' => '半包']],
-    ]);
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-
-    $this->getJson("/api/admin/matters/{$census->id}/registrations")
-        ->assertSuccessful()
-        ->assertJsonPath('data.0.unit_label', '3栋')
-        ->assertJsonPath('data.0.room_label', '1802')
-        ->assertJsonPath('data.0.phone', '13800138000')
-        ->assertJsonPath('data.0.answers.0.question', '打算怎么装？')
-        ->assertJsonPath('data.0.answers.0.answer', '半包');
 });
 
 test('admin certifies parties onto the public list', function () {

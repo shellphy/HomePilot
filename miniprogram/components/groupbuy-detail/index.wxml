@@ -16,7 +16,7 @@
     >另有 {{intentCount}} 人登记过意向，确认参团后才计入人数</view
   >
   <view wx:if="{{matter.needs_survey}}" class="head-survey"
-    >按户出方案的团购：报名后商家逐户沟通需求（如上门量房），你家的方案和报价单独谈</view
+    >逐人报价的团购：报名后商家单独和你沟通需求，你的方案和报价单独谈</view
   >
   <view wx:if="{{matter.perk}}" class="head-perk">{{matter.perk}}</view>
 </view>
@@ -172,7 +172,7 @@
       bind:tap="goProgress"
       >发布进度</t-button
     >
-    <!-- 次操作等宽两列对齐，落单的自动撑满整行，不再高低错落 -->
+    <!-- 次操作等宽两列对齐，落单的自动撑满整行 -->
     <view class="leader-btns-sub">
       <t-button
         wx:if="{{matter.state === 'done'}}"

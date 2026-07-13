@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\CensusSummaryAdminController;
 use App\Http\Controllers\Api\Admin\MatterAdminController;
 use App\Http\Controllers\Api\Admin\PartyAdminController;
 use App\Http\Controllers\Api\Admin\SettingAdminController;
@@ -24,7 +23,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/options', [OptionController::class, 'index']);
-Route::get('/census-reports/{token}', [CensusReportController::class, 'shared'])->middleware('throttle:60,1');
 
 Route::middleware('auth:sanctum')->group(function () {
     // 成员与身份
@@ -62,8 +60,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/matters/{matter}/census', [CensusController::class, 'store']);
     Route::get('/matters/{matter}/census-report', [CensusReportController::class, 'show']);
     Route::post('/matters/{matter}/census-report', [CensusReportController::class, 'store'])->middleware('throttle:10,1');
-    Route::post('/matters/{matter}/census-report/share', [CensusReportController::class, 'share']);
-    Route::delete('/matters/{matter}/census-report/share', [CensusReportController::class, 'revoke']);
     // 发起者视图：主动勾选授权的参与者明细（非 admin，授权收窄到发起者本人）
     Route::get('/matters/{matter}/census-consented', [CensusController::class, 'consented']);
 
@@ -82,13 +78,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/uploads', [UploadController::class, 'store']);
 
-    // 管理端（管理员=被授权的成员，php artisan admin:grant）：审核、发布、明细、认证、设置
+    // 管理端（管理员=被授权的成员，php artisan admin:grant）：只有审核类功能——事项审核、相关方认证、社区设置
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/matters', [MatterAdminController::class, 'index']);
         Route::put('/matters/{matter}/approve', [MatterAdminController::class, 'approve']);
-        Route::get('/matters/{matter}/registrations', [MatterAdminController::class, 'registrations']);
-        Route::get('/matters/{matter}/census-text', [CensusSummaryAdminController::class, 'show']);
-        Route::put('/matters/{matter}/census-summary', [CensusSummaryAdminController::class, 'update']);
         Route::get('/parties', [PartyAdminController::class, 'index']);
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
         Route::get('/settings', [SettingAdminController::class, 'show']);

@@ -24,8 +24,8 @@ function signedCensus(array $overrides = []): Matter
                 'key' => 'basic',
                 'title' => '基础登记',
                 'questions' => [
-                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡'], 'required' => true],
-                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖'], 'required' => true],
+                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡']],
+                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖']],
                     ['key' => 'note', 'text' => '还有什么想说的？', 'type' => 'text'],
                 ],
             ]],
@@ -153,7 +153,7 @@ test('phone stays hidden when the census does not collect contact', function () 
             'key' => 'basic',
             'title' => '基础登记',
             'questions' => [
-                ['key' => 'layout', 'text' => '户型？', 'type' => 'single', 'options' => ['107㎡'], 'required' => true],
+                ['key' => 'layout', 'text' => '户型？', 'type' => 'single', 'options' => ['107㎡']],
             ],
         ]],
     ]]);
@@ -178,13 +178,11 @@ test('non initiator non admin cannot view the consented list', function () {
     $this->getJson("/api/matters/{$census->id}/census-consented")->assertForbidden();
 });
 
-test('admins may view the consented list too', function () {
+test('an admin who is not the initiator cannot view the consented list', function () {
     $census = signedCensus(['initiator_id' => Resident::factory()->create()->id]);
 
     Sanctum::actingAs(Resident::factory()->admin()->create());
-    $this->getJson("/api/matters/{$census->id}/census-consented")
-        ->assertSuccessful()
-        ->assertJsonPath('data', []);
+    $this->getJson("/api/matters/{$census->id}/census-consented")->assertForbidden();
 });
 
 test('the consented endpoint rejects non census matters', function () {

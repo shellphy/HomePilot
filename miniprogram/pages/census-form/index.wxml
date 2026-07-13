@@ -33,7 +33,6 @@
           <text class="q-index">{{questionIndex + 1}}</text>
           <view class="q-title">
             {{question.text}}
-            <text wx:if="{{question.required}}" class="f-required">必答</text>
             <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
           </view>
         </view>

@@ -88,7 +88,7 @@ test('the agent instructions carry the matter terms, glossary and community cons
         ->toContain('双转子压缩机')
         ->toContain('看噪音参数')
         ->toContain('满 20 户送清洗')
-        ->toContain('按户出方案')
+        ->toContain('逐人报价')
         ->toContain('外机位'); // 小区硬条件出厂默认值
 });
 

@@ -98,13 +98,6 @@ class CensusController extends Controller
         $stance = $this->stanceOf($matter, $request);
         $merged = array_merge($stance?->payload['answers'] ?? [], $validated['answers']);
 
-        // 必答题在合并后必须齐全（保证基础模块先答）
-        foreach ($questions as $key => $question) {
-            if (($question['required'] ?? false) && ! array_key_exists($key, $merged)) {
-                throw ValidationException::withMessages(['answers' => "「{$question['text']}」是必答题"]);
-            }
-        }
-
         $payload = ['answers' => $merged];
         // 授权标记随答案一起进 payload：本次带了就更新，没带则沿用上次选择（默认 false）
         if ($request->has('visible_to_initiator')) {
@@ -133,14 +126,14 @@ class CensusController extends Controller
     /**
      * 发起者视图：只列出主动勾选「让发起者看到我的问卷」的参与者，
      * 含显示名、手机号（限收联系方式的征集且业主已授权）、逐题答案（换算成题面文字）。
-     * 匿名破例仅对本份征集的发起者本人开放；管理员始终可看全部（走 admin registrations）。
+     * 邻居授权的对象是发起者本人。
      */
     public function consented(Request $request, Matter $matter): JsonResponse
     {
         abort_unless($matter->type === 'census', 404);
 
         $resident = $this->resident($request);
-        abort_unless($matter->initiator_id === $resident->id || $resident->is_admin, 403);
+        abort_unless($matter->initiator_id === $resident->id, 403);
 
         $questions = collect($matter->payloadList('modules'))
             ->flatMap(fn (array $module): array => $module['questions'] ?? [])
@@ -193,7 +186,7 @@ class CensusController extends Controller
 
     /**
      * @param  array<string, mixed>  $answers
-     * @param  Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>, required?: bool}>  $questions
+     * @param  Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>}>  $questions
      */
     private function validateAnswers(array $answers, Collection $questions): void
     {

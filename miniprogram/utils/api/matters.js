@@ -77,7 +77,7 @@ function postUpdate(id, data) {
   return request(`/matters/${id}/updates`, { method: 'POST', data });
 }
 
-// 征集：schema 下发与表态提交（通用，装修摸底只是第一份 schema）
+// 征集：schema 下发与表态提交（通用）
 function getCensus(id) {
   return request(`/matters/${id}/census`);
 }
@@ -92,18 +92,6 @@ function getCensusReport(id) {
 
 function generateCensusReport(id) {
   return request(`/matters/${id}/census-report`, { method: 'POST' });
-}
-
-function shareCensusReport(id) {
-  return request(`/matters/${id}/census-report/share`, { method: 'POST' });
-}
-
-function revokeCensusReport(id) {
-  return request(`/matters/${id}/census-report/share`, { method: 'DELETE' });
-}
-
-function getSharedCensusReport(token) {
-  return request(`/census-reports/${token}`);
 }
 
 // 发起者视图：主动勾选授权的参与者明细（后端限发起者本人/管理员可看）
@@ -169,9 +157,6 @@ module.exports = {
   saveCensus,
   getCensusReport,
   generateCensusReport,
-  shareCensusReport,
-  revokeCensusReport,
-  getSharedCensusReport,
   getCensusConsented,
   draftGlossary,
   aiChatStream,

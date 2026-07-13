@@ -188,7 +188,7 @@ class MatterController extends Controller
     public function updateParticipant(Request $request, Matter $matter, Stance $stance): JsonResponse
     {
         $resident = $this->resident($request);
-        abort_unless($matter->initiator_id === $resident->id || $resident->is_admin, 403);
+        abort_unless($matter->initiator_id === $resident->id, 403);
         abort_unless($stance->matter_id === $matter->id && $stance->mode === Stance::MODE_JOIN, 404);
 
         $validated = $request->validate([
@@ -486,7 +486,8 @@ class MatterController extends Controller
             [
                 'title' => ['required', 'string', 'max:60'],
                 'starts_at' => ['sometimes', 'nullable', 'date'],
-                'registration_deadline_at' => ['sometimes', 'nullable', 'date', 'before_or_equal:starts_at'],
+                // 开始时间与报名截止各自独立：团购报名窗口常晚于开始时间，开始时间也可留空
+                'registration_deadline_at' => ['sometimes', 'nullable', 'date'],
                 'location' => ['sometimes', 'nullable', 'string', 'max:120'],
             ],
             $type->baseRules(),

@@ -56,9 +56,31 @@
   flex-shrink: 0;
 }
 
-.schema-status {
-  margin-top: 24rpx;
+.schema-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  padding: 22rpx 26rpx;
+  margin-bottom: 20rpx;
+  border-radius: 16rpx;
+  border-left: 6rpx solid var(--info);
+  background: var(--info-bg);
+}
+.schema-banner-pending {
+  border-left-color: var(--info);
+  background: var(--info-bg);
+}
+.schema-banner-done {
+  border-left-color: var(--brand);
+  background: var(--brand-bg);
+}
+.schema-banner-title {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.schema-banner-sub {
+  font-size: 23rpx;
+  line-height: 1.5;
   color: var(--text-secondary);
-  font-size: 24rpx;
-  text-align: center;
 }

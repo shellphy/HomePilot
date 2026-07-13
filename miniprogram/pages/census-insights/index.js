@@ -1,6 +1,5 @@
 // 征集详情页：单期征集的完整聚合公示面（从征集卡片、小区数据 tab、答完题跳转进来）。
 const matters = require('../../utils/api/matters');
-const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 function toBars(counts) {
@@ -19,7 +18,6 @@ Page({
   data: {
     censusId: null,
     block: null,
-    showTextAdmin: false, // 管理员且问卷含填空题：露出「文本题明细与归纳」入口
     aiChatShow: false,
   },
 
@@ -38,7 +36,7 @@ Page({
   },
 
   goMyRegistration() {
-    wx.navigateTo({ url: `/pages/census-report/index?id=${this.data.censusId}` });
+    wx.navigateTo({ url: `/pages/census-answers/index?id=${this.data.censusId}` });
   },
 
   toggleSection(event) {
@@ -77,14 +75,11 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [census, me] = await Promise.all([matters.getCensus(this.data.censusId), getMe()]);
+      const census = await matters.getCensus(this.data.censusId);
       const expandedSections = Object.fromEntries(
         ((this.data.block && this.data.block.sections) || []).map((section) => [section.title, section.expanded]),
       );
       wx.setNavigationBarTitle({ title: census.title });
-      const hasTextQuestions = (census.modules || []).some((module) =>
-        (module.questions || []).some((question) => question.type === 'text'),
-      );
       const sections = census.aggregates
         .map((module) => ({
           title: module.title,
@@ -92,9 +87,8 @@ Page({
             .map((question) => ({
               text: question.text,
               bars: question.counts ? toBars(question.counts) : [],
-              themes: question.themes || [],
             }))
-            .filter((question) => question.bars.length || question.themes.length),
+            .filter((question) => question.bars.length),
         }))
         .filter((section) => section.questions.length)
         .map((section, index) => ({
@@ -116,13 +110,8 @@ Page({
           aggregatesMinimum: census.aggregates_minimum,
           sections,
         },
-        showTextAdmin: !!me.is_admin && hasTextQuestions,
       });
     });
-  },
-
-  goTextAdmin() {
-    wx.navigateTo({ url: `/pages/admin/census-text/index?id=${this.data.censusId}` });
   },
 
   goCensusForm() {

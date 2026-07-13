@@ -1,5 +1,6 @@
 {
-  "navigationBarTitleText": "文本题明细与归纳",
+  "navigationBarTitleText": "我的问卷",
+  "enablePullDownRefresh": true,
   "usingComponents": {
     "page-status": "/components/page-status/index"
   }

@@ -19,8 +19,7 @@ use Stringable;
 
 /**
  * 居民侧 AI 答疑：面向正在了解某个团购/活动/征集的居民，
- * 带着本事项的条款、买前必懂和小区硬条件回答，支持多轮追问——
- * 这份上下文正是业主去通用 AI（ChatGPT/豆包）问不到的部分。
+ * 带着本事项的条款、买前必懂和小区硬条件回答，支持多轮追问。
  * 叠加联网检索：本事项上下文之外的时效信息（政策、行情）也能查证再答。
  */
 #[Provider('deepseek-anthropic')]
@@ -41,20 +40,20 @@ class MatterExplainer implements Agent, Conversational, HasTools
 
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，居民追问时再展开。
-- 居民问某道问卷题时，先解释这道题为什么要问、会影响什么，再结合已选答案和事项背景给出建议；不要把背景资料整段复述。
-- 信息不足以判断时，只追问一个最影响选择的关键问题；不要一次抛出一串问题。
-- 区分“必须遵守的安全 / 规范底线”和“可以按预算偏好选择的方案”，不要把经验做法说成唯一标准。
-- 优先结合下面的背景资料回答；有个人情况时再做针对性解释，不要假设事项一定与住房有关。
-- 不评价、不推荐、不贬低任何具体品牌、商家或相关方。
+- 居民问某道问卷题时，先解释这道题为什么要问、会影响什么，再结合已选答案和事项背景给出建议。
+- 信息不足以判断时，只追问一个最影响选择的关键问题。
+- 区分“必须遵守的安全 / 规范底线”和“可以按预算偏好选择的方案”。
+- 优先结合下面的背景资料回答，有个人情况时再做针对性解释。
+- 对具体品牌、商家、相关方保持中立，不替居民做选择。
 - 凡涉及具体承诺、费用、服务范围或执行安排，明确提醒以事项公示或相关方书面确认为准，建议居民在事项页提问留档。
-- 拿不准的直接说不确定，不编数字。
+- 拿不准的直接说不确定。
 - 与本社区或当前事项无关的问题，礼貌说明你只聊这件事相关的内容。
 
 PROMPT.$this->matterContext();
     }
 
     /**
-     * 事项上下文（业主在通用 AI 那里拿不到的部分）：小区硬条件 + 本事项的全部公示信息。
+     * 事项上下文：小区硬条件 + 本事项的全部公示信息。
      */
     private function matterContext(): string
     {
@@ -63,7 +62,7 @@ PROMPT.$this->matterContext();
 
         $lines = [
             '',
-            '【背景资料（业主看不到这段原文，回答时直接使用）】',
+            '【背景资料（回答时直接使用）】',
             "小区：{$settings->name}",
         ];
 
@@ -82,7 +81,7 @@ PROMPT.$this->matterContext();
             ."，当前阶段：{$type->stateLabel($this->matter->state)}";
 
         if ($this->matter->payloadValue('needs_survey')) {
-            $lines[] = '这是按户出方案的团购：报名后商家逐户沟通需求，每户的方案和报价单独谈。';
+            $lines[] = '这是逐人报价的团购：报名后发起方单独和每位报名者沟通需求，各自的方案和报价单独谈。';
         }
 
         if (($pitch = (string) $this->matter->payloadValue('pitch', '')) !== '') {
@@ -212,8 +211,8 @@ PROMPT.$this->matterContext();
                 ->where('resident_id', $this->asker->id)
                 ->first();
             $report = $reportStance?->payload['ai_report'] ?? null;
-            if (is_array($report)) {
-                $lines[] = '已生成的个人问卷报告：'.json_encode($report, JSON_UNESCAPED_UNICODE);
+            if (is_string($report) && $report !== '') {
+                $lines[] = '已生成的个人问卷报告：'.$report;
             }
         }
 

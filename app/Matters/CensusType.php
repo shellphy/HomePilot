@@ -34,7 +34,7 @@ class CensusType extends MatterType
     {
         return [
             'pitch' => ['nullable', 'string', 'max:1000'],
-            // 发起目的：自由文本，发起者写为什么发这次征集，给参与者看；不枚举、不驱动分支
+            // 发起目的：自由文本，发起者写为什么发这次征集，给参与者看
             'purpose' => ['nullable', 'string', 'max:1000'],
             // 署名发起：物业/业委会/商家想做的调研由管理员代建，结果对全小区公开
             'collects_contact' => ['sometimes', 'boolean'],
@@ -48,7 +48,6 @@ class CensusType extends MatterType
             'modules.*.questions.*.text' => ['required', 'string', 'max:100'],
             'modules.*.questions.*.type' => ['required', Rule::in(['single', 'multi', 'text'])],
             'modules.*.questions.*.note' => ['sometimes', 'nullable', 'string', 'max:200'],
-            'modules.*.questions.*.required' => ['sometimes', 'boolean'],
             // 填空题没有选项（前端不传该键）；选择题至少两个
             'modules.*.questions.*.options' => ['required_unless:modules.*.questions.*.type,text', 'array', 'min:2'],
             'modules.*.questions.*.options.*' => ['required', 'string', 'max:50'],

@@ -7,6 +7,7 @@
     "pages/census-insights/index",
     "pages/census-form/index",
     "pages/census-report/index",
+    "pages/census-answers/index",
     "pages/census-consented/index",
     "pages/matter-update/index",
     "pages/groupbuy-deal/index",
@@ -19,8 +20,6 @@
     "pages/admin/census-schema/index",
     "pages/admin/census-module/index",
     "pages/admin/census-question/index",
-    "pages/admin/registrations/index",
-    "pages/admin/census-text/index",
     "pages/admin/parties/index",
     "pages/admin/settings/index"
   ],

@@ -52,9 +52,9 @@ function runQueuedCensusReport(): void
     $queuedJob->handle(app(GenerateCensusReport::class));
 }
 
-test('a resident generates and reuses a structured census report', function () {
+test('a resident generates and reuses a markdown census report', function () {
     Queue::fake();
-    CensusReportGenerator::fake();
+    CensusReportGenerator::fake(["## 我的问卷总结\n\n- 重视环保与防潮"]);
     $resident = Resident::factory()->create(['layout_label' => '130㎡']);
     $matter = reportCensus($resident);
     Sanctum::actingAs($resident);
@@ -74,44 +74,15 @@ test('a resident generates and reuses a structured census report', function () {
     $first = $this->getJson("/api/matters/{$matter->id}/census-report")
         ->assertSuccessful()
         ->assertJsonPath('generation_status', 'completed')
-        ->assertJsonStructure([
-            'report' => ['headline', 'overview', 'priorities', 'decisions', 'open_questions', 'risks', 'share_brief'],
-            'presentation' => ['profile_label', 'report_title', 'risk_label', 'brief_label', 'share_button_label', 'share_disclaimer'],
-        ])
-        ->assertJsonPath('presentation.report_title', '我的问卷总结');
+        ->assertJsonStructure(['report', 'presentation' => ['empty_description']]);
+    expect($first->json('report'))->toBeString()->toContain('重视环保与防潮');
 
     $this->postJson("/api/matters/{$matter->id}/census-report")
         ->assertSuccessful()
-        ->assertJsonPath('report.headline', $first->json('report.headline'));
+        ->assertJsonPath('report', $first->json('report'));
 
     Queue::assertPushedTimes(GenerateCensusReportJob::class, 1);
     CensusReportGenerator::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('130㎡') && $prompt->contains('老人'));
-});
-
-test('a report can be shared without exposing resident identity and revoked', function () {
-    Queue::fake();
-    CensusReportGenerator::fake();
-    $resident = Resident::factory()->create(['nickname' => '不应公开', 'phone' => '13800138000']);
-    $matter = reportCensus($resident);
-    Sanctum::actingAs($resident);
-
-    $this->postJson("/api/matters/{$matter->id}/census-report")->assertAccepted();
-    runQueuedCensusReport();
-
-    $share = $this->postJson("/api/matters/{$matter->id}/census-report/share")
-        ->assertSuccessful()
-        ->assertJsonPath('share_enabled', true);
-
-    $token = $share->json('share_token');
-    $public = $this->getJson("/api/census-reports/{$token}")
-        ->assertSuccessful()
-        ->assertJsonMissing(['不应公开'])
-        ->assertJsonMissing(['13800138000']);
-
-    expect($public->json('report'))->toBeArray();
-
-    $this->deleteJson("/api/matters/{$matter->id}/census-report/share")->assertSuccessful();
-    $this->getJson("/api/census-reports/{$token}")->assertNotFound();
 });
 
 test('a failed report job exposes a retryable status', function () {
@@ -180,10 +151,10 @@ test('report generation timeouts allow slow structured responses to finish', fun
         ->value;
     $job = new GenerateCensusReportJob(1, 'answer-hash');
 
-    // 联网检索拉长生成时间：agent HTTP 超时 < job 超时 < 队列 retry_after
-    expect($agentTimeout)->toBe(200)
-        ->and($job->timeout)->toBe(240)
-        ->and(config('queue.connections.database.retry_after'))->toBe(300)
+    // 联网检索拉长生成时间：agent HTTP 超时 < job 超时 < 队列 retry_after，逐层留富余
+    expect($agentTimeout)->toBe(240)
+        ->and($job->timeout)->toBe(300)
+        ->and(config('queue.connections.database.retry_after'))->toBe(360)
         ->and($agentTimeout)->toBeLessThan($job->timeout)
         ->and($job->timeout)->toBeLessThan(config('queue.connections.database.retry_after'));
 });

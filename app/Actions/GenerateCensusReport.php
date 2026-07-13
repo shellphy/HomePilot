@@ -3,39 +3,31 @@
 namespace App\Actions;
 
 use App\Ai\Agents\CensusReportGenerator;
-use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Laravel\Ai\Responses\StructuredAgentResponse;
-use RuntimeException;
 
 class GenerateCensusReport
 {
-    public function __construct(private CensusReportPresentation $presentation) {}
-
-    /** @return array<string, mixed> */
-    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): array
+    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): void
     {
         $answers = $stance->payload['answers'] ?? [];
         $answerHash = $this->answerHash($answers);
         $existing = $stance->payload['ai_report'] ?? null;
 
         if ($expectedHash !== null && $expectedHash !== $answerHash) {
-            return is_array($existing) ? $existing : [];
+            return;
         }
 
-        if (is_array($existing) && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
-            return $existing;
+        if (is_string($existing) && $existing !== '' && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
+            return;
         }
 
         $prompt = json_encode([
             'questionnaire' => [
                 'title' => $matter->title,
                 'purpose' => $matter->payloadValue('purpose', ''),
-                'report_presentation' => $this->presentation->for($matter),
                 'modules' => $matter->payloadList('modules'),
             ],
             'resident_context' => [
@@ -50,29 +42,21 @@ class GenerateCensusReport
             'resident_id' => $resident->id,
         ]);
 
-        $response = (new CensusReportGenerator)->prompt($prompt);
-        if (! $response instanceof StructuredAgentResponse) {
-            Log::warning('AI 问卷报告未返回结构化结果（联网检索后 JSON 解析可能失败）', [
-                'matter_id' => $matter->id,
-                'stance_id' => $stance->id,
-                'response_type' => $response::class,
-            ]);
-            throw new RuntimeException('AI 未返回结构化问卷总结');
-        }
-        $report = $response->toArray();
+        $report = trim((new CensusReportGenerator)->prompt($prompt)->text);
 
         Log::debug('AI 问卷报告生成完成', [
             'matter_id' => $matter->id,
             'stance_id' => $stance->id,
-            'headline' => $report['headline'] ?? null,
-            'priorities' => count($report['priorities'] ?? []),
+            'length' => mb_strlen($report),
         ]);
 
+        // 生成期间答案又变了：丢弃这次结果，别覆盖更新的答案
         $stance->refresh();
         $latestAnswers = $stance->payload['answers'] ?? [];
-        if (($expectedHash !== null && $this->answerHash($latestAnswers) !== $expectedHash)
-            || ($expectedHash !== null && ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
-            return $report;
+        if ($expectedHash !== null
+            && ($this->answerHash($latestAnswers) !== $expectedHash
+                || ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
+            return;
         }
 
         $payload = $stance->payload ?? [];
@@ -80,16 +64,12 @@ class GenerateCensusReport
         $payload['ai_report_answers_hash'] = $answerHash;
         $payload['ai_report_generated_at'] = now()->toIso8601String();
         $payload['ai_report_status'] = 'completed';
-        $payload['report_share_token'] ??= Str::random(48);
-        $payload['report_share_enabled'] ??= false;
         unset(
             $payload['ai_report_pending_hash'],
             $payload['ai_report_failed_hash'],
             $payload['ai_report_error'],
         );
         $stance->update(['payload' => $payload]);
-
-        return $report;
     }
 
     /** @param array<string, mixed> $answers */

@@ -21,9 +21,9 @@ function renovationCensus(array $overrides = []): Matter
                 'key' => 'basic',
                 'title' => '基础登记',
                 'questions' => [
-                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡'], 'required' => true],
-                    ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => ['全包（都交给装修公司）', '半包（主材自己买）'], 'required' => true],
-                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖'], 'required' => true],
+                    ['key' => 'layout', 'text' => '你家是哪个户型？', 'type' => 'single', 'options' => ['107㎡', '130㎡', '154㎡']],
+                    ['key' => 'decoration_mode', 'text' => '打算怎么装？', 'type' => 'single', 'options' => ['全包（都交给装修公司）', '半包（主材自己买）']],
+                    ['key' => 'interests', 'text' => '对哪些团购感兴趣？', 'type' => 'multi', 'options' => ['装修公司', '门窗', '地暖']],
                 ],
             ], [
                 'key' => 'family',
@@ -110,13 +110,13 @@ test('answers merge module by module and keep a revision trail', function () {
         ->and($stance->revisions()->count())->toBe(1);
 });
 
-test('required questions must be answered before optional modules', function () {
+test('any subset of answers can be submitted (no question is mandatory)', function () {
     $census = renovationCensus();
     Sanctum::actingAs(Resident::factory()->create());
 
+    // 没有「必答」概念：只答一道后置模块的题也能提交成功
     $this->putJson("/api/matters/{$census->id}/census", ['answers' => ['household_size' => '3 人']])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors('answers');
+        ->assertSuccessful();
 });
 
 test('the census rejects unknown questions and invalid options', function (array $answers) {
@@ -216,13 +216,6 @@ test('text questions accept free-form answers but stay out of the public aggrega
         ->assertSuccessful()
         ->json('aggregates.0.questions');
     expect(collect($aggregates)->pluck('key')->all())->toBe(['visited']);
-
-    // 填空原文进管理端登记明细
-    Sanctum::actingAs(Resident::factory()->admin()->create());
-    $this->getJson("/api/admin/matters/{$census->id}/registrations")
-        ->assertSuccessful()
-        ->assertJsonPath('data.0.answers.1.question', '踩过什么坑或有什么心得？')
-        ->assertJsonPath('data.0.answers.1.answer', '定金说随时退，合同里却写不退，签约前要问清');
 });
 
 test('blank or oversized text answers are rejected', function () {
