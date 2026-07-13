@@ -357,15 +357,15 @@ class MatterController extends Controller
             $updateData['reject_reason'] = '';
         }
 
-        // 管理端「公示到小区页」开关（发起人不下发此键）：勾上→通过并清理驳回理由；
-        // 把已公示的撤下→回待审核；待审/驳回态只编辑其它字段时保持原状态
-        if ($isAdmin && array_key_exists('is_approved', $validated)) {
-            if ($validated['is_approved']) {
-                $updateData['review_status'] = MatterReviewStatus::Approved;
-                $updateData['reject_reason'] = '';
-            } elseif ($matter->is_approved) {
-                $updateData['review_status'] = MatterReviewStatus::Pending;
-            }
+        // 管理端「公示到小区页」开关（发起人不下发此键）：对尚未公示的事项审核放行并清理驳回理由
+        if ($isAdmin && array_key_exists('is_approved', $validated) && $validated['is_approved']) {
+            $updateData['review_status'] = MatterReviewStatus::Approved;
+            $updateData['reject_reason'] = '';
+        }
+
+        // 编辑已公示的事项一律重新过审：内容改了要多一道检查，管理员也不例外，先从小区页撤下
+        if ($matter->is_approved) {
+            $updateData['review_status'] = MatterReviewStatus::Pending;
         }
 
         $matter->update($updateData);
