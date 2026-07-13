@@ -14,7 +14,7 @@
       <text class="profile-arrow">›</text>
     </view>
 
-    <!-- 固定三行：参与 / 牵头 / 答题 -->
+    <!-- 固定三行：参与 / 牵头 / 问卷 -->
     <view class="list">
       <view class="row" hover-class="row-hover" bind:tap="goJoined">
         <text class="row-title">我参与的</text>
@@ -33,7 +33,7 @@
         </view>
       </view>
       <view class="row" hover-class="row-hover" bind:tap="goCensus">
-        <text class="row-title">我的答题</text>
+        <text class="row-title">我的问卷</text>
         <view class="row-right">
           <text class="row-note">{{censusCount}} 份</text>
           <text class="row-arrow">›</text>

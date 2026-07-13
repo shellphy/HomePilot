@@ -19,9 +19,8 @@ Page({
     answers: {},
     picked: {}, // {'题key::选项': true}，WXML 不能调 indexOf，用查表渲染选中态
     needProfile: false, // 该征集要求档案完整且当前缺失 → 先去完善个人资料
-    initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的登记」勾选
+    initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的问卷」勾选
     visibleToInitiator: false, // 是否把匿名破例给这个发起者本人看（默认关）
-    reportPresentation: {}, // 答题前预告完成后的 AI 个性化总结价值
     submitting: false,
     aiChatShow: false, // AI 答疑半屏面板（每道题「问 AI」呼出）
   },
@@ -31,7 +30,7 @@ Page({
     this.reload();
   },
 
-  // 答题现场每道题的「问 AI」：把题面直接写进问题，AI 顺着这道题讲该怎么选
+  // 填写问卷时每道题的「问 AI」：把题面直接写进问题，AI 顺着这道题讲该怎么选
   askQuestion(event) {
     const { qkey, text } = event.currentTarget.dataset;
     const currentAnswer = this.data.answers[qkey];
@@ -72,7 +71,7 @@ Page({
           .filter((module) => (module.questions || []).length)
           .map((module) => ({
             ...module,
-            // 带选项解释的题渲染成竖排选项行（答题即建概念），没有解释的保持横排 chips
+            // 带选项解释的题渲染成竖排选项行（填写过程即建概念），没有解释的保持横排 chips
             questions: module.questions.map((question) => {
               const notes = question.option_notes || [];
               const hasNotes = notes.some((note) => note && note.trim());
@@ -89,8 +88,7 @@ Page({
         picked: this.buildPicked(answers),
         needProfile: census.collects_contact && (!me.unit_label || !me.phone),
         initiatorParty: census.initiator_party || null,
-        reportPresentation: census.report_presentation || {},
-        // 回填上次选择：改登记时保持勾选状态，默认关
+        // 回填上次选择：修改问卷时保持勾选状态，默认关
         visibleToInitiator: !!census.my_visible_to_initiator,
       });
       this.showModule(0);
@@ -124,7 +122,7 @@ Page({
     this.setData({ answers, picked: this.buildPicked(answers) });
   },
 
-  // 「让发起者看到我的登记」：默认关，只在末模块露出，勾选把匿名破例给署名发起方本人
+  // 「让发起者看到我的问卷」：默认关，只在末模块露出，勾选把匿名破例给署名发起方本人
   toggleVisible() {
     this.markDirty();
     this.setData({ visibleToInitiator: !this.data.visibleToInitiator });
@@ -196,7 +194,7 @@ Page({
       }
       if (Object.keys(payload.answers).length) {
         await matters.saveCensus(id, payload);
-        invalidateMe(); // 「我的」页展示答题进度，需要重新拉
+        invalidateMe(); // 「我的」页展示问卷进度，需要重新拉
       }
       this.clearDirty(); // 当前模块已落库，返回不再拦
 
@@ -204,10 +202,10 @@ Page({
         this.showModule(moduleIndex + 1);
       } else {
         wx.showModal({
-          title: '登记完成',
+          title: '问卷完成',
           content: '可以查看刚才填写的答案，并生成一份 AI 总结。',
           showCancel: false,
-          confirmText: '查看我的登记',
+          confirmText: '查看我的问卷',
           success: () => {
             const pages = getCurrentPages();
             const prev = pages[pages.length - 2];

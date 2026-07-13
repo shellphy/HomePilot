@@ -2,7 +2,7 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <block wx:if="{{block}}">
       <view class="card">
-        <view class="hero-num">{{block.registered}} <text class="hero-sub">人已登记</text></view>
+        <view class="hero-num">{{block.registered}} <text class="hero-sub">人已参与</text></view>
         <!-- 署名调研三不变量之二：亮明发起方、结果对全小区公开（第三个是管理员审核） -->
         <view class="hero-sign" wx:if="{{block.initiatorParty}}"
           >由 {{block.initiatorParty.label}} · {{block.initiatorParty.name}} 发起，聚合结果对全小区公开</view
@@ -11,10 +11,10 @@
         <view class="hero-cap" wx:if="{{block.pitch}}">{{block.pitch}}</view>
       </view>
 
-      <!-- 个人登记入口固定在聚合内容前，不必滑到页面底部 -->
+      <!-- 我的问卷入口固定在聚合内容前，不必滑到页面底部 -->
       <view class="card my-registration-entry" wx:if="{{block.myAnswered}}" hover-class="frow-hover" bind:tap="goMyRegistration">
         <view>
-          <view class="my-registration-title">查看我的登记</view>
+          <view class="my-registration-title">查看我的问卷</view>
           <view class="my-registration-sub">已回答 {{block.myAnswered}} 题 · 查看答案和 AI 总结</view>
         </view>
         <text class="frow-arrow">›</text>
@@ -26,7 +26,7 @@
         size="large"
         style="width: 100%; margin-bottom: 24rpx"
         bind:tap="goCensusForm"
-      >参与登记</t-button>
+      >参与问卷</t-button>
 
       <view class="card hint" wx:if="{{!block.aggregatesVisible}}">
         为避免他人的选择影响你的判断，进行中的统计会在你完成登记后展示；少于 {{block.aggregatesMinimum}} 份时暂不公开。
@@ -58,18 +58,18 @@
                 <view class="theme-note" wx:if="{{theme.note}}">{{theme.note}}</view>
               </view>
               <view class="theme-foot" wx:if="{{question.themes.length}}"
-                >归纳自 {{block.registered}} 份登记的文字反馈</view
+                >归纳自 {{block.registered}} 份问卷的文字反馈</view
               >
             </view>
           </view>
         </view>
       </block>
 
-      <!-- 发起者本人入口：邻居主动勾选授权给你看的登记明细 -->
+      <!-- 发起者本人入口：邻居主动勾选授权给你看的问卷明细 -->
       <view class="card admin-entry" wx:if="{{block.isInitiator}}" hover-class="frow-hover" bind:tap="goConsented">
         <view>
-          <view class="admin-entry-title">邻居授权给你看的登记</view>
-          <view class="admin-entry-sub">勾选了「让发起者看到我的登记」的邻居 · 含联系方式与逐题回答</view>
+          <view class="admin-entry-title">邻居授权给你看的问卷</view>
+          <view class="admin-entry-sub">勾选了「让发起者看到我的问卷」的邻居 · 含联系方式与逐题回答</view>
         </view>
         <text class="frow-arrow">›</text>
       </view>

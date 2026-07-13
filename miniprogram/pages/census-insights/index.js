@@ -65,7 +65,7 @@ Page({
   onShareAppMessage() {
     const { block, censusId } = this.data;
     return {
-      title: block ? `${block.title}｜${block.registered} 人已登记` : '小区数据',
+      title: block ? `${block.title}｜${block.registered} 人已参与` : '小区数据',
       path: `/pages/census-insights/index?id=${censusId}`,
     };
   },
@@ -109,7 +109,7 @@ Page({
           purpose: census.purpose || '',
           reportPresentation: census.report_presentation || {},
           initiatorParty: census.initiator_party || null,
-          isInitiator: !!census.is_initiator, // 我是发起者本人 → 露出「邻居授权给你看的登记」入口
+          isInitiator: !!census.is_initiator, // 我是发起者本人 → 露出「邻居授权给你看的问卷」入口
           registered: census.registered_count,
           myAnswered: Object.keys(census.answers || {}).length,
           aggregatesVisible: census.aggregates_visible,

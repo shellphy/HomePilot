@@ -27,7 +27,7 @@ Page({
     const first = this.data.openCards[0];
     return {
       title: first
-        ? `${first.title}｜${first.registered} 人已登记`
+        ? `${first.title}｜${first.registered} 人已参与`
         : `${this.data.communityName || '小区'} · 小区数据`,
       path: '/pages/insights/index',
     };
@@ -50,23 +50,23 @@ Page({
       const openCards = censuses
         .filter((matter) => matter.state === 'open')
         .map((matter) => ({
-            id: matter.id,
-            title: matter.title,
-            pitch: matter.pitch,
-            registered: matter.registered,
-            myAnswered: matter.my_answered,
-            percent: stats.residents
-              ? Math.min(100, Math.round((matter.registered / stats.residents) * 100))
-              : 0,
-            top: matter.top,
-            aggregatesVisible: matter.aggregates_visible,
-          }));
+          id: matter.id,
+          title: matter.title,
+          pitch: matter.pitch,
+          registered: matter.registered,
+          myAnswered: matter.my_answered,
+          percent: stats.residents
+            ? Math.min(100, Math.round((matter.registered / stats.residents) * 100))
+            : 0,
+          top: matter.top,
+          aggregatesVisible: matter.aggregates_visible,
+        }));
       const pastItems = censuses
         .filter((matter) => matter.state !== 'open')
         .map((matter) => ({
           id: matter.id,
           title: matter.title,
-          note: `${matter.state_label} · ${matter.registered} 人已登记`,
+          note: `${matter.state_label} · ${matter.registered} 人参与`,
         }));
 
       this.setData({

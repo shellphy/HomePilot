@@ -10,6 +10,5 @@
   <view wx:if="{{matter.registration_deadline_on}}" class="muted">报名截止 {{matter.registration_deadline_on}}</view>
   <view class="mcard-foot">
     <text><text class="mcard-num">{{matter.join_count}}</text>{{matter.target_count ? ' / ' + matter.target_count : ''}} {{foot}}</text>
-    <text class="muted">查看详情 ›</text>
   </view>
 </view>

@@ -21,7 +21,7 @@
           <view class="fcard-fill" style="width: {{item.percent}}%"></view>
         </view>
         <view class="fcard-foot">
-          <text><text class="fcard-num">{{item.registered}}</text> 人已登记</text>
+          <text><text class="fcard-num">{{item.registered}}</text> 人已参与</text>
           <text class="fcard-cta">看完整数据 ›</text>
         </view>
         <!-- tap 必须绑在 t-button 本身：TDesign 内部原生 button 用 catch:tap 截断后
@@ -38,7 +38,7 @@
             data-id="{{item.id}}"
             data-answered="{{item.myAnswered}}"
             bind:tap="goRegistration"
-          >{{item.myAnswered ? '查看我的登记' : '参与登记'}}</t-button>
+          >{{item.myAnswered ? '查看我的问卷' : '参与问卷'}}</t-button>
         </view>
       </view>
     </block>

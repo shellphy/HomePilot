@@ -60,7 +60,7 @@ class CensusController extends Controller
             ] : null,
             // 我是不是这份征集的发起者本人（决定要不要露出「看邻居授权登记」入口）
             'is_initiator' => $matter->initiator_id === $resident->id,
-            // 我这次登记有没有勾选「让发起者看到我的登记」（回填勾选框，改登记时保持上次选择）
+            // 我这次问卷有没有勾选「让发起者看到我的问卷」（回填勾选框，修改问卷时保持上次选择）
             'my_visible_to_initiator' => (bool) ($stance?->payload['visible_to_initiator'] ?? false),
         ]);
     }
@@ -131,7 +131,7 @@ class CensusController extends Controller
     }
 
     /**
-     * 发起者视图：只列出主动勾选「让发起者看到我的登记」的参与者，
+     * 发起者视图：只列出主动勾选「让发起者看到我的问卷」的参与者，
      * 含显示名、手机号（限收联系方式的征集且业主已授权）、逐题答案（换算成题面文字）。
      * 匿名破例仅对本份征集的发起者本人开放；管理员始终可看全部（走 admin registrations）。
      */
@@ -166,7 +166,7 @@ class CensusController extends Controller
     }
 
     /**
-     * 把一份登记的答案 key 换算成题面文字（多选顿号连接，填空出原文）。
+     * 把一份问卷的答案 key 换算成题面文字（多选顿号连接，填空出原文）。
      *
      * @param  Collection<array-key, array<string, mixed>>  $questions
      * @return Collection<int, array{question: string, answer: string}>

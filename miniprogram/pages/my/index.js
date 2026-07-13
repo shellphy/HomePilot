@@ -65,7 +65,7 @@ Page({
     wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 我的答题：答过的直接落到个人登记与 AI 总结，多期弹选择；没答过就去数据 tab 逛逛
+  // 我的问卷：答过的直接落到个人问卷与 AI 总结，多期弹选择；没答过就去数据 tab 逛逛
   goCensus() {
     const censuses = (this.data.me && this.data.me.censuses) || [];
     if (!censuses.length) {

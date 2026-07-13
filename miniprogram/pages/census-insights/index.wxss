@@ -102,7 +102,7 @@
   margin-top: 4rpx;
 }
 
-/* 个人登记入口固定在统计内容之前 */
+/* 个人问卷入口固定在统计内容之前 */
 .my-registration-entry {
   display: flex;
   align-items: center;

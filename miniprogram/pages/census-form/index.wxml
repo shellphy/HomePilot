@@ -14,7 +14,7 @@
         <view class="ai-preview-head">
           <view class="ai-preview-mark">AI</view>
           <view>
-            <view class="ai-preview-title">答完后，AI 帮你整理「{{reportPresentation.report_title || '我的问卷总结'}}」</view>
+            <view class="ai-preview-title">答完后，AI 帮你整理问卷总结</view>
             <view class="ai-preview-sub">根据你的回答生成个人总结</view>
           </view>
         </view>
@@ -28,11 +28,14 @@
         <view wx:if="{{current.intro}}" class="step-intro">{{current.intro}}</view>
       </view>
 
-      <view class="card" wx:for="{{current.questions}}" wx:for-item="question" wx:key="key">
-        <view class="q-title">
-          {{question.text}}
-          <text wx:if="{{question.required}}" class="f-required">必答</text>
-          <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
+      <view class="card question-card" wx:for="{{current.questions}}" wx:for-item="question" wx:for-index="questionIndex" wx:key="key">
+        <view class="q-head">
+          <text class="q-index">{{questionIndex + 1}}</text>
+          <view class="q-title">
+            {{question.text}}
+            <text wx:if="{{question.required}}" class="f-required">必答</text>
+            <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
+          </view>
         </view>
         <!-- 疑问冒头就地问：题面直传给 AI，不懂这道题不用退出去查 -->
         <view class="ask-ai" data-qkey="{{question.key}}" data-text="{{question.text}}" bind:tap="askQuestion">不懂这道题？问 AI</view>
@@ -46,7 +49,7 @@
           data-qkey="{{question.key}}"
           bind:input="onText"
         />
-        <!-- 带选项解释的题：竖排选项行，解释写在选项下方（答题的过程就是建概念） -->
+        <!-- 带选项解释的题：竖排选项行，解释写在选项下方（填写过程就是建概念） -->
         <view wx:elif="{{question.hasNotes}}" class="opts">
           <view
             wx:for="{{question.optionRows}}"
@@ -80,7 +83,7 @@
       <view wx:if="{{initiatorParty && moduleIndex + 1 >= modules.length}}" class="consent" bind:tap="toggleVisible">
         <view class="consent-box {{visibleToInitiator ? 'consent-box-on' : ''}}">{{visibleToInitiator ? '✓' : ''}}</view>
         <view class="consent-copy">
-          <view class="consent-title">让发起者看到我的登记</view>
+          <view class="consent-title">让发起者看到我的问卷</view>
           <view class="consent-sub">勾选后，「{{initiatorParty.label}} · {{initiatorParty.name}}」能看到你的联系方式和你每道题的回答；不勾则只计入匿名统计</view>
         </view>
       </view>
@@ -89,7 +92,6 @@
         <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" style="flex: 1" bind:tap="prev">上一步</t-button>
         <t-button theme="primary" size="large" style="flex: 2" loading="{{submitting}}" bind:tap="next">{{moduleIndex + 1 < modules.length ? '下一模块' : '完成'}}</t-button>
       </view>
-      <view class="skip-note">带「必答」的答完就行，其他题跳过也没关系</view>
     </block>
   </page-status>
 
