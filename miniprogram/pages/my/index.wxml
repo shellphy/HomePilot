@@ -75,6 +75,13 @@
           <text class="row-arrow">›</text>
         </view>
       </view>
+      <!-- 管理员管理：只有超级管理员能增减管理员 -->
+      <view class="row" wx:if="{{me.is_super_admin}}" hover-class="row-hover" bind:tap="goAdminUsers">
+        <text class="row-title">管理员</text>
+        <view class="row-right">
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
     </view>
 
   </block>

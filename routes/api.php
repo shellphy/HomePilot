@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\MatterAdminController;
 use App\Http\Controllers\Api\Admin\PartyAdminController;
 use App\Http\Controllers\Api\Admin\SettingAdminController;
@@ -88,5 +89,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
         Route::get('/settings', [SettingAdminController::class, 'show']);
         Route::put('/settings', [SettingAdminController::class, 'update']);
+    });
+
+    // 超级管理端（is_super_admin）：应用内增减管理员，替代纯 CLI
+    Route::middleware('super_admin')->prefix('admin')->group(function () {
+        Route::get('/admins', [AdminUserController::class, 'index']);
+        Route::post('/admins', [AdminUserController::class, 'store']);
+        Route::delete('/admins/{resident}', [AdminUserController::class, 'destroy']);
     });
 });

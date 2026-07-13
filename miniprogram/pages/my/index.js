@@ -109,6 +109,10 @@ Page({
     wx.navigateTo({ url: '/pages/admin/parties/index' });
   },
 
+  goAdminUsers() {
+    wx.navigateTo({ url: '/pages/admin/admins/index' });
+  },
+
   goAdminSettings() {
     wx.navigateTo({ url: '/pages/admin/settings/index' });
   },

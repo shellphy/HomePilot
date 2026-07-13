@@ -29,6 +29,19 @@ function saveSettings(data) {
   return request('/admin/settings', { method: 'PUT', data });
 }
 
+// 超级管理端：增减管理员（仅超级管理员）
+function listAdmins() {
+  return request('/admin/admins');
+}
+
+function grantAdmin(phone) {
+  return request('/admin/admins', { method: 'POST', data: { phone } });
+}
+
+function revokeAdmin(id) {
+  return request(`/admin/admins/${id}`, { method: 'DELETE' });
+}
+
 module.exports = {
   listMatters,
   approveMatter,
@@ -36,4 +49,7 @@ module.exports = {
   reviewParty,
   getSettings,
   saveSettings,
+  listAdmins,
+  grantAdmin,
+  revokeAdmin,
 };

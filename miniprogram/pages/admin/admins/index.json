@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "管理员",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

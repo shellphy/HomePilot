@@ -1,0 +1,28 @@
+<view class="page-body has-footer">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="hint intro">超级管理员可以增减管理员。管理员做事项审核、相关方认证、社区设置。</view>
+    <view class="card">
+      <view class="row" wx:for="{{admins}}" wx:key="id">
+        <view class="row-main">
+          <view class="row-title">{{item.name}}{{item.is_super_admin ? ' · 超级管理员' : ''}}</view>
+          <view class="row-sub">{{item.phone || '未留手机号'}}</view>
+          <view class="row-sub" wx:if="{{item.granted_by}}">{{item.granted_by}} 授权 · {{item.granted_at}}</view>
+        </view>
+        <!-- 超级管理员不在这里收回（创始人由 CLI 管理） -->
+        <view
+          wx:if="{{!item.is_super_admin}}"
+          class="approve-btn approve-btn-reject"
+          hover-class="approve-btn-hover"
+          data-id="{{item.id}}"
+          data-name="{{item.name}}"
+          catch:tap="revoke"
+        >收回</view>
+      </view>
+      <view wx:if="{{!admins.length}}" class="hint">还没有管理员</view>
+    </view>
+
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" style="width: 100%" bind:tap="grant">授权新管理员</t-button>
+    </view>
+  </page-status>
+</view>

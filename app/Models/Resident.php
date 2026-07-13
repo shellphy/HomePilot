@@ -24,10 +24,14 @@ use Laravel\Sanctum\HasApiTokens;
  * @property int|null $affiliated_party_id
  * @property int|null $last_party_id
  * @property bool $is_admin
+ * @property bool $is_super_admin
+ * @property int|null $admin_granted_by_id
+ * @property Carbon|null $admin_granted_at
  * @property Carbon|null $mine_seen_at
  * @property Carbon|null $joined_seen_at
  * @property-read Party|null $affiliatedParty
  * @property-read Party|null $lastParty
+ * @property-read Resident|null $adminGrantedBy
  */
 class Resident extends Authenticatable
 {
@@ -50,9 +54,41 @@ class Resident extends Authenticatable
     {
         return [
             'is_admin' => 'boolean',
+            'is_super_admin' => 'boolean',
+            'admin_granted_at' => 'datetime',
             'mine_seen_at' => 'datetime',
             'joined_seen_at' => 'datetime',
         ];
+    }
+
+    /**
+     * 授权我的超级管理员（CLI 种下的创始人为 null）。
+     *
+     * @return BelongsTo<Resident, $this>
+     */
+    public function adminGrantedBy(): BelongsTo
+    {
+        return $this->belongsTo(Resident::class, 'admin_granted_by_id');
+    }
+
+    /** 设为管理员并记下是谁、何时授权（审计）。 */
+    public function grantAdmin(Resident $by): void
+    {
+        $this->forceFill([
+            'is_admin' => true,
+            'admin_granted_by_id' => $by->id,
+            'admin_granted_at' => now(),
+        ])->save();
+    }
+
+    /** 收回管理员，清掉授权记录（超级管理员身份不受影响）。 */
+    public function revokeAdmin(): void
+    {
+        $this->forceFill([
+            'is_admin' => false,
+            'admin_granted_by_id' => null,
+            'admin_granted_at' => null,
+        ])->save();
     }
 
     /**

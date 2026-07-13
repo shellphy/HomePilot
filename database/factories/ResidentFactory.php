@@ -51,6 +51,11 @@ class ResidentFactory extends Factory
         return $this->state(fn (): array => ['is_admin' => true]);
     }
 
+    public function superAdmin(): static
+    {
+        return $this->state(fn (): array => ['is_admin' => true, 'is_super_admin' => true]);
+    }
+
     /**
      * 商家身份（绑定一个 merchant 相关方）。
      */
