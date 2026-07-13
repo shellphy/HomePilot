@@ -190,6 +190,11 @@ page {
   color: var(--danger);
   margin-left: 8rpx;
 }
+.f-optional {
+  font-size: 20rpx;
+  color: var(--text-muted);
+  margin-left: 8rpx;
+}
 
 .privacy {
   font-size: 22rpx;

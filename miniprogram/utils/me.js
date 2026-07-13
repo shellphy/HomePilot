@@ -34,12 +34,11 @@ async function markSeen(kind) {
   return res.data;
 }
 
-// 手机号授权：官方组件（open-type="getPhoneNumber"）拿到的 code 换微信绑定号码，
-// 这是手机号唯一的写入途径（不接受手填）
-async function authPhone(code) {
+// 手机号预填：官方组件（open-type="getPhoneNumber"）拿到的 code 换微信绑定号码，
+// 只解析返回、不落库（用户可再改号，最终随资料 updateMe 一并保存）
+async function resolvePhone(code) {
   const res = await request('/me/phone', { method: 'POST', data: { code } });
-  cached = Promise.resolve(res.data);
-  return res.data;
+  return res.data.phone;
 }
 
 // 相关方入驻：创建并绑定相关方（可入驻类型由 /options 的 party_types 下发）
@@ -57,4 +56,4 @@ async function unbindParty() {
   return res.data;
 }
 
-module.exports = { getMe, updateMe, invalidateMe, markSeen, authPhone, bindParty, unbindParty };
+module.exports = { getMe, updateMe, invalidateMe, markSeen, resolvePhone, bindParty, unbindParty };
