@@ -1,7 +1,11 @@
-.gcard-row {
+.gcard-meta {
   display: flex;
   align-items: center;
-  gap: 14rpx;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+.gcard-meta .pill {
+  margin-left: auto;
 }
 .gcard-cat {
   font-size: 21rpx;
@@ -13,9 +17,9 @@
   flex-shrink: 0;
 }
 .gcard-title {
-  flex: 1;
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 600;
+  line-height: 1.4;
 }
 .gcard-done .gcard-title {
   color: var(--text-muted);

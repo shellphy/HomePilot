@@ -1,7 +1,11 @@
-.mcard-row {
+.mcard-meta {
   display: flex;
   align-items: center;
-  gap: 14rpx;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+.mcard-meta .pill {
+  margin-left: auto;
 }
 .mcard-tag {
   font-size: 21rpx;
@@ -25,9 +29,9 @@
   background: var(--info-bg);
 }
 .mcard-title {
-  flex: 1;
-  font-size: 29rpx;
+  font-size: 31rpx;
   font-weight: 600;
+  line-height: 1.4;
 }
 .mcard-pitch {
   font-size: 24rpx;
