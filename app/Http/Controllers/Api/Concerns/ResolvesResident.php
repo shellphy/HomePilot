@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 trait ResolvesResident
 {
     /**
-     * 当前登录的业主（API 守卫只应签发给 Resident，防御性收窄）。
+     * 当前登录的业主（API 守卫签发给 Resident）。
      */
     protected function resident(Request $request): Resident
     {

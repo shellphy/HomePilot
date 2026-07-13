@@ -23,7 +23,7 @@ Page({
   reload() {
     return this.runLoad(async () => {
       const res = this.data.kind === 'mine' ? await matters.listMine() : await matters.listJoined();
-      // mine 列表的胶囊按 review_status 渲染（见 wxml），不再预算 pillClass
+      // mine 列表的胶囊按 review_status 渲染（见 wxml）
       this.setData({ matters: res.data });
     });
   },

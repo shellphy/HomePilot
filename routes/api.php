@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\Admin\CensusSummaryAdminController;
 use App\Http\Controllers\Api\Admin\MatterAdminController;
 use App\Http\Controllers\Api\Admin\PartyAdminController;
 use App\Http\Controllers\Api\Admin\SettingAdminController;
@@ -79,13 +78,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/uploads', [UploadController::class, 'store']);
 
-    // 管理端（管理员=被授权的成员，php artisan admin:grant）：审核、发布、明细、认证、设置
+    // 管理端（管理员=被授权的成员，php artisan admin:grant）：只有审核类功能——事项审核、相关方认证、社区设置
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::get('/matters', [MatterAdminController::class, 'index']);
         Route::put('/matters/{matter}/approve', [MatterAdminController::class, 'approve']);
-        Route::get('/matters/{matter}/registrations', [MatterAdminController::class, 'registrations']);
-        Route::get('/matters/{matter}/census-text', [CensusSummaryAdminController::class, 'show']);
-        Route::put('/matters/{matter}/census-summary', [CensusSummaryAdminController::class, 'update']);
         Route::get('/parties', [PartyAdminController::class, 'index']);
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
         Route::get('/settings', [SettingAdminController::class, 'show']);

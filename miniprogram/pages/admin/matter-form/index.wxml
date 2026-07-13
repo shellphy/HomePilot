@@ -275,20 +275,6 @@
         </view>
         <text class="row-arrow">›</text>
       </view>
-      <view class="row" wx:if="{{isAdmin}}" hover-class="row-hover" bind:tap="goRegistrations">
-        <view class="row-main">
-          <view class="row-title">登记明细</view>
-          <view class="row-sub">含楼栋、房号、联系方式，仅管理员可见</view>
-        </view>
-        <text class="row-arrow">›</text>
-      </view>
-      <view class="row" wx:if="{{isAdmin}}" hover-class="row-hover" bind:tap="goCensusText">
-        <view class="row-main">
-          <view class="row-title">文本题归纳</view>
-          <view class="row-sub">把填空回答归纳成主题后发布到公示面</view>
-        </view>
-        <text class="row-arrow">›</text>
-      </view>
     </view>
 
     <!-- 删除（管理动作）：与吸底的保存拉开距离，避免误触 -->

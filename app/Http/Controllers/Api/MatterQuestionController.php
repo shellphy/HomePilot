@@ -14,14 +14,14 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * 「大家都在问」：针对事项的公开问答。
- * 不是评论区——只有业主提问和负责方回答两种内容，业主间不互相回复（闲聊留在微信群）；
+ * 只有业主提问和负责方回答两种内容，业主间不互相回复；
  * 同问聚合热度，好答案可由团长沉淀成「买前必懂」词条。
  */
 class MatterQuestionController extends Controller
 {
     use ResolvesResident;
 
-    /** 开放问答的事项类型：有决策疑问场景的（公告没有疑问，维权容易变质）。 */
+    /** 开放问答的事项类型：有决策疑问场景的（团购/活动）。 */
     private const QUESTION_TYPES = ['groupbuy', 'activity'];
 
     public function index(Request $request, Matter $matter): JsonResponse

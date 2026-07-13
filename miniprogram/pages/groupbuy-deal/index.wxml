@@ -2,7 +2,7 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="form-hint">成交公示是团购的最后一步：把最终谈成的条件、返点让利的去向摊开给全小区看。透明是下一个团的信任来源。</view>
 
-    <!-- 逐人报价的团每人成交价不同：引导公示规则口径（折扣/返利/成交人数/人均区间），不是统一价 -->
+    <!-- 逐人报价的团每人成交价不同：引导公示规则口径（折扣/返利/成交人数/人均区间） -->
     <view class="form-hint" wx:if="{{needsSurvey}}">这是逐人报价的团购，每人成交价不同：公示统一的规则（如折扣、返利、免费项）和成交人数、人均价区间，让邻居能对照自己的方案核验。</view>
 
     <view class="card">

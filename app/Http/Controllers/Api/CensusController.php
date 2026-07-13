@@ -126,14 +126,14 @@ class CensusController extends Controller
     /**
      * 发起者视图：只列出主动勾选「让发起者看到我的问卷」的参与者，
      * 含显示名、手机号（限收联系方式的征集且业主已授权）、逐题答案（换算成题面文字）。
-     * 匿名破例仅对本份征集的发起者本人开放；管理员始终可看全部（走 admin registrations）。
+     * 邻居授权的对象是发起者本人。
      */
     public function consented(Request $request, Matter $matter): JsonResponse
     {
         abort_unless($matter->type === 'census', 404);
 
         $resident = $this->resident($request);
-        abort_unless($matter->initiator_id === $resident->id || $resident->is_admin, 403);
+        abort_unless($matter->initiator_id === $resident->id, 403);
 
         $questions = collect($matter->payloadList('modules'))
             ->flatMap(fn (array $module): array => $module['questions'] ?? [])

@@ -213,14 +213,6 @@ Page({
     wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${this.data.id}` });
   },
 
-  goRegistrations() {
-    wx.navigateTo({ url: `/pages/admin/registrations/index?id=${this.data.id}` });
-  },
-
-  goCensusText() {
-    wx.navigateTo({ url: `/pages/admin/census-text/index?id=${this.data.id}` });
-  },
-
   // 收敛按类型的内容字段为一份顶层 body（不包 payload，后端 payloadFrom 自行归拢）
   buildContent() {
     const { data } = this;

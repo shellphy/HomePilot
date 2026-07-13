@@ -16,8 +16,6 @@ class CensusAggregator
             ? $matter->stances->where('mode', Stance::MODE_REGISTER)
             : $matter->stances()->where('mode', Stance::MODE_REGISTER)->get();
         $allAnswers = $stances->map(fn (Stance $stance): array => $stance->payload['answers'] ?? []);
-        $rawSummaries = $matter->payloadValue('text_summaries', []);
-        $summaries = is_array($rawSummaries) ? $rawSummaries : [];
         $aggregates = [];
 
         foreach ($matter->payloadList('modules') as $module) {
@@ -37,17 +35,8 @@ class CensusAggregator
                 $key = (string) ($question['key'] ?? '');
                 $text = (string) ($question['text'] ?? '');
 
+                // 填空题不进公示聚合（原文不公示）
                 if (($question['type'] ?? '') === 'text') {
-                    $summary = $summaries[$key] ?? null;
-
-                    if (is_array($summary) && ($summary['published'] ?? false)) {
-                        $presentedQuestions[] = [
-                            'key' => $key,
-                            'text' => $text,
-                            'themes' => is_array($summary['themes'] ?? null) ? $summary['themes'] : [],
-                        ];
-                    }
-
                     continue;
                 }
 
