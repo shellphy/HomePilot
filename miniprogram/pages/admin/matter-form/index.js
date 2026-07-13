@@ -46,6 +46,9 @@ Page({
     purpose: '', // 仅征集：发起目的自由文本
     perk: '',
     needsSurvey: false, // 团购：逐人报价（业主端发起时锁定，管理端作为纠错通道可改）
+    isMerchant: false, // 当前身份是否为商家（商家直供团不填利益关系，后端自动标注）
+    relationship: '', // 团购：发起人与商家的利益关系（none/rebate/affiliated）
+    rebateNote: '', // 有返点时的去向说明
     collectsContact: false,
     terms: [],
     glossary: [],
@@ -60,7 +63,18 @@ Page({
     const id = query.id ? Number(query.id) : null;
     this.setData({ id, type: query.type || 'notice' });
     wx.setNavigationBarTitle({ title: id ? '编辑' : '发起' });
-    if (!id) this.setData({ loaded: true });
+    if (!id) this.initCreate();
+  },
+
+  // 发起态：拉一次 me 判断身份（商家直供团不填利益关系）
+  initCreate() {
+    return this.runLoad(async () => {
+      const me = await getMe();
+      this.setData({
+        isAdmin: !!me.is_admin,
+        isMerchant: !!(me.party && me.party.type === 'merchant'),
+      });
+    });
   },
 
   onShow() {
@@ -76,10 +90,13 @@ Page({
       const deadline = splitDateTime(matter.registration_deadline_at);
       this.setData({
         isAdmin: !!me.is_admin,
+        isMerchant: !!(me.party && me.party.type === 'merchant'),
         type: matter.type,
         typeLabel: matter.type_label,
         title: matter.title,
         category: matter.category || '',
+        relationship: matter.relationship === 'merchant_direct' ? '' : (matter.relationship || ''),
+        rebateNote: matter.rebate_note || '',
         // 审核态回显（三态：pending/approved/rejected + 驳回理由），管理端编辑器据此渲染公示开关/驳回提示
         reviewStatus: matter.review_status,
         reviewStatusLabel: matter.review_status_label,
@@ -161,6 +178,11 @@ Page({
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
+  pickRelationship(event) {
+    this.markDirty();
+    this.setData({ relationship: event.currentTarget.dataset.value });
+  },
+
   onSwitch(event) {
     this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
@@ -240,6 +262,11 @@ Page({
       content.needs_survey = data.needsSurvey;
       content.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
       content.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
+      // 商家直供团由后端自动标注；业主/管理员发起才下发利益关系披露
+      if (!data.isMerchant && data.relationship) {
+        content.relationship = data.relationship;
+        if (data.relationship === 'rebate') content.rebate_note = data.rebateNote.trim();
+      }
     }
     if (data.type === 'census') {
       content.purpose = data.purpose.trim();
@@ -260,6 +287,12 @@ Page({
       if (!data.category.trim()) return wx.showToast({ title: '请填写品类', icon: 'none' });
       if (!data.targetCount || Number(data.targetCount) < 1) {
         return wx.showToast({ title: '请填写目标人数', icon: 'none' });
+      }
+      if (!data.isMerchant && !data.relationship) {
+        return wx.showToast({ title: '请选择你与商家的关系', icon: 'none' });
+      }
+      if (!data.isMerchant && data.relationship === 'rebate' && !data.rebateNote.trim()) {
+        return wx.showToast({ title: '请说明返点去向', icon: 'none' });
       }
     }
     if (['activity', 'aid'].includes(data.type) && (!data.startDate || !data.startTime || !data.location.trim())) {

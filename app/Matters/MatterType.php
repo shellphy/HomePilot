@@ -63,6 +63,16 @@ abstract class MatterType
         return true;
     }
 
+    /**
+     * 实质键：这些 payload 键变更后，已确认参团者需重新确认（默认无）。
+     *
+     * @return array<int, string>
+     */
+    public function materialPayloadKeys(): array
+    {
+        return [];
+    }
+
     /** 是否进入了可评价阶段（与"是否参与过"分开，便于给出不同的错误提示）。 */
     public function reviewOpen(Matter $matter): bool
     {

@@ -11,6 +11,7 @@ test('any resident can initiate a groupbuy which starts unapproved', function ()
 
     $response = $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'category' => '门窗',
         'title' => '门窗团购（断桥铝）',
         'target_count' => 15,
@@ -27,6 +28,7 @@ test('the initial state comes from the state machine and ignores client input', 
 
     $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'category' => '门窗',
         'title' => '门窗团购（断桥铝）',
         'target_count' => 15,

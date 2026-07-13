@@ -47,6 +47,13 @@
   >
 </view>
 
+<!-- 利益关系披露：参团前先看清发起人与商家的关系 -->
+<view class="card" wx:if="{{matter.relationship_label}}">
+  <view class="kicker">利益关系</view>
+  <view class="disclosure">{{matter.relationship_label}}</view>
+  <view class="disclosure-note" wx:if="{{matter.rebate_note}}">返点去向：{{matter.rebate_note}}</view>
+</view>
+
 <view class="card" wx:if="{{matter.glossary.length}}">
   <view class="kicker">买前必懂 · 看完再决定</view>
   <view class="gl" wx:for="{{matter.glossary}}" wx:key="term">

@@ -9,6 +9,7 @@ test('a groupbuy carries a glossary of term + free-text explanation', function (
 
     $response = $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'category' => '中央空调',
         'title' => '中央空调团购',
         'target_count' => 20,
@@ -35,6 +36,7 @@ test('glossary entries require a term and an explanation', function () {
 
     $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'category' => '门窗',
         'title' => '门窗团购',
         'target_count' => 15,
@@ -49,6 +51,7 @@ test('the glossary explanation is length-capped', function () {
 
     $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'category' => '中央空调',
         'title' => '中央空调团购',
         'target_count' => 20,
