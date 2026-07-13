@@ -52,6 +52,11 @@ function runQueuedCensusReport(): void
     $queuedJob->handle(app(GenerateCensusReport::class));
 }
 
+test('report agent does not assume questionnaire content is correct', function () {
+    expect((string) (new CensusReportGenerator)->instructions())
+        ->toContain('不要顺着明显错误继续推导');
+});
+
 test('a resident generates and reuses a markdown census report', function () {
     Queue::fake();
     CensusReportGenerator::fake(["## 我的问卷总结\n\n- 重视环保与防潮"]);
