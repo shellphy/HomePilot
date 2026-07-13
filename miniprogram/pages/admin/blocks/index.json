@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "拉黑名单",
+  "usingComponents": {
+    "page-status": "/components/page-status/index"
+  }
+}

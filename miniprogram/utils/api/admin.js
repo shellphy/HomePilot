@@ -34,12 +34,31 @@ function listAdmins() {
   return request('/admin/admins');
 }
 
-function grantAdmin(phone) {
-  return request('/admin/admins', { method: 'POST', data: { phone } });
+// 先按手机号查出待授权的成员，供超管确认身份
+function lookupAdminCandidate(phone) {
+  return request(`/admin/admins/candidate?phone=${encodeURIComponent(phone)}`);
+}
+
+// 确认身份后按 id 授权
+function grantAdmin(residentId) {
+  return request('/admin/admins', { method: 'POST', data: { resident_id: residentId } });
 }
 
 function revokeAdmin(id) {
   return request(`/admin/admins/${id}`, { method: 'DELETE' });
+}
+
+// 拉黑名单：查看、拉黑、解除
+function listBlocks() {
+  return request('/admin/blocks');
+}
+
+function blockResident(residentId) {
+  return request('/admin/blocks', { method: 'POST', data: { resident_id: residentId } });
+}
+
+function unblockResident(id) {
+  return request(`/admin/blocks/${id}`, { method: 'DELETE' });
 }
 
 module.exports = {
@@ -50,6 +69,10 @@ module.exports = {
   getSettings,
   saveSettings,
   listAdmins,
+  lookupAdminCandidate,
   grantAdmin,
   revokeAdmin,
+  listBlocks,
+  blockResident,
+  unblockResident,
 };

@@ -18,4 +18,12 @@ trait ResolvesResident
 
         return $resident;
     }
+
+    /**
+     * 参与类动作（提问/回复/接龙/发起/答问卷）前置：被拉黑的成员仍可浏览，但不能写入。
+     */
+    protected function assertNotBlocked(Resident $resident): void
+    {
+        abort_if($resident->isBlocked(), 403, '你已被管理员限制参与社区互动');
+    }
 }

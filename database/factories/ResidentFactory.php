@@ -56,6 +56,12 @@ class ResidentFactory extends Factory
         return $this->state(fn (): array => ['is_admin' => true, 'is_super_admin' => true]);
     }
 
+    /** 被拉黑的成员。 */
+    public function blocked(): static
+    {
+        return $this->state(fn (): array => ['blocked_at' => now()]);
+    }
+
     /**
      * 商家身份（绑定一个 merchant 相关方）。
      */

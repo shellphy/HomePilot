@@ -1,6 +1,7 @@
 // 「大家都在问」：针对事项的公开问答面板。
-// 业主提问、负责方（团长/商家/管理员）回答，业主间不互相回复；同问聚合热度。
+// 填好资料的业主、已认证相关方都能问能答；同问聚合热度。本人或管理员可删问答，管理员可拉黑成员。
 const matters = require('../../utils/api/matters');
+const admin = require('../../utils/api/admin');
 const { guardProfileError } = require('../../utils/profile-guard');
 
 Component({
@@ -17,6 +18,7 @@ Component({
     canAsk: false,
     canAnswer: false,
     canPromote: false,
+    canModerate: false,
     loaded: false,
     // 提问/回答共用的底部输入弹层
     editorVisible: false,
@@ -41,6 +43,7 @@ Component({
           canAsk: res.can_ask,
           canAnswer: res.can_answer,
           canPromote: res.can_promote,
+          canModerate: res.can_moderate,
           loaded: true,
         });
       } catch (error) {
@@ -75,7 +78,7 @@ Component({
       try {
         if (editorMode === 'ask') {
           await matters.askQuestion(this.data.matter.id, content);
-          wx.showToast({ title: '已提问，等负责方回答', icon: 'none' });
+          wx.showToast({ title: '已提问，等人解答', icon: 'none' });
         } else {
           await matters.answerQuestion(editorId, content);
           wx.showToast({ title: '已回答', icon: 'success' });
@@ -99,6 +102,68 @@ Component({
       } catch (error) {
         wx.showToast({ title: error.message, icon: 'none' });
       }
+    },
+
+    // 删除整条问答（本人或管理员）
+    remove(event) {
+      const { id } = event.currentTarget.dataset;
+      wx.showModal({
+        title: '删除整条问答？',
+        content: '问题连同回答一并删除，不可恢复',
+        confirmText: '删除',
+        confirmColor: '#e34d59',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await matters.deleteQuestion(id);
+            wx.showToast({ title: '已删除', icon: 'none' });
+            this.fetchQuestions();
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          }
+        },
+      });
+    },
+
+    // 只删回复保留问题（本人或管理员）
+    removeAnswer(event) {
+      const { id } = event.currentTarget.dataset;
+      wx.showModal({
+        title: '删除这条回复？',
+        content: '问题保留，仅删除回复',
+        confirmText: '删除',
+        confirmColor: '#e34d59',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await matters.deleteAnswer(id);
+            wx.showToast({ title: '已删回复', icon: 'none' });
+            this.fetchQuestions();
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          }
+        },
+      });
+    },
+
+    // 管理员拉黑发问人/回复人：之后不能再参与社区互动
+    blockPerson(event) {
+      const { id, name } = event.currentTarget.dataset;
+      wx.showModal({
+        title: '拉黑这位成员？',
+        content: `「${name}」将不能再提问、回复、接龙、发起`,
+        confirmText: '拉黑',
+        confirmColor: '#e34d59',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          try {
+            await admin.blockResident(id);
+            wx.showToast({ title: '已拉黑', icon: 'none' });
+          } catch (error) {
+            wx.showToast({ title: error.message, icon: 'none' });
+          }
+        },
+      });
     },
 
     // 沉淀：答过的问题变成「买前必懂」词条，后来的业主不用再问

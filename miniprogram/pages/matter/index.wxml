@@ -34,9 +34,8 @@
         bind:dockmeasure="onDockMeasure"
       />
 
-      <!-- 大家都在问：业主提问、负责方回答，疑问沉淀给后来的人（类型是否开放由后端 supports_questions 决定） -->
+      <!-- 大家都在问：谁都能问、谁都能答，疑问沉淀给后来的人 -->
       <qa-panel
-        wx:if="{{matter.supports_questions}}"
         matter="{{matter}}"
         bind:refresh="reload"
       />

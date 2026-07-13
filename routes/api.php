@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AdminBlockController;
 use App\Http\Controllers\Api\Admin\AdminUserController;
 use App\Http\Controllers\Api\Admin\MatterAdminController;
 use App\Http\Controllers\Api\Admin\PartyAdminController;
@@ -78,6 +79,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/questions/{question}/echo', [MatterQuestionController::class, 'echo']);
     Route::put('/questions/{question}/answer', [MatterQuestionController::class, 'answer']);
     Route::post('/questions/{question}/promote', [MatterQuestionController::class, 'promote']);
+    Route::delete('/questions/{question}/answer', [MatterQuestionController::class, 'destroyAnswer']); // 管理员只删回复
+    Route::delete('/questions/{question}', [MatterQuestionController::class, 'destroy']); // 管理员删整条
 
     Route::post('/uploads', [UploadController::class, 'store']);
 
@@ -89,11 +92,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/parties/{party}', [PartyAdminController::class, 'update']);
         Route::get('/settings', [SettingAdminController::class, 'show']);
         Route::put('/settings', [SettingAdminController::class, 'update']);
+        Route::get('/blocks', [AdminBlockController::class, 'index']);
+        Route::post('/blocks', [AdminBlockController::class, 'store']);
+        Route::delete('/blocks/{resident}', [AdminBlockController::class, 'destroy']);
     });
 
     // 超级管理端（is_super_admin）：应用内增减管理员，替代纯 CLI
     Route::middleware('super_admin')->prefix('admin')->group(function () {
         Route::get('/admins', [AdminUserController::class, 'index']);
+        Route::get('/admins/candidate', [AdminUserController::class, 'candidate']);
         Route::post('/admins', [AdminUserController::class, 'store']);
         Route::delete('/admins/{resident}', [AdminUserController::class, 'destroy']);
     });

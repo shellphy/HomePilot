@@ -143,6 +143,16 @@ function promoteQuestion(questionId, term) {
   return request(`/questions/${questionId}/promote`, { method: 'POST', data: { term } });
 }
 
+// 删除整条问答（本人或管理员）
+function deleteQuestion(questionId) {
+  return request(`/questions/${questionId}`, { method: 'DELETE' });
+}
+
+// 只删回复保留问题（本人或管理员）
+function deleteAnswer(questionId) {
+  return request(`/questions/${questionId}/answer`, { method: 'DELETE' });
+}
+
 module.exports = {
   listMatters,
   listMine,
@@ -174,4 +184,6 @@ module.exports = {
   echoQuestion,
   answerQuestion,
   promoteQuestion,
+  deleteQuestion,
+  deleteAnswer,
 };

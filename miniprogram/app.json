@@ -23,7 +23,8 @@
     "pages/admin/census-question/index",
     "pages/admin/parties/index",
     "pages/admin/settings/index",
-    "pages/admin/admins/index"
+    "pages/admin/admins/index",
+    "pages/admin/blocks/index"
   ],
   "window": {
     "navigationBarTextStyle": "black",

@@ -35,7 +35,6 @@ class MatterResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type,
             'type_label' => $type->label(),
-            'supports_questions' => $type->supportsQuestions(),
             'initiator_id' => $this->initiator_id,
             'initiator_name' => $this->whenLoaded('initiator', fn () => $this->initiatorParty ? $this->initiatorParty->name : $this->initiator?->displayName()),
             'initiator_party' => $this->whenLoaded('initiatorParty', fn () => $this->initiatorParty ? [
