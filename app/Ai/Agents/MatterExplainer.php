@@ -35,7 +35,10 @@ class MatterExplainer implements Agent, Conversational, HasTools
      */
     private const RENOVATION_CATEGORIES = ['装修', '装修公司', '中央空调', '全屋定制', '软装', '地暖', '门窗'];
 
-    public function __construct(public Matter $matter, public ?Resident $asker = null) {}
+    /**
+     * @param  array<string, mixed>|null  $draftAnswers  问 AI 时随请求带上的当前（可能未保存）答案，覆盖已存答案
+     */
+    public function __construct(public Matter $matter, public ?Resident $asker = null, public ?array $draftAnswers = null) {}
 
     /**
      * Get the instructions that the agent should follow.
@@ -43,9 +46,10 @@ class MatterExplainer implements Agent, Conversational, HasTools
     public function instructions(): Stringable|string
     {
         $name = app(CommunitySettings::class)->name;
+        $today = now()->format('Y 年 n 月 j 日');
 
         return <<<PROMPT
-你是「{$name}」小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。
+你是「{$name}」小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。今天是 {$today}，涉及行情、政策等时效信息以此为准、联网查证后再答，别按训练时的年份推断。
 
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，居民追问时再展开。
@@ -242,8 +246,10 @@ PROMPT.$this->matterContext();
             ->where('resident_id', $this->asker->id)
             ->first();
 
-        $answers = $stance?->payload['answers'] ?? null;
-        if (! is_array($answers)) {
+        // 未保存的本地答案（问 AI 时随请求带上）覆盖已存答案，AI 才看得到屏幕上的实时选择
+        $stored = $stance?->payload['answers'] ?? [];
+        $answers = array_merge(is_array($stored) ? $stored : [], $this->draftAnswers ?? []);
+        if ($answers === []) {
             return [];
         }
 

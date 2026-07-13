@@ -23,9 +23,10 @@ class CensusReportGenerator implements Agent, HasTools
     public function instructions(): Stringable|string
     {
         $name = app(CommunitySettings::class)->name;
+        $today = now()->format('Y 年 n 月 j 日');
 
         return <<<PROMPT
-你是「{$name}」社区问卷的分析顾问。根据问卷的标题、目的、题目定义和用户的答案，生成一份中文个人报告。
+你是「{$name}」社区问卷的分析顾问。根据问卷的标题、目的、题目定义和用户的答案，生成一份中文个人报告。今天是 {$today}，涉及时效信息以此为准，别按训练时的年份推断。
 
 - 直接输出报告本身，以一个概括全篇的大标题开头。
 - 先判断这份问卷是做什么的，再决定报告讲什么、怎么组织，用贴合它的小标题。

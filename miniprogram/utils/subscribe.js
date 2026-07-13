@@ -3,13 +3,27 @@ const TEMPLATE_ID = 'MNOujHx4Bcm_ruar87ONFsI7VbHhOMBZA1BFsHciA-o';
 const ASKED_AT_KEY = 'subscribe_asked_at';
 const ASK_INTERVAL = 24 * 60 * 60 * 1000;
 
+function isDevtools() {
+  try {
+    return wx.getSystemInfoSync && wx.getSystemInfoSync().platform === 'devtools';
+  } catch (e) {
+    return false;
+  }
+}
+
 function requestSubscribe() {
   return new Promise((resolve) => {
     if (!wx.requestSubscribeMessage) return resolve();
+    // 开发者工具里 requestSubscribeMessage 常不回调，会把保存流程卡住，直接跳过
+    if (isDevtools()) return resolve();
     const lastAsked = wx.getStorageSync(ASKED_AT_KEY) || 0;
     if (Date.now() - lastAsked < ASK_INTERVAL) return resolve();
     wx.setStorageSync(ASKED_AT_KEY, Date.now());
-    wx.requestSubscribeMessage({ tmplIds: [TEMPLATE_ID], complete: resolve });
+    // 非用户手势上下文（如确认弹窗之后）调用时，complete 可能不回调；
+    // 加超时兜底，别把 await 它的保存流程永远卡住、按钮一直转圈
+    const done = () => resolve();
+    setTimeout(done, 2000);
+    wx.requestSubscribeMessage({ tmplIds: [TEMPLATE_ID], complete: done });
   });
 }
 

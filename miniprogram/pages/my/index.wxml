@@ -14,9 +14,6 @@
       <text class="profile-arrow">›</text>
     </view>
 
-    <!-- 待我处理：聚合下一步动作，点每项直达对应页 -->
-    <todo-list todos="{{todos}}" />
-
     <!-- 相关方核验状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
     <view class="list" wx:if="{{me.party}}">
       <view class="row" hover-class="row-hover" bind:tap="goPartyStatus">
@@ -92,6 +89,9 @@
         </view>
       </view>
     </view>
+
+    <!-- 待我处理：放在最下方（普通用户在「我的问卷」之下、管理员在「拉黑名单」之下），聚合下一步动作 -->
+    <todo-list todos="{{todos}}" />
 
   </block>
   </page-status>

@@ -2,6 +2,9 @@ const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 const { mdToHtml } = require('../../utils/markdown');
 
+// 生成中轮流展示的步骤提示：让等待有可见的推进感，别让人以为卡住了
+const GEN_HINTS = ['正在读你的每一道选择…', '正在查阅相关资料…', '正在把要点整理成文…'];
+
 Page({
   behaviors: [load],
 
@@ -13,6 +16,7 @@ Page({
     generating: false,
     generationStatus: 'idle',
     generationError: '',
+    genHint: GEN_HINTS[0],
     aiChatShow: false,
     presentation: {},
   },
@@ -33,6 +37,7 @@ Page({
   onUnload() {
     this.pageActive = false;
     this.stopPolling();
+    this.stopHintTicker();
   },
 
   reload() {
@@ -53,6 +58,28 @@ Page({
       generationError: data.generation_error || '',
       generating: data.generation_status === 'pending',
     });
+    if (data.generation_status === 'pending') {
+      this.startHintTicker();
+    } else {
+      this.stopHintTicker();
+    }
+  },
+
+  // 生成中每隔几秒换一句步骤提示，配合徽标呼吸动画让等待有推进感
+  startHintTicker() {
+    if (this.hintTimer) return;
+    this.hintIndex = 0;
+    this.hintTimer = setInterval(() => {
+      this.hintIndex = (this.hintIndex + 1) % GEN_HINTS.length;
+      this.setData({ genHint: GEN_HINTS[this.hintIndex] });
+    }, 2500);
+  },
+
+  stopHintTicker() {
+    if (this.hintTimer) {
+      clearInterval(this.hintTimer);
+      this.hintTimer = null;
+    }
   },
 
   async generate() {
