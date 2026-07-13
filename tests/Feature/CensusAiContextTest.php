@@ -4,6 +4,7 @@ use App\Ai\Agents\MatterExplainer;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
+use App\Settings\CommunitySettings;
 
 /**
  * 用带答案的征集构造 explainer，断言指令里带上了征集专属上下文。
@@ -67,6 +68,7 @@ test('census ai context carries purpose, questions, option notes, my answer and 
     $instructions = (string) (new MatterExplainer($census, $asker))->instructions();
 
     expect($instructions)
+        ->toContain('不要顺着明显错误继续推导')
         ->toContain('开团前先摸清大家想装什么') // 发起目的
         ->toContain('模块：柜体')
         ->toContain('先确定柜体材料，再比较价格。')
@@ -77,6 +79,26 @@ test('census ai context carries purpose, questions, option notes, my answer and 
         ->toContain('希望环保达标')               // 我填空题的答案
         ->toContain('重视环保与防潮')             // 已生成报告可继续追问
         ->toContain('多数选「颗粒板」（2 人）');   // 匿名聚合的多数选择
+});
+
+test('census ai context uses draft answers passed with the question over saved ones', function () {
+    [$census, $asker] = censusWithAnswers();
+
+    // 存库里 q1 = 多层实木；本地未保存改成颗粒板，AI 应看到最新的草稿选择
+    $instructions = (string) (new MatterExplainer($census, $asker, ['q1' => '颗粒板']))->instructions();
+
+    expect($instructions)
+        ->toContain('柜体倾向哪种板材？→颗粒板')
+        ->not->toContain('柜体倾向哪种板材？→多层实木');
+});
+
+test('census ai context shows draft answers even without a saved registration', function () {
+    [$census] = censusWithAnswers();
+
+    $fresh = Resident::factory()->create();
+    $instructions = (string) (new MatterExplainer($census, $fresh, ['q1' => '多层实木']))->instructions();
+
+    expect($instructions)->toContain('柜体倾向哪种板材？→多层实木');
 });
 
 test('census ai context omits my registration for a resident who has not answered', function () {
@@ -115,6 +137,29 @@ test('census ai context includes every question without truncation', function ()
         ->toContain('第 1 道硬装题')
         ->toContain('第 28 道硬装题')
         ->toContain('第 28 道说明');
+});
+
+test('renovation matter injects community hard conditions', function () {
+    $settings = app(CommunitySettings::class);
+    $settings->ai_context = '每户只有一个外机位';
+    $settings->save();
+
+    $matter = Matter::factory()->create(['type' => 'groupbuy', 'category' => '中央空调']);
+
+    expect((string) (new MatterExplainer($matter))->instructions())
+        ->toContain('小区硬条件：每户只有一个外机位');
+});
+
+test('non-renovation matter omits装修 hard conditions', function () {
+    $settings = app(CommunitySettings::class);
+    $settings->ai_context = '每户只有一个外机位';
+    $settings->save();
+
+    // 活动事项（品类不在装修白名单）不该拿到装修硬条件
+    $matter = Matter::factory()->create(['type' => 'activity', 'category' => '亲子活动']);
+
+    expect((string) (new MatterExplainer($matter))->instructions())
+        ->not->toContain('小区硬条件');
 });
 
 test('groupbuy ai context is unaffected by the census branch', function () {

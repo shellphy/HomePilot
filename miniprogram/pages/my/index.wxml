@@ -14,10 +14,10 @@
       <text class="profile-arrow">›</text>
     </view>
 
-    <!-- 相关方认证状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
+    <!-- 相关方核验状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
     <view class="list" wx:if="{{me.party}}">
       <view class="row" hover-class="row-hover" bind:tap="goPartyStatus">
-        <text class="row-title">{{me.party.label}}认证</text>
+        <text class="row-title">{{me.party.label}}核验</text>
         <view class="row-right">
           <text class="row-note {{me.party.review_status === 'rejected' ? 'row-note-todo' : ''}}">{{partyStatusNote}}</text>
           <text class="row-arrow">›</text>
@@ -63,14 +63,20 @@
         </view>
       </view>
       <view class="row" hover-class="row-hover" bind:tap="goAdminParties">
-        <text class="row-title">相关方认证</text>
+        <text class="row-title">相关方核验</text>
         <view class="row-right">
-          <text class="row-note {{partyPendingCount ? 'row-note-todo' : ''}}">{{partyPendingCount ? partyPendingCount + ' 家待认证' : ''}}</text>
+          <text class="row-note {{partyPendingCount ? 'row-note-todo' : ''}}">{{partyPendingCount ? partyPendingCount + ' 家待核验' : ''}}</text>
           <text class="row-arrow">›</text>
         </view>
       </view>
       <view class="row" hover-class="row-hover" bind:tap="goAdminSettings">
         <text class="row-title">社区设置</text>
+        <view class="row-right">
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+      <view class="row" hover-class="row-hover" bind:tap="goAdminBlocks">
+        <text class="row-title">拉黑名单</text>
         <view class="row-right">
           <text class="row-arrow">›</text>
         </view>
@@ -83,6 +89,9 @@
         </view>
       </view>
     </view>
+
+    <!-- 待我处理：放在最下方（普通用户在「我的问卷」之下、管理员在「拉黑名单」之下），聚合下一步动作 -->
+    <todo-list todos="{{todos}}" />
 
   </block>
   </page-status>

@@ -2,7 +2,7 @@
 // 社区名称、口号、张罗类型清单全部来自 /options。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
-const { getMe } = require('../../utils/me');
+const { getMe, getTodos } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 // 各类型的收尾态：压成单行沉底
@@ -13,8 +13,9 @@ Page({
 
   data: {
     community: {},
+    todos: [], // 待我处理（首页只 peek 最高优先级几项）
     initiatableTypes: [],
-    merchantUnlisted: false, // 未认证商家：入口保留，点击引导认证
+    merchantUnlisted: false, // 未核验商家：入口保留，点击引导核验
     listedParties: 0,
     openCensusCount: 0, // 正在征集数：喂给指引卡，点进「数据」tab
     notices: [],
@@ -52,11 +53,12 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [res, stats, options, me] = await Promise.all([
+      const [res, stats, options, me, todos] = await Promise.all([
         matters.listMatters(),
         profile.getStats(),
         profile.getOptions(),
         getMe(),
+        getTodos(),
       ]);
       const notices = res.data.filter((matter) => matter.type === 'notice');
       // 征集(census)整条归「数据」tab（进行中+往期+聚合都在那）
@@ -74,13 +76,14 @@ Page({
         title: matter.title,
         note: `${matter.join_count} 人 · ${matter.state_label}`,
       }));
-      // 张罗入口按身份分流：业主看 user_initiatable，已认证商家看 merchant_initiatable，
+      // 张罗入口按身份分流：业主看 user_initiatable，已核验商家看 merchant_initiatable，
       // 其余相关方（物业等）没有发起入口（他们的参与方式是官方回应）
       const isMerchant = !!(me.party && me.party.type === 'merchant');
       // 选中的类型可能已从进行中列表消失（事项收尾了），回落到全部
       const typeFilter = feedTypes.some((type) => type.key === this.data.typeFilter) ? this.data.typeFilter : '';
       this.setData({
         community: options.community || {},
+        todos,
         initiatableTypes: (options.matter_types || []).filter((type) => (me.party
           ? isMerchant && me.party.is_listed && type.merchant_initiatable
           : type.user_initiatable)),
@@ -127,10 +130,10 @@ Page({
     if (this.data.merchantUnlisted) {
       // 给「联系管理员」一个具体落点：联系方式由社区设置下发
       const adminContact = this.data.community.admin_contact;
-      const contactTip = adminContact ? `联系管理员认证：${adminContact}` : '请联系管理员认证。';
+      const contactTip = adminContact ? `联系管理员核验：${adminContact}` : '请联系管理员核验。';
       wx.showModal({
-        title: '先完成商家认证',
-        content: `认证后就能以商家身份发起团购和活动，并带「已认证」标识。${contactTip}`,
+        title: '先完成商家核验',
+        content: `核验后就能以商家身份发起团购和活动，并带「身份已核验」标识。${contactTip}`,
         showCancel: false,
         confirmText: '好的',
       });

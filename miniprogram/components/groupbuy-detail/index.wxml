@@ -42,9 +42,16 @@
     >”</view
   >
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}"
-    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 本团发起人'
+    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已核验' + matter.initiator_party.label + ' · 本团发起人'
     : '本团发起人'}}</view
   >
+</view>
+
+<!-- 利益关系披露：参团前先看清发起人与商家的关系 -->
+<view class="card" wx:if="{{matter.relationship_label}}">
+  <view class="kicker">利益关系</view>
+  <view class="disclosure">{{matter.relationship_label}}</view>
+  <view class="disclosure-note" wx:if="{{matter.rebate_note}}">返点去向：{{matter.rebate_note}}</view>
 </view>
 
 <view class="card" wx:if="{{matter.glossary.length}}">

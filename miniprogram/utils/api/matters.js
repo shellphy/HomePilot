@@ -112,10 +112,10 @@ function draftGlossary(term, draft, category) {
 // 业主侧 AI 答疑：带事项上下文的多轮对话，conversation_id 续聊。
 // 流式返回，onDelta 收增量文字、onSearching 收联网检索词、onSource 收命中来源；
 // 返回 { abort, promise } 供停止/收尾。
-function aiChatStream(id, question, conversationId, { onDelta, onSearching, onSource } = {}) {
+function aiChatStream(id, question, conversationId, { answers, onDelta, onSearching, onSource } = {}) {
   return streamRequest(`/matters/${id}/ai-chat`, {
     method: 'POST',
-    data: { question, conversation_id: conversationId || null },
+    data: { question, conversation_id: conversationId || null, answers: answers || undefined },
     onDelta,
     onSearching,
     onSource,
@@ -141,6 +141,16 @@ function answerQuestion(questionId, content) {
 
 function promoteQuestion(questionId, term) {
   return request(`/questions/${questionId}/promote`, { method: 'POST', data: { term } });
+}
+
+// 删除整条问答（本人或管理员）
+function deleteQuestion(questionId) {
+  return request(`/questions/${questionId}`, { method: 'DELETE' });
+}
+
+// 只删回复保留问题（本人或管理员）
+function deleteAnswer(questionId) {
+  return request(`/questions/${questionId}/answer`, { method: 'DELETE' });
 }
 
 module.exports = {
@@ -174,4 +184,6 @@ module.exports = {
   echoQuestion,
   answerQuestion,
   promoteQuestion,
+  deleteQuestion,
+  deleteAnswer,
 };

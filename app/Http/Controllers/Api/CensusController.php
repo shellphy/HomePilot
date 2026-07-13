@@ -76,6 +76,7 @@ class CensusController extends Controller
         abort_unless($matter->state === 'open', 422, '该征集已结束');
 
         $resident = $this->resident($request);
+        $this->assertNotBlocked($resident);
 
         if ($matter->payloadValue('collects_contact') && ($resident->unit_label === '' || $resident->phone === '')) {
             throw ValidationException::withMessages([

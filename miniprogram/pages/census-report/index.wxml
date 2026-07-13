@@ -5,7 +5,8 @@
         <view class="report-generating-mark">AI</view>
         <view class="report-generating-copy">
           <view class="report-generating-title">正在生成总结</view>
-          <view class="report-generating-sub">完成后会自动显示。</view>
+          <view class="report-generating-step">{{genHint}}</view>
+          <view class="report-generating-sub">通常十几秒，好了会自动显示，不用一直守着。</view>
         </view>
       </view>
       <view class="card report-empty" wx:else>

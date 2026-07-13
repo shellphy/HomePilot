@@ -1,4 +1,4 @@
-// 管理端 · 相关方认证：入驻档案一览（商家/物业等都自助入驻），认证通过公示 / 驳回附理由
+// 管理端 · 相关方核验：入驻档案一览（商家/物业等都自助入驻），核验通过公示 / 驳回附理由
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 
@@ -8,7 +8,7 @@ Page({
   data: {
     all: [],
     parties: [],
-    statusFilter: '', // '' 全部 / pending 待认证 / approved 已认证 / rejected 未通过
+    statusFilter: '', // '' 全部 / pending 待核验 / approved 已核验 / rejected 未通过
   },
 
   onShow() {
@@ -35,24 +35,24 @@ Page({
     this.applyFilter();
   },
 
-  // 审核前先看完整档案（详情页与名录共用，管理员可看未认证的）
+  // 审核前先看完整档案（详情页与名录共用，管理员可看未核验的）
   goDetail(event) {
     wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
   },
 
-  // 认证即把「已认证」身份推给全小区，先确认
+  // 核验即把「身份已核验」推给全小区，先确认
   approve(event) {
     const { id } = event.currentTarget.dataset;
     const party = this.data.all.find((item) => item.id === id);
     wx.showModal({
-      title: '认证并公示？',
-      content: `认证后「${party.name || 'TA'}」将以「已认证」身份对全小区公示`,
-      confirmText: '认证',
+      title: '核验并公示？',
+      content: `通过后「${party.name || 'TA'}」将以「身份已核验」对全小区公示`,
+      confirmText: '核验通过',
       success: async ({ confirm }) => {
         if (!confirm) return;
         try {
           await admin.reviewParty(id, true);
-          wx.showToast({ title: '已认证公示', icon: 'success' });
+          wx.showToast({ title: '已核验公示', icon: 'success' });
           this.reload();
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
@@ -61,7 +61,7 @@ Page({
     });
   },
 
-  // 附一句理由，归属人在详情页看到，改资料后即重新提交；已认证的是「撤下」，其余是「驳回」
+  // 附一句理由，归属人在详情页看到，改资料后即重新提交；已核验的是「撤下」，其余是「驳回」
   reject(event) {
     const { id } = event.currentTarget.dataset;
     const party = this.data.all.find((item) => item.id === id);

@@ -1,0 +1,38 @@
+.todo-head {
+  font-size: 27rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+.todo-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.todo-row:last-child {
+  border-bottom: none;
+}
+.todo-row-hover {
+  opacity: 0.6;
+}
+.todo-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 27rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.todo-action {
+  flex-shrink: 0;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--brand-deep);
+}
+.todo-more {
+  padding-top: 22rpx;
+  font-size: 24rpx;
+  color: var(--text-muted);
+  text-align: center;
+}

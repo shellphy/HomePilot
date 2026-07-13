@@ -61,7 +61,7 @@ abstract class MatterType
         return true;
     }
 
-    /** 已认证商家是否可以发起该类型事项（带商家署名与「已认证」标识）。 */
+    /** 已核验商家是否可以发起该类型事项（带商家署名与「已核验」标识）。 */
     public function merchantInitiatable(): bool
     {
         return false;
@@ -73,10 +73,14 @@ abstract class MatterType
         return true;
     }
 
-    /** 是否开放「大家都在问」公开问答（业主提问、负责方回答）。 */
-    public function supportsQuestions(): bool
+    /**
+     * 实质键：这些 payload 键变更后，已确认参团者需重新确认（默认无）。
+     *
+     * @return array<int, string>
+     */
+    public function materialPayloadKeys(): array
     {
-        return true;
+        return [];
     }
 
     /** 是否进入了可评价阶段（与"是否参与过"分开，便于给出不同的错误提示）。 */

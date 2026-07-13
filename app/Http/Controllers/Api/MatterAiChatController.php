@@ -41,6 +41,8 @@ class MatterAiChatController extends Controller
         $validated = $request->validate([
             'question' => ['required', 'string', 'max:300'],
             'conversation_id' => ['sometimes', 'nullable', 'string', 'max:64'],
+            // 征集填写页问 AI 时带上当前（可能未保存）的答案，让 AI 看到屏幕上的实时选择
+            'answers' => ['sometimes', 'array'],
         ]);
 
         $rateKey = 'matter-ai-chat:'.$resident->id;
@@ -49,7 +51,7 @@ class MatterAiChatController extends Controller
         }
         RateLimiter::hit($rateKey, 86400);
 
-        $agent = new MatterExplainer($matter, $resident);
+        $agent = new MatterExplainer($matter, $resident, $validated['answers'] ?? null);
         $conversationId = $validated['conversation_id'] ?? null;
 
         Log::info('AI 事项答疑开始', [

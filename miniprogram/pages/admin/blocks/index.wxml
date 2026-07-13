@@ -1,0 +1,21 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="hint intro">被拉黑的成员仍可浏览，但不能提问、回复、接龙、发起。拉黑在「大家都在问」等内容处发起。</view>
+    <view class="card">
+      <view class="row" wx:for="{{blocks}}" wx:key="id">
+        <view class="row-main">
+          <view class="row-title">{{item.name}}</view>
+          <view class="row-sub" wx:if="{{item.blocked_by}}">{{item.blocked_by}} 拉黑 · {{item.blocked_at}}</view>
+        </view>
+        <view
+          class="approve-btn"
+          hover-class="approve-btn-hover"
+          data-id="{{item.id}}"
+          data-name="{{item.name}}"
+          catch:tap="unblock"
+        >解除</view>
+      </view>
+      <view wx:if="{{!blocks.length}}" class="hint">拉黑名单是空的</view>
+    </view>
+  </page-status>
+</view>

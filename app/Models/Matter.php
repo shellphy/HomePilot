@@ -192,7 +192,7 @@ class Matter extends Model
     }
 
     /**
-     * 发起时的相关方身份快照（已认证商家发起的事项带商家署名）。
+     * 发起时的相关方身份快照（已核验商家发起的事项带商家署名）。
      *
      * @return BelongsTo<Party, $this>
      */

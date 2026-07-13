@@ -68,6 +68,9 @@
   font-size: 24rpx;
   color: var(--brand-deep);
 }
+.qa-op-danger {
+  color: #e34d59;
+}
 .qa-ask-btn {
   margin-top: 16rpx;
 }

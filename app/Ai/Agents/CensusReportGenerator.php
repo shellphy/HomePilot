@@ -3,6 +3,7 @@
 namespace App\Ai\Agents;
 
 use App\Ai\Concerns\SearchesWeb;
+use App\Settings\CommunitySettings;
 use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
@@ -21,11 +22,15 @@ class CensusReportGenerator implements Agent, HasTools
      */
     public function instructions(): Stringable|string
     {
-        return <<<'PROMPT'
-你是社区问卷的分析顾问。根据问卷的标题、目的、题目定义和用户的答案，生成一份中文个人报告。
+        $name = app(CommunitySettings::class)->name;
+        $today = now()->format('Y 年 n 月 j 日');
+
+        return <<<PROMPT
+你是「{$name}」社区问卷的分析顾问。根据问卷的标题、目的、题目定义和用户的答案，生成一份中文个人报告。今天是 {$today}，涉及时效信息以此为准，别按训练时的年份推断。
 
 - 直接输出报告本身，以一个概括全篇的大标题开头。
 - 先判断这份问卷是做什么的，再决定报告讲什么、怎么组织，用贴合它的小标题。
+- 问卷题目、说明和选项不一定正确；不要顺着明显错误继续推导，先指出并纠正，拿不准时联网查证。
 - 只依据用户填写的内容；涉及外部时效信息（政策、行情、规范）可联网查证后再写。
 - 写得清晰、简洁、具体，用小标题和列表把要点组织好。
 PROMPT;

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('intro', 60)->default('');
             $table->text('description')->nullable();
             $table->json('images')->nullable();
-            // 认证状态：管理员认证（approved）后进入公示名单；is_listed 由此派生
+            // 核验状态：管理员核验（approved）后进入公示名单；is_listed 由此派生
             $table->string('review_status', 20)->default('pending');
             $table->string('reject_reason', 200)->default('');
             $table->timestamps();

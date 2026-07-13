@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\MatterReviewStatus;
+use App\Events\GroupbuyTermsRevised;
 use App\Events\MatterDealPosted;
 use App\Events\MatterStateChanged;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MatterResource;
+use App\Matters\MatterType;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Party;
@@ -205,7 +207,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 发起事项：业主可发起（类型需允许）；已认证商家可发起团购/活动（带商家署名）；
+     * 发起事项：业主可发起（类型需允许）；已核验商家可发起团购/活动（带商家署名）；
      * 其余相关方身份不发起（治理方走官方回应）。管理员不受发起权/身份/楼栋护栏限制，
      * 可代发任何类型并显式署名（物业/业委会的调研）。征集先存草稿并配置题目，
      * 其它类型直接进待审，管理员审核后公示。
@@ -213,6 +215,7 @@ class MatterController extends Controller
     public function store(Request $request): JsonResponse
     {
         $resident = $this->resident($request);
+        $this->assertNotBlocked($resident);
         $isAdmin = $resident->is_admin;
         $party = $resident->affiliatedParty;
 
@@ -227,7 +230,7 @@ class MatterController extends Controller
 
             if ($party !== null) {
                 abort_unless($party->type === Party::TYPE_MERCHANT, 403, '该身份不发起事项，如需张罗请切回业主身份');
-                abort_unless($party->is_listed, 403, '商家发起需先由管理员认证，请联系管理员');
+                abort_unless($party->is_listed, 403, '商家发起需先由管理员核验，请联系管理员');
                 abort_unless($type->merchantInitiatable(), 403, '商家可以发起团购和活动');
             }
 
@@ -248,18 +251,31 @@ class MatterController extends Controller
 
         $validated = $request->validate($rules);
 
+        $initiatorPartyId = $isAdmin
+            ? ($validated['initiator_party_id'] ?? null)
+            : $party?->id;
+
+        // 业主自己发起的团购必须如实披露与商家的利益关系（商家直供、管理员代发不强制）
+        if ($typeKey === 'groupbuy' && ! $isAdmin && $initiatorPartyId === null
+            && ! in_array($validated['relationship'] ?? null, ['none', 'rebate', 'affiliated'], true)) {
+            throw ValidationException::withMessages(['relationship' => '请先披露你与商家的利益关系']);
+        }
+
+        $payload = $type->payloadFrom($validated);
+        if ($typeKey === 'groupbuy') {
+            $payload = $this->applyGroupbuyDisclosure($payload, $initiatorPartyId);
+        }
+
         $matter = Matter::create([
             'type' => $typeKey,
             'initiator_id' => $resident->id,
-            'initiator_party_id' => $isAdmin
-                ? ($validated['initiator_party_id'] ?? null)
-                : $party?->id,
+            'initiator_party_id' => $initiatorPartyId,
             'title' => $validated['title'],
             'body' => $validated['body'] ?? '',
             'category' => $validated['category'] ?? '',
             'state' => $type->initialState(),
             'target_count' => $validated['target_count'] ?? 0,
-            'payload' => $type->payloadFrom($validated),
+            'payload' => $payload,
             'starts_at' => $validated['starts_at'] ?? null,
             'registration_deadline_at' => $validated['registration_deadline_at'] ?? null,
             'location' => $validated['location'] ?? '',
@@ -332,6 +348,16 @@ class MatterController extends Controller
             }
         }
 
+        if ($matter->type === 'groupbuy') {
+            $effectivePartyId = $isAdmin && array_key_exists('initiator_party_id', $validated)
+                ? $validated['initiator_party_id']
+                : $matter->initiator_party_id;
+            $payload = $this->applyGroupbuyDisclosure($payload, $effectivePartyId);
+        }
+
+        // 条款/披露实质变更 → 已确认参团者要重新确认（在 update 覆盖 payload 前比对旧值）
+        $materialChanged = $this->materialPayloadChanged($matter, $type, $payload);
+
         $updateData = [
             'title' => $validated['title'],
             'body' => array_key_exists('body', $validated) ? ($validated['body'] ?? '') : $matter->body,
@@ -358,18 +384,22 @@ class MatterController extends Controller
             $updateData['reject_reason'] = '';
         }
 
-        // 管理端「公示到小区页」开关（发起人不下发此键）：勾上→通过并清理驳回理由；
-        // 把已公示的撤下→回待审核；待审/驳回态只编辑其它字段时保持原状态
-        if ($isAdmin && array_key_exists('is_approved', $validated)) {
-            if ($validated['is_approved']) {
-                $updateData['review_status'] = MatterReviewStatus::Approved;
-                $updateData['reject_reason'] = '';
-            } elseif ($matter->is_approved) {
-                $updateData['review_status'] = MatterReviewStatus::Pending;
-            }
+        // 管理端「公示到小区页」开关（发起人不下发此键）：对尚未公示的事项审核放行并清理驳回理由
+        if ($isAdmin && array_key_exists('is_approved', $validated) && $validated['is_approved']) {
+            $updateData['review_status'] = MatterReviewStatus::Approved;
+            $updateData['reject_reason'] = '';
+        }
+
+        // 编辑已公示的事项一律重新过审：打回待审、从小区页撤下
+        if ($matter->is_approved) {
+            $updateData['review_status'] = MatterReviewStatus::Pending;
         }
 
         $matter->update($updateData);
+
+        if ($materialChanged) {
+            $this->requireReconfirm($matter, $resident);
+        }
 
         if ($matter->state !== $previousState) {
             $matter->recordActivity($resident);
@@ -377,6 +407,57 @@ class MatterController extends Controller
         }
 
         return response()->json(['data' => MatterResource::make($matter)]);
+    }
+
+    /**
+     * 团购利益关系披露：商家直供团由后端置 merchant_direct；业主发起不得冒充商家直供。
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function applyGroupbuyDisclosure(array $payload, ?int $initiatorPartyId): array
+    {
+        if ($initiatorPartyId !== null) {
+            $payload['relationship'] = 'merchant_direct';
+            $payload['rebate_note'] = '';
+
+            return $payload;
+        }
+
+        abort_if(($payload['relationship'] ?? null) === 'merchant_direct', 422, '业主发起的团购请如实披露与商家的关系');
+
+        return $payload;
+    }
+
+    /**
+     * 与新 payload 比对类型声明的实质键，判断有没有实质变更。
+     *
+     * @param  array<string, mixed>  $newPayload
+     */
+    private function materialPayloadChanged(Matter $matter, MatterType $type, array $newPayload): bool
+    {
+        foreach ($type->materialPayloadKeys() as $key) {
+            if ($matter->payloadValue($key) != ($newPayload[$key] ?? null)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** 把已确认参团者降回登记意向并通知：本人重新确认才算数（会重新出现在「待我处理」）。 */
+    private function requireReconfirm(Matter $matter, Resident $actor): void
+    {
+        $residentIds = [];
+        foreach ($matter->confirmedJoins()->get() as $stance) {
+            $stance->reviseTo(array_merge($stance->payload ?? [], ['stage' => Stance::JOIN_STAGE_INTENT]));
+            $residentIds[] = $stance->resident_id;
+        }
+
+        if ($residentIds !== []) {
+            $matter->recordActivity($actor);
+            GroupbuyTermsRevised::dispatch($matter, $residentIds);
+        }
     }
 
     /**

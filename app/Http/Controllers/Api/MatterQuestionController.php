@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
-use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\MatterQuestion;
 use App\Models\Resident;
@@ -14,9 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * 「大家都在问」：针对事项的公开问答。
- * 只有业主提问和负责方回答两种内容，业主间不互相回复；
- * 同问聚合热度，好答案可由团长沉淀成「买前必懂」词条。
+ * 「大家都在问」：针对事项的公开问答。填好资料的业主、已核验相关方都能问能答；
+ * 同问聚合热度，好答案可由团长沉淀成「买前必懂」词条。本人或管理员可删问答，管理员可拉黑成员。
  */
 class MatterQuestionController extends Controller
 {
@@ -37,23 +35,31 @@ class MatterQuestionController extends Controller
             ->latest('id')
             ->get();
 
+        $canParticipate = $matter->is_approved && $this->canParticipate($resident);
+
         return response()->json([
             'data' => $questions->map(fn (MatterQuestion $question): array => [
                 'id' => $question->id,
                 'content' => $question->content,
                 'asker' => $question->asker->displayName(),
+                // 拉黑发问人要定位到人，仅管理员可见
+                'asker_id' => $resident->is_admin ? $question->resident_id : null,
                 'is_mine' => $question->resident_id === $resident->id,
+                'answer_is_mine' => $question->answered_by_id === $resident->id,
                 'echo_count' => (int) ($question->echoers_count ?? 0),
                 'echoed_by_me' => (bool) ($question->echoed_by_me ?? false),
                 'answer' => $question->answer,
                 'answered_by' => $question->answered_by,
+                // 拉黑回复人要定位到人，仅管理员可见
+                'answerer_id' => $resident->is_admin ? $question->answered_by_id : null,
                 'answered_on' => $question->answered_at?->format('m-d'),
             ]),
-            // 权限随人走：负责方看到回答入口，团长/管理员看到沉淀入口
-            'can_ask' => $resident->affiliatedParty === null && MatterTypeRegistry::for($matter->type)->supportsQuestions() && $matter->is_approved,
-            'can_answer' => $this->canAnswer($matter, $resident),
+            'can_ask' => $canParticipate,
+            'can_answer' => $canParticipate,
             'can_promote' => $matter->type === 'groupbuy'
                 && ($resident->is_admin || $matter->initiator_id === $resident->id),
+            // 管理员：删内容、拉黑成员的入口
+            'can_moderate' => $resident->is_admin,
         ]);
     }
 
@@ -62,15 +68,7 @@ class MatterQuestionController extends Controller
         $resident = $this->resident($request);
 
         abort_unless($matter->is_approved, 404);
-        abort_unless(MatterTypeRegistry::for($matter->type)->supportsQuestions(), 422, '该事项不开放提问');
-        abort_if($resident->affiliatedParty !== null, 403, '相关方身份不提问，如有疑问请切回业主身份');
-
-        // 提问与接龙同一公示口径：楼栋 + 昵称
-        if ($resident->unit_label === '') {
-            throw ValidationException::withMessages([
-                'profile' => '提问前请先在「我的 · 个人资料」里选好楼栋号',
-            ]);
-        }
+        $this->assertCanParticipate($resident, '提问');
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:300'],
@@ -91,6 +89,7 @@ class MatterQuestionController extends Controller
 
         // 事项被软删后问题仍在库里，对外一律 404
         abort_unless((bool) $question->matter?->is_approved, 404);
+        $this->assertNotBlocked($resident);
         abort_if($question->resident_id === $resident->id, 422, '这是你自己提的问题');
 
         $changes = $question->echoers()->toggle($resident->id);
@@ -102,14 +101,14 @@ class MatterQuestionController extends Controller
         ]]);
     }
 
-    /** 负责方回答（可修改）：署名快照跟着回答者身份走。 */
+    /** 回答（可修改）：署名快照跟着回答者身份走。 */
     public function answer(Request $request, MatterQuestion $question): JsonResponse
     {
         $resident = $this->resident($request);
         $matter = $question->matter;
 
         abort_unless((bool) $matter?->is_approved, 404);
-        abort_unless($this->canAnswer($matter, $resident), 403, '只有团长、商家或管理员可以回答');
+        $this->assertCanParticipate($resident, '回复');
 
         $validated = $request->validate([
             'content' => ['required', 'string', 'max:1000'],
@@ -117,11 +116,39 @@ class MatterQuestionController extends Controller
 
         $question->update([
             'answer' => $validated['content'],
-            'answered_by' => $this->answererLabel($matter, $resident),
+            'answered_by' => $this->answererLabel($resident),
+            'answered_by_id' => $resident->id,
             'answered_at' => $question->answered_at ?? now(),
         ]);
 
         return response()->json(['data' => ['id' => $question->id]]);
+    }
+
+    /** 删除整条问答（管理员或提问本人；回答与同问记录随之清除）。 */
+    public function destroy(Request $request, MatterQuestion $question): JsonResponse
+    {
+        $resident = $this->resident($request);
+        abort_unless($resident->is_admin || $question->resident_id === $resident->id, 403);
+
+        $question->delete();
+
+        return response()->json(['deleted' => true]);
+    }
+
+    /** 只删回复保留问题（管理员或回复本人）。 */
+    public function destroyAnswer(Request $request, MatterQuestion $question): JsonResponse
+    {
+        $resident = $this->resident($request);
+        abort_unless($resident->is_admin || $question->answered_by_id === $resident->id, 403);
+
+        $question->update([
+            'answer' => null,
+            'answered_by' => '',
+            'answered_by_id' => null,
+            'answered_at' => null,
+        ]);
+
+        return response()->json(['deleted' => true]);
     }
 
     /**
@@ -157,24 +184,49 @@ class MatterQuestionController extends Controller
         return response()->json(['data' => ['term' => $validated['term']]]);
     }
 
-    /** 谁能回答：团长本人、事项署名相关方（商家直供团的商家）的成员、管理员。 */
-    private function canAnswer(Matter $matter, Resident $resident): bool
+    /** 能否参与(问/答)：业主按钮照显示（提交时再校验楼栋），已核验相关方放行，被拉黑不显示。 */
+    private function canParticipate(Resident $resident): bool
     {
-        return $resident->is_admin
-            || $matter->initiator_id === $resident->id
-            || ($matter->initiator_party_id !== null && $resident->affiliated_party_id === $matter->initiator_party_id);
+        if ($resident->isBlocked()) {
+            return false;
+        }
+
+        if ($resident->affiliatedParty !== null) {
+            return $resident->affiliatedParty->is_listed;
+        }
+
+        return true;
     }
 
-    private function answererLabel(Matter $matter, Resident $resident): string
+    /** 提交前置：拉黑挡下、相关方须已核验、业主须先填楼栋。 */
+    private function assertCanParticipate(Resident $resident, string $verb): void
     {
-        if ($matter->initiator_party_id !== null && $resident->affiliated_party_id === $matter->initiator_party_id) {
-            return (string) $resident->affiliatedParty?->name;
+        $this->assertNotBlocked($resident);
+
+        if ($resident->affiliatedParty !== null) {
+            abort_unless($resident->affiliatedParty->is_listed, 403, '相关方通过核验后才能'.$verb);
+
+            return;
         }
 
-        if ($matter->initiator_id === $resident->id) {
-            return $resident->displayName();
+        if ($resident->unit_label === '') {
+            throw ValidationException::withMessages([
+                'profile' => $verb.'前请先在「我的 · 个人资料」里选好楼栋号',
+            ]);
+        }
+    }
+
+    /** 回答署名：机构成员署机构名，管理员署「管理员」，其余署 楼栋 + 昵称。 */
+    private function answererLabel(Resident $resident): string
+    {
+        if ($resident->affiliatedParty !== null) {
+            return (string) $resident->affiliatedParty->name;
         }
 
-        return '管理员';
+        if ($resident->is_admin) {
+            return '管理员';
+        }
+
+        return $resident->displayName();
     }
 }

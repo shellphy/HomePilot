@@ -34,6 +34,7 @@ class MatterQuestion extends Model
         'content',
         'answer',
         'answered_by',
+        'answered_by_id',
         'answered_at',
     ];
 

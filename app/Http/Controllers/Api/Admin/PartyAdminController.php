@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * 管理端 · 相关方：查看入驻档案，认证通过公示 / 驳回附理由。
+ * 管理端 · 相关方：查看入驻档案，核验通过公示 / 驳回附理由。
  * 商家/物业/业委会全部自助入驻（/me/party），这里只负责审核。
  */
 class PartyAdminController extends Controller
@@ -42,7 +42,7 @@ class PartyAdminController extends Controller
             ];
         });
 
-        // 待认证 = 有归属人亮明了身份且还在待认证队列的（驳回态在等归属人改，空壳档案不算待办）
+        // 待核验 = 有归属人亮明了身份且还在待核验队列的（驳回态在等归属人改，空壳档案不算待办）
         $pendingCount = $parties
             ->filter(fn (Party $party): bool => $party->review_status === PartyReviewStatus::Pending
                 && $party->contactOwnerAmong($owners) !== null)

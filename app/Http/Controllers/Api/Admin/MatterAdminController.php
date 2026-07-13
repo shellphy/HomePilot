@@ -89,7 +89,7 @@ class MatterAdminController extends Controller
     {
         if ($matter->initiatorParty) {
             return $matter->initiatorParty->typeLabel().' · '.$matter->initiatorParty->name
-                .($matter->initiatorParty->is_listed ? '（已认证）' : '（未认证）');
+                .($matter->initiatorParty->is_listed ? '（已核验）' : '（未核验）');
         }
 
         return $matter->initiator?->displayName() ?: '管理员发布';

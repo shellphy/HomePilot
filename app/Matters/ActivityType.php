@@ -45,7 +45,7 @@ class ActivityType extends MatterType
         return '已取消';
     }
 
-    /** 已认证商家可以发起探店、开放日类活动。 */
+    /** 已核验商家可以发起探店、开放日类活动。 */
     public function merchantInitiatable(): bool
     {
         return true;

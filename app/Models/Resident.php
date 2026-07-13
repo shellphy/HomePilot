@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\ResidentFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -27,11 +28,14 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_super_admin
  * @property int|null $admin_granted_by_id
  * @property Carbon|null $admin_granted_at
+ * @property Carbon|null $blocked_at
+ * @property int|null $blocked_by_id
  * @property Carbon|null $mine_seen_at
  * @property Carbon|null $joined_seen_at
  * @property-read Party|null $affiliatedParty
  * @property-read Party|null $lastParty
  * @property-read Resident|null $adminGrantedBy
+ * @property-read Resident|null $blockedBy
  */
 class Resident extends Authenticatable
 {
@@ -56,6 +60,7 @@ class Resident extends Authenticatable
             'is_admin' => 'boolean',
             'is_super_admin' => 'boolean',
             'admin_granted_at' => 'datetime',
+            'blocked_at' => 'datetime',
             'mine_seen_at' => 'datetime',
             'joined_seen_at' => 'datetime',
         ];
@@ -78,6 +83,38 @@ class Resident extends Authenticatable
             'is_admin' => true,
             'admin_granted_by_id' => $by->id,
             'admin_granted_at' => now(),
+        ])->save();
+    }
+
+    /**
+     * 拉黑我的管理员（unblock 后清空）。
+     *
+     * @return BelongsTo<Resident, $this>
+     */
+    public function blockedBy(): BelongsTo
+    {
+        return $this->belongsTo(Resident::class, 'blocked_by_id');
+    }
+
+    public function isBlocked(): bool
+    {
+        return $this->blocked_at !== null;
+    }
+
+    /** 拉黑：限制参与社区互动，记下是谁、何时拉黑。 */
+    public function block(Resident $by): void
+    {
+        $this->forceFill([
+            'blocked_at' => now(),
+            'blocked_by_id' => $by->id,
+        ])->save();
+    }
+
+    public function unblock(): void
+    {
+        $this->forceFill([
+            'blocked_at' => null,
+            'blocked_by_id' => null,
         ])->save();
     }
 
@@ -110,6 +147,22 @@ class Resident extends Authenticatable
             ->approved()
             ->whereHas('joins', fn ($query) => $query->whereBelongsTo($this, 'resident'))
             ->exists();
+    }
+
+    /**
+     * 我牵头或参与、且有我没看过的新动态的事项（喂给「待我处理」）。
+     *
+     * @return EloquentCollection<int, Matter>
+     */
+    public function unseenActivityMatters(): EloquentCollection
+    {
+        $mine = $this->unseenActivityQuery()->whereBelongsTo($this, 'initiator')->get();
+        $joined = $this->unseenActivityQuery()
+            ->approved()
+            ->whereHas('joins', fn ($query) => $query->whereBelongsTo($this, 'resident'))
+            ->get();
+
+        return $mine->merge($joined);
     }
 
     /**

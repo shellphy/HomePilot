@@ -24,6 +24,7 @@ Page({
     type: 'notice',
     typeLabel: '',
     isAdmin: false, // 管理动作（状态/公示/署名/明细/删除）的显示开关
+    publishedNow: false, // 加载时该事项是否已公示（编辑已公示的会重新送审）
     title: '',
     category: '',
     state: '',
@@ -102,6 +103,8 @@ Page({
         states: matter.all_states || matter.states || {},
         stateKeys: Object.keys(matter.all_states || matter.states || {}),
         isApproved: matter.is_approved,
+        // 加载时的公示状态（不随「公示开关」变动）：判断这次编辑会不会触发重新送审
+        publishedNow: matter.is_approved,
         initiatorPartyId: matter.initiator_party_id || null,
       });
       wx.setNavigationBarTitle({ title: `编辑${matter.type_label}` });
@@ -267,6 +270,21 @@ Page({
       if (data.id) body.is_approved = data.isApproved;
     }
 
+    // 改动已公示的事项会重新送审、暂时从小区页撤下，保存前先确认一次
+    if (data.id && data.publishedNow) {
+      const confirmed = await new Promise((resolve) => {
+        wx.showModal({
+          title: '保存后需要重新审核',
+          content: '这件事已经公示。保存修改后会重新送审、暂时从小区页撤下，通过后再公示。',
+          confirmText: '保存送审',
+          cancelText: '再改改',
+          success: ({ confirm }) => resolve(confirm),
+          fail: () => resolve(false),
+        });
+      });
+      if (!confirmed) return;
+    }
+
     this.setData({ submitting: true });
     try {
       // 提交顺手收一次订阅授权：审核结果/新报名的通知才有额度可推
@@ -274,7 +292,7 @@ Page({
       if (data.id) {
         await matters.updateMatter(data.id, body);
         this.clearDirty();
-        wx.showToast({ title: '已保存', icon: 'success' });
+        wx.showToast({ title: data.publishedNow ? '已送重新审核' : '已保存', icon: 'none' });
         setTimeout(() => wx.navigateBack(), 800);
       } else {
         const res = await matters.createMatter(data.type, body);
@@ -316,7 +334,18 @@ Page({
           await matters.deleteMatter(this.data.id);
           this.clearDirty();
           wx.showToast({ title: '已删除', icon: 'success' });
-          setTimeout(() => wx.navigateBack(), 800);
+          // 删除后别退回已失效的详情页（会报「资源找不到」）：跳过它退到上层列表
+          setTimeout(() => {
+            const pages = getCurrentPages();
+            const prevIsDetail = pages[pages.length - 2]?.route === 'pages/matter/index';
+            if (prevIsDetail && pages.length >= 3) {
+              wx.navigateBack({ delta: 2 });
+            } else if (prevIsDetail) {
+              wx.reLaunch({ url: '/pages/community/index' });
+            } else {
+              wx.navigateBack();
+            }
+          }, 800);
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
         }

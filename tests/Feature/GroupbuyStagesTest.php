@@ -145,6 +145,7 @@ test('the survey flag is chosen at creation and the initiator cannot flip it aft
 
     $id = $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'title' => '中央空调团购',
         'category' => '中央空调',
         'target_count' => 15,

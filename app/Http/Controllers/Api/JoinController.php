@@ -23,6 +23,7 @@ class JoinController extends Controller
     public function store(Request $request, Matter $matter): JsonResponse
     {
         $resident = $this->resident($request);
+        $this->assertNotBlocked($resident);
 
         // 接龙名单是业主的信任背书：相关方不进名单（商家的参与方式是发起，治理方是官方回应）
         abort_if($resident->affiliated_party_id !== null, 403, '相关方身份不参与接龙，如需参与请在个人资料里切回业主身份');

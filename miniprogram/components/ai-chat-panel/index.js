@@ -33,21 +33,24 @@ Component({
   methods: {
     // 宿主页面打开面板时调用；带 question 则自动填入并发送（如术语追问），
     // 带 questions 则作为「猜你想问」在空对话时展示，让业主自己挑
-    open({ matterId, matterTitle, question, questions }) {
+    open({ matterId, matterTitle, question, questions, answers }) {
       this.haltStream();
       const cache = wx.getStorageSync(this.cacheKey(matterId)) || {};
       this.conversationId = cache.conversationId || null;
+      this.contextAnswers = answers || null; // 征集填写页带来的当前答案，随每轮提问上送
+      const history = cache.messages || [];
       this.setData({
         matterId,
         matterTitle: matterTitle || '',
-        messages: this.withRenderedNodes(cache.messages || []),
+        messages: this.withRenderedNodes(history),
         presets: questions || [],
         input: question || '',
         busy: false,
         streamingIndex: -1,
       });
       this.scrollToBottom();
-      if (question) this.send();
+      // 已有历史时不自动发：让人能只回看上一轮答案；无历史才一键提问
+      if (question && history.length === 0) this.send();
     },
 
     // 宿主关闭面板时调用：中断在途请求，别让它在后台继续跑
@@ -106,6 +109,7 @@ Component({
       this.startTyping();
 
       this.stream = matters.aiChatStream(this.data.matterId, question, this.conversationId, {
+        answers: this.contextAnswers,
         onDelta: (delta) => {
           this.fullText += delta;
           this.startTyping();

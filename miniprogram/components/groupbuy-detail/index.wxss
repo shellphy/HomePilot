@@ -338,3 +338,14 @@
 .abort-btn {
   --td-button-light-color: var(--danger);
 }
+
+/* 利益关系披露 */
+.disclosure {
+  font-size: 28rpx;
+  color: var(--text-primary);
+}
+.disclosure-note {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: var(--text-muted);
+}

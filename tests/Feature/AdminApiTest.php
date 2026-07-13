@@ -166,7 +166,7 @@ test('admin certifies parties onto the public list', function () {
     $owner = Resident::factory()->create(['affiliated_party_id' => $party->id]);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    // 认证前要能联系上入驻方核实，列表带归属人的授权手机号
+    // 核验前要能联系上入驻方核实，列表带归属人的授权手机号
     $this->getJson('/api/admin/parties')
         ->assertSuccessful()
         ->assertJsonPath('data.0.is_listed', false)
@@ -253,7 +253,7 @@ test('the admin queue signs matters with the initiator party snapshot', function
     Sanctum::actingAs(Resident::factory()->admin()->create());
     $this->getJson('/api/admin/matters?pending=1')
         ->assertSuccessful()
-        ->assertJsonPath('data.0.initiator', '商家 · 青城中央空调（已认证）');
+        ->assertJsonPath('data.0.initiator', '商家 · 青城中央空调（已核验）');
 });
 
 test('admin publishing a groupbuy requires the same category and target count as the member form', function () {

@@ -22,7 +22,7 @@
   <view class="kicker">发起人说</view>
   <view class="pitch">“{{matter.body}}”</view>
   <view class="pitch-sign" wx:if="{{matter.initiator_name}}"
-    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已认证' + matter.initiator_party.label + ' · 牵头人' :
+    >—— {{matter.initiator_name}} · {{matter.initiator_party ? '已核验' + matter.initiator_party.label + ' · 牵头人' :
     '牵头人'}}</view
   >
 </view>
@@ -69,18 +69,19 @@
 
 <view class="card leader-ops" wx:if="{{isInitiator}}">
   <view class="kicker">牵头人操作（这件事由你负责）</view>
-  <!-- 唯一的 primary 放最前：日常最常做的是发进展 -->
+  <!-- 等宽两列网格，唯一的 primary 放最前：日常最常做的是发进展 -->
   <view class="leader-btns">
-    <t-button theme="primary" size="medium" bind:tap="goProgress">发布进展</t-button>
-    <t-button wx:if="{{nextState}}" theme="light" size="medium" bind:tap="flipState"
+    <t-button theme="primary" size="medium" block bind:tap="goProgress">发布进展</t-button>
+    <t-button wx:if="{{nextState}}" theme="light" size="medium" block bind:tap="flipState"
       >推进到「{{nextState.label}}」</t-button
     >
-    <t-button theme="light" size="medium" bind:tap="goEdit">编辑</t-button>
+    <t-button theme="light" size="medium" block bind:tap="goEdit">编辑</t-button>
     <!-- 收场出口：办不成/不再推进时给个体面台阶，别让事项挂成僵尸 -->
     <t-button
       wx:if="{{nextState && matter.abort_state}}"
       theme="light"
       size="medium"
+      block
       class="abort-btn"
       bind:tap="abortMatter"
       >按「{{matter.abort_state.label}}」收场</t-button
@@ -88,9 +89,9 @@
   </view>
 </view>
 
-<!-- 被认证的治理类相关方（物业/开发商/业委会）：官方回应入口，进展时间线里带署名 -->
+<!-- 被核验的治理类相关方（物业/开发商/业委会）：官方回应入口，进展时间线里带署名 -->
 <view class="card leader-ops" wx:if="{{canRespond && !isInitiator}}">
-  <view class="kicker">你以认证相关方身份出现，可对这件事正式回应</view>
+  <view class="kicker">你以核验相关方身份出现，可对这件事正式回应</view>
   <view class="leader-btns">
     <t-button theme="light" size="medium" bind:tap="goProgress">发布官方回应</t-button>
   </view>

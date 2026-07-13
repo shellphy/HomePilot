@@ -4,6 +4,7 @@
   "navigationBarTextStyle": "black",
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "page-status": "/components/page-status/index"
+    "page-status": "/components/page-status/index",
+    "todo-list": "/components/todo-list/index"
   }
 }

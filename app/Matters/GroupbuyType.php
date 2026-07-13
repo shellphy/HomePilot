@@ -50,6 +50,9 @@ class GroupbuyType extends MatterType
     {
         return [
             'perk' => ['nullable', 'string', 'max:100'],
+            // 发起人与商家的利益关系披露（业主发起须选，商家直供由后端标注）
+            'relationship' => ['nullable', 'in:none,rebate,affiliated,merchant_direct'],
+            'rebate_note' => ['nullable', 'required_if:relationship,rebate', 'string', 'max:200'],
             // 逐人报价团购：非标准品，商家需单独和每位报名者沟通需求、单独出方案，
             // 联系互通提前到谈判中
             'needs_survey' => ['sometimes', 'boolean'],
@@ -70,7 +73,15 @@ class GroupbuyType extends MatterType
             'terms' => $validated['terms'] ?? [],
             'glossary' => $validated['glossary'] ?? [],
             'needs_survey' => (bool) ($validated['needs_survey'] ?? false),
+            'relationship' => $validated['relationship'] ?? '',
+            'rebate_note' => $validated['rebate_note'] ?? '',
         ];
+    }
+
+    /** 条款与利益关系披露属于实质条款。 */
+    public function materialPayloadKeys(): array
+    {
+        return ['terms', 'relationship', 'rebate_note'];
     }
 
     /** 方案型开关只在发起时选：中途翻转会改变联系互通的隐私承诺。 */
@@ -85,7 +96,7 @@ class GroupbuyType extends MatterType
         return (bool) $matter->payloadValue('needs_survey', false);
     }
 
-    /** 已认证商家可以发起商家直供团。 */
+    /** 已核验商家可以发起商家直供团。 */
     public function merchantInitiatable(): bool
     {
         return true;

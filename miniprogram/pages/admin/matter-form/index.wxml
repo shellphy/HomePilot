@@ -55,6 +55,38 @@
           </view>
           <text class="frow-value">已开启</text>
         </view>
+        <!-- 利益关系披露：业主/管理员发起团购必选；商家直供团由后端自动标注 -->
+        <block wx:if="{{!isMerchant}}">
+          <view class="rel">
+            <view class="rel-label">你与商家的关系<text class="f-required">*</text></view>
+            <view
+              class="rel-opt {{relationship === 'none' ? 'rel-opt-on' : ''}}"
+              data-value="none"
+              bind:tap="pickRelationship"
+            >与商家无利益关系，纯热心张罗</view>
+            <view
+              class="rel-opt {{relationship === 'rebate' ? 'rel-opt-on' : ''}}"
+              data-value="rebate"
+              bind:tap="pickRelationship"
+            >我会从中获得返点或好处</view>
+            <view
+              class="rel-opt {{relationship === 'affiliated' ? 'rel-opt-on' : ''}}"
+              data-value="affiliated"
+              bind:tap="pickRelationship"
+            >我关联这家商家</view>
+          </view>
+          <view class="frow" wx:if="{{relationship === 'rebate'}}">
+            <text class="frow-label">返点去向<text class="f-required">*</text></text>
+            <input
+              class="frow-input"
+              value="{{rebateNote}}"
+              placeholder="例如：返点全额返给参团业主"
+              maxlength="200"
+              data-field="rebateNote"
+              bind:input="onInput"
+            />
+          </view>
+        </block>
       </block>
 
       <!-- 目标数（团购/活动/互助/维权）：团购必填 ≥1，与业主端发起口径一致 -->

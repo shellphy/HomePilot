@@ -68,10 +68,10 @@ test('uncertified parties, merchants and bystanders cannot post responses', func
         'content' => '我来说两句',
     ])->assertForbidden();
 })->with([
-    '未认证的物业' => [fn () => Resident::factory()->create([
+    '未核验的物业' => [fn () => Resident::factory()->create([
         'affiliated_party_id' => Party::factory()->create(['type' => Party::TYPE_PROPERTY])->id,
     ])],
-    '已认证的商家' => [fn () => Resident::factory()->create([
+    '已核验的商家' => [fn () => Resident::factory()->create([
         'affiliated_party_id' => Party::factory()->listed()->merchant()->create()->id,
     ])],
     '普通邻居' => [fn () => Resident::factory()->create()],
