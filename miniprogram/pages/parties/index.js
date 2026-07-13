@@ -27,6 +27,11 @@ Page({
     wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
   },
 
+  // 相关方入驻：去个人资料切换身份、填档案，提交后进入认证队列
+  goRegister() {
+    wx.navigateTo({ url: '/pages/profile-form/index' });
+  },
+
   reload() {
     return this.runLoad(async () => {
       const res = await profile.listParties();

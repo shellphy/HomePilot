@@ -104,8 +104,7 @@ class SubscribeNotifier
      */
     public function partyListed(Party $party): void
     {
-        $owner = Resident::where('affiliated_party_id', $party->id)->orderByDesc('updated_at')->first()
-            ?? Resident::where('last_party_id', $party->id)->orderByDesc('updated_at')->first();
+        $owner = $this->partyOwner($party);
 
         if ($owner === null) {
             return;
@@ -119,6 +118,51 @@ class SubscribeNotifier
             '认证通过',
             '已进入小区公示名录',
         );
+    }
+
+    /**
+     * 相关方自助入驻 → 通知管理员去认证。
+     */
+    public function partyRegistered(Party $party): void
+    {
+        Resident::where('is_admin', true)->get()->each(fn (Resident $admin) => $this->send(
+            $admin,
+            'pages/admin/parties/index',
+            $party->name,
+            $party->typeLabel().'入驻',
+            '待认证',
+            '有新入驻等待认证',
+        ));
+    }
+
+    /**
+     * 相关方认证被驳回 → 通知归属人（附理由，可改后重交）。
+     */
+    public function partyRejected(Party $party): void
+    {
+        $owner = $this->partyOwner($party);
+
+        if ($owner === null) {
+            return;
+        }
+
+        $this->send(
+            $owner,
+            'pages/party/index?id='.$party->id,
+            $party->name,
+            $party->typeLabel().'入驻',
+            '未通过',
+            $party->reject_reason !== '' ? $party->reject_reason : '可修改资料后重新提交',
+        );
+    }
+
+    /**
+     * 档案归属人：当前绑定的成员优先，其次最近绑定过的。
+     */
+    private function partyOwner(Party $party): ?Resident
+    {
+        return Resident::where('affiliated_party_id', $party->id)->orderByDesc('updated_at')->first()
+            ?? Resident::where('last_party_id', $party->id)->orderByDesc('updated_at')->first();
     }
 
     /**

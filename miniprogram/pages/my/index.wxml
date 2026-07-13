@@ -14,6 +14,17 @@
       <text class="profile-arrow">›</text>
     </view>
 
+    <!-- 相关方认证状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
+    <view class="list" wx:if="{{me.party}}">
+      <view class="row" hover-class="row-hover" bind:tap="goPartyStatus">
+        <text class="row-title">{{me.party.label}}认证</text>
+        <view class="row-right">
+          <text class="row-note {{me.party.review_status === 'rejected' ? 'row-note-todo' : ''}}">{{partyStatusNote}}</text>
+          <text class="row-arrow">›</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 固定三行：参与 / 牵头 / 问卷 -->
     <view class="list">
       <view class="row" hover-class="row-hover" bind:tap="goJoined">

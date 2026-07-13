@@ -42,3 +42,13 @@
   font-size: 24rpx;
   color: #9b978c;
 }
+
+.register-cta {
+  margin-top: 32rpx;
+}
+.register-note {
+  margin-top: 12rpx;
+  text-align: center;
+  font-size: 23rpx;
+  color: var(--text-muted);
+}

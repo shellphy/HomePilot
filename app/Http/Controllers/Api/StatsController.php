@@ -19,7 +19,7 @@ class StatsController extends Controller
             // 只算选好楼栋的成员：静默登录会把路过的人也建号，不选楼栋不算「邻居」
             'residents' => Resident::where('unit_label', '!=', '')->count(),
             // 喂给首页「已认证商家名录」入口：只算商家（治理身份不进名录）
-            'listed_parties' => Party::where('is_listed', true)->where('type', Party::TYPE_MERCHANT)->count(),
+            'listed_parties' => Party::listed()->where('type', Party::TYPE_MERCHANT)->count(),
         ]);
     }
 }

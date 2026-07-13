@@ -16,8 +16,9 @@ function listParties() {
   return request('/admin/parties');
 }
 
-function certifyParty(id, listed) {
-  return request(`/admin/parties/${id}`, { method: 'PUT', data: { is_listed: listed } });
+// 认证通过 / 驳回（reason 仅驳回时有意义：归属人在详情页看到，改资料后重新提交）
+function reviewParty(id, approved, reason = '') {
+  return request(`/admin/parties/${id}`, { method: 'PUT', data: { is_approved: approved, reason } });
 }
 
 function getSettings() {
@@ -32,7 +33,7 @@ module.exports = {
   listMatters,
   approveMatter,
   listParties,
-  certifyParty,
+  reviewParty,
   getSettings,
   saveSettings,
 };

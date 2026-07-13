@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\PartyReviewStatus;
 use Database\Factories\PartyFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,7 +22,9 @@ use Illuminate\Support\Collection;
  * @property string $intro
  * @property string|null $description
  * @property array<int, string>|null $images
- * @property bool $is_listed
+ * @property PartyReviewStatus $review_status
+ * @property string $reject_reason
+ * @property-read bool $is_listed 派生：review_status 是否为已认证
  */
 class Party extends Model
 {
@@ -50,19 +55,54 @@ class Party extends Model
         self::TYPE_COMMITTEE => ['label' => '业委会', 'self_registrable' => true, 'name_hint' => '如：天青府业主委员会', 'category_label' => '', 'description_hint' => '业委会职责、如何联系、正在推进的事……'],
     ];
 
-    protected $fillable = ['type', 'name', 'category', 'intro', 'description', 'images', 'is_listed'];
+    protected $fillable = ['type', 'name', 'category', 'intro', 'description', 'images', 'review_status', 'reject_reason'];
 
     protected function casts(): array
     {
         return [
             'images' => 'array',
-            'is_listed' => 'boolean',
+            'review_status' => PartyReviewStatus::class,
         ];
     }
 
     public function typeLabel(): string
     {
         return self::TYPES[$this->type]['label'] ?? $this->type;
+    }
+
+    /**
+     * 公示态 = 认证通过：名录、发起权、官方回应都以此为准。
+     *
+     * @return Attribute<bool, never>
+     */
+    protected function isListed(): Attribute
+    {
+        return Attribute::get(fn (): bool => $this->review_status === PartyReviewStatus::Approved);
+    }
+
+    public function approve(): void
+    {
+        $this->update([
+            'review_status' => PartyReviewStatus::Approved,
+            'reject_reason' => '',
+        ]);
+    }
+
+    public function reject(string $reason): void
+    {
+        $this->update([
+            'review_status' => PartyReviewStatus::Rejected,
+            'reject_reason' => $reason,
+        ]);
+    }
+
+    /**
+     * @param  Builder<Party>  $query
+     * @return Builder<Party>
+     */
+    public function scopeListed(Builder $query): Builder
+    {
+        return $query->where('review_status', PartyReviewStatus::Approved->value);
     }
 
     /**

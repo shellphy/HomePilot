@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\PartyReviewStatus;
+use App\Events\PartyRegistered;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentResource;
@@ -21,7 +23,7 @@ class PartyController extends Controller
      */
     public function index(): JsonResponse
     {
-        $parties = Party::where('is_listed', true)
+        $parties = Party::listed()
             ->where('type', Party::TYPE_MERCHANT)
             ->withCount(['initiatedMatters as matter_count' => fn ($query) => $query->approved()])
             ->withCount(['initiatedMatters as deal_count' => fn ($query) => $query->where('type', 'groupbuy')->where('state', 'done')])
@@ -94,6 +96,9 @@ class PartyController extends Controller
                 'description' => $party->description ?? '',
                 'images' => $party->images ?? [],
                 'is_listed' => $party->is_listed,
+                'review_status' => $party->review_status->value,
+                'review_status_label' => $party->review_status->label(),
+                'reject_reason' => $party->reject_reason,
                 'phone' => $owner?->phone,
                 'matter_count' => $party->initiatedMatters()->approved()->count(),
                 'deal_count' => $party->initiatedMatters()->where('type', 'groupbuy')->where('state', 'done')->count(),
@@ -146,20 +151,38 @@ class PartyController extends Controller
             'images' => $validated['images'] ?? [],
         ];
 
-        // 档案跟人走：当前绑定的、或上次切走时留下的同类型档案都直接复用
-        // （资料和认证状态原样保留），只有真正第一次入驻才新建
+        // 档案跟人走：当前绑定的、或上次切走时留下的同类型档案都直接复用，只有真正第一次入驻才新建
         $party = $resident->affiliatedParty;
         if (! $party || $party->type !== $validated['type']) {
             $last = $resident->lastParty()->first();
             $party = ($last && $last->type === $validated['type']) ? $last : null;
         }
 
+        // 新建，或已认证/已驳回的档案改了公开资料 → 进（回）待认证队列并提醒管理员；
+        // 原样切回身份（资料没变）保留原认证状态
+        $enteredQueue = false;
         if ($party) {
-            $party->update($profile);
+            $changed = [
+                'name' => $party->name,
+                'category' => $party->category ?? '',
+                'intro' => $party->intro ?? '',
+                'description' => $party->description ?? '',
+                'images' => $party->images ?? [],
+            ] !== $profile;
+            $requeue = $changed && $party->review_status !== PartyReviewStatus::Pending;
+            $party->update($requeue
+                ? [...$profile, 'review_status' => PartyReviewStatus::Pending, 'reject_reason' => '']
+                : $profile);
+            $enteredQueue = $requeue;
         } else {
             $party = Party::create(['type' => $validated['type'], ...$profile]);
+            $enteredQueue = true;
         }
         $resident->update(['affiliated_party_id' => $party->id, 'last_party_id' => $party->id]);
+
+        if ($enteredQueue) {
+            PartyRegistered::dispatch($party);
+        }
 
         return ResidentResource::make($resident->load('affiliatedParty'));
     }
