@@ -76,7 +76,7 @@ Page({
     });
   },
 
-  // 微信原生头像选择：上传拿 URL 后只更新预览、标脏，等点保存才落库（避免整页自动存的错觉）
+  // 微信原生头像选择：上传拿 URL 后只更新预览并标脏，点保存时落库
   async onChooseAvatar(event) {
     try {
       const url = await uploadImage(event.detail.avatarUrl);
@@ -87,10 +87,9 @@ Page({
     }
   },
 
-  // 微信手机号授权组件回调：拿 code 换真实号码预填进输入框（不落库），用户可再改号，点保存才写入
+  // 微信手机号授权组件回调：拿 code 换号码预填进输入框，不落库；点保存才写入
   async onGetPhone(event) {
     if (!event.detail.code) {
-      // 用户点了拒绝：提示可手填，不必非走微信授权
       wx.showToast({ title: '未授权，可手动填写手机号', icon: 'none' });
       return;
     }
