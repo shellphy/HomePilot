@@ -67,6 +67,7 @@ test('census ai context carries purpose, questions, option notes, my answer and 
     $instructions = (string) (new MatterExplainer($census, $asker))->instructions();
 
     expect($instructions)
+        ->toContain('不要顺着明显错误继续推导')
         ->toContain('开团前先摸清大家想装什么') // 发起目的
         ->toContain('模块：柜体')
         ->toContain('先确定柜体材料，再比较价格。')
