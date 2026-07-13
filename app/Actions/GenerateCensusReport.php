@@ -3,37 +3,30 @@
 namespace App\Actions;
 
 use App\Ai\Agents\CensusReportGenerator;
-use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
-use Laravel\Ai\Responses\StructuredAgentResponse;
-use RuntimeException;
 
 class GenerateCensusReport
 {
-    public function __construct(private CensusReportPresentation $presentation) {}
-
-    /** @return array<string, mixed> */
-    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): array
+    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): void
     {
         $answers = $stance->payload['answers'] ?? [];
         $answerHash = $this->answerHash($answers);
         $existing = $stance->payload['ai_report'] ?? null;
 
         if ($expectedHash !== null && $expectedHash !== $answerHash) {
-            return is_array($existing) ? $existing : [];
+            return;
         }
 
-        if (is_array($existing) && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
-            return $existing;
+        if (is_string($existing) && $existing !== '' && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
+            return;
         }
 
         $prompt = json_encode([
             'questionnaire' => [
                 'title' => $matter->title,
                 'purpose' => $matter->payloadValue('purpose', ''),
-                'report_presentation' => $this->presentation->for($matter),
                 'modules' => $matter->payloadList('modules'),
             ],
             'resident_context' => [
@@ -42,17 +35,15 @@ class GenerateCensusReport
             'answers' => $answers,
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
 
-        $response = (new CensusReportGenerator)->prompt($prompt);
-        if (! $response instanceof StructuredAgentResponse) {
-            throw new RuntimeException('AI 未返回结构化问卷总结');
-        }
-        $report = $response->toArray();
+        $report = trim((new CensusReportGenerator)->prompt($prompt)->text);
 
+        // 生成期间答案又变了：丢弃这次结果，别覆盖更新的答案
         $stance->refresh();
         $latestAnswers = $stance->payload['answers'] ?? [];
-        if (($expectedHash !== null && $this->answerHash($latestAnswers) !== $expectedHash)
-            || ($expectedHash !== null && ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
-            return $report;
+        if ($expectedHash !== null
+            && ($this->answerHash($latestAnswers) !== $expectedHash
+                || ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
+            return;
         }
 
         $payload = $stance->payload ?? [];
@@ -66,8 +57,6 @@ class GenerateCensusReport
             $payload['ai_report_error'],
         );
         $stance->update(['payload' => $payload]);
-
-        return $report;
     }
 
     /** @param array<string, mixed> $answers */

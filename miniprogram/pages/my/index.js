@@ -69,13 +69,13 @@ Page({
       return;
     }
     if (censuses.length === 1) {
-      wx.navigateTo({ url: `/pages/census-report/index?id=${censuses[0].matter_id}` });
+      wx.navigateTo({ url: `/pages/census-answers/index?id=${censuses[0].matter_id}` });
       return;
     }
     wx.showActionSheet({
       itemList: censuses.map((census) => `${census.title}（已答 ${census.answered} 题）`),
       success: ({ tapIndex }) => {
-        wx.navigateTo({ url: `/pages/census-report/index?id=${censuses[tapIndex].matter_id}` });
+        wx.navigateTo({ url: `/pages/census-answers/index?id=${censuses[tapIndex].matter_id}` });
       },
     });
   },

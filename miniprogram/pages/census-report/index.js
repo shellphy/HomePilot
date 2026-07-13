@@ -1,5 +1,6 @@
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
+const { mdToHtml } = require('../../utils/markdown');
 
 Page({
   behaviors: [load],
@@ -7,13 +8,11 @@ Page({
   data: {
     censusId: null,
     title: '',
-    report: null,
-    generatedAt: '',
+    report: '',
+    reportNodes: '',
     generating: false,
     generationStatus: 'idle',
     generationError: '',
-    answeredCount: 0,
-    censusState: '',
     aiChatShow: false,
     presentation: {},
   },
@@ -38,25 +37,17 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [report, census] = await Promise.all([
-        matters.getCensusReport(this.data.censusId),
-        matters.getCensus(this.data.censusId),
-      ]);
-      this.setData({
-        answeredCount: Object.keys(census.answers || {}).length,
-        censusState: census.state || '',
-      });
-      this.applyReport(report);
-      if (report.generation_status === 'pending') this.startPolling();
-      wx.setNavigationBarTitle({ title: '我的问卷' });
+      const data = await matters.getCensusReport(this.data.censusId);
+      this.applyReport(data);
+      if (data.generation_status === 'pending') this.startPolling();
     });
   },
 
   applyReport(data) {
     this.setData({
       title: data.title || '',
-      report: data.report || null,
-      generatedAt: data.generated_at || '',
+      report: data.report || '',
+      reportNodes: data.report ? mdToHtml(data.report) : '',
       presentation: data.presentation || {},
       generationStatus: data.generation_status || (data.report ? 'completed' : 'idle'),
       generationError: data.generation_error || '',
@@ -102,18 +93,6 @@ Page({
     } catch {
       if (this.pageActive) this.startPolling();
     }
-  },
-
-  goAnswers() {
-    wx.navigateTo({ url: `/pages/census-answers/index?id=${this.data.censusId}` });
-  },
-
-  goStats() {
-    wx.navigateTo({ url: `/pages/census-insights/index?id=${this.data.censusId}` });
-  },
-
-  goEdit() {
-    wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
   },
 
   askAi() {
