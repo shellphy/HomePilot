@@ -40,6 +40,12 @@ class NoticeType extends MatterType
         return false;
     }
 
+    /** 公告是单向通知，不开放问答。 */
+    public function supportsQuestions(): bool
+    {
+        return false;
+    }
+
     /** 归档的公告退出事项流。 */
     public function visibleInList(Matter $matter): bool
     {

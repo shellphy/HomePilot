@@ -22,6 +22,12 @@ class CensusType extends MatterType
         return '征集';
     }
 
+    /** 征集靠问卷与聚合表达，不走「大家都在问」。 */
+    public function supportsQuestions(): bool
+    {
+        return false;
+    }
+
     public function states(): array
     {
         return [

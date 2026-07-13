@@ -63,6 +63,12 @@ abstract class MatterType
         return true;
     }
 
+    /** 是否开放「大家都在问」公开问答（业主提问、负责方回答）。 */
+    public function supportsQuestions(): bool
+    {
+        return true;
+    }
+
     /** 是否进入了可评价阶段（与"是否参与过"分开，便于给出不同的错误提示）。 */
     public function reviewOpen(Matter $matter): bool
     {
