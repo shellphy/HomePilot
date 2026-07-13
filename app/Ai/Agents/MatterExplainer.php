@@ -44,7 +44,7 @@ class MatterExplainer implements Agent, Conversational, HasTools
     public function instructions(): Stringable|string
     {
         return <<<'PROMPT'
-你是社区协作小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。
+你是「天青府家园」小程序里的 AI 顾问，帮助居民看懂当前这件社区事项，用大白话回答与该事项有关的疑问。
 
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，居民追问时再展开。
