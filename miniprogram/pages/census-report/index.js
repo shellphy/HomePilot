@@ -68,6 +68,19 @@ Page({
     }
   },
 
+  // 发起后退回「我的问卷」，进度在那边的按钮上跟进
+  async regenerate() {
+    if (this.data.generating) return;
+    this.setData({ generating: true });
+    try {
+      await matters.generateCensusReport(this.data.censusId);
+      wx.navigateBack();
+    } catch (error) {
+      wx.showToast({ title: error.message, icon: 'none' });
+      this.setData({ generating: false });
+    }
+  },
+
   startPolling() {
     if (!this.pageActive) return;
     this.stopPolling();

@@ -82,7 +82,7 @@ Page({
     wx.navigateTo({ url: `/pages/party/index?id=${party.id}` });
   },
 
-  // 我的问卷：答过的直接落到个人问卷与 AI 总结，多期弹选择；没答过就去数据 tab 逛逛
+  // 我的问卷：答过一份直接落到个人问卷，多份进列表页选；没答过就去数据 tab 逛逛
   goCensus() {
     const censuses = (this.data.me && this.data.me.censuses) || [];
     if (!censuses.length) {
@@ -93,12 +93,7 @@ Page({
       wx.navigateTo({ url: `/pages/census-answers/index?id=${censuses[0].matter_id}` });
       return;
     }
-    wx.showActionSheet({
-      itemList: censuses.map((census) => `${census.title}（已答 ${census.answered} 题）`),
-      success: ({ tapIndex }) => {
-        wx.navigateTo({ url: `/pages/census-answers/index?id=${censuses[tapIndex].matter_id}` });
-      },
-    });
+    wx.navigateTo({ url: '/pages/my-censuses/index' });
   },
 
   goAdminMatters() {

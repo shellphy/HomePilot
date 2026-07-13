@@ -10,7 +10,7 @@
       wx:if="{{reviewStatus && reviewStatus !== 'draft'}}"
     >
       <text class="schema-banner-title">{{reviewStatus === 'pending' ? '已提交审核' : '审核状态已更新'}}</text>
-      <text class="schema-banner-sub">{{reviewStatus === 'pending' ? '通常 24 小时内完成，通过后自动公示到小区页' : '题目改动已保存'}}</text>
+      <text class="schema-banner-sub">{{reviewStatus === 'pending' ? '通过后自动公示到小区页' : '题目改动已保存'}}</text>
     </view>
 
     <view class="card">

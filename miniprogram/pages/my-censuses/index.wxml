@@ -1,0 +1,17 @@
+<view class="page-body">
+  <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card">
+      <view class="row" wx:for="{{censuses}}" wx:key="matter_id" data-id="{{item.matter_id}}" bind:tap="goAnswers">
+        <view class="row-main">
+          <view class="row-title">{{item.title}}</view>
+          <view class="row-sub">已回答 {{item.answered}} 题</view>
+        </view>
+        <text class="muted">›</text>
+      </view>
+
+      <view wx:if="{{!censuses.length}}" class="hint">你还没参与过小区的问卷。回数据页看看有哪些征集。</view>
+    </view>
+
+    <t-button wx:if="{{!censuses.length}}" theme="light" block style="width: 100%" bind:tap="goInsights">去数据页看看</t-button>
+  </page-status>
+</view>
