@@ -32,6 +32,8 @@ class ResidentResource extends JsonResource
             // 「我的」页红点：我牵头的/我参与的有没有我没看过的新动态（POST /me/seen 标记已读）
             'has_mine_updates' => $this->hasMineUpdates(),
             'has_joined_updates' => $this->hasJoinedUpdates(),
+            // 「数据」tab 红点：有进行中、我还没参与的征集
+            'has_unanswered_census' => $this->hasUnansweredCensus(),
             'party' => $this->affiliatedParty ? [
                 'id' => $this->affiliatedParty->id,
                 'type' => $this->affiliatedParty->type,

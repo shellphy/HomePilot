@@ -25,6 +25,12 @@
       <text class="prow-note">{{listedParties}} 家 ›</text>
     </view>
 
+    <!-- 正在征集指引卡：征集主体在「数据」tab，首页只放一个发现入口 -->
+    <view wx:if="{{openCensusCount}}" class="card prow" hover-class="row-hover" bind:tap="goCensus">
+      <text class="prow-title">正在征集</text>
+      <text class="prow-note">{{openCensusCount}} 项 ›</text>
+    </view>
+
     <!-- 公告 -->
     <block wx:if="{{notices.length}}">
       <view class="feed-head">小区公告</view>
@@ -33,10 +39,23 @@
 
     <!-- 正在张罗的事 -->
     <view class="feed-head">大家正在张罗的事</view>
-    <block wx:for="{{doings}}" wx:key="id">
+    <!-- 类型筛选：进行中的事有 ≥2 种类型时才露出 -->
+    <view wx:if="{{feedTypes.length > 1}}" class="chips filter-chips">
+      <view class="chip {{typeFilter === '' ? 'chip-on' : ''}}" data-type="" bind:tap="pickType">全部</view>
+      <view
+        class="chip {{typeFilter === item.key ? 'chip-on' : ''}}"
+        wx:for="{{feedTypes}}"
+        wx:key="key"
+        data-type="{{item.key}}"
+        bind:tap="pickType"
+      >{{item.label}}</view>
+    </view>
+    <block wx:for="{{visibleDoings}}" wx:key="id">
       <groupbuy-card wx:if="{{item.type === 'groupbuy'}}" matter="{{item}}" />
       <matter-card wx:else matter="{{item}}" />
     </block>
+    <!-- 筛选后本类型没有，但整体有事：轻提示，不占号召位 -->
+    <view wx:if="{{doings.length && !visibleDoings.length}}" class="hint">这个类型暂时没有正在张罗的事</view>
     <!-- 空态：号召和行动放在同一处，别让人读完还得回头找顶部入口 -->
     <view wx:if="{{!doings.length}}" class="hint">
       {{finished.length ? '进行中的事都收尾了。下一件事，等你来张罗。' : '还没有人牵头张罗。第一个张罗的人，就是这件事的牵头人。'}}

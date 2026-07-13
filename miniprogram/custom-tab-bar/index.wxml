@@ -4,6 +4,6 @@
     wx:key="value"
     icon="{{item.icon}}"
     value="{{item.value}}"
-    badge-props="{{item.value === 'my' ? myBadge : null}}"
+    badge-props="{{item.badge}}"
   >{{item.label}}</t-tab-bar-item>
 </t-tab-bar>

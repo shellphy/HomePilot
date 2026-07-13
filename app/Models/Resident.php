@@ -77,6 +77,20 @@ class Resident extends Authenticatable
     }
 
     /**
+     * 有没有进行中、我还没参与过的征集（喂给「数据」tab 红点）。
+     */
+    public function hasUnansweredCensus(): bool
+    {
+        return Matter::approved()
+            ->where('type', 'census')
+            ->where('state', 'open')
+            ->whereDoesntHave('stances', fn ($query) => $query
+                ->where('mode', Stance::MODE_REGISTER)
+                ->where('resident_id', $this->id))
+            ->exists();
+    }
+
+    /**
      * @return Builder<Matter>
      */
     private function unseenActivityQuery(): Builder
