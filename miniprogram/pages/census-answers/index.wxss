@@ -1,3 +1,49 @@
+.registration-summary {
+  padding: 30rpx;
+  border: 1rpx solid var(--brand);
+  background: linear-gradient(145deg, #ffffff, var(--brand-bg));
+}
+.registration-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+.registration-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+.registration-count {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--text-muted);
+}
+.questionnaire-status {
+  flex-shrink: 0;
+  padding: 6rpx 14rpx;
+  font-size: 21rpx;
+  font-weight: 600;
+  color: var(--brand-deep);
+  background: #ffffff;
+  border: 1rpx solid var(--brand);
+  border-radius: 999rpx;
+}
+.questionnaire-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+.questionnaire-action {
+  flex: 1;
+  padding: 16rpx 12rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--brand-deep);
+  text-align: center;
+  background: #ffffff;
+  border: 1rpx solid var(--brand);
+  border-radius: 14rpx;
+}
 .content-heading {
   padding: 14rpx 8rpx 16rpx;
 }

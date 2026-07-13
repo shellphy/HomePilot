@@ -194,10 +194,10 @@ Page({
         wx.showToast({ title: '问卷完成', icon: 'success' });
         const pages = getCurrentPages();
         const prev = pages[pages.length - 2];
-        if (prev && prev.route === 'pages/census-report/index') {
+        if (prev && prev.route === 'pages/census-answers/index') {
           setTimeout(() => wx.navigateBack(), 600);
         } else {
-          setTimeout(() => wx.redirectTo({ url: `/pages/census-report/index?id=${id}` }), 600);
+          setTimeout(() => wx.redirectTo({ url: `/pages/census-answers/index?id=${id}` }), 600);
         }
       }
     } catch (error) {

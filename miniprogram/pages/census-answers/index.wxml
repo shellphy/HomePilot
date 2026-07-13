@@ -1,8 +1,22 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
+    <view class="card registration-summary">
+      <view class="registration-summary-head">
+        <view>
+          <view class="registration-title">我的问卷</view>
+          <view class="registration-count">已回答 {{answeredCount}} 题</view>
+        </view>
+        <view class="questionnaire-status">已提交</view>
+      </view>
+      <view class="questionnaire-actions">
+        <view class="questionnaire-action" bind:tap="goReport">AI 总结</view>
+        <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
+        <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
+      </view>
+    </view>
+
     <view class="content-heading">
       <view class="content-heading-title">我的回答</view>
-      <view class="content-heading-sub">共 {{answeredCount}} 题，按问卷分组查看</view>
     </view>
 
     <view class="card registration-module {{item.expanded ? 'registration-module-open' : ''}}" wx:for="{{answerModules}}" wx:key="key">

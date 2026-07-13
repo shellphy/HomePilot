@@ -36,6 +36,7 @@ Page({
     censusId: null,
     answerModules: [],
     answeredCount: 0,
+    censusState: '',
   },
 
   onLoad(query) {
@@ -56,6 +57,7 @@ Page({
       this.setData({
         answerModules: answerModules(census, this.data.answerModules),
         answeredCount: Object.keys(census.answers || {}).length,
+        censusState: census.state || '',
       });
     });
   },
@@ -67,5 +69,17 @@ Page({
         moduleIndex === index ? { ...module, expanded: !module.expanded } : module,
       ),
     });
+  },
+
+  goReport() {
+    wx.navigateTo({ url: `/pages/census-report/index?id=${this.data.censusId}` });
+  },
+
+  goStats() {
+    wx.navigateTo({ url: `/pages/census-insights/index?id=${this.data.censusId}` });
+  },
+
+  goEdit() {
+    wx.navigateTo({ url: `/pages/census-form/index?id=${this.data.censusId}` });
   },
 });

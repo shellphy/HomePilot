@@ -1,40 +1,18 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <view class="card registration-summary">
-      <view class="registration-summary-head">
-        <view>
-          <view class="registration-title">我的问卷</view>
-          <view class="registration-count">已回答 {{answeredCount}} 题</view>
-        </view>
-        <view class="questionnaire-status">已提交</view>
-      </view>
-      <view class="questionnaire-actions">
-        <view class="questionnaire-action" bind:tap="goAnswers">我的回答</view>
-        <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
-        <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
-      </view>
-    </view>
-
-    <view class="content-heading ai-content-heading">
-      <view>
-        <view class="content-heading-title">AI 问卷总结</view>
-        <view class="content-heading-sub">根据你的回答整理重点和待确认事项，只给你自己看</view>
-      </view>
-    </view>
-
     <block wx:if="{{!report}}">
       <view class="card report-generating" wx:if="{{generationStatus === 'pending'}}">
         <view class="report-generating-mark">AI</view>
         <view class="report-generating-copy">
-          <view class="report-generating-title">正在生成报告中</view>
-          <view class="report-generating-sub">生成需要一分多钟，完成后会自动显示，中途可以先去别的页面。</view>
+          <view class="report-generating-title">正在生成总结</view>
+          <view class="report-generating-sub">完成后会自动显示。</view>
         </view>
       </view>
       <view class="card report-empty" wx:else>
-        <view class="empty-title">{{generationStatus === 'failed' ? '报告生成失败' : '生成我的问卷总结'}}</view>
+        <view class="empty-title">{{generationStatus === 'failed' ? '生成失败' : '生成问卷总结'}}</view>
         <view class="empty-copy">{{generationError || presentation.empty_description}}</view>
         <t-button theme="primary" block size="large" bind:tap="generate"
-          >{{generationStatus === 'failed' ? '重新生成' : '生成报告'}}</t-button
+          >{{generationStatus === 'failed' ? '重新生成' : '生成'}}</t-button
         >
       </view>
     </block>

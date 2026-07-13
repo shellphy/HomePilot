@@ -38,7 +38,7 @@ Page({
   },
 
   goMyRegistration() {
-    wx.navigateTo({ url: `/pages/census-report/index?id=${this.data.censusId}` });
+    wx.navigateTo({ url: `/pages/census-answers/index?id=${this.data.censusId}` });
   },
 
   toggleSection(event) {
