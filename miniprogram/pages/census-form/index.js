@@ -159,13 +159,13 @@ Page({
       if (moduleIndex + 1 < modules.length) {
         this.showModule(moduleIndex + 1);
       } else {
-        wx.showToast({ title: '问卷完成', icon: 'success' });
+        // 存完立刻跳转（按钮 loading 已给过反馈），目标页即完成态，不再空等
         const pages = getCurrentPages();
         const prev = pages[pages.length - 2];
         if (prev && prev.route === 'pages/census-answers/index') {
-          setTimeout(() => wx.navigateBack(), 600);
+          wx.navigateBack();
         } else {
-          setTimeout(() => wx.redirectTo({ url: `/pages/census-answers/index?id=${id}` }), 600);
+          wx.redirectTo({ url: `/pages/census-answers/index?id=${id}` });
         }
       }
     } catch (error) {
