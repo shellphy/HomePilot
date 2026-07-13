@@ -172,7 +172,7 @@
       bind:tap="goProgress"
       >发布进度</t-button
     >
-    <!-- 次操作等宽两列对齐，落单的自动撑满整行，不再高低错落 -->
+    <!-- 次操作等宽两列对齐，落单的自动撑满整行 -->
     <view class="leader-btns-sub">
       <t-button
         wx:if="{{matter.state === 'done'}}"

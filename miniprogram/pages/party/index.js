@@ -1,5 +1,5 @@
 // 相关方详情页：名录与管理端审核共用。
-// 已认证对全小区可见；未认证的档案只有管理员（审核前看资料）和归属人自己（预览）能看到。
+// 已认证对全小区公示；未认证的档案仅管理员与归属人可见。
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 const { contactPhone } = require('../../utils/phone');

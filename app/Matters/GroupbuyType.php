@@ -35,7 +35,7 @@ class GroupbuyType extends MatterType
     {
         return [
             'category' => ['required', 'string', 'max:30'],
-            // 团购没有「不设目标」：目标人数是去谈价的筹码，至少 1 人（业主端与管理端同一口径）
+            // 目标人数是去谈价的筹码，至少 1 人（业主端与管理端同一口径）
             'target_count' => ['required', 'integer', 'min:1', 'max:999'],
         ];
     }

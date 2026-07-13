@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 
 /**
  * 管理端 · 事项：审核队列与通过/驳回。
- * 创建/详情/编辑/删除已并入用户端 MatterController（按 is_admin 做字段级授权）。
+ * 创建/详情/编辑/删除在用户端 MatterController（按 is_admin 做字段级授权）。
  */
 class MatterAdminController extends Controller
 {

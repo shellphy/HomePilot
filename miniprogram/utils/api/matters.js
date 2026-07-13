@@ -77,7 +77,7 @@ function postUpdate(id, data) {
   return request(`/matters/${id}/updates`, { method: 'POST', data });
 }
 
-// 征集：schema 下发与表态提交（通用，装修摸底只是第一份 schema）
+// 征集：schema 下发与表态提交（通用）
 function getCensus(id) {
   return request(`/matters/${id}/census`);
 }

@@ -126,7 +126,7 @@ class CensusController extends Controller
     /**
      * 发起者视图：只列出主动勾选「让发起者看到我的问卷」的参与者，
      * 含显示名、手机号（限收联系方式的征集且业主已授权）、逐题答案（换算成题面文字）。
-     * 邻居授权的对象是发起者本人，只有发起者能看。
+     * 邻居授权的对象是发起者本人。
      */
     public function consented(Request $request, Matter $matter): JsonResponse
     {
