@@ -22,6 +22,8 @@ return new class extends Migration
             $table->text('answer')->nullable();
             // 回答方署名快照（团长昵称/商家名/「管理员」），断开后续改名的耦合
             $table->string('answered_by', 60)->default('');
+            // 回复人：供管理员拉黑与本人删除定位（answered_by 是署名快照）
+            $table->foreignId('answered_by_id')->nullable()->constrained('residents')->nullOnDelete();
             $table->timestamp('answered_at')->nullable();
             $table->timestamps();
         });

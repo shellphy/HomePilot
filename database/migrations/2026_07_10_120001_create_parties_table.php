@@ -25,6 +25,8 @@ return new class extends Migration
             // 核验状态：管理员核验（approved）后进入公示名单；is_listed 由此派生
             $table->string('review_status', 20)->default('pending');
             $table->string('reject_reason', 200)->default('');
+            // 身份核验通过的时间：档案上「已核验」附一个可追溯的日期
+            $table->timestamp('reviewed_at')->nullable();
             $table->timestamps();
         });
     }

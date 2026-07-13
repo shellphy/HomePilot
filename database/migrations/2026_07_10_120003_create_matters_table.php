@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreignId('initiator_party_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->string('title', 60);
             // 事项正文：各类型统一的自由文本主体，后续全文检索的目标列
-            $table->text('body')->nullable();
+            $table->text('body')->default('');
             $table->string('category', 30)->default('');
             $table->string('state', 20); // 类型内状态机，由 MatterType 定义
             // 审核状态（与 state 正交）：pending 待审核 / approved 已公示 / rejected 已驳回
@@ -28,7 +28,7 @@ return new class extends Migration
             // 驳回理由：仅 rejected 态有值，发起人在详情页看到，编辑重提后清空
             $table->string('reject_reason', 200)->default('');
             $table->unsignedInteger('target_count')->default(0);
-            $table->json('payload')->nullable(); // 类型专属字段：groupbuy 的 perk/terms/glossary/final_terms/final_note、census 的 purpose/collects_contact/modules
+            $table->json('payload')->nullable(); // 类型专属字段：groupbuy 的 perk/terms/glossary/relationship/rebate_note/final_terms/final_note、census 的 purpose/collects_contact/modules
             // 时间与地点（团购/活动/互助用）：开始时间与报名截止各自独立，可分别留空
             $table->dateTime('starts_at')->nullable()->index();
             $table->dateTime('registration_deadline_at')->nullable()->index();

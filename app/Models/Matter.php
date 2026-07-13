@@ -21,7 +21,7 @@ use Illuminate\Support\Carbon;
  * @property int|null $initiator_id
  * @property int|null $initiator_party_id
  * @property string $title
- * @property string|null $body
+ * @property string $body
  * @property string $category
  * @property string $state
  * @property MatterReviewStatus $review_status
