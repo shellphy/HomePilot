@@ -1,4 +1,4 @@
-// 管理端 · 相关方认证：入驻档案一览（商家/物业等都自助入驻），认证后进入公示身份
+// 管理端 · 相关方认证：入驻档案一览（商家/物业等都自助入驻），认证通过公示 / 驳回附理由
 const admin = require('../../../utils/api/admin');
 const load = require('../../../behaviors/load');
 
@@ -8,7 +8,7 @@ Page({
   data: {
     all: [],
     parties: [],
-    listedFilter: '', // '' 全部 / yes 已认证 / no 未认证
+    statusFilter: '', // '' 全部 / pending 待认证 / approved 已认证 / rejected 未通过
   },
 
   onShow() {
@@ -24,15 +24,14 @@ Page({
   },
 
   applyFilter() {
-    const { all, listedFilter } = this.data;
+    const { all, statusFilter } = this.data;
     this.setData({
-      parties: all.filter((party) => !listedFilter
-        || (listedFilter === 'yes' ? party.is_listed : !party.is_listed)),
+      parties: all.filter((party) => !statusFilter || party.review_status === statusFilter),
     });
   },
 
   pickFilter(event) {
-    this.setData({ listedFilter: event.currentTarget.dataset.filter });
+    this.setData({ statusFilter: event.currentTarget.dataset.filter });
     this.applyFilter();
   },
 
@@ -41,47 +40,48 @@ Page({
     wx.navigateTo({ url: `/pages/party/index?id=${event.currentTarget.dataset.id}` });
   },
 
-  toggle(event) {
-    const { id, index } = event.currentTarget.dataset;
-    const listed = event.detail.value;
-    // 认证是把「已认证」身份推给全小区的对外动作，和撤下一样先确认；取消时把开关拨回去
-    if (listed) {
-      const party = this.data.parties[index] || {};
-      wx.showModal({
-        title: '认证这个相关方？',
-        content: `认证后「${party.name || 'TA'}」将以「已认证」身份对全小区公示`,
-        confirmText: '认证',
-        success: ({ confirm }) => {
-          if (confirm) this.certify(id, true);
-          else this.setData({ [`parties[${index}].is_listed`]: false });
-        },
-      });
-      return;
-    }
-    // 撤下会失去公示身份，先确认；取消时重设 checked 把开关拨回去
+  // 认证即把「已认证」身份推给全小区，先确认
+  approve(event) {
+    const { id } = event.currentTarget.dataset;
+    const party = this.data.all.find((item) => item.id === id);
     wx.showModal({
-      title: '撤下这个相关方？',
-      content: '撤下后将失去「已认证」公示身份',
-      confirmText: '撤下',
-      confirmColor: '#e34d59',
-      success: ({ confirm }) => {
-        if (confirm) this.certify(id, false);
-        else this.setData({ [`parties[${index}].is_listed`]: true });
+      title: '认证并公示？',
+      content: `认证后「${party.name || 'TA'}」将以「已认证」身份对全小区公示`,
+      confirmText: '认证',
+      success: async ({ confirm }) => {
+        if (!confirm) return;
+        try {
+          await admin.reviewParty(id, true);
+          wx.showToast({ title: '已认证公示', icon: 'success' });
+          this.reload();
+        } catch (error) {
+          wx.showToast({ title: error.message, icon: 'none' });
+        }
       },
     });
   },
 
-  async certify(id, listed) {
-    try {
-      await admin.certifyParty(id, listed);
-      const all = this.data.all.map((party) => (party.id === id ? { ...party, is_listed: listed } : party));
-      this.setData({ all });
-      // 重跑筛选：在「未认证」桶里处理完的条目按新状态离开当前列表，不滞留
-      this.applyFilter();
-      wx.showToast({ title: listed ? '已认证公示' : '已撤下', icon: 'none' });
-    } catch (error) {
-      wx.showToast({ title: error.message, icon: 'none' });
-      this.reload();
-    }
+  // 驳回/撤下附一句理由，归属人在详情页看到，改资料后即重新提交
+  reject(event) {
+    const { id } = event.currentTarget.dataset;
+    const party = this.data.all.find((item) => item.id === id);
+    wx.showModal({
+      title: `驳回「${party.name || 'TA'}」`,
+      editable: true,
+      confirmText: '驳回',
+      success: async ({ confirm, content }) => {
+        if (!confirm) return;
+        const reason = (content || '').trim();
+        // 没有理由的驳回会让归属人不知道怎么改，重新提交的闭环就断了
+        if (!reason) return wx.showToast({ title: '请写一句驳回理由', icon: 'none' });
+        try {
+          await admin.reviewParty(id, false, reason);
+          wx.showToast({ title: '已驳回', icon: 'none' });
+          this.reload();
+        } catch (error) {
+          wx.showToast({ title: error.message, icon: 'none' });
+        }
+      },
+    });
   },
 });

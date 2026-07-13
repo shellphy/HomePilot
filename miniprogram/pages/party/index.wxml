@@ -4,7 +4,7 @@
       <view class="card">
         <view class="party-row">
           <view class="party-name">{{party.name}}</view>
-          <view class="party-badge {{party.is_listed ? '' : 'party-badge-pending'}}">{{party.is_listed ? '✓ 已认证' + party.label : party.label + ' · 待认证'}}</view>
+          <view class="party-badge {{party.is_listed ? '' : 'party-badge-pending'}}">{{party.is_listed ? '✓ 已认证' + party.label : party.label + ' · ' + party.review_status_label}}</view>
         </view>
         <view class="party-intro" wx:if="{{party.intro}}">{{party.intro}}</view>
         <view class="party-sub" wx:if="{{party.category}}">主营：{{party.category}}</view>
@@ -32,7 +32,8 @@
         </view>
       </view>
 
-      <view class="hint" wx:if="{{!party.is_listed}}">这份档案还没通过认证，暂时不对小区公开。</view>
+      <view class="hint hint-reject" wx:if="{{party.review_status === 'rejected'}}">未通过：{{party.reject_reason}}。可在「我的 · 个人资料」改资料后重新提交。</view>
+      <view class="hint" wx:elif="{{!party.is_listed}}">这份档案还没通过认证，暂时不对小区公开。</view>
     </block>
   </page-status>
 </view>

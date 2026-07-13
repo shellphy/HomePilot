@@ -28,3 +28,6 @@
 .row-touch {
   opacity: 0.7;
 }
+.row-sub-reject {
+  color: var(--danger);
+}

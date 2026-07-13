@@ -14,6 +14,7 @@ Page({
     censusCount: 0,
     pendingCount: 0,
     partyPendingCount: 0, // 待认证相关方（有成员但未认证）
+    partyStatusNote: '', // 我的相关方认证状态（审核中/已认证/未通过）
   },
 
   onShow() {
@@ -45,9 +46,18 @@ Page({
         ? [me.party.label, me.party.name].filter(Boolean).join(' · ')
         : ['业主', me.unit_label, me.room_label].filter(Boolean).join(' · ');
 
+      const partyStatusNote = me.party
+        ? {
+          pending: '审核中',
+          approved: '已认证',
+          rejected: '未通过，点此改资料重交',
+        }[me.party.review_status]
+        : '';
+
       this.setData({
         me,
         identityLine,
+        partyStatusNote,
         censusCount: (me.censuses || []).length,
         mineCount: mineRes.data.length,
         joinedCount: joinedRes.data.length,
@@ -59,6 +69,17 @@ Page({
 
   goProfile() {
     wx.navigateTo({ url: '/pages/profile-form/index' });
+  },
+
+  // 认证状态入口：未通过直接去改资料重交，其余去档案详情看公示情况
+  goPartyStatus() {
+    const party = this.data.me && this.data.me.party;
+    if (!party) return;
+    if (party.review_status === 'rejected') {
+      wx.navigateTo({ url: '/pages/profile-form/index' });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/party/index?id=${party.id}` });
   },
 
   // 我的问卷：答过的直接落到个人问卷与 AI 总结，多期弹选择；没答过就去数据 tab 逛逛

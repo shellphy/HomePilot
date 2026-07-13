@@ -97,6 +97,7 @@ class PartyController extends Controller
                 'images' => $party->images ?? [],
                 'is_listed' => $party->is_listed,
                 'review_status' => $party->review_status->value,
+                'review_status_label' => $party->review_status->label(),
                 'reject_reason' => $party->reject_reason,
                 'phone' => $owner?->phone,
                 'matter_count' => $party->initiatedMatters()->approved()->count(),
