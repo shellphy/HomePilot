@@ -86,7 +86,8 @@ Page({
 
   goRegistration(event) {
     const { id, answered } = event.currentTarget.dataset;
-    const page = answered ? 'census-report' : 'census-form';
+    // 已答过看自己的问卷回答（census-answers），未答去填写；AI 总结从问卷页内再进
+    const page = answered ? 'census-answers' : 'census-form';
     wx.navigateTo({ url: `/pages/${page}/index?id=${id}` });
   },
 });
