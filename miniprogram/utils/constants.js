@@ -20,7 +20,7 @@ const TYPE_META = {
   rights: { joinCta: '参与联名', joinedCta: '撤回联名', foot: '人已联名', roster: '联名名单' },
 };
 
-// 状态机本身由后端下发（详情/列表数据里的 states 与 state_label），前端不重复维护；
+// 状态机由后端下发（详情/列表数据里的 states 与 state_label）；
 // 这里只把状态值映射到展示样式，未知状态回退到默认。
 function pillClass(state) {
   return PILL_CLASS[state] || 'pill-seeking';

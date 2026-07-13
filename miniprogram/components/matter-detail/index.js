@@ -227,11 +227,9 @@ Component({
       wx.navigateTo({ url: `/pages/matter-update/index?id=${this.data.matter.id}` });
     },
 
-    // 办不下去/不再推进的收场出口：不开放评价等事后环节，也不可再改
+    // 办不下去时的收场出口：直接进终态
     abortMatter() {
       const { matter } = this.data;
-      if (!matter.abort_state) return;
-
       wx.showModal({
         title: `按「${matter.abort_state.label}」收场？`,
         content: `确认后这件事按「${matter.abort_state.label}」收场：参与关闭、名单封存，不开放评价，且不能再改回来（弄错了需要联系管理员）。`,
