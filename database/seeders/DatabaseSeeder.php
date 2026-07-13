@@ -29,9 +29,14 @@ class DatabaseSeeder extends Seeder
         $this->needsCensus();
     }
 
-    private function decorationGroupbuyDraft(): void
+    /**
+     * 尚未发布的团购草稿，保留在代码中供后续修改和手动发布。
+     *
+     * @return array{category: string, title: string, target_count: int, payload: array<string, mixed>}
+     */
+    public function decorationGroupbuyDraft(): array
     {
-        Matter::factory()->survey()->for($this->publisher, 'initiator')->create([
+        return [
             'category' => '装修公司',
             'title' => '武汉拜斯达装饰 · 硬装全包意向团购',
             'target_count' => 10,
@@ -67,7 +72,7 @@ class DatabaseSeeder extends Seeder
                     ],
                 ],
             ],
-        ]);
+        ];
     }
 
     /**
