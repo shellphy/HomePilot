@@ -4,6 +4,7 @@
   "backgroundTextStyle": "dark",
   "usingComponents": {
     "page-status": "/components/page-status/index",
+    "todo-list": "/components/todo-list/index",
     "groupbuy-card": "/components/groupbuy-card/index",
     "notice-card": "/components/notice-card/index",
     "matter-card": "/components/matter-card/index"

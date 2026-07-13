@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PartyController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StatsController;
+use App\Http\Controllers\Api\TodoController;
 use App\Http\Controllers\Api\UploadController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/me', [ProfileController::class, 'update']);
     Route::post('/me/phone', [ProfileController::class, 'resolvePhone']);
     Route::post('/me/seen', [ProfileController::class, 'markSeen']);
+    Route::get('/me/todos', [TodoController::class, 'index']);
     Route::post('/me/party', [PartyController::class, 'store']);
     Route::delete('/me/party', [PartyController::class, 'destroy']);
     Route::get('/parties', [PartyController::class, 'index']);

@@ -41,6 +41,11 @@ async function resolvePhone(code) {
   return res.data.phone;
 }
 
+// 「待我处理」：聚合的待办列表，全部从当前状态派生（做完即消失）
+function getTodos() {
+  return request('/me/todos').then((res) => res.data);
+}
+
 // 相关方入驻：创建并绑定相关方（可入驻类型由 /options 的 party_types 下发）
 // profile = { name, category, intro, description, images }
 async function bindParty(type, profile) {
@@ -56,4 +61,4 @@ async function unbindParty() {
   return res.data;
 }
 
-module.exports = { getMe, updateMe, invalidateMe, markSeen, resolvePhone, bindParty, unbindParty };
+module.exports = { getMe, updateMe, invalidateMe, markSeen, getTodos, resolvePhone, bindParty, unbindParty };

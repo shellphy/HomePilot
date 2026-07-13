@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\ResidentFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -146,6 +147,22 @@ class Resident extends Authenticatable
             ->approved()
             ->whereHas('joins', fn ($query) => $query->whereBelongsTo($this, 'resident'))
             ->exists();
+    }
+
+    /**
+     * 我牵头或参与、且有我没看过的新动态的事项（喂给「待我处理」）。
+     *
+     * @return EloquentCollection<int, Matter>
+     */
+    public function unseenActivityMatters(): EloquentCollection
+    {
+        $mine = $this->unseenActivityQuery()->whereBelongsTo($this, 'initiator')->get();
+        $joined = $this->unseenActivityQuery()
+            ->approved()
+            ->whereHas('joins', fn ($query) => $query->whereBelongsTo($this, 'resident'))
+            ->get();
+
+        return $mine->merge($joined);
     }
 
     /**

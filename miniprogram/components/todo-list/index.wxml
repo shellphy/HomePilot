@@ -1,0 +1,15 @@
+<view class="card todo-card" wx:if="{{shown.length}}">
+  <view class="todo-head">待我处理</view>
+  <view
+    class="todo-row"
+    wx:for="{{shown}}"
+    wx:key="index"
+    hover-class="todo-row-hover"
+    data-todo="{{item}}"
+    bind:tap="open"
+  >
+    <view class="todo-title">{{item.title}}</view>
+    <view class="todo-action">{{item.action}} ›</view>
+  </view>
+  <view wx:if="{{more}}" class="todo-more" hover-class="todo-row-hover" bind:tap="goAll">还有 {{more}} 项 · 查看全部</view>
+</view>
