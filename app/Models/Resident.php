@@ -85,7 +85,11 @@ class Resident extends Authenticatable
         ])->save();
     }
 
-    /** 拉黑我的管理员（unblock 后清空）。 */
+    /**
+     * 拉黑我的管理员（unblock 后清空）。
+     *
+     * @return BelongsTo<Resident, $this>
+     */
     public function blockedBy(): BelongsTo
     {
         return $this->belongsTo(Resident::class, 'blocked_by_id');

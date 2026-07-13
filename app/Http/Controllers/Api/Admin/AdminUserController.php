@@ -51,7 +51,7 @@ class AdminUserController extends Controller
     {
         $validated = $request->validate(['resident_id' => ['required', 'integer']]);
 
-        $resident = Resident::find($validated['resident_id']);
+        $resident = Resident::find((int) $validated['resident_id']);
 
         if ($resident === null || $resident->is_admin) {
             throw ValidationException::withMessages(['resident_id' => '该成员不存在或已经是管理员']);
