@@ -29,8 +29,7 @@ class MatterExplainer implements Agent, Conversational, HasTools
     use Promptable, RemembersConversations, SearchesWeb;
 
     /**
-     * 装修相关品类：只有这些事项才注入装修硬条件（外机位、层高、门窗等）。
-     * 活动 / 公告 / 维权 / 互助及非装修团购不注入，避免无关背景污染答疑。
+     * 只有这些装修相关品类的事项才注入小区硬条件（ai_context）。
      *
      * @var list<string>
      */
@@ -77,7 +76,6 @@ PROMPT.$this->matterContext();
             "小区：{$settings->name}",
         ];
 
-        // 装修硬条件只对装修相关事项有意义，非装修事项（活动/公告/维权/互助等）不注入
         if ($settings->ai_context !== '' && in_array($this->matter->category, self::RENOVATION_CATEGORIES, true)) {
             $lines[] = "小区硬条件：{$settings->ai_context}";
         }
