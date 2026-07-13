@@ -99,9 +99,9 @@ function getCensusConsented(id) {
   return request(`/matters/${id}/census-consented`);
 }
 
-// 「买前必懂」AI 起草：返回三段草稿（是什么/怎么选/避坑），由填表人校订后提交
-function draftGlossary(term, category) {
-  return request('/glossary/draft', { method: 'POST', data: { term, category } });
+// 「买前必懂」AI 改写：发起人手填的一段说明交 AI 改顺，返回单段文本回填，由填表人校订后提交
+function draftGlossary(term, draft, category) {
+  return request('/glossary/draft', { method: 'POST', data: { term, draft, category } });
 }
 
 // 业主侧 AI 答疑：带事项上下文的多轮对话，conversation_id 续聊。

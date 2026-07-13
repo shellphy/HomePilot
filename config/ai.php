@@ -94,14 +94,12 @@ return [
             ],
         ],
 
-        // DeepSeek 的 Anthropic 兼容端点：借 anthropic driver 拿到服务端 web search
-        // 能力（deepseek driver 的 OpenAI 格式不支持 WebSearch）。结构化输出必须关掉
-        // 原生 output_config——DeepSeek 兼容层没有该特性，回退到合成工具方案才可用。
+        // DeepSeek 的 Anthropic 兼容端点：借 anthropic driver 拿服务端 web search
+        // （deepseek driver 的 OpenAI 格式不支持 WebSearch）。
         'deepseek-anthropic' => [
             'driver' => 'anthropic',
             'key' => env('DEEPSEEK_API_KEY'),
             'url' => env('DEEPSEEK_ANTHROPIC_URL', 'https://api.deepseek.com/anthropic/v1'),
-            'use_native_structured_output' => false,
             'models' => [
                 'text' => [
                     'default' => env('DEEPSEEK_MODEL', 'deepseek-v4-pro'),

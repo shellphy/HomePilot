@@ -105,14 +105,7 @@ PROMPT.$this->matterContext();
         }
 
         foreach ($this->matter->payloadList('glossary') as $entry) {
-            $line = "买前必懂 · {$entry['term']}：{$entry['explain']}";
-            if (($entry['judge'] ?? '') !== '') {
-                $line .= "；怎么选：{$entry['judge']}";
-            }
-            if (($entry['caution'] ?? '') !== '') {
-                $line .= "；避坑：{$entry['caution']}";
-            }
-            $lines[] = $line;
+            $lines[] = "买前必懂 · {$entry['term']}：{$entry['explain']}";
         }
 
         if ($this->matter->initiatorParty) {

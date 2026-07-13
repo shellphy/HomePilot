@@ -216,7 +216,7 @@
         <view class="add-row" data-list="terms" bind:tap="addRow">＋ 添加一条</view>
       </view>
       <view class="card">
-        <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，3~5 条</text></view>
+        <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，先自己写，再让 AI 帮你改顺</text></view>
         <view class="pair pair-col" wx:for="{{glossary}}" wx:key="index">
           <view class="pair-head">
             <input
@@ -228,37 +228,18 @@
               data-field="term"
               bind:input="onRowInput"
             />
-            <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 起草</view>
+            <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 改写</view>
             <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
           </view>
           <textarea
             class="fin farea"
             auto-height
+            placeholder="先用大白话写一句这个词是什么、怎么选、避什么坑，再点 AI 改写"
             value="{{item.explain}}"
-            maxlength="300"
+            maxlength="500"
             data-list="glossary"
             data-index="{{index}}"
             data-field="explain"
-            bind:input="onRowInput"
-          />
-          <textarea
-            class="fin farea"
-            auto-height
-            value="{{item.judge}}"
-            maxlength="300"
-            data-list="glossary"
-            data-index="{{index}}"
-            data-field="judge"
-            bind:input="onRowInput"
-          />
-          <textarea
-            class="fin farea"
-            auto-height
-            value="{{item.caution}}"
-            maxlength="300"
-            data-list="glossary"
-            data-index="{{index}}"
-            data-field="caution"
             bind:input="onRowInput"
           />
         </view>

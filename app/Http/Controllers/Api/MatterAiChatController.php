@@ -71,8 +71,8 @@ class MatterAiChatController extends Controller
                         continue;
                     }
 
-                    // 服务端联网检索：搜索词确定时下发 {searching}，让前端显示「正在联网检索 xxx」；
-                    // 命中来源时下发 {source}，供前端在答案下附引用。搜索原始过程不进正文。
+                    // 服务端联网检索：确定搜索词时下发 {searching}（前端显示检索状态），
+                    // 命中来源下发 {source}（附在答案下）。
                     if ($event instanceof ProviderToolEvent
                         && $event->type === 'server_tool_use'
                         && $event->status === 'completed') {
