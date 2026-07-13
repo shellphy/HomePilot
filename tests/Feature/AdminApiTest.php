@@ -172,7 +172,7 @@ test('admin certifies parties onto the public list', function () {
         ->assertJsonPath('data.0.is_listed', false)
         ->assertJsonPath('data.0.phone', $owner->phone);
 
-    $this->putJson("/api/admin/parties/{$party->id}", ['is_listed' => true])
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => true])
         ->assertSuccessful();
 
     expect($party->refresh()->is_listed)->toBeTrue();
@@ -244,7 +244,7 @@ test('census schema accepts text questions without options and keeps question no
 
 test('the admin queue signs matters with the initiator party snapshot', function () {
     $merchant = Resident::factory()->merchant('青城中央空调')->create();
-    $merchant->affiliatedParty->update(['is_listed' => true]);
+    $merchant->affiliatedParty->approve();
     Matter::factory()->pending()->create([
         'initiator_id' => $merchant->id,
         'initiator_party_id' => $merchant->affiliated_party_id,

@@ -6,11 +6,27 @@ use App\Models\Resident;
 use App\Settings\CommunitySettings;
 use Laravel\Sanctum\Sanctum;
 
+test('admin rejects a party with a reason and it leaves the pending queue', function () {
+    $party = Party::factory()->create(['name' => '青城中央空调']);
+    Resident::factory()->create(['affiliated_party_id' => $party->id, 'phone' => '13800138000']);
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => false, 'reason' => '资料不完整'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.review_status', 'rejected')
+        ->assertJsonPath('data.reject_reason', '资料不完整');
+
+    expect($party->refresh()->is_listed)->toBeFalse();
+
+    // 驳回态在等归属人改，不再占认证队列的待办
+    $this->getJson('/api/admin/parties')->assertJsonPath('pending_count', 0);
+});
+
 test('certifying a party is admin only', function () {
     $party = Party::factory()->create();
     Sanctum::actingAs(Resident::factory()->create());
 
-    $this->putJson("/api/admin/parties/{$party->id}", ['is_listed' => true])->assertForbidden();
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => true])->assertForbidden();
 });
 
 test('a self registered property member can post official responses once certified', function () {
@@ -30,7 +46,7 @@ test('a self registered property member can post official responses once certifi
 
     Sanctum::actingAs(Resident::factory()->admin()->create());
     $partyId = $member->refresh()->affiliated_party_id;
-    $this->putJson("/api/admin/parties/{$partyId}", ['is_listed' => true])->assertSuccessful();
+    $this->putJson("/api/admin/parties/{$partyId}", ['is_approved' => true])->assertSuccessful();
 
     // 用 fresh 实例重新登录，避免认证前缓存的 affiliatedParty 关系
     Sanctum::actingAs($member->fresh());

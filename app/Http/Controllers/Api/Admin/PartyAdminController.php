@@ -2,15 +2,17 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Enums\PartyReviewStatus;
 use App\Events\PartyListed;
+use App\Events\PartyRejected;
 use App\Http\Controllers\Controller;
 use App\Models\Party;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * 管理端 · 相关方：查看入驻档案、认证进公示名单（is_listed）。
- * 商家/物业/业委会全部自助入驻（/me/party），这里只负责认证。
+ * 管理端 · 相关方：查看入驻档案，认证通过公示 / 驳回附理由。
+ * 商家/物业/业委会全部自助入驻（/me/party），这里只负责审核。
  */
 class PartyAdminController extends Controller
 {
@@ -33,13 +35,17 @@ class PartyAdminController extends Controller
                 'intro' => $party->intro,
                 'phone' => $owner?->phone,
                 'is_listed' => $party->is_listed,
+                'review_status' => $party->review_status->value,
+                'review_status_label' => $party->review_status->label(),
+                'reject_reason' => $party->reject_reason,
                 'created_at' => $party->created_at?->format('Y-m-d H:i'),
             ];
         });
 
-        // 待认证 = 有归属人亮明了身份但还没被认证的（空壳档案不算待办），喂给「我的」页角标
+        // 待认证 = 有归属人亮明了身份且还在待认证队列的（驳回态在等归属人改，空壳档案不算待办）
         $pendingCount = $parties
-            ->filter(fn (Party $party): bool => ! $party->is_listed && $party->contactOwnerAmong($owners) !== null)
+            ->filter(fn (Party $party): bool => $party->review_status === PartyReviewStatus::Pending
+                && $party->contactOwnerAmong($owners) !== null)
             ->count();
 
         return response()->json(['data' => $data, 'pending_count' => $pendingCount]);
@@ -47,15 +53,32 @@ class PartyAdminController extends Controller
 
     public function update(Request $request, Party $party): JsonResponse
     {
-        $validated = $request->validate(['is_listed' => ['required', 'boolean']]);
+        $validated = $request->validate([
+            'is_approved' => ['required', 'boolean'],
+            'reason' => ['sometimes', 'nullable', 'string', 'max:200'],
+        ]);
 
         $wasListed = $party->is_listed;
-        $party->update($validated);
+
+        if ($validated['is_approved']) {
+            $party->approve();
+        } else {
+            $party->reject($validated['reason'] ?? '');
+        }
 
         if ($party->is_listed && ! $wasListed) {
             PartyListed::dispatch($party);
         }
 
-        return response()->json(['data' => ['id' => $party->id, 'is_listed' => $party->is_listed]]);
+        if (! $validated['is_approved']) {
+            PartyRejected::dispatch($party);
+        }
+
+        return response()->json(['data' => [
+            'id' => $party->id,
+            'is_listed' => $party->is_listed,
+            'review_status' => $party->review_status->value,
+            'reject_reason' => $party->reject_reason,
+        ]]);
     }
 }

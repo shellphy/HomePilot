@@ -42,6 +42,9 @@ class ResidentResource extends JsonResource
                 'description' => $this->affiliatedParty->description ?? '',
                 'images' => $this->affiliatedParty->images ?? [],
                 'is_listed' => $this->affiliatedParty->is_listed,
+                'review_status' => $this->affiliatedParty->review_status->value,
+                'review_status_label' => $this->affiliatedParty->review_status->label(),
+                'reject_reason' => $this->affiliatedParty->reject_reason,
             ] : null,
             // 上次绑定的相关方档案：切回业主后再进资料页，商家资料按它预填
             'last_party' => (! $this->affiliatedParty && $this->lastParty) ? [

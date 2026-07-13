@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PartyReviewStatus;
 use App\Models\Party;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +22,7 @@ class PartyFactory extends Factory
             'type' => Party::TYPE_MERCHANT,
             'name' => fake()->company(),
             'category' => fake()->randomElement(['装修公司', '中央空调', '地暖', '门窗']),
-            'is_listed' => false,
+            'review_status' => PartyReviewStatus::Pending,
         ];
     }
 
@@ -32,6 +33,11 @@ class PartyFactory extends Factory
 
     public function listed(): static
     {
-        return $this->state(fn (): array => ['is_listed' => true]);
+        return $this->state(fn (): array => ['review_status' => PartyReviewStatus::Approved]);
+    }
+
+    public function rejected(string $reason = '资料不完整'): static
+    {
+        return $this->state(fn (): array => ['review_status' => PartyReviewStatus::Rejected, 'reject_reason' => $reason]);
     }
 }

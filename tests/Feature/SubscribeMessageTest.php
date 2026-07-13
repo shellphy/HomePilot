@@ -161,11 +161,11 @@ test('posting a progress update notifies participants with the content', functio
 });
 
 test('listing a party notifies its owner and only on the flip', function () {
-    $party = Party::factory()->create(['is_listed' => false, 'name' => '青城中央空调']);
+    $party = Party::factory()->create(['name' => '青城中央空调']);
     $owner = Resident::factory()->create(['affiliated_party_id' => $party->id]);
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->putJson("/api/admin/parties/{$party->id}", ['is_listed' => true])->assertSuccessful();
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => true])->assertSuccessful();
 
     $message = sentSubscribeMessages()->sole();
     expect($message['touser'])->toBe($owner->openid)
@@ -174,8 +174,34 @@ test('listing a party notifies its owner and only on the flip', function () {
         ->and($message['data']['short_thing3']['value'])->toBe('认证通过');
 
     // 重复保存已认证状态不再通知
-    $this->putJson("/api/admin/parties/{$party->id}", ['is_listed' => true])->assertSuccessful();
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => true])->assertSuccessful();
     expect(sentSubscribeMessages())->toHaveCount(1);
+});
+
+test('self-registering a party notifies the admins to certify it', function () {
+    $admin = Resident::factory()->admin()->create();
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城中央空调'])->assertSuccessful();
+
+    $message = sentSubscribeMessages()->sole();
+    expect($message['touser'])->toBe($admin->openid)
+        ->and($message['data']['thing1']['value'])->toBe('青城中央空调')
+        ->and($message['data']['short_thing3']['value'])->toBe('待认证');
+});
+
+test('rejecting a party notifies its owner with the reason', function () {
+    $party = Party::factory()->create(['name' => '青城中央空调']);
+    $owner = Resident::factory()->create(['affiliated_party_id' => $party->id]);
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+
+    $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => false, 'reason' => '请补充营业执照'])
+        ->assertSuccessful();
+
+    $message = sentSubscribeMessages()->sole();
+    expect($message['touser'])->toBe($owner->openid)
+        ->and($message['data']['short_thing3']['value'])->toBe('未通过')
+        ->and($message['data']['thing4']['value'])->toBe('请补充营业执照');
 });
 
 test('overlong template values are clipped to the field limits', function () {
