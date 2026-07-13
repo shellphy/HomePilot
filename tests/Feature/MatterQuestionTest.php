@@ -4,6 +4,7 @@ use App\Models\Matter;
 use App\Models\MatterQuestion;
 use App\Models\Party;
 use App\Models\Resident;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 test('a resident asks a question and it shows up pending in the list', function () {
@@ -22,48 +23,100 @@ test('a resident asks a question and it shows up pending in the list', function 
         ->assertJsonPath('can_ask', true);
 });
 
-test('asking requires a building label on the profile', function () {
+test('an approved party identity can ask, a pending one cannot', function () {
     $matter = Matter::factory()->create();
+
+    $approved = Party::factory()->listed()->create();
+    Sanctum::actingAs(Resident::factory()->create(['affiliated_party_id' => $approved->id]));
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '？'])->assertCreated();
+
+    $pending = Party::factory()->create();
+    Sanctum::actingAs(Resident::factory()->create(['affiliated_party_id' => $pending->id]));
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '？'])->assertForbidden();
+});
+
+test('asking and answering require a building label on the profile', function () {
+    $matter = Matter::factory()->create();
+    $question = MatterQuestion::factory()->for($matter)->create();
     Sanctum::actingAs(Resident::factory()->create(['unit_label' => '']));
 
-    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '？？'])
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '？'])
+        ->assertJsonValidationErrors(['profile']);
+    $this->putJson("/api/questions/{$question->id}/answer", ['content' => '答'])
         ->assertJsonValidationErrors(['profile']);
 });
 
-test('party identities cannot ask and notices are closed to questions', function () {
-    $party = Party::factory()->create();
-    Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋', 'affiliated_party_id' => $party->id]));
+test('a blocked resident can neither ask nor answer', function () {
     $matter = Matter::factory()->create();
+    $question = MatterQuestion::factory()->for($matter)->create();
+    Sanctum::actingAs(Resident::factory()->blocked()->create(['unit_label' => '3栋']));
 
     $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '？'])->assertForbidden();
-
-    Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋']));
-    $notice = Matter::factory()->notice()->create();
-    $this->postJson("/api/matters/{$notice->id}/questions", ['content' => '？'])->assertStatus(422);
+    $this->putJson("/api/questions/{$question->id}/answer", ['content' => '答'])->assertForbidden();
 });
 
-test('rights and aid actions are open to questions', function (string $factoryState) {
+test('every matter type is open to questions', function (string $factoryState) {
     Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋']));
     $matter = Matter::factory()->{$factoryState}()->create();
 
     $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '这次有什么风险？'])->assertCreated();
     $this->getJson("/api/matters/{$matter->id}/questions")->assertJsonPath('can_ask', true);
-})->with(['rights', 'aid']);
+})->with(['rights', 'aid', 'notice']);
 
-test('censuses stay closed to questions', function () {
-    Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋']));
-    $census = Matter::factory()->create(['type' => 'census', 'state' => 'open']);
+test('an admin deletes a question and its echoes', function () {
+    $matter = Matter::factory()->create();
+    $question = MatterQuestion::factory()->for($matter)->create();
+    $question->echoers()->attach(Resident::factory()->create());
 
-    $this->postJson("/api/matters/{$census->id}/questions", ['content' => '？'])->assertStatus(422);
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+    $this->deleteJson("/api/questions/{$question->id}")->assertSuccessful();
+
+    expect(MatterQuestion::find($question->id))->toBeNull()
+        ->and(DB::table('matter_question_echoes')->where('matter_question_id', $question->id)->count())->toBe(0);
 });
 
-test('the matter resource flags whether questions are open', function () {
-    Sanctum::actingAs(Resident::factory()->create());
+test('an admin deletes only the answer, keeping the question', function () {
+    $question = MatterQuestion::factory()->answered('先前的回答')->create();
+    Sanctum::actingAs(Resident::factory()->admin()->create());
 
-    $this->getJson('/api/matters/'.Matter::factory()->rights()->create()->id)
-        ->assertJsonPath('data.supports_questions', true);
-    $this->getJson('/api/matters/'.Matter::factory()->notice()->create()->id)
-        ->assertJsonPath('data.supports_questions', false);
+    $this->deleteJson("/api/questions/{$question->id}/answer")->assertSuccessful();
+
+    expect($question->refresh())
+        ->answer->toBeNull()
+        ->answered_at->toBeNull()
+        ->content->not->toBe('');
+});
+
+test('an outsider (not author, not admin) cannot delete a question or an answer', function () {
+    $question = MatterQuestion::factory()->answered()->create();
+    Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋']));
+
+    $this->deleteJson("/api/questions/{$question->id}")->assertForbidden();
+    $this->deleteJson("/api/questions/{$question->id}/answer")->assertForbidden();
+});
+
+test('the asker can delete their own question', function () {
+    $asker = Resident::factory()->create(['unit_label' => '3栋']);
+    $question = MatterQuestion::factory()->for($asker, 'asker')->create();
+    Sanctum::actingAs($asker);
+
+    $this->deleteJson("/api/questions/{$question->id}")->assertSuccessful();
+    expect(MatterQuestion::find($question->id))->toBeNull();
+});
+
+test('the answerer can delete their own reply but not the whole question', function () {
+    $matter = Matter::factory()->create();
+    $question = MatterQuestion::factory()->for($matter)->create();
+    $answerer = Resident::factory()->create(['unit_label' => '7栋']);
+    Sanctum::actingAs($answerer);
+    $this->putJson("/api/questions/{$question->id}/answer", ['content' => '我来答'])->assertSuccessful();
+
+    // 回复本人能删自己的回复
+    $this->deleteJson("/api/questions/{$question->id}/answer")->assertSuccessful();
+    expect($question->refresh()->answer)->toBeNull();
+
+    // 但删不了别人的整条问题
+    $this->deleteJson("/api/questions/{$question->id}")->assertForbidden();
 });
 
 test('neighbors echo a question but not their own, and echo toggles', function () {
@@ -108,10 +161,10 @@ test('the initiator answers with their name and can revise the answer', function
         ->answered_at->format('Y-m-d H:i:s')->toBe($firstAnsweredAt->format('Y-m-d H:i:s'));
 });
 
-test('merchant staff of the signed party answer under the merchant name', function () {
+test('party staff answer under the party name', function () {
     $merchant = Party::factory()->listed()->create(['name' => '青城中央空调']);
     $staff = Resident::factory()->create(['affiliated_party_id' => $merchant->id]);
-    $matter = Matter::factory()->create(['initiator_party_id' => $merchant->id]);
+    $matter = Matter::factory()->create();
     $question = MatterQuestion::factory()->for($matter)->create();
 
     Sanctum::actingAs($staff);
@@ -122,12 +175,31 @@ test('merchant staff of the signed party answer under the merchant name', functi
     expect($question->refresh()->answered_by)->toBe('青城中央空调');
 });
 
-test('ordinary residents cannot answer', function () {
+test('any resident can answer, signed under their name', function () {
     $question = MatterQuestion::factory()->create();
-    Sanctum::actingAs(Resident::factory()->create());
+    $neighbor = Resident::factory()->create(['unit_label' => '7栋', 'nickname' => '小林']);
+    Sanctum::actingAs($neighbor);
 
-    $this->putJson("/api/questions/{$question->id}/answer", ['content' => '我猜是 6 年'])
-        ->assertForbidden();
+    $this->putJson("/api/questions/{$question->id}/answer", ['content' => '我这栋是保修 6 年。'])
+        ->assertSuccessful();
+
+    expect($question->refresh())
+        ->answer->toBe('我这栋是保修 6 年。')
+        ->answered_by->toBe($neighbor->displayName())
+        ->answered_by_id->toBe($neighbor->id);
+});
+
+test('the answerer id is exposed only to admins, for blocking', function () {
+    $matter = Matter::factory()->create();
+    $question = MatterQuestion::factory()->for($matter)->create();
+    $answerer = Resident::factory()->create(['unit_label' => '7栋']);
+    Sanctum::actingAs($answerer);
+    $this->putJson("/api/questions/{$question->id}/answer", ['content' => '我知道'])->assertSuccessful();
+
+    $this->getJson("/api/matters/{$matter->id}/questions")->assertJsonPath('data.0.answerer_id', null);
+
+    Sanctum::actingAs(Resident::factory()->admin()->create());
+    $this->getJson("/api/matters/{$matter->id}/questions")->assertJsonPath('data.0.answerer_id', $answerer->id);
 });
 
 test('the initiator promotes an answered question into the glossary', function () {

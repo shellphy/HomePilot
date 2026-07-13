@@ -213,6 +213,7 @@ class MatterController extends Controller
     public function store(Request $request): JsonResponse
     {
         $resident = $this->resident($request);
+        $this->assertNotBlocked($resident);
         $isAdmin = $resident->is_admin;
         $party = $resident->affiliatedParty;
 

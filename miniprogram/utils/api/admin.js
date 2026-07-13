@@ -48,6 +48,19 @@ function revokeAdmin(id) {
   return request(`/admin/admins/${id}`, { method: 'DELETE' });
 }
 
+// 拉黑名单：查看、拉黑、解除
+function listBlocks() {
+  return request('/admin/blocks');
+}
+
+function blockResident(residentId) {
+  return request('/admin/blocks', { method: 'POST', data: { resident_id: residentId } });
+}
+
+function unblockResident(id) {
+  return request(`/admin/blocks/${id}`, { method: 'DELETE' });
+}
+
 module.exports = {
   listMatters,
   approveMatter,
@@ -59,4 +72,7 @@ module.exports = {
   lookupAdminCandidate,
   grantAdmin,
   revokeAdmin,
+  listBlocks,
+  blockResident,
+  unblockResident,
 };

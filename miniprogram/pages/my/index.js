@@ -112,6 +112,10 @@ Page({
     wx.navigateTo({ url: '/pages/admin/settings/index' });
   },
 
+  goAdminBlocks() {
+    wx.navigateTo({ url: '/pages/admin/blocks/index' });
+  },
+
   goJoined() {
     wx.navigateTo({ url: '/pages/mine-matters/index?kind=joined' });
   },
