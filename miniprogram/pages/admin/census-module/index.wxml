@@ -15,13 +15,13 @@
         <view class="row" hover-class="row-hover" wx:for="{{questions}}" wx:key="key" data-qi="{{index}}" bind:tap="goQuestion">
           <view class="row-main">
             <view class="row-title">{{item.text}}</view>
-            <view class="row-sub">{{item.type === 'text' ? '填空' : (item.type === 'multi' ? '多选' : '单选') + ' · ' + item.options.length + ' 个选项'}}{{item.required ? ' · 必答' : ''}}</view>
+            <view class="row-sub">{{item.type === 'text' ? '填空' : (item.type === 'multi' ? '多选' : '单选') + ' · ' + item.options.length + ' 个选项'}}</view>
           </view>
           <text class="row-arrow">›</text>
         </view>
         <view wx:if="{{!questions.length}}" class="hint">这个模块还没有题目</view>
       </view>
-      <t-button theme="light" block style="width: 100%" bind:tap="addQuestion">＋ 添加题目</t-button>
+      <t-button theme="primary" variant="outline" block style="width: 100%" bind:tap="addQuestion">＋ 添加题目</t-button>
     </block>
 
     <!-- 危险操作与吸底的保存拉开距离，避免误触（与事项表单同一约定） -->

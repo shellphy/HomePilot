@@ -93,7 +93,6 @@ class DatabaseSeeder extends Seeder
             'target_count' => 0,
             'payload' => [
                 'purpose' => '第一次装修、完全搞不懂硬装工艺？这份问卷把该懂的都串成了题：每题有讲解、选项下写清「为什么」，答一遍就能建立基本认知。纯科普、不推销。',
-                'report_presentation' => $this->renovationReportPresentation(),
                 'modules' => $modules,
             ],
         ]);
@@ -114,7 +113,7 @@ class DatabaseSeeder extends Seeder
                 'intro' => '装修分硬装和软装。硬装 = 拆改、水电、防水、瓷砖、吊顶、墙面、门这些「埋进去、装完难改」的基础工程（隐蔽工程），是房子的骨架；软装 = 家具、窗帘、灯具这些能搬走的。硬装做错返工代价最大，先把该懂的过一遍。',
                 'questions' => [
                     [
-                        'key' => 'know_level', 'text' => '你对硬装了解到哪一步了？', 'type' => 'single', 'required' => true,
+                        'key' => 'know_level', 'text' => '你对硬装了解到哪一步了？', 'type' => 'single',
                         'note' => '按现在的了解选就行，不影响后续作答。',
                         'options' => ['完全没概念，第一次了解', '听过一些名词，但不懂工艺', '做过一些功课', '已经比较清楚了'],
                         'option_notes' => ['正好，跟着往下答就行', '这份问卷帮你把名词背后的门道串起来', '看看有没有补充的盲区', '当复习，也给拿不准的邻居留个参考'],
@@ -483,7 +482,6 @@ class DatabaseSeeder extends Seeder
             'target_count' => 0,
             'payload' => [
                 'purpose' => '第一次装修、完全没接触过中央空调？这份问卷把该懂的都串成了题：每题有讲解、选项下写清「为什么」，答一遍约 8 分钟就能建立基本认知。纯科普、不推销。',
-                'report_presentation' => $this->renovationReportPresentation(),
                 'modules' => $modules,
             ],
         ]);
@@ -503,7 +501,7 @@ class DatabaseSeeder extends Seeder
                 'intro' => '先用一句话说清楚：中央空调就是“一台外机，带家里好几台内机”。内机和管道藏在吊顶里，看起来更整洁。咱们小区每户只有一个空调机位，所以主要看一拖多。先别急着看品牌，第一步只要弄懂：氟机还是水机。',
                 'questions' => [
                     [
-                        'key' => 'know_level', 'text' => '说实话，你现在对中央空调懂多少？', 'type' => 'single', 'required' => true,
+                        'key' => 'know_level', 'text' => '说实话，你现在对中央空调懂多少？', 'type' => 'single',
                         'note' => '完全不懂也没关系。后面每道题都会顺手把知识点讲清楚，跟着选就行。',
                         'options' => ['完全没概念，第一次了解', '听说过，但不知道怎么选', '做过一些功课', '已经比较清楚了'],
                         'option_notes' => ['正好，跟着往下答就行', '这份问卷就是帮你把「怎么选」串起来', '看看有没有补充的盲区', '当复习，也给拿不准的邻居留个参考'],
@@ -526,7 +524,7 @@ class DatabaseSeeder extends Seeder
                 'intro' => '报价单参数很多，其实先抓住两件事就够了：家里要装几台内机，外机要配多大。再顺手想清楚厨房要不要单独制冷。',
                 'questions' => [
                     [
-                        'key' => 'internal_units', 'text' => '你家准备装几台内机？', 'type' => 'single', 'required' => true,
+                        'key' => 'internal_units', 'text' => '你家准备装几台内机？', 'type' => 'single',
                         'note' => '通常客厅算一台，每个要装空调的卧室各算一台。客餐厅特别大或形状狭长时，可能要分成两台，不能只按房间数硬套。',
                         'options' => ['3 个（一拖三）', '4 个（一拖四）', '5 个及以上（一拖五 / 六）', '还没数过'],
                         'option_notes' => ['只装客厅和主要卧室、想省一点的做法', '107㎡（3 房）满装的常见配置', '130㎡ / 154㎡（4 房）满装；客厅大想分区会更多', '照「客厅 + 卧室数」数一下，或等量房时定'],
@@ -727,7 +725,6 @@ class DatabaseSeeder extends Seeder
             'target_count' => 0,
             'payload' => [
                 'purpose' => '第一次做柜子、分不清颗粒板多层板、也不懂封边五金？这份问卷把该懂的都串成了题：每题有讲解、选项下写清「为什么」，答一遍就能入门。纯科普、不推销。',
-                'report_presentation' => $this->renovationReportPresentation(),
                 'modules' => $modules,
             ],
         ]);
@@ -748,7 +745,7 @@ class DatabaseSeeder extends Seeder
                 'intro' => '全屋定制是按现场尺寸设计、生产并安装柜体。成品效果由材料、设计、加工、安装和服务共同决定。',
                 'questions' => [
                     [
-                        'key' => 'know_level', 'text' => '你对全屋定制了解到哪一步了？', 'type' => 'single', 'required' => true,
+                        'key' => 'know_level', 'text' => '你对全屋定制了解到哪一步了？', 'type' => 'single',
                         'note' => '按现在的了解选择即可，不影响后续作答。',
                         'options' => ['完全没概念，第一次了解', '听过一些名词，但不懂门道', '做过一些功课', '已经比较清楚了'],
                         'option_notes' => ['正好，跟着往下答就行', '这份问卷帮你把板材、封边、五金串起来', '看看有没有补充的盲区', '当复习，也给拿不准的邻居留个参考'],
@@ -989,7 +986,6 @@ class DatabaseSeeder extends Seeder
             'target_count' => 0,
             'payload' => [
                 'purpose' => '硬装做好了，软装却不知从何下手？这份问卷把风格、家具、灯光、窗帘布艺都串成了题：每题有讲解、选项下写清「为什么」，答一遍就能入门。纯科普、不推销。',
-                'report_presentation' => $this->renovationReportPresentation(),
                 'modules' => $modules,
             ],
         ]);
@@ -1010,7 +1006,7 @@ class DatabaseSeeder extends Seeder
                 'intro' => '软装 = 硬装完成后能搬进搬出的一切：家具、窗帘、灯具、床品布艺、地毯、装饰画、绿植摆件…… 它决定家的「气质」和舒适度，好处是能随时换、试错成本低。行话说「轻硬装、重软装」——硬装打好底，软装才是住得舒不舒服、好不好看的关键。',
                 'questions' => [
                     [
-                        'key' => 'know_level', 'text' => '你对软装了解到哪一步了？', 'type' => 'single', 'required' => true,
+                        'key' => 'know_level', 'text' => '你对软装了解到哪一步了？', 'type' => 'single',
                         'note' => '不用有压力，这份问卷每题都带讲解，答一遍就能入门。',
                         'options' => ['完全没概念，第一次了解', '有点想法，但不成体系', '做过一些功课', '已经比较清楚了'],
                         'option_notes' => ['正好，跟着往下答就行', '这份问卷帮你把风格、家具、灯光、布艺串起来', '看看有没有补充的盲区', '当复习，也给拿不准的邻居留个参考'],
@@ -1205,7 +1201,6 @@ class DatabaseSeeder extends Seeder
             'target_count' => 0,
             'payload' => [
                 'purpose' => '装修好不好用，取决于贴不贴合你家的生活。这份问卷按房间和家电，帮你把需求理清楚：常住人口、就餐、厨房卫生间、卧室、家电、清洁洗衣…… 照实答，越清楚越好落地。',
-                'report_presentation' => $this->renovationReportPresentation(true),
                 'modules' => $modules,
             ],
         ]);
@@ -1225,7 +1220,7 @@ class DatabaseSeeder extends Seeder
                 'intro' => '先说说一家人怎么生活——这决定了房子该怎么用、往哪个方向装。',
                 'questions' => [
                     [
-                        'key' => 'household_size', 'text' => '常住几口人？', 'type' => 'single', 'required' => true,
+                        'key' => 'household_size', 'text' => '常住几口人？', 'type' => 'single',
                         'options' => ['1~2 人', '3 人', '4 人', '5 人及以上'],
                     ],
                     [
@@ -1239,7 +1234,7 @@ class DatabaseSeeder extends Seeder
                         'option_notes' => ['房间和收纳给成长留余量', '预留可独立使用的房间和学习位', '考虑卧室、卫生间和通行动线', '工位、网络和隔音要长期可用', '避免过度定制，重视耐用和可恢复', '按当前生活优化，同时保留基础弹性'],
                     ],
                     [
-                        'key' => 'life_stage', 'text' => '这套房主要拿来做什么？', 'type' => 'single', 'required' => true,
+                        'key' => 'life_stage', 'text' => '这套房主要拿来做什么？', 'type' => 'single',
                         'note' => '用途影响耐用、维护、投入和可调整性，不代表一定要高配或从简。',
                         'options' => ['婚房', '长期自住', '短期过渡', '出租', '养老'],
                         'option_notes' => ['兼顾当前生活和家庭变化', '重视长期维护、舒适和可调整性', '控制不可带走的投入，保留改动空间', '耐用、易维护、配置清楚', '优先安全、通行、照明和易操作'],
@@ -1375,13 +1370,13 @@ class DatabaseSeeder extends Seeder
                         'option_notes' => ['省协调精力，但要锁定配置、范围和增项', '施工方负责人工辅料，主材预算和采购由自己掌握', '自主度高，也最考验时间、专业和协调能力', '设计相对独立，施工招采和落地责任要衔接', '先用同一套需求分别测算总价和投入精力'],
                     ],
                     [
-                        'key' => 'budget_scope', 'text' => '你说的“装修总预算”准备包含哪些？（可多选）', 'type' => 'multi', 'required' => true,
+                        'key' => 'budget_scope', 'text' => '你说的“装修总预算”准备包含哪些？（可多选）', 'type' => 'multi',
                         'note' => '范围不同的总价不能直接比较，最终报告会按你勾选的口径整理。',
                         'options' => ['设计费', '基础施工 / 半包', '瓷砖卫浴等主材', '全屋定制', '软装家具', '家用电器', '空调地暖新风等系统', '税费 / 管理 / 清运', '备用金'],
                         'option_notes' => ['确认服务深度、修改次数和施工配合', '人工和辅料，明确拆改、水电、防水等范围', '按空间列品牌型号、数量、损耗和安装', '按图纸、板材、五金、台面和安装计入', '沙发、床、桌椅、窗帘、灯具和装饰', '厨房、清洁、影音等可移动电器', '单列设备、辅材、安装、控制和维护', '容易漏报，签约前统一是否含税及收费主体', '建议独立保留，不提前花在非必要升级上'],
                     ],
                     [
-                        'key' => 'budget_range', 'text' => '装修总预算准备控制在什么范围？', 'type' => 'single', 'required' => true,
+                        'key' => 'budget_range', 'text' => '装修总预算准备控制在什么范围？', 'type' => 'single',
                         'note' => '按上一题勾选的范围回答；本小区自住通常以 30 万上下作为初步核算起点，再按户型和配置调整。',
                         'options' => ['25 万以内', '25~35 万', '35~50 万', '50 万以上', '还没核算'],
                         'option_notes' => ['需要明显控制范围、设备和个性化项目', '本小区自住的常见起步区间，仍要看包含范围', '可覆盖更多舒适系统和品质配置，注意总量叠加', '重点管理设计落地、系统协调和长期维护', '先按基础施工、主材、定制、家具家电和系统分项估算'],
@@ -1427,19 +1422,5 @@ class DatabaseSeeder extends Seeder
                 'reject_reason' => '',
             ]),
         );
-    }
-
-    /** @return array<string, string> */
-    private function renovationReportPresentation(bool $wholeHomeNeeds = false): array
-    {
-        return [
-            'profile_label' => $wholeHomeNeeds ? '你的全屋需求画像' : '你的装修认知与选择画像',
-            'report_title' => '我的装修需求报告',
-            'empty_description' => 'AI 会把你的答案整理成装修选择、优先级、潜在冲突、待确认问题和给设计师 / 商家的沟通清单。报告只依据你的答案，不替你做决定。',
-            'risk_label' => '装修避坑与风险提醒',
-            'brief_label' => '给设计师 / 商家的需求清单',
-            'share_button_label' => '分享给设计师 / 商家',
-            'share_disclaimer' => '这是一份业主主动分享的只读需求报告，请以双方最终确认的图纸、报价与合同为准。',
-        ];
     }
 }

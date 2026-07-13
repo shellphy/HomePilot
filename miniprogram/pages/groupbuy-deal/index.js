@@ -10,7 +10,7 @@ Page({
     id: null,
     finalTerms: [],
     finalNote: '',
-    needsSurvey: false, // 方案型团每户成交价不同：公示的是成交规则与户数，不是统一价
+    needsSurvey: false, // 逐人报价团每人成交价不同：公示的是成交规则与人数，不是统一价
     submitting: false,
   },
 

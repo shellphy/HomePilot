@@ -77,7 +77,7 @@ PROMPT.$this->matterContext();
             ."，当前阶段：{$type->stateLabel($this->matter->state)}";
 
         if ($this->matter->payloadValue('needs_survey')) {
-            $lines[] = '这是按户出方案的团购：报名后商家逐户沟通需求，每户的方案和报价单独谈。';
+            $lines[] = '这是逐人报价的团购：报名后商家单独和每位报名者沟通需求，各自的方案和报价单独谈。';
         }
 
         if (($pitch = (string) $this->matter->payloadValue('pitch', '')) !== '') {

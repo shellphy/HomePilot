@@ -1,12 +1,14 @@
-// 订阅消息授权收集（「活动状态提醒」单模板打全场景）。
-// 微信的规则是一次授权、一次下发：在用户的每个主动操作节点（报名/发起/评价/答题/入驻）
-// 顺手请求一次，勾选「总是保持以上选择」后不再弹窗但额度照常累积。
-// 拒绝、不支持、报错都静默放行——授权是顺路的事，绝不挡住操作主流程。
+// 订阅消息授权：一天最多拉起一次，避免每次操作都弹窗。任何结果都静默放行。
 const TEMPLATE_ID = 'MNOujHx4Bcm_ruar87ONFsI7VbHhOMBZA1BFsHciA-o';
+const ASKED_AT_KEY = 'subscribe_asked_at';
+const ASK_INTERVAL = 24 * 60 * 60 * 1000;
 
 function requestSubscribe() {
   return new Promise((resolve) => {
     if (!wx.requestSubscribeMessage) return resolve();
+    const lastAsked = wx.getStorageSync(ASKED_AT_KEY) || 0;
+    if (Date.now() - lastAsked < ASK_INTERVAL) return resolve();
+    wx.setStorageSync(ASKED_AT_KEY, Date.now());
     wx.requestSubscribeMessage({ tmplIds: [TEMPLATE_ID], complete: resolve });
   });
 }

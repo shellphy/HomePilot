@@ -1,34 +1,33 @@
 <view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <block wx:if="{{!token}}">
-      <view class="card registration-summary">
-        <view class="registration-summary-head">
-          <view>
-            <view class="registration-title">我的问卷</view>
-            <view class="registration-count">已回答 {{answeredCount}} 题</view>
-          </view>
-          <view class="questionnaire-status">已提交</view>
-        </view>
-        <view class="questionnaire-actions">
-          <view class="questionnaire-action" bind:tap="goStats">查看整体数据</view>
-          <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
-        </view>
-      </view>
-
-      <view class="content-heading ai-content-heading">
+    <view class="card registration-summary">
+      <view class="registration-summary-head">
         <view>
-          <view class="content-heading-title">AI 问卷总结</view>
-          <view class="content-heading-sub">根据你的回答整理重点和待确认事项</view>
+          <view class="registration-title">我的问卷</view>
+          <view class="registration-count">已回答 {{answeredCount}} 题</view>
         </view>
+        <view class="questionnaire-status">已提交</view>
       </view>
-    </block>
+      <view class="questionnaire-actions">
+        <view class="questionnaire-action" bind:tap="goAnswers">我的回答</view>
+        <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
+        <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
+      </view>
+    </view>
 
-    <block wx:if="{{!token && !report}}">
+    <view class="content-heading ai-content-heading">
+      <view>
+        <view class="content-heading-title">AI 问卷总结</view>
+        <view class="content-heading-sub">根据你的回答整理重点和待确认事项，只给你自己看</view>
+      </view>
+    </view>
+
+    <block wx:if="{{!report}}">
       <view class="card report-generating" wx:if="{{generationStatus === 'pending'}}">
         <view class="report-generating-mark">AI</view>
         <view class="report-generating-copy">
           <view class="report-generating-title">正在生成报告中</view>
-          <view class="report-generating-sub">生成需要一些时间，完成后会自动显示。你可以先查看下方的问卷答案。</view>
+          <view class="report-generating-sub">生成需要一分多钟，完成后会自动显示，中途可以先去别的页面。</view>
         </view>
       </view>
       <view class="card report-empty" wx:else>
@@ -74,47 +73,9 @@
         <view class="check" wx:for="{{report.open_questions}}" wx:key="*this"><text class="box"></text>{{item}}</view>
       </view>
 
-      <view class="card merchant-card" wx:if="{{report.share_brief.length}}">
-        <view class="section-title">{{presentation.brief_label}}</view>
-        <view class="bullet" wx:for="{{report.share_brief}}" wx:key="*this">• {{item}}</view>
-        <view class="privacy">分享页不包含姓名、电话、楼栋和邻居统计。你可以随时关闭旧链接。</view>
-      </view>
-
-      <view wx:if="{{!token}}" class="actions">
-        <t-button theme="primary" block size="large" open-type="share" wx:if="{{shareEnabled}}">{{presentation.share_button_label}}</t-button>
-        <t-button theme="primary" block size="large" bind:tap="enableShare" wx:else>开启安全分享</t-button>
+      <view class="actions">
         <t-button theme="light" block size="large" bind:tap="askAi">继续问 AI</t-button>
         <t-button theme="light" block size="large" loading="{{generating}}" bind:tap="generate">按最新答案重新生成</t-button>
-        <view class="revoke" wx:if="{{shareEnabled}}" bind:tap="revokeShare">关闭分享并让旧链接失效</view>
-      </view>
-      <view class="shared-foot" wx:else>{{presentation.share_disclaimer}}</view>
-    </block>
-
-    <block wx:if="{{!token}}">
-      <view class="content-heading answers-content-heading">
-        <view>
-          <view class="content-heading-title">我的回答</view>
-          <view class="content-heading-sub">按问卷分组查看已提交内容</view>
-        </view>
-      </view>
-
-      <view class="card registration-module {{item.expanded ? 'registration-module-open' : ''}}" wx:for="{{registrationModules}}" wx:key="key">
-        <view class="registration-module-head" data-index="{{index}}" bind:tap="toggleRegistrationModule">
-          <view class="registration-module-title">{{item.title}}</view>
-          <view class="registration-module-meta">
-            <view class="registration-module-count">{{item.questions.length}} 题</view>
-            <text class="registration-arrow {{item.expanded ? 'registration-arrow-open' : ''}}">›</text>
-          </view>
-        </view>
-        <view wx:if="{{item.expanded}}" class="registration-answers">
-          <view class="registration-answer" wx:for="{{item.questions}}" wx:for-item="question" wx:for-index="questionIndex" wx:key="key">
-            <view class="registration-question-row">
-              <text class="registration-question-index">{{questionIndex + 1}}</text>
-              <view class="registration-question">{{question.text}}</view>
-            </view>
-            <view class="registration-value">{{question.answer}}</view>
-          </view>
-        </view>
       </view>
     </block>
   </page-status>

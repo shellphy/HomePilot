@@ -10,9 +10,10 @@ function presetQuestions(matter) {
     return ['这个活动的安排帮我讲讲？', '参加前要准备什么？'];
   }
   if (matter.type === 'groupbuy') {
+    const topic = matter.category || '这个团购';
     return matter.needs_survey
-      ? ['我的情况适合哪种方案？', '相关方沟通时该确认什么？', '现在登记还是再等等？']
-      : ['条款里哪条最影响总价？', '我的情况适合参加吗？', '现在参加还是再等等？'];
+      ? [`${topic}我的情况适合怎么选？`, '和商家沟通报价时该确认什么？', '现在登记还是再等等？']
+      : [`${topic}值不值得参加？`, '条款里哪条最影响总价？', '现在参加还是再等等？'];
   }
   return [];
 }

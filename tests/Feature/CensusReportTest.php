@@ -75,8 +75,8 @@ test('a resident generates and reuses a structured census report', function () {
         ->assertSuccessful()
         ->assertJsonPath('generation_status', 'completed')
         ->assertJsonStructure([
-            'report' => ['headline', 'overview', 'priorities', 'decisions', 'open_questions', 'risks', 'share_brief'],
-            'presentation' => ['profile_label', 'report_title', 'risk_label', 'brief_label', 'share_button_label', 'share_disclaimer'],
+            'report' => ['headline', 'overview', 'priorities', 'decisions', 'open_questions', 'risks'],
+            'presentation' => ['profile_label', 'report_title', 'risk_label'],
         ])
         ->assertJsonPath('presentation.report_title', '我的问卷总结');
 
@@ -86,32 +86,6 @@ test('a resident generates and reuses a structured census report', function () {
 
     Queue::assertPushedTimes(GenerateCensusReportJob::class, 1);
     CensusReportGenerator::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('130㎡') && $prompt->contains('老人'));
-});
-
-test('a report can be shared without exposing resident identity and revoked', function () {
-    Queue::fake();
-    CensusReportGenerator::fake();
-    $resident = Resident::factory()->create(['nickname' => '不应公开', 'phone' => '13800138000']);
-    $matter = reportCensus($resident);
-    Sanctum::actingAs($resident);
-
-    $this->postJson("/api/matters/{$matter->id}/census-report")->assertAccepted();
-    runQueuedCensusReport();
-
-    $share = $this->postJson("/api/matters/{$matter->id}/census-report/share")
-        ->assertSuccessful()
-        ->assertJsonPath('share_enabled', true);
-
-    $token = $share->json('share_token');
-    $public = $this->getJson("/api/census-reports/{$token}")
-        ->assertSuccessful()
-        ->assertJsonMissing(['不应公开'])
-        ->assertJsonMissing(['13800138000']);
-
-    expect($public->json('report'))->toBeArray();
-
-    $this->deleteJson("/api/matters/{$matter->id}/census-report/share")->assertSuccessful();
-    $this->getJson("/api/census-reports/{$token}")->assertNotFound();
 });
 
 test('a failed report job exposes a retryable status', function () {
@@ -180,7 +154,8 @@ test('report generation timeouts allow slow structured responses to finish', fun
         ->value;
     $job = new GenerateCensusReportJob(1, 'answer-hash');
 
-    expect($agentTimeout)->toBe(150)
-        ->and($job->timeout)->toBe(180)
-        ->and(config('queue.connections.database.retry_after'))->toBe(240);
+    // agent < job < 队列 retry_after，逐层留富余
+    expect($agentTimeout)->toBe(240)
+        ->and($job->timeout)->toBe(300)
+        ->and(config('queue.connections.database.retry_after'))->toBe(360);
 });

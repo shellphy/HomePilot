@@ -3,7 +3,6 @@
 // 在这里只做前置引导，表单里没有联系方式字段。
 const matters = require('../../utils/api/matters');
 const { getMe, invalidateMe } = require('../../utils/me');
-const { requestSubscribe } = require('../../utils/subscribe');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 
@@ -163,14 +162,8 @@ Page({
     const { id, current, answers, moduleIndex, modules, submitting } = this.data;
     if (submitting) return;
 
-    // 必答题拦在客户端，给出具体是哪题（填空题只填空白也算没答）
+    // 只提交当前模块已作答的题（填空题只填空白也算没答）
     const answered = (value) => value !== undefined && (typeof value !== 'string' || value.trim() !== '');
-    const missing = current.questions.find((question) => question.required && !answered(answers[question.key]));
-    if (missing) {
-      return wx.showToast({ title: `「${missing.text}」是必答题`, icon: 'none' });
-    }
-
-    // 只提交当前模块已作答的题
     const moduleAnswers = {};
     current.questions.forEach((question) => {
       if (answered(answers[question.key])) {
@@ -183,9 +176,6 @@ Page({
 
     this.setData({ submitting: true });
     try {
-      // 答完最后一个模块顺手收一次订阅授权：征集收尾的通知才有额度可推（中间模块不打扰）
-      if (isLast) await requestSubscribe();
-
       // 末模块带上授权勾选：即便这一模块没新答案，也要把 flag 落库（补齐全量答案满足后端校验）
       const payload = { answers: moduleAnswers };
       if (isLast && this.data.initiatorParty) {
@@ -201,21 +191,14 @@ Page({
       if (moduleIndex + 1 < modules.length) {
         this.showModule(moduleIndex + 1);
       } else {
-        wx.showModal({
-          title: '问卷完成',
-          content: '可以查看刚才填写的答案，并生成一份 AI 总结。',
-          showCancel: false,
-          confirmText: '查看我的问卷',
-          success: () => {
-            const pages = getCurrentPages();
-            const prev = pages[pages.length - 2];
-            if (prev && prev.route === 'pages/census-report/index') {
-              wx.navigateBack();
-            } else {
-              wx.redirectTo({ url: `/pages/census-report/index?id=${id}` });
-            }
-          },
-        });
+        wx.showToast({ title: '问卷完成', icon: 'success' });
+        const pages = getCurrentPages();
+        const prev = pages[pages.length - 2];
+        if (prev && prev.route === 'pages/census-report/index') {
+          setTimeout(() => wx.navigateBack(), 600);
+        } else {
+          setTimeout(() => wx.redirectTo({ url: `/pages/census-report/index?id=${id}` }), 600);
+        }
       }
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });

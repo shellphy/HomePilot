@@ -38,19 +38,19 @@
             bind:input="onInput"
           />
         </view>
-        <!-- 按户出方案：发起时可选；发起后对团长锁定（改联系互通的隐私承诺），管理员可纠错 -->
+        <!-- 逐人报价：发起时可选；发起后对团长锁定（改联系互通的隐私承诺），管理员可纠错 -->
         <view class="frow" wx:if="{{!id || isAdmin}}">
           <view class="frow-main">
-            <view class="row-title">按户出方案</view>
+            <view class="row-title">逐人报价</view>
             <view class="row-sub"
-              >中央空调、全屋定制这类非标品：商家逐户沟通需求（如上门量房）单独报价，报名者手机号从「谈判中」起与团长互通。发起后不可再改，中途翻转会改变对报名邻居的隐私承诺</view
+              >非标准品每人的方案和价格不同：商家单独和每位报名者沟通、单独报价，手机号从「谈判中」起与团长互通。发起后不可再改</view
             >
           </view>
           <switch checked="{{needsSurvey}}" data-field="needsSurvey" bind:change="onSwitch" color="#06ae56" />
         </view>
         <view class="frow" wx:elif="{{needsSurvey}}">
           <view class="frow-main">
-            <view class="row-title">按户出方案</view>
+            <view class="row-title">逐人报价</view>
             <view class="row-sub">发起时已选定，不可修改</view>
           </view>
           <text class="frow-value">已开启</text>

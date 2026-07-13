@@ -48,7 +48,6 @@ class CensusType extends MatterType
             'modules.*.questions.*.text' => ['required', 'string', 'max:100'],
             'modules.*.questions.*.type' => ['required', Rule::in(['single', 'multi', 'text'])],
             'modules.*.questions.*.note' => ['sometimes', 'nullable', 'string', 'max:200'],
-            'modules.*.questions.*.required' => ['sometimes', 'boolean'],
             // 填空题没有选项（前端不传该键）；选择题至少两个
             'modules.*.questions.*.options' => ['required_unless:modules.*.questions.*.type,text', 'array', 'min:2'],
             'modules.*.questions.*.options.*' => ['required', 'string', 'max:50'],

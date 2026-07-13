@@ -114,7 +114,8 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 
 # Test Enforcement
 
-- Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
+- **只对核心业务逻辑的边界条件写测试**：校验规则、状态机流转、权限/可见性、金额/计数、时间窗口、数据归拢等真实行为。前端（小程序 wxml/wxss/js）、文案、样式一律不写单元测试——它们变动频繁且没有稳定契约，断言具体标记或文案的测试只会一改就挂、没有价值。
+- 改到核心业务逻辑时，写或更新覆盖其边界条件的测试再跑；只改前端/文案/样式时不需要补测试。
 - Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
 
 === laravel/core rules ===

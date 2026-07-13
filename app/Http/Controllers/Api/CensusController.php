@@ -98,13 +98,6 @@ class CensusController extends Controller
         $stance = $this->stanceOf($matter, $request);
         $merged = array_merge($stance?->payload['answers'] ?? [], $validated['answers']);
 
-        // 必答题在合并后必须齐全（保证基础模块先答）
-        foreach ($questions as $key => $question) {
-            if (($question['required'] ?? false) && ! array_key_exists($key, $merged)) {
-                throw ValidationException::withMessages(['answers' => "「{$question['text']}」是必答题"]);
-            }
-        }
-
         $payload = ['answers' => $merged];
         // 授权标记随答案一起进 payload：本次带了就更新，没带则沿用上次选择（默认 false）
         if ($request->has('visible_to_initiator')) {
@@ -193,7 +186,7 @@ class CensusController extends Controller
 
     /**
      * @param  array<string, mixed>  $answers
-     * @param  Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>, required?: bool}>  $questions
+     * @param  Collection<array-key, array{key: string, text: string, type: string, options?: array<int, string>}>  $questions
      */
     private function validateAnswers(array $answers, Collection $questions): void
     {
