@@ -119,6 +119,18 @@ test('notices do not offer ai chat and unapproved matters stay hidden', function
     $this->postJson("/api/matters/{$pending->id}/ai-chat", ['question' => '？'])->assertNotFound();
 });
 
+test('the initiator can use ai chat on their own unapproved matter', function () {
+    MatterExplainer::fake(['先把外机位量出来。']);
+    $initiator = Resident::factory()->create();
+    $pending = Matter::factory()->pending()->create(['initiator_id' => $initiator->id]);
+    Sanctum::actingAs($initiator);
+
+    $response = $this->postJson("/api/matters/{$pending->id}/ai-chat", ['question' => '要先准备什么？'])
+        ->assertSuccessful();
+
+    expect(sseAnswer($response))->toBe('先把外机位量出来。');
+});
+
 test('guests cannot use ai chat', function () {
     MatterExplainer::fake();
     $matter = Matter::factory()->create();
