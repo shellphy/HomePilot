@@ -2,78 +2,51 @@
   display: block;
 }
 
-.datetime-row {
+/* 与行式表单（.frow）同款：标签左、值右对齐、细分割线 */
+.dt-row {
   display: flex;
   align-items: center;
   gap: 24rpx;
   min-height: 116rpx;
-  padding: 20rpx 0;
   border-bottom: 1rpx solid var(--line);
   box-sizing: border-box;
 }
 
-.datetime-label {
+.dt-label {
   flex-shrink: 0;
-  width: 156rpx;
   color: var(--text-primary);
   font-size: 28rpx;
 }
 
-.datetime-required {
+.dt-required {
   margin-left: 8rpx;
   color: var(--danger);
   font-size: 20rpx;
 }
 
-.datetime-fields {
+/* 日期、时间并成一个值：两段可点文本靠右排，无边框盒子 */
+.dt-value {
   display: flex;
   flex: 1;
-  min-width: 0;
-  gap: 12rpx;
-}
-
-.datetime-picker {
-  flex: 1;
-  min-width: 0;
-}
-
-.datetime-control {
-  display: flex;
   align-items: center;
+  justify-content: flex-end;
   min-width: 0;
-  height: 76rpx;
-  padding: 0 14rpx;
-  background: var(--bg-page);
-  border: 1rpx solid var(--line);
-  border-radius: 14rpx;
-  box-sizing: border-box;
+  gap: 32rpx;
 }
 
-.datetime-kind {
-  flex-shrink: 0;
-  margin-right: 8rpx;
-  color: var(--text-muted);
-  font-size: 21rpx;
+.dt-pick {
+  min-width: 0;
 }
 
-.datetime-value {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
+.dt-seg {
+  font-size: 28rpx;
   color: var(--text-primary);
-  font-size: 24rpx;
-  text-align: right;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.datetime-placeholder {
+.dt-seg-hover {
+  opacity: 0.5;
+}
+
+.dt-ph {
   color: var(--text-muted);
-}
-
-.datetime-arrow {
-  flex-shrink: 0;
-  margin-left: 6rpx;
-  color: var(--line-dark);
-  font-size: 30rpx;
 }

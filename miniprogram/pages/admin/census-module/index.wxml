@@ -1,11 +1,11 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <!-- 面包屑：三层编辑里随时知道自己在哪个征集下 -->
     <view class="kicker">{{matterTitle}}</view>
     <view class="card">
       <view class="q-title">模块标题<text class="f-required">*</text></view>
       <input class="fin" value="{{title}}" data-field="title" bind:input="onInput" />
-      <view class="q-title">模块引言<text class="q-note">显示在这组题目上方</text></view>
+      <view class="q-title q-title-gap">模块引言<text class="q-note">显示在这组题目上方</text></view>
       <input class="fin" value="{{intro}}" data-field="intro" bind:input="onInput" />
     </view>
 
@@ -24,8 +24,11 @@
       <t-button theme="light" block style="width: 100%" bind:tap="addQuestion">＋ 添加题目</t-button>
     </block>
 
-    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="save">保存模块</t-button>
-    <!-- 危险操作与保存拉开距离，避免误触（与事项表单同一约定） -->
+    <!-- 危险操作与吸底的保存拉开距离，避免误触（与事项表单同一约定） -->
     <t-button wx:if="{{mi >= 0}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这个模块</t-button>
+
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="save">保存模块</t-button>
+    </view>
   </page-status>
 </view>

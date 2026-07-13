@@ -1,18 +1,14 @@
-<view class="datetime-row">
-  <text class="datetime-label">{{label}}<text wx:if="{{required}}" class="datetime-required">*</text></text>
-  <view class="datetime-fields">
-    <picker class="datetime-picker" mode="date" value="{{date}}" bind:change="onDateChange">
-      <view class="datetime-control">
-        <text class="datetime-kind">日期</text>
-        <text class="datetime-value {{date ? '' : 'datetime-placeholder'}}">{{date || '请选择'}}</text>
-        <text class="datetime-arrow">›</text>
+<view class="dt-row">
+  <text class="dt-label">{{label}}<text wx:if="{{required}}" class="dt-required">*</text></text>
+  <view class="dt-value">
+    <picker class="dt-pick" mode="date" value="{{date}}" bind:change="onDateChange">
+      <view class="dt-seg" hover-class="dt-seg-hover">
+        <text class="{{date ? '' : 'dt-ph'}}">{{date || '选择日期'}}</text>
       </view>
     </picker>
-    <picker class="datetime-picker" mode="time" value="{{time}}" bind:change="onTimeChange">
-      <view class="datetime-control">
-        <text class="datetime-kind">时间</text>
-        <text class="datetime-value {{time ? '' : 'datetime-placeholder'}}">{{time || '请选择'}}</text>
-        <text class="datetime-arrow">›</text>
+    <picker class="dt-pick" mode="time" value="{{time}}" bind:change="onTimeChange">
+      <view class="dt-seg" hover-class="dt-seg-hover">
+        <text class="{{time ? '' : 'dt-ph'}}">{{time || '选择时间'}}</text>
       </view>
     </picker>
   </view>
