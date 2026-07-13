@@ -1,14 +1,15 @@
 <view class="page-body tabbed">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <!-- 进行中的征集：大卡（进度 + 头牌数据 + 参与按钮），点卡片看完整数据 -->
+    <!-- 进行中的征集：参与率 + 头牌数据 + 参与按钮；有查看权限时才能点卡片看完整数据 -->
     <block wx:if="{{openCards.length}}">
       <view class="feed-head">正在征集</view>
       <view
         class="card fcard"
-        hover-class="card-hover"
+        hover-class="{{item.aggregatesVisible ? 'card-hover' : 'none'}}"
         wx:for="{{openCards}}"
         wx:key="id"
         data-id="{{item.id}}"
+        data-visible="{{item.aggregatesVisible}}"
         bind:tap="goDetail"
       >
         <view class="fcard-row">
@@ -16,13 +17,19 @@
           <view class="fcard-title">{{item.title}}</view>
         </view>
         <view wx:if="{{item.pitch}}" class="fcard-pitch">{{item.pitch}}</view>
-        <view wx:if="{{item.top}}" class="fcard-top">「{{item.top.question}}」答得最多的是 {{item.top.label}}（{{item.top.count}} 人）</view>
-        <view class="fcard-meter">
-          <view class="fcard-fill" style="width: {{item.percent}}%"></view>
+        <view wx:if="{{item.top}}" class="fcard-top"
+          >「{{item.top.question}}」答得最多的是 {{item.top.label}}（{{item.top.count}} 人）</view
+        >
+        <view wx:if="{{item.hasParticipationRate}}" class="fcard-meter" aria-label="参与率 {{item.participationRate}}%">
+          <view class="fcard-fill" style="width: {{item.participationRate}}%"></view>
         </view>
         <view class="fcard-foot">
-          <text><text class="fcard-num">{{item.registered}}</text> 人已参与</text>
-          <text class="fcard-cta">看完整数据 ›</text>
+          <text wx:if="{{item.hasParticipationRate}}"
+            ><text class="fcard-num">{{item.registered}} / {{item.totalResidents}}</text> 人参与 · 参与率
+            {{item.participationRate}}%</text
+          >
+          <text wx:else><text class="fcard-num">{{item.registered}}</text> 人已参与</text>
+          <text wx:if="{{item.aggregatesVisible}}" class="fcard-cta">看完整数据 ›</text>
         </view>
         <!-- tap 必须绑在 t-button 本身：TDesign 内部原生 button 用 catch:tap 截断后
              以 triggerEvent 重发（不冒泡），绑在外层 view 上收不到；
@@ -38,7 +45,8 @@
             data-id="{{item.id}}"
             data-answered="{{item.myAnswered}}"
             bind:tap="goRegistration"
-          >{{item.myAnswered ? '查看我的问卷' : '参与问卷'}}</t-button>
+            >{{item.myAnswered ? '查看我的问卷' : '参与问卷'}}</t-button
+          >
         </view>
       </view>
     </block>
@@ -49,20 +57,20 @@
       <view class="card census-list">
         <view
           class="crow"
-          hover-class="crow-hover"
+          hover-class="{{item.aggregatesVisible ? 'crow-hover' : 'none'}}"
           wx:for="{{pastItems}}"
           wx:key="id"
           data-id="{{item.id}}"
+          data-visible="{{item.aggregatesVisible}}"
           bind:tap="goDetail"
         >
           <text class="crow-title">{{item.title}}</text>
           <view class="crow-right">
             <text class="crow-note">{{item.note}}</text>
-            <text class="crow-arrow">›</text>
+            <text wx:if="{{item.aggregatesVisible}}" class="crow-arrow">›</text>
           </view>
         </view>
       </view>
     </block>
-
   </page-status>
 </view>

@@ -1,3 +1,16 @@
+.schema-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.schema-edit {
+  flex-shrink: 0;
+  color: var(--brand-deep);
+  font-size: 24rpx;
+}
+
 .row {
   display: flex;
   align-items: center;
@@ -28,4 +41,11 @@
   font-size: 36rpx;
   color: var(--line-dark);
   flex-shrink: 0;
+}
+
+.schema-status {
+  margin-top: 24rpx;
+  color: var(--text-secondary);
+  font-size: 24rpx;
+  text-align: center;
 }

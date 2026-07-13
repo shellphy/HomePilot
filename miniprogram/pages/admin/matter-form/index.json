@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "发布事项",
   "usingComponents": {
-    "page-status": "/components/page-status/index"
+    "page-status": "/components/page-status/index",
+    "datetime-field": "/components/datetime-field/index"
   }
 }

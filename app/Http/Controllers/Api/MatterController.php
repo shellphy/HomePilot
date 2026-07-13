@@ -207,7 +207,8 @@ class MatterController extends Controller
     /**
      * 发起事项：业主可发起（类型需允许）；已认证商家可发起团购/活动（带商家署名）；
      * 其余相关方身份不发起（治理方走官方回应）。管理员不受发起权/身份/楼栋护栏限制，
-     * 可代发任何类型并显式署名（物业/业委会的调研）。两条路径都进待审，管理员审核后公示。
+     * 可代发任何类型并显式署名（物业/业委会的调研）。征集先存草稿并配置题目，
+     * 其它类型直接进待审，管理员审核后公示。
      */
     public function store(Request $request): JsonResponse
     {
@@ -261,9 +262,35 @@ class MatterController extends Controller
             'starts_at' => $validated['starts_at'] ?? null,
             'registration_deadline_at' => $validated['registration_deadline_at'] ?? null,
             'location' => $validated['location'] ?? '',
+            'review_status' => $typeKey === 'census'
+                ? MatterReviewStatus::Draft
+                : MatterReviewStatus::Pending,
         ]);
 
         return response()->json(['data' => MatterResource::make($matter->load('initiatorParty'))], 201);
+    }
+
+    public function submitReview(Request $request, Matter $matter): JsonResponse
+    {
+        $resident = $this->resident($request);
+        abort_unless($resident->is_admin || $matter->initiator_id === $resident->id, 403, '只有发起人可以提交审核');
+        abort_unless($matter->type === 'census', 404);
+
+        if ($matter->review_status === MatterReviewStatus::Pending) {
+            return response()->json(['data' => MatterResource::make($matter)]);
+        }
+
+        abort_unless($matter->review_status === MatterReviewStatus::Draft, 422, '当前状态不能提交审核');
+
+        if (! $matter->hasCensusQuestions()) {
+            throw ValidationException::withMessages([
+                'modules' => '至少添加一道题后才能提交审核',
+            ]);
+        }
+
+        $matter->markPending();
+
+        return response()->json(['data' => MatterResource::make($matter)]);
     }
 
     /**

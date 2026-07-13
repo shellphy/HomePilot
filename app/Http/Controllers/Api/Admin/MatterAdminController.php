@@ -27,6 +27,7 @@ class MatterAdminController extends Controller
     public function index(Request $request): JsonResponse
     {
         $matters = Matter::query()
+            ->where('review_status', '!=', MatterReviewStatus::Draft->value)
             ->when($request->boolean('pending'), fn ($query) => $query->where('review_status', MatterReviewStatus::Pending->value))
             ->with(['initiator', 'initiatorParty'])
             ->withCount('joins')
@@ -51,6 +52,8 @@ class MatterAdminController extends Controller
      */
     public function approve(Request $request, Matter $matter): JsonResponse
     {
+        abort_if($matter->review_status === MatterReviewStatus::Draft, 422, '问卷草稿配置题目并提交后才能审核');
+
         $validated = $request->validate([
             'is_approved' => ['required', 'boolean'],
             'reason' => ['sometimes', 'nullable', 'string', 'max:200'],

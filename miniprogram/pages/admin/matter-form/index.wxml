@@ -2,26 +2,49 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <!-- 基本信息：短字段统一行式（标签左、值右） -->
     <view class="card form-list">
-      <view class="frow">
+      <view class="frow matter-form-row">
         <text class="frow-label">标题<text class="f-required">*</text></text>
-        <input class="frow-input" value="{{title}}" maxlength="60" data-field="title" bind:input="onInput" />
+        <input
+          class="frow-input matter-form-input"
+          value="{{title}}"
+          placeholder="一句话说清楚这件事"
+          maxlength="60"
+          data-field="title"
+          bind:input="onInput"
+        />
       </view>
 
       <!-- 团购专属短字段 -->
       <block wx:if="{{type === 'groupbuy'}}">
-        <view class="frow">
+        <view class="frow matter-form-row">
           <text class="frow-label">品类<text class="f-required">*</text></text>
-          <input class="frow-input" value="{{category}}" maxlength="30" data-field="category" bind:input="onInput" />
+          <input
+            class="frow-input matter-form-input"
+            value="{{category}}"
+            placeholder="填写商品或服务品类"
+            maxlength="30"
+            data-field="category"
+            bind:input="onInput"
+          />
         </view>
-        <view class="frow">
+        <view class="frow matter-form-row">
           <text class="frow-label">阶梯优惠</text>
-          <input class="frow-input" value="{{perk}}" maxlength="100" data-field="perk" bind:input="onInput" />
+          <input
+            class="frow-input matter-form-input"
+            value="{{perk}}"
+            placeholder="例如：满 20 人九折"
+            maxlength="100"
+            data-field="perk"
+            bind:input="onInput"
+          />
         </view>
         <!-- 按户出方案：发起时可选；发起后对团长锁定（改联系互通的隐私承诺），管理员可纠错 -->
         <view class="frow" wx:if="{{!id || isAdmin}}">
           <view class="frow-main">
             <view class="row-title">按户出方案</view>
-            <view class="row-sub">中央空调、全屋定制这类非标品：商家逐户沟通需求（如上门量房）单独报价，报名者手机号从「谈判中」起与团长互通。发起后不可再改，中途翻转会改变对报名邻居的隐私承诺</view>
+            <view class="row-sub"
+              >中央空调、全屋定制这类非标品：商家逐户沟通需求（如上门量房）单独报价，报名者手机号从「谈判中」起与团长互通。发起后不可再改，中途翻转会改变对报名邻居的隐私承诺</view
+            >
           </view>
           <switch checked="{{needsSurvey}}" data-field="needsSurvey" bind:change="onSwitch" color="#06ae56" />
         </view>
@@ -35,26 +58,47 @@
       </block>
 
       <!-- 目标数（团购/活动/互助/维权）：团购必填 ≥1，与业主端发起口径一致 -->
-      <view class="frow" wx:if="{{type !== 'notice' && type !== 'census'}}">
-        <text class="frow-label" wx:if="{{type === 'groupbuy'}}">目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text>
+      <view class="frow matter-form-row" wx:if="{{type !== 'notice' && type !== 'census'}}">
+        <text class="frow-label" wx:if="{{type === 'groupbuy'}}"
+          >目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text
+        >
         <text class="frow-label" wx:else>目标数<text class="q-note">0 表示不设目标</text></text>
-        <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
+        <input
+          class="frow-input matter-form-input"
+          type="number"
+          value="{{targetCount}}"
+          placeholder="0"
+          data-field="targetCount"
+          bind:input="onInput"
+        />
       </view>
 
       <block wx:if="{{type === 'groupbuy' || type === 'activity' || type === 'aid'}}">
-        <view class="frow">
-          <text class="frow-label">开始时间{{type === 'activity' || type === 'aid' ? ' *' : ''}}</text>
-          <picker mode="date" value="{{startDate}}" data-field="startDate" bind:change="onPicker"><text class="frow-value">{{startDate || '选择日期'}}</text></picker>
-          <picker mode="time" value="{{startTime}}" data-field="startTime" bind:change="onPicker"><text class="frow-value">{{startTime || '选择时间'}}</text></picker>
-        </view>
-        <view class="frow">
-          <text class="frow-label">报名截止</text>
-          <picker mode="date" value="{{deadlineDate}}" data-field="deadlineDate" bind:change="onPicker"><text class="frow-value">{{deadlineDate || '选择日期'}}</text></picker>
-          <picker mode="time" value="{{deadlineTime}}" data-field="deadlineTime" bind:change="onPicker"><text class="frow-value">{{deadlineTime || '选择时间'}}</text></picker>
-        </view>
-        <view class="frow">
+        <datetime-field
+          label="开始时间"
+          required="{{type === 'activity' || type === 'aid'}}"
+          date="{{startDate}}"
+          time="{{startTime}}"
+          data-name="start"
+          bind:change="onDateTimeChange"
+        />
+        <datetime-field
+          label="报名截止"
+          date="{{deadlineDate}}"
+          time="{{deadlineTime}}"
+          data-name="deadline"
+          bind:change="onDateTimeChange"
+        />
+        <view class="frow matter-form-row">
           <text class="frow-label">地点{{type === 'activity' || type === 'aid' ? ' *' : ''}}</text>
-          <input class="frow-input" value="{{location}}" maxlength="120" data-field="location" bind:input="onInput" />
+          <input
+            class="frow-input matter-form-input"
+            value="{{location}}"
+            placeholder="例如：小区东门活动室"
+            maxlength="120"
+            data-field="location"
+            bind:input="onInput"
+          />
         </view>
       </block>
 
@@ -74,7 +118,12 @@
       </view>
 
       <!-- 署名发起（管理动作）：物业/业委会/商家想做的调研，代建后亮明发起方，结果对全小区公开 -->
-      <view class="frow" wx:if="{{isAdmin && type === 'census'}}" hover-class="frow-hover" bind:tap="chooseInitiatorParty">
+      <view
+        class="frow"
+        wx:if="{{isAdmin && type === 'census'}}"
+        hover-class="frow-hover"
+        bind:tap="chooseInitiatorParty"
+      >
         <view class="frow-main">
           <view class="row-title">署名发起方</view>
           <view class="row-sub">物业/业委会/商家的调研在此署名，业主看得到是谁想了解什么</view>
@@ -105,17 +154,38 @@
     <!-- 长文本：公告正文 / 说明 -->
     <view class="card" wx:if="{{type === 'notice'}}">
       <view class="q-title">公告正文<text class="f-required">*</text></view>
-      <textarea class="fin farea" auto-height maxlength="2000" value="{{body}}" data-field="body" bind:input="onInput" />
+      <textarea
+        class="fin farea"
+        auto-height
+        maxlength="2000"
+        value="{{body}}"
+        data-field="body"
+        bind:input="onInput"
+      />
     </view>
     <view class="card" wx:else>
       <view class="q-title">{{type === 'census' ? '征集说明' : '把事情说清楚'}}</view>
-      <textarea class="fin farea" auto-height maxlength="1000" value="{{pitch}}" data-field="pitch" bind:input="onInput" />
+      <textarea
+        class="fin farea"
+        auto-height
+        maxlength="1000"
+        value="{{pitch}}"
+        data-field="pitch"
+        bind:input="onInput"
+      />
     </view>
 
     <!-- 征集专属：发起目的（给参与者看，为什么发这次征集） -->
     <view class="card" wx:if="{{type === 'census'}}">
       <view class="q-title">发起目的<text class="q-note">给参与者看，为什么发这次征集</text></view>
-      <textarea class="fin farea" auto-height maxlength="1000" value="{{purpose}}" data-field="purpose" bind:input="onInput" />
+      <textarea
+        class="fin farea"
+        auto-height
+        maxlength="1000"
+        value="{{purpose}}"
+        data-field="purpose"
+        bind:input="onInput"
+      />
     </view>
 
     <!-- 团购专属条目列表 -->
@@ -123,8 +193,24 @@
       <view class="card">
         <view class="q-title">团购条件</view>
         <view class="pair" wx:for="{{terms}}" wx:key="index">
-          <input class="fin pair-a" value="{{item.label}}" maxlength="30" data-list="terms" data-index="{{index}}" data-field="label" bind:input="onRowInput" />
-          <input class="fin pair-b" value="{{item.value}}" maxlength="100" data-list="terms" data-index="{{index}}" data-field="value" bind:input="onRowInput" />
+          <input
+            class="fin pair-a"
+            value="{{item.label}}"
+            maxlength="30"
+            data-list="terms"
+            data-index="{{index}}"
+            data-field="label"
+            bind:input="onRowInput"
+          />
+          <input
+            class="fin pair-b"
+            value="{{item.value}}"
+            maxlength="100"
+            data-list="terms"
+            data-index="{{index}}"
+            data-field="value"
+            bind:input="onRowInput"
+          />
           <view class="pair-del" data-list="terms" data-index="{{index}}" bind:tap="removeRow">✕</view>
         </view>
         <view class="add-row" data-list="terms" bind:tap="addRow">＋ 添加一条</view>
@@ -133,13 +219,48 @@
         <view class="q-title">买前必懂<text class="q-note">大白话讲清报价单上的词，3~5 条</text></view>
         <view class="pair pair-col" wx:for="{{glossary}}" wx:key="index">
           <view class="pair-head">
-            <input class="fin pair-a" value="{{item.term}}" maxlength="30" data-list="glossary" data-index="{{index}}" data-field="term" bind:input="onRowInput" />
+            <input
+              class="fin pair-a"
+              value="{{item.term}}"
+              maxlength="30"
+              data-list="glossary"
+              data-index="{{index}}"
+              data-field="term"
+              bind:input="onRowInput"
+            />
             <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 起草</view>
             <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
           </view>
-          <textarea class="fin farea" auto-height value="{{item.explain}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="explain" bind:input="onRowInput" />
-          <textarea class="fin farea" auto-height value="{{item.judge}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="judge" bind:input="onRowInput" />
-          <textarea class="fin farea" auto-height value="{{item.caution}}" maxlength="300" data-list="glossary" data-index="{{index}}" data-field="caution" bind:input="onRowInput" />
+          <textarea
+            class="fin farea"
+            auto-height
+            value="{{item.explain}}"
+            maxlength="300"
+            data-list="glossary"
+            data-index="{{index}}"
+            data-field="explain"
+            bind:input="onRowInput"
+          />
+          <textarea
+            class="fin farea"
+            auto-height
+            value="{{item.judge}}"
+            maxlength="300"
+            data-list="glossary"
+            data-index="{{index}}"
+            data-field="judge"
+            bind:input="onRowInput"
+          />
+          <textarea
+            class="fin farea"
+            auto-height
+            value="{{item.caution}}"
+            maxlength="300"
+            data-list="glossary"
+            data-index="{{index}}"
+            data-field="caution"
+            bind:input="onRowInput"
+          />
         </view>
         <view class="add-row" data-list="glossary" bind:tap="addRow">＋ 添加一条</view>
       </view>
@@ -171,10 +292,20 @@
     </view>
 
     <!-- 删除（管理动作）：与吸底的保存拉开距离，避免误触 -->
-    <t-button wx:if="{{isAdmin && id}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这件事项</t-button>
+    <t-button
+      wx:if="{{isAdmin && id}}"
+      theme="danger"
+      variant="text"
+      block
+      style="width: 100%; margin-top: 40rpx"
+      bind:tap="remove"
+      >删除这件事项</t-button
+    >
 
     <view class="footer-bar">
-      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit">{{id ? '保存' : (isAdmin ? '发布' : '提交审核')}}</t-button>
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="submit"
+        >{{type === 'census' && !id ? '保存并配置题目' : (id ? '保存' : (isAdmin ? '发布' : '提交审核'))}}</t-button
+      >
     </view>
   </page-status>
 </view>

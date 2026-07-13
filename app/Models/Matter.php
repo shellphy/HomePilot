@@ -166,6 +166,23 @@ class Matter extends Model
         return is_array($value) ? $value : [];
     }
 
+    public function hasCensusQuestions(): bool
+    {
+        foreach ($this->payloadList('modules') as $module) {
+            if (! is_array($module)) {
+                continue;
+            }
+
+            $questions = $module['questions'] ?? null;
+
+            if (is_array($questions) && $questions !== []) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** @return BelongsTo<Resident, $this> */
     public function initiator(): BelongsTo
     {

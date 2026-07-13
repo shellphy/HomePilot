@@ -71,6 +71,11 @@ class MatterFactory extends Factory
         return $this->state(fn (): array => ['review_status' => MatterReviewStatus::Pending]);
     }
 
+    public function draft(): static
+    {
+        return $this->state(fn (): array => ['review_status' => MatterReviewStatus::Draft]);
+    }
+
     public function rejected(string $reason = '需要补充信息'): static
     {
         return $this->state(fn (): array => [

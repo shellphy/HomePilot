@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.datetime-row {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  min-height: 116rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--line);
+  box-sizing: border-box;
+}
+
+.datetime-label {
+  flex-shrink: 0;
+  width: 156rpx;
+  color: var(--text-primary);
+  font-size: 28rpx;
+}
+
+.datetime-required {
+  margin-left: 8rpx;
+  color: var(--danger);
+  font-size: 20rpx;
+}
+
+.datetime-fields {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  gap: 12rpx;
+}
+
+.datetime-picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.datetime-control {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 76rpx;
+  padding: 0 14rpx;
+  background: var(--bg-page);
+  border: 1rpx solid var(--line);
+  border-radius: 14rpx;
+  box-sizing: border-box;
+}
+
+.datetime-kind {
+  flex-shrink: 0;
+  margin-right: 8rpx;
+  color: var(--text-muted);
+  font-size: 21rpx;
+}
+
+.datetime-value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 24rpx;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datetime-placeholder {
+  color: var(--text-muted);
+}
+
+.datetime-arrow {
+  flex-shrink: 0;
+  margin-left: 6rpx;
+  color: var(--line-dark);
+  font-size: 30rpx;
+}
