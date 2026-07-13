@@ -2,7 +2,7 @@
 // 社区名称、口号、张罗类型清单全部来自 /options。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
-const { getMe } = require('../../utils/me');
+const { getMe, getTodos } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 // 各类型的收尾态：压成单行沉底
@@ -13,6 +13,7 @@ Page({
 
   data: {
     community: {},
+    todos: [], // 待我处理（首页只 peek 最高优先级几项）
     initiatableTypes: [],
     merchantUnlisted: false, // 未认证商家：入口保留，点击引导认证
     listedParties: 0,
@@ -52,11 +53,12 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [res, stats, options, me] = await Promise.all([
+      const [res, stats, options, me, todos] = await Promise.all([
         matters.listMatters(),
         profile.getStats(),
         profile.getOptions(),
         getMe(),
+        getTodos(),
       ]);
       const notices = res.data.filter((matter) => matter.type === 'notice');
       // 征集(census)整条归「数据」tab（进行中+往期+聚合都在那）
@@ -81,6 +83,7 @@ Page({
       const typeFilter = feedTypes.some((type) => type.key === this.data.typeFilter) ? this.data.typeFilter : '';
       this.setData({
         community: options.community || {},
+        todos,
         initiatableTypes: (options.matter_types || []).filter((type) => (me.party
           ? isMerchant && me.party.is_listed && type.merchant_initiatable
           : type.user_initiatable)),

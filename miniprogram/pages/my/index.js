@@ -1,7 +1,7 @@
 // 我的：我家在小区里的档案（标准布局：头像区 + 分组单元格）
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
-const { getMe } = require('../../utils/me');
+const { getMe, getTodos } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 Page({
@@ -9,6 +9,7 @@ Page({
 
   data: {
     me: null,
+    todos: [],
     joinedCount: 0,
     mineCount: 0,
     censusCount: 0,
@@ -29,10 +30,11 @@ Page({
   reload() {
     return this.runLoad(async () => {
       // /me 强制刷新：未读红点（has_mine_updates 等）要反映最新动态，不能吃会话缓存
-      const [me, mineRes, joinedRes] = await Promise.all([
+      const [me, mineRes, joinedRes, todos] = await Promise.all([
         getMe(true),
         matters.listMine(),
         matters.listJoined(),
+        getTodos(),
       ]);
       const [pendingCount, partyPendingCount] = me.is_admin
         ? await Promise.all([
@@ -56,6 +58,7 @@ Page({
 
       this.setData({
         me,
+        todos,
         identityLine,
         partyStatusNote,
         censusCount: (me.censuses || []).length,
