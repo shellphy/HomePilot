@@ -16,12 +16,12 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 90;
+    public int $timeout = 180;
 
     /** @var list<int> */
-    public array $backoff = [10, 30];
+    public array $backoff = [15, 60];
 
-    public int $uniqueFor = 300;
+    public int $uniqueFor = 600;
 
     public function __construct(public int $stanceId, public string $answerHash) {}
 

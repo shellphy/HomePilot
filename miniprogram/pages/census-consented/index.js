@@ -1,4 +1,4 @@
-// 发起者视图 · 邻居授权登记：只列出主动勾选「让发起者看到我的登记」的邻居，
+// 发起者视图 · 邻居授权问卷：只列出主动勾选「让发起者看到我的问卷」的邻居，
 // 含显示名、手机号（限收联系方式的征集）、逐题回答。授权由后端收窄到发起者本人/管理员。
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
@@ -9,7 +9,7 @@ Page({
   data: {
     id: null,
     registrations: [],
-    openId: null, // 展开答案的登记
+    openId: null, // 展开答案的问卷
   },
 
   onLoad(query) {

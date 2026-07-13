@@ -2,7 +2,7 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <view class="card">
       <view class="kicker" wx:if="{{registrations.length}}">{{registrations.length}} 位邻居主动授权你查看</view>
-      <view class="lead" wx:if="{{registrations.length}}">这些邻居勾选了「让发起者看到我的登记」，其余参与者只计入匿名统计。</view>
+      <view class="lead" wx:if="{{registrations.length}}">这些邻居勾选了「让发起者看到我的问卷」，其余参与者只计入匿名统计。</view>
       <block wx:for="{{registrations}}" wx:key="id">
         <view class="row" hover-class="row-hover" data-id="{{item.id}}" bind:tap="toggle">
           <view class="row-main">
@@ -19,7 +19,7 @@
           <view wx:if="{{!item.answers.length}}" class="hint">没有答案</view>
         </view>
       </block>
-      <view wx:if="{{!registrations.length}}" class="hint">还没有邻居授权你查看。参与者答题时可勾选「让发起者看到我的登记」。</view>
+      <view wx:if="{{!registrations.length}}" class="hint">还没有邻居授权你查看。参与者填写时可勾选「让发起者看到我的问卷」。</view>
     </view>
   </page-status>
 </view>
