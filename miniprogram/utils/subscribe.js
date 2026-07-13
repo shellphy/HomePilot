@@ -9,7 +9,11 @@ function requestSubscribe() {
     const lastAsked = wx.getStorageSync(ASKED_AT_KEY) || 0;
     if (Date.now() - lastAsked < ASK_INTERVAL) return resolve();
     wx.setStorageSync(ASKED_AT_KEY, Date.now());
-    wx.requestSubscribeMessage({ tmplIds: [TEMPLATE_ID], complete: resolve });
+    // 非用户手势上下文（如确认弹窗之后）调用时，complete 可能不回调；
+    // 加超时兜底，别把 await 它的保存流程永远卡住、按钮一直转圈
+    const done = () => resolve();
+    setTimeout(done, 2000);
+    wx.requestSubscribeMessage({ tmplIds: [TEMPLATE_ID], complete: done });
   });
 }
 
