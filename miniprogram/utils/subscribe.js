@@ -11,4 +11,18 @@ function requestSubscribe() {
   });
 }
 
-module.exports = { requestSubscribe };
+function getSubscribeStatus() {
+  return new Promise((resolve) => {
+    if (!wx.getSetting) return resolve('unsupported');
+    wx.getSetting({
+      withSubscriptions: true,
+      success: ({ subscriptionsSetting }) => {
+        const setting = subscriptionsSetting || {};
+        resolve((setting.itemSettings && setting.itemSettings[TEMPLATE_ID]) || (setting.mainSwitch === false ? 'disabled' : 'unknown'));
+      },
+      fail: () => resolve('unknown'),
+    });
+  });
+}
+
+module.exports = { requestSubscribe, getSubscribeStatus };

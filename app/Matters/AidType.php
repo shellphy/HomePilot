@@ -54,13 +54,13 @@ class AidType extends MatterType
 
     public function allowsJoin(Matter $matter): bool
     {
-        return $matter->state === 'open';
+        return $matter->state === 'open' && $this->registrationOpen($matter);
     }
 
     /** 进行中就互通联系方式：拼车、代收不互通电话成不了事。 */
     public function contactsOpen(Matter $matter): bool
     {
-        return $matter->state === 'open';
+        return $matter->state === 'open' && $this->registrationOpen($matter);
     }
 
     /** 互助结束后开放评价，给后来搭伙的邻居留参考。 */

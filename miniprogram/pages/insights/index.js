@@ -5,17 +5,6 @@ const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 
-/** @returns {{question: string, label: string, count: number}|null} 第一道已有答案的题里票数最高的选项 */
-function topAnswer(aggregates) {
-  const question = (aggregates || [])
-    .flatMap((module) => module.questions || [])
-    .find((item) => Object.keys(item.counts || {}).length);
-  if (!question) return null;
-
-  const [label, count] = Object.entries(question.counts).sort((a, b) => b[1] - a[1])[0];
-  return { question: question.text, label, count };
-}
-
 Page({
   behaviors: [load],
 
@@ -50,36 +39,34 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [stats, options, feed] = await Promise.all([
+      const [stats, options, overview] = await Promise.all([
         profile.getStats(),
         profile.getOptions(),
-        matters.listMatters(),
+        matters.listCensusOverview(),
       ]);
-      const censuses = feed.data.filter((matter) => matter.type === 'census');
+      const censuses = overview.data;
 
       // 进行中的通常只有一两期，逐期拉聚合做头牌数据；往期直接用事项流字段
-      const openCards = await Promise.all(censuses
+      const openCards = censuses
         .filter((matter) => matter.state === 'open')
-        .map(async (matter) => {
-          const census = await matters.getCensus(matter.id);
-          return {
+        .map((matter) => ({
             id: matter.id,
             title: matter.title,
-            pitch: census.pitch,
-            registered: census.registered_count,
-            myAnswered: Object.keys(census.answers || {}).length,
+            pitch: matter.pitch,
+            registered: matter.registered,
+            myAnswered: matter.my_answered,
             percent: stats.residents
-              ? Math.min(100, Math.round((census.registered_count / stats.residents) * 100))
+              ? Math.min(100, Math.round((matter.registered / stats.residents) * 100))
               : 0,
-            top: topAnswer(census.aggregates),
-          };
-        }));
+            top: matter.top,
+            aggregatesVisible: matter.aggregates_visible,
+          }));
       const pastItems = censuses
         .filter((matter) => matter.state !== 'open')
         .map((matter) => ({
           id: matter.id,
           title: matter.title,
-          note: `${matter.state_label} · ${matter.register_count} 人已登记`,
+          note: `${matter.state_label} · ${matter.registered} 人已登记`,
         }));
 
       this.setData({

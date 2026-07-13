@@ -28,6 +28,10 @@
         bind:tap="goCensusForm"
       >参与登记</t-button>
 
+      <view class="card hint" wx:if="{{!block.aggregatesVisible}}">
+        为避免他人的选择影响你的判断，进行中的统计会在你完成登记后展示；少于 {{block.aggregatesMinimum}} 份时暂不公开。
+      </view>
+
       <block wx:for="{{block.sections}}" wx:for-item="section" wx:key="title">
         <view class="card stats-section" wx:if="{{section.questions.length}}">
           <view class="stats-section-head" data-index="{{index}}" bind:tap="toggleSection">

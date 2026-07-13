@@ -31,7 +31,12 @@ class MatterAdminController extends Controller
             ->with(['initiator', 'initiatorParty'])
             ->withCount('joins')
             ->withCount(['stances as register_count' => fn ($query) => $query->where('mode', Stance::MODE_REGISTER)])
-            ->latest()
+            ->orderByRaw('CASE WHEN review_status = ? THEN 0 WHEN review_status = ? THEN 1 ELSE 2 END', [
+                MatterReviewStatus::Pending->value,
+                MatterReviewStatus::Rejected->value,
+            ])
+            ->orderByRaw('CASE WHEN review_status = ? THEN created_at END ASC', [MatterReviewStatus::Pending->value])
+            ->latest('created_at')
             ->get();
 
         return response()->json([
@@ -154,6 +159,11 @@ class MatterAdminController extends Controller
             'register_count' => (int) ($matter->register_count ?? 0),
             'payload' => $matter->payload ?? (object) [],
             'created_at' => $matter->created_at?->format('Y-m-d H:i'),
+            'pending_hours' => $matter->review_status === MatterReviewStatus::Pending
+                ? (int) $matter->created_at->diffInHours(now())
+                : 0,
+            'needs_attention' => $matter->review_status === MatterReviewStatus::Pending
+                && $matter->created_at->lte(now()->subDay()),
         ];
     }
 }

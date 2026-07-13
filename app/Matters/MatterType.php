@@ -80,6 +80,11 @@ abstract class MatterType
         return array_key_first($this->states());
     }
 
+    protected function registrationOpen(Matter $matter): bool
+    {
+        return ! $matter->registrationHasClosed();
+    }
+
     /**
      * 旁路终态的显示名（如 未成团/已取消）：半途收场的出口，从任意非终态可直接进入，
      * 不触发评价/联系互通等事后能力。null 表示该类型没有半途收场一说（如公告/征集）。

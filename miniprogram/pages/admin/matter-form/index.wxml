@@ -41,6 +41,23 @@
         <input class="frow-input" type="number" value="{{targetCount}}" data-field="targetCount" bind:input="onInput" />
       </view>
 
+      <block wx:if="{{type === 'groupbuy' || type === 'activity' || type === 'aid'}}">
+        <view class="frow">
+          <text class="frow-label">开始时间{{type === 'activity' || type === 'aid' ? ' *' : ''}}</text>
+          <picker mode="date" value="{{startDate}}" data-field="startDate" bind:change="onPicker"><text class="frow-value">{{startDate || '选择日期'}}</text></picker>
+          <picker mode="time" value="{{startTime}}" data-field="startTime" bind:change="onPicker"><text class="frow-value">{{startTime || '选择时间'}}</text></picker>
+        </view>
+        <view class="frow">
+          <text class="frow-label">报名截止</text>
+          <picker mode="date" value="{{deadlineDate}}" data-field="deadlineDate" bind:change="onPicker"><text class="frow-value">{{deadlineDate || '选择日期'}}</text></picker>
+          <picker mode="time" value="{{deadlineTime}}" data-field="deadlineTime" bind:change="onPicker"><text class="frow-value">{{deadlineTime || '选择时间'}}</text></picker>
+        </view>
+        <view class="frow">
+          <text class="frow-label">地点{{type === 'activity' || type === 'aid' ? ' *' : ''}}</text>
+          <input class="frow-input" value="{{location}}" maxlength="120" data-field="location" bind:input="onInput" />
+        </view>
+      </block>
+
       <!-- 状态流转（管理动作）：单选走 action-sheet，与资料页「身份」同一套交互 -->
       <view class="frow" wx:if="{{isAdmin && stateKeys.length}}" hover-class="frow-hover" bind:tap="chooseState">
         <text class="frow-label">状态</text>

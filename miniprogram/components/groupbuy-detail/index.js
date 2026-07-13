@@ -5,6 +5,7 @@ const { pillClass, joinPercent, stateOptions, starsOf } = require('../../utils/c
 const { guardProfileError } = require('../../utils/profile-guard');
 const { splitByTerms } = require('../../utils/term-match');
 const { requestSubscribe } = require('../../utils/subscribe');
+const { unbindParty } = require('../../utils/me');
 
 Component({
   options: {
@@ -17,6 +18,7 @@ Component({
     isInitiator: Boolean,
     myReview: Object,
     contacts: Array, // 团长视角：同意共享的参团者联系方式（成团后）
+    contactRoster: Array,
     initiatorContact: Object, // 参团者视角：团长联系方式（成团后且自己同意过共享）
     isParty: Boolean, // 相关方身份不参与接龙，报名区改为解释 + 切回业主入口
     partyLabel: String, // 当前相关方身份的显示名（解释文案用）
@@ -44,6 +46,8 @@ Component({
     termRows: [],
     finalRows: [],
     activeTerm: null,
+    rosterKeyword: '',
+    filteredRoster: [],
   },
 
   observers: {
@@ -95,11 +99,43 @@ Component({
         reviewContent: (myReview && myReview.content) || '',
       });
     },
+    'contactRoster, rosterKeyword': function (contactRoster, rosterKeyword) {
+      const keyword = (rosterKeyword || '').trim().toLowerCase();
+      this.setData({
+        filteredRoster: (contactRoster || []).filter((row) => !keyword
+          || row.name.toLowerCase().includes(keyword)
+          || (row.phone || '').includes(keyword)
+          || (row.leader_note || '').toLowerCase().includes(keyword)),
+      });
+    },
   },
 
   methods: {
     refresh() {
       this.triggerEvent('refresh');
+    },
+
+    onRosterSearch(event) {
+      this.setData({ rosterKeyword: event.detail.value });
+    },
+
+    editParticipant(event) {
+      const row = this.data.filteredRoster[event.currentTarget.dataset.index];
+      wx.showModal({
+        title: row.contact_status === 'contacted' ? '更新联系备注' : '标记已联系',
+        editable: true,
+        placeholderText: '例如：已进群，周三量房',
+        content: row.leader_note || '',
+        success: async ({ confirm, content }) => {
+          if (!confirm) return;
+          await matters.updateParticipant(this.data.matter.id, row.stance_id, {
+            contact_status: 'contacted',
+            leader_note: (content || '').trim(),
+          });
+          wx.showToast({ title: '已更新', icon: 'success' });
+          this.refresh();
+        },
+      });
     },
 
     // 量出吸底操作条的实际高度上报给页面，让页面按需精确预留底部空间：
@@ -403,7 +439,16 @@ Component({
 
     // 相关方身份不参与接龙：去个人资料页切回业主身份
     goSwitchIdentity() {
-      wx.navigateTo({ url: '/pages/profile-form/index' });
+      wx.showModal({
+        title: '切回业主身份？',
+        content: '切回后即可报名；相关方档案会保留，之后可在个人资料里再次切换。',
+        confirmText: '切回并报名',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          await unbindParty();
+          this.refresh();
+        },
+      });
     },
   },
 });

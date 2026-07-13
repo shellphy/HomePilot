@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
 use App\Http\Resources\ResidentResource;
+use App\Models\Matter;
 use App\Services\WeChat;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -44,6 +45,14 @@ class ProfileController extends Controller
 
         $resident = $this->resident($request);
         $resident->forceFill([$validated['kind'].'_seen_at' => now()])->save();
+
+        $matters = $validated['kind'] === 'mine'
+            ? Matter::whereBelongsTo($resident, 'initiator')->get()
+            : Matter::whereHas('joins', fn ($query) => $query->whereBelongsTo($resident, 'resident'))->get();
+        $matters->each(fn (Matter $matter) => $matter->reads()->updateOrCreate(
+            ['resident_id' => $resident->id],
+            ['seen_at' => now()],
+        ));
 
         return ResidentResource::make($resident->load('affiliatedParty'));
     }

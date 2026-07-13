@@ -11,6 +11,13 @@
   </view>
 </view>
 
+<view class="card" wx:if="{{matter.starts_on || matter.location || matter.registration_deadline_on}}">
+  <view class="kicker">时间与地点</view>
+  <view class="term-row" wx:if="{{matter.starts_on}}"><text class="term-label">开始</text><text class="term-value">{{matter.starts_on}}</text></view>
+  <view class="term-row" wx:if="{{matter.registration_deadline_on}}"><text class="term-label">报名截止</text><text class="term-value">{{matter.registration_deadline_on}}{{matter.registration_closed ? '（已截止）' : ''}}</text></view>
+  <view class="term-row" wx:if="{{matter.location}}"><text class="term-label">地点</text><text class="term-value">{{matter.location}}</text></view>
+</view>
+
 <view class="card" wx:if="{{matter.pitch}}">
   <view class="kicker">发起人说</view>
   <view class="pitch">“{{matter.pitch}}”</view>
@@ -189,5 +196,5 @@
 <!-- 相关方身份：不进名单，但说清楚为什么、怎么参与 -->
 <view class="cta-dock" wx:if="{{matter.join_open && isParty}}">
   <view class="party-note">你正以「{{partyLabel}}」身份浏览，{{meta.roster}}仅向业主开放</view>
-  <t-button theme="light" block size="large" style="width: 100%" bind:tap="goSwitchIdentity">切回业主身份参与</t-button>
+  <t-button theme="light" block size="large" style="width: 100%" bind:tap="goSwitchIdentity">切回业主身份并参与</t-button>
 </view>

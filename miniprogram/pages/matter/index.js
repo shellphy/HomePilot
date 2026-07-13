@@ -27,6 +27,7 @@ Page({
     isInitiator: false,
     myReview: null,
     contacts: [], // 牵头人视角：同意共享的参与者联系方式（互通阶段）
+    contactRoster: [],
     initiatorContact: null, // 参与者视角：牵头人联系方式（互通阶段且自己同意过共享）
     canRespond: false, // 被认证的治理类相关方成员：可发官方回应
     isParty: false, // 相关方身份不参与接龙，改为解释 + 切回业主入口
@@ -103,6 +104,7 @@ Page({
         isInitiator: res.data.initiator_id === me.id,
         myReview: res.my_review || null,
         contacts: res.contacts,
+        contactRoster: res.contact_roster || [],
         initiatorContact: res.initiator_contact,
         canRespond: !!(me.party && me.party.is_listed && GOVERNANCE_TYPES.includes(me.party.type)),
         isParty: !!me.party,
@@ -110,6 +112,9 @@ Page({
         myShareContact: !!res.my_share_contact,
         myJoinStage: res.my_join_stage || '',
       });
+      if (res.data.initiator_id === me.id || res.joined) {
+        matters.markMatterSeen(this.data.id).catch(() => {});
+      }
       wx.setNavigationBarTitle({ title: res.data.title });
     });
   },

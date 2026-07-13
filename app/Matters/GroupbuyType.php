@@ -98,7 +98,7 @@ class GroupbuyType extends MatterType
     /** 收场（已成团/未成团）前都可以报名/取消。 */
     public function allowsJoin(Matter $matter): bool
     {
-        return ! $this->isFinalState($matter->state);
+        return ! $this->isFinalState($matter->state) && $this->registrationOpen($matter);
     }
 
     /**

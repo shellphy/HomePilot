@@ -4,6 +4,7 @@ const matters = require('../../utils/api/matters');
 const { pillClass, TYPE_META, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
 const { requestSubscribe } = require('../../utils/subscribe');
+const { unbindParty } = require('../../utils/me');
 
 Component({
   options: {
@@ -279,7 +280,16 @@ Component({
 
     // 相关方身份不参与接龙：去个人资料页切回业主身份
     goSwitchIdentity() {
-      wx.navigateTo({ url: '/pages/profile-form/index' });
+      wx.showModal({
+        title: '切回业主身份？',
+        content: '切回后即可参与；相关方档案会保留，之后可在个人资料里再次切换。',
+        confirmText: '切回并参与',
+        success: async ({ confirm }) => {
+          if (!confirm) return;
+          await unbindParty();
+          this.refresh();
+        },
+      });
     },
   },
 });
