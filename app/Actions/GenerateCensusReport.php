@@ -9,18 +9,18 @@ use App\Models\Stance;
 
 class GenerateCensusReport
 {
-    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): string
+    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): void
     {
         $answers = $stance->payload['answers'] ?? [];
         $answerHash = $this->answerHash($answers);
         $existing = $stance->payload['ai_report'] ?? null;
 
         if ($expectedHash !== null && $expectedHash !== $answerHash) {
-            return is_string($existing) ? $existing : '';
+            return;
         }
 
         if (is_string($existing) && $existing !== '' && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
-            return $existing;
+            return;
         }
 
         $prompt = json_encode([
@@ -37,11 +37,13 @@ class GenerateCensusReport
 
         $report = trim((new CensusReportGenerator)->prompt($prompt)->text);
 
+        // 生成期间答案又变了：丢弃这次结果，别覆盖更新的答案
         $stance->refresh();
         $latestAnswers = $stance->payload['answers'] ?? [];
-        if (($expectedHash !== null && $this->answerHash($latestAnswers) !== $expectedHash)
-            || ($expectedHash !== null && ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
-            return $report;
+        if ($expectedHash !== null
+            && ($this->answerHash($latestAnswers) !== $expectedHash
+                || ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
+            return;
         }
 
         $payload = $stance->payload ?? [];
@@ -55,8 +57,6 @@ class GenerateCensusReport
             $payload['ai_report_error'],
         );
         $stance->update(['payload' => $payload]);
-
-        return $report;
     }
 
     /** @param array<string, mixed> $answers */
