@@ -81,6 +81,26 @@ test('census ai context carries purpose, questions, option notes, my answer and 
         ->toContain('多数选「颗粒板」（2 人）');   // 匿名聚合的多数选择
 });
 
+test('census ai context uses draft answers passed with the question over saved ones', function () {
+    [$census, $asker] = censusWithAnswers();
+
+    // 存库里 q1 = 多层实木；本地未保存改成颗粒板，AI 应看到最新的草稿选择
+    $instructions = (string) (new MatterExplainer($census, $asker, ['q1' => '颗粒板']))->instructions();
+
+    expect($instructions)
+        ->toContain('柜体倾向哪种板材？→颗粒板')
+        ->not->toContain('柜体倾向哪种板材？→多层实木');
+});
+
+test('census ai context shows draft answers even without a saved registration', function () {
+    [$census] = censusWithAnswers();
+
+    $fresh = Resident::factory()->create();
+    $instructions = (string) (new MatterExplainer($census, $fresh, ['q1' => '多层实木']))->instructions();
+
+    expect($instructions)->toContain('柜体倾向哪种板材？→多层实木');
+});
+
 test('census ai context omits my registration for a resident who has not answered', function () {
     [$census] = censusWithAnswers();
 

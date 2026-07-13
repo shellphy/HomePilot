@@ -38,6 +38,7 @@ Page({
       matterId: this.data.id,
       matterTitle: this.data.title,
       question: `我正在回答「${text}」。${selected}请结合我的情况告诉我怎么选；信息不足时，只问我一个最关键的问题。`,
+      answers: this.data.answers, // 带上当前整份（含未保存）答案，AI 才知道前面的题已经选了
     });
   },
 

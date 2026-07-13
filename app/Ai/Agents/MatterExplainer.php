@@ -35,7 +35,7 @@ class MatterExplainer implements Agent, Conversational, HasTools
      */
     private const RENOVATION_CATEGORIES = ['装修', '装修公司', '中央空调', '全屋定制', '软装', '地暖', '门窗'];
 
-    public function __construct(public Matter $matter, public ?Resident $asker = null) {}
+    public function __construct(public Matter $matter, public ?Resident $asker = null, public ?array $draftAnswers = null) {}
 
     /**
      * Get the instructions that the agent should follow.
@@ -242,8 +242,10 @@ PROMPT.$this->matterContext();
             ->where('resident_id', $this->asker->id)
             ->first();
 
-        $answers = $stance?->payload['answers'] ?? null;
-        if (! is_array($answers)) {
+        // 未保存的本地答案（问 AI 时随请求带上）覆盖已存答案，AI 才看得到屏幕上的实时选择
+        $stored = $stance?->payload['answers'] ?? [];
+        $answers = array_merge(is_array($stored) ? $stored : [], $this->draftAnswers ?? []);
+        if ($answers === []) {
             return [];
         }
 
