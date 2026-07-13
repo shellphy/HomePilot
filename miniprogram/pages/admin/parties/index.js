@@ -61,22 +61,23 @@ Page({
     });
   },
 
-  // 驳回/撤下附一句理由，归属人在详情页看到，改资料后即重新提交
+  // 附一句理由，归属人在详情页看到，改资料后即重新提交；已认证的是「撤下」，其余是「驳回」
   reject(event) {
     const { id } = event.currentTarget.dataset;
     const party = this.data.all.find((item) => item.id === id);
+    const action = party.review_status === 'approved' ? '撤下' : '驳回';
     wx.showModal({
-      title: `驳回「${party.name || 'TA'}」`,
+      title: `${action}「${party.name || 'TA'}」`,
       editable: true,
-      confirmText: '驳回',
+      confirmText: action,
       success: async ({ confirm, content }) => {
         if (!confirm) return;
         const reason = (content || '').trim();
-        // 没有理由的驳回会让归属人不知道怎么改，重新提交的闭环就断了
-        if (!reason) return wx.showToast({ title: '请写一句驳回理由', icon: 'none' });
+        // 没有理由会让归属人不知道怎么改，重新提交的闭环就断了
+        if (!reason) return wx.showToast({ title: `请写一句${action}理由`, icon: 'none' });
         try {
           await admin.reviewParty(id, false, reason);
-          wx.showToast({ title: '已驳回', icon: 'none' });
+          wx.showToast({ title: `已${action}`, icon: 'none' });
           this.reload();
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });

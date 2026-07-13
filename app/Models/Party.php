@@ -96,14 +96,6 @@ class Party extends Model
         ]);
     }
 
-    public function markPending(): void
-    {
-        $this->update([
-            'review_status' => PartyReviewStatus::Pending,
-            'reject_reason' => '',
-        ]);
-    }
-
     /**
      * @param  Builder<Party>  $query
      * @return Builder<Party>

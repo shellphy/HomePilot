@@ -6,6 +6,18 @@ use App\Models\Resident;
 use App\Models\Stance;
 use Laravel\Sanctum\Sanctum;
 
+test('editing an approved party profile sends it back for re-review', function () {
+    $merchant = Resident::factory()->merchant()->create();
+    $merchant->affiliatedParty->approve();
+    Sanctum::actingAs($merchant);
+
+    // 改了公开资料（主营）→ 打回待认证，重新过审前退出名录
+    $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城中央空调', 'category' => '地暖'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.party.review_status', 'pending')
+        ->assertJsonPath('data.party.is_listed', false);
+});
+
 test('a rejected party returns to pending when the owner resubmits its profile', function () {
     $party = Party::factory()->rejected()->merchant()->create(['name' => '青城中央空调']);
     $member = Resident::factory()->create(['affiliated_party_id' => $party->id, 'last_party_id' => $party->id]);

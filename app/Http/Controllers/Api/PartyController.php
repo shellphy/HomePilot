@@ -151,23 +151,29 @@ class PartyController extends Controller
             'images' => $validated['images'] ?? [],
         ];
 
-        // 档案跟人走：当前绑定的、或上次切走时留下的同类型档案都直接复用
-        // （资料原样保留），只有真正第一次入驻才新建
+        // 档案跟人走：当前绑定的、或上次切走时留下的同类型档案都直接复用，只有真正第一次入驻才新建
         $party = $resident->affiliatedParty;
         if (! $party || $party->type !== $validated['type']) {
             $last = $resident->lastParty()->first();
             $party = ($last && $last->type === $validated['type']) ? $last : null;
         }
 
-        // 新建 → 待认证进队列；被驳回后改资料重交 → 打回待认证。两种都提醒管理员去认证
+        // 新建，或已认证/已驳回的档案改了公开资料 → 进（回）待认证队列并提醒管理员；
+        // 原样切回身份（资料没变）保留原认证状态
         $enteredQueue = false;
         if ($party) {
-            $wasRejected = $party->review_status === PartyReviewStatus::Rejected;
-            $party->update($profile);
-            if ($wasRejected) {
-                $party->markPending();
-                $enteredQueue = true;
-            }
+            $changed = [
+                'name' => $party->name,
+                'category' => $party->category ?? '',
+                'intro' => $party->intro ?? '',
+                'description' => $party->description ?? '',
+                'images' => $party->images ?? [],
+            ] !== $profile;
+            $requeue = $changed && $party->review_status !== PartyReviewStatus::Pending;
+            $party->update($requeue
+                ? [...$profile, 'review_status' => PartyReviewStatus::Pending, 'reject_reason' => '']
+                : $profile);
+            $enteredQueue = $requeue;
         } else {
             $party = Party::create(['type' => $validated['type'], ...$profile]);
             $enteredQueue = true;
