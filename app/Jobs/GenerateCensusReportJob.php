@@ -16,7 +16,8 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
 
     public int $tries = 3;
 
-    public int $timeout = 180;
+    // 联网检索会拉长生成时间，超时链须满足 agent(200) < job < retry_after(300)
+    public int $timeout = 240;
 
     /** @var list<int> */
     public array $backoff = [15, 60];

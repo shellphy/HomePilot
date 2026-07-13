@@ -2,17 +2,21 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\SearchesWeb;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
-#[Timeout(150)]
-class CensusReportGenerator implements Agent, HasStructuredOutput
+#[Provider('deepseek-anthropic')]
+#[Timeout(200)]
+class CensusReportGenerator implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, SearchesWeb;
 
     /**
      * Get the instructions that the agent should follow.
@@ -30,7 +34,7 @@ class CensusReportGenerator implements Agent, HasStructuredOutput
 - 发现答案之间可能冲突时直接指出，并说明为什么需要进一步确认。
 - 分享摘要必须是相关方可以直接理解和执行的内容，不含姓名、电话、楼栋、小区身份或邻居统计。
 - 语言简洁具体，不推荐具体品牌、商家或服务方，不编造价格、规范数字和用户没有提供的个人或家庭情况。
-PROMPT;
+PROMPT.$this->structuredJsonDirective();
     }
 
     /**

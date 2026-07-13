@@ -2,21 +2,26 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\SearchesWeb;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
 /**
  * 术语决策卡起草：输入事项术语 + 品类，产出「是什么 / 怎么选 / 避坑」三段草稿，
  * 由团长/管理员校订后才发布——AI 只起草，不直接面向业主。
+ * 接入联网检索，让「怎么选 / 避坑」能参考实时行情与常见坑，不凭空编。
  */
-#[Timeout(30)]
-class GlossaryDrafter implements Agent, HasStructuredOutput
+#[Provider('deepseek-anthropic')]
+#[Timeout(90)]
+class GlossaryDrafter implements Agent, HasStructuredOutput, HasTools
 {
-    use Promptable;
+    use Promptable, SearchesWeb;
 
     /**
      * Get the instructions that the agent should follow.
@@ -32,7 +37,7 @@ class GlossaryDrafter implements Agent, HasStructuredOutput
 - caution（避坑）：说明最常见的误解、风险或营销噱头，以及该向相关方确认什么，不超过 100 字。
 
 要求：根据输入术语和品类判断具体领域，不默认与装修有关；说人话，不用专业黑话解释黑话；不吹不黑，不提任何具体品牌；不确定的事写「以相关方书面确认为准」，不要编造数字。
-PROMPT;
+PROMPT.$this->structuredJsonDirective();
     }
 
     /**

@@ -2,15 +2,18 @@
 
 namespace App\Ai\Agents;
 
+use App\Ai\Concerns\SearchesWeb;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
 use App\Settings\CommunitySettings;
+use Laravel\Ai\Attributes\Provider;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Promptable;
 use Stringable;
 
@@ -18,11 +21,13 @@ use Stringable;
  * 居民侧 AI 答疑：面向正在了解某个团购/活动/征集的居民，
  * 带着本事项的条款、买前必懂和小区硬条件回答，支持多轮追问——
  * 这份上下文正是业主去通用 AI（ChatGPT/豆包）问不到的部分。
+ * 叠加联网检索：本事项上下文之外的时效信息（政策、行情）也能查证再答。
  */
-#[Timeout(30)]
-class MatterExplainer implements Agent, Conversational
+#[Provider('deepseek-anthropic')]
+#[Timeout(90)]
+class MatterExplainer implements Agent, Conversational, HasTools
 {
-    use Promptable, RemembersConversations;
+    use Promptable, RemembersConversations, SearchesWeb;
 
     public function __construct(public Matter $matter, public ?Resident $asker = null) {}
 

@@ -6,6 +6,7 @@ use App\Ai\Agents\GlossaryDrafter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use Throwable;
@@ -25,16 +26,40 @@ class GlossaryDraftController extends Controller
 
         $category = $validated['category'] ?? '';
 
+        Log::info('AI 术语卡起草开始', [
+            'term' => $validated['term'],
+            'category' => $category,
+        ]);
+
         try {
             $draft = (new GlossaryDrafter)->prompt(
                 ($category !== '' ? "团购品类：{$category}\n" : '')."术语：{$validated['term']}",
             );
-        } catch (Throwable) {
+        } catch (Throwable $e) {
+            Log::warning('AI 术语卡起草失败（联网检索或模型异常）', [
+                'term' => $validated['term'],
+                'category' => $category,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
             abort(502, 'AI 起草暂时不可用，请稍后再试或手动填写');
         }
 
         // 结构化 agent 实际返回 StructuredAgentResponse（prompt() 声明的是父类）
-        abort_unless($draft instanceof StructuredAgentResponse, 502, 'AI 起草暂时不可用，请稍后再试或手动填写');
+        if (! $draft instanceof StructuredAgentResponse) {
+            Log::warning('AI 术语卡起草未返回结构化结果', [
+                'term' => $validated['term'],
+                'response_type' => $draft::class,
+            ]);
+            abort(502, 'AI 起草暂时不可用，请稍后再试或手动填写');
+        }
+
+        Log::debug('AI 术语卡起草完成', [
+            'term' => $validated['term'],
+            'explain_len' => mb_strlen((string) $draft['explain']),
+            'judge_len' => mb_strlen((string) $draft['judge']),
+            'caution_len' => mb_strlen((string) $draft['caution']),
+        ]);
 
         // 与 glossary 校验的 max:300 对齐，超长草稿截断而不是让提交时报错
         return response()->json(['data' => [
