@@ -281,7 +281,7 @@ Component({
       wx.showModal({
         title: '切回业主身份？',
         content: '切回后即可参与；相关方档案会保留，之后可在个人资料里再次切换。',
-        confirmText: '切回并参与',
+        confirmText: '切回参与',
         success: async ({ confirm }) => {
           if (!confirm) return;
           await unbindParty();
