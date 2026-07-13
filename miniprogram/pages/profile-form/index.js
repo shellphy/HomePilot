@@ -1,10 +1,10 @@
-// 个人资料：设置列表式行布局，头像、昵称、手机号（微信授权获取）对所有身份通用；
+// 个人资料：设置列表式行布局，头像、昵称、手机号（微信授权预填或手填）对所有身份通用；
 // 身份（业主/商家/物业…，选项由服务端下发，点击行弹 action-sheet 切换）决定下方行——
 // 业主选楼栋（社区设置的楼栋清单）/填房号；相关方填名称，补充字段（如商家主营）
 // 由类型元数据 category_label 决定是否出现。保存时按身份落库（含身份切换）。
 const { uploadImage } = require('../../utils/request');
 const profile = require('../../utils/api/profile');
-const { getMe, updateMe, authPhone, bindParty, unbindParty } = require('../../utils/me');
+const { getMe, updateMe, resolvePhone, bindParty, unbindParty } = require('../../utils/me');
 const { requestSubscribe } = require('../../utils/subscribe');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
@@ -76,29 +76,28 @@ Page({
     });
   },
 
-  // 微信原生头像选择，选完即保存（即时落库要给反馈，别让用户误以为整页都自动存了）
+  // 微信原生头像选择：上传拿 URL 后只更新预览、标脏，等点保存才落库（避免整页自动存的错觉）
   async onChooseAvatar(event) {
     try {
       const url = await uploadImage(event.detail.avatarUrl);
-      await updateMe({ avatar: url });
+      this.markDirty();
       this.setData({ avatar: url });
-      wx.showToast({ title: '头像已更新', icon: 'success' });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
     }
   },
 
-  // 微信手机号授权组件回调：拿 code 去后端换真实绑定号码，换到即保存
+  // 微信手机号授权组件回调：拿 code 换真实号码预填进输入框（不落库），用户可再改号，点保存才写入
   async onGetPhone(event) {
     if (!event.detail.code) {
-      // 用户点了拒绝：给一句反馈说明用途与可见范围
-      wx.showToast({ title: '未授权。手机号不会公示，仅必要时用于联系', icon: 'none' });
+      // 用户点了拒绝：提示可手填，不必非走微信授权
+      wx.showToast({ title: '未授权，可手动填写手机号', icon: 'none' });
       return;
     }
     try {
-      const me = await authPhone(event.detail.code);
-      this.setData({ phone: me.phone });
-      wx.showToast({ title: '手机号已更新', icon: 'success' });
+      const phone = await resolvePhone(event.detail.code);
+      this.markDirty();
+      this.setData({ phone });
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });
     }
@@ -170,7 +169,7 @@ Page({
 
   async submit() {
     const {
-      identity, identityMeta, nickname, unitLabel, roomLabel, layoutLabel,
+      identity, identityMeta, avatar, nickname, phone, unitLabel, roomLabel, layoutLabel,
       partyName, partyCategory, partyIntro, partyDescription, partyImages,
       submitting, uploading,
     } = this.data;
@@ -185,11 +184,14 @@ Page({
 
     this.setData({ submitting: true });
     try {
+      // 头像、手机号对业主/相关方通用；头像为空不下发（url 校验不接受空串）
+      const commonFields = { nickname: nickname.trim(), phone: phone.trim() };
+      if (avatar) commonFields.avatar = avatar;
       if (identity === 'resident') {
         const me = await getMe();
         if (me.party) await unbindParty(); // 从相关方切回业主
         await updateMe({
-          nickname: nickname.trim(),
+          ...commonFields,
           unit_label: unitLabel,
           room_label: roomLabel.trim(),
           layout_label: layoutLabel,
@@ -197,7 +199,7 @@ Page({
       } else {
         // 入驻提交顺手收一次订阅授权：认证结果的通知才有额度可推
         await requestSubscribe();
-        await updateMe({ nickname: nickname.trim() });
+        await updateMe(commonFields);
         await bindParty(identity, {
           name: partyName.trim(),
           // 补充字段只有声明了 category_label 的类型才有（商家主营），其余类型不携带

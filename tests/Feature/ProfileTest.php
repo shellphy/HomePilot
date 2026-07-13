@@ -78,7 +78,7 @@ test('an owner cannot clear the unit label but a party member has no such requir
     $this->putJson('/api/me', ['unit_label' => ''])->assertSuccessful();
 });
 
-test('the phone is written through the wechat authorization exchange only', function () {
+test('the wechat authorization exchange resolves a number for prefill without persisting it', function () {
     $resident = Resident::factory()->create(['phone' => '']);
     Sanctum::actingAs($resident);
 
@@ -92,11 +92,40 @@ test('the phone is written through the wechat authorization exchange only', func
         ->assertSuccessful()
         ->assertJsonPath('data.phone', '13800138000');
 
-    expect($resident->refresh()->phone)->toBe('13800138000');
+    // 只解析返回供前端预填，不落库；写入统一走 /me 保存
+    expect($resident->refresh()->phone)->toBe('');
+});
 
-    // 手机号不接受手填：/me 不认识 phone 字段，提交也不会写入
-    $this->putJson('/api/me', ['phone' => '13911112222'])->assertSuccessful();
-    expect($resident->refresh()->phone)->toBe('13800138000');
+test('the phone is saved as part of the profile and validated', function () {
+    $resident = Resident::factory()->create(['phone' => '']);
+    Sanctum::actingAs($resident);
+
+    $this->putJson('/api/me', ['phone' => '13911112222'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.phone', '13911112222');
+    expect($resident->refresh()->phone)->toBe('13911112222');
+
+    // 非法号码被拒
+    $this->putJson('/api/me', ['phone' => '139'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('phone');
+    expect($resident->refresh()->phone)->toBe('13911112222');
+
+    // 允许清空
+    $this->putJson('/api/me', ['phone' => ''])
+        ->assertSuccessful()
+        ->assertJsonPath('data.phone', '');
+    expect($resident->refresh()->phone)->toBe('');
+});
+
+test('the avatar is saved through the unified profile update', function () {
+    $resident = Resident::factory()->create(['avatar' => '']);
+    Sanctum::actingAs($resident);
+
+    $this->putJson('/api/me', ['avatar' => 'https://cdn.example.com/a.png'])
+        ->assertSuccessful()
+        ->assertJsonPath('data.avatar', 'https://cdn.example.com/a.png');
+    expect($resident->refresh()->avatar)->toBe('https://cdn.example.com/a.png');
 });
 
 test('the phone exchange requires a code', function () {

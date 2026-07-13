@@ -33,6 +33,22 @@
   background-size: 100% 100%;
 }
 
+/* 手机号行「微信号」预填按钮：压平成绿色行内文字链，不显边框盒子 */
+.frow-inline-btn {
+  flex-shrink: 0;
+  width: auto;
+  margin: 0;
+  padding: 0 8rpx;
+  min-height: 0;
+  line-height: 1;
+  background: transparent;
+  font-size: 26rpx;
+  color: var(--brand);
+}
+.frow-inline-btn::after {
+  border: none;
+}
+
 /* 相关方档案照片（与进展页同一套九宫格交互） */
 .shots {
   display: flex;
