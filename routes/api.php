@@ -94,6 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // 超级管理端（is_super_admin）：应用内增减管理员，替代纯 CLI
     Route::middleware('super_admin')->prefix('admin')->group(function () {
         Route::get('/admins', [AdminUserController::class, 'index']);
+        Route::get('/admins/candidate', [AdminUserController::class, 'candidate']);
         Route::post('/admins', [AdminUserController::class, 'store']);
         Route::delete('/admins/{resident}', [AdminUserController::class, 'destroy']);
     });

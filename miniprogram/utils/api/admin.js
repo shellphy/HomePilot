@@ -34,8 +34,14 @@ function listAdmins() {
   return request('/admin/admins');
 }
 
-function grantAdmin(phone) {
-  return request('/admin/admins', { method: 'POST', data: { phone } });
+// 先按手机号查出待授权的成员，供超管确认身份
+function lookupAdminCandidate(phone) {
+  return request(`/admin/admins/candidate?phone=${encodeURIComponent(phone)}`);
+}
+
+// 确认身份后按 id 授权
+function grantAdmin(residentId) {
+  return request('/admin/admins', { method: 'POST', data: { resident_id: residentId } });
 }
 
 function revokeAdmin(id) {
@@ -50,6 +56,7 @@ module.exports = {
   getSettings,
   saveSettings,
   listAdmins,
+  lookupAdminCandidate,
   grantAdmin,
   revokeAdmin,
 };

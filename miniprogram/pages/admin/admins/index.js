@@ -20,19 +20,37 @@ Page({
     });
   },
 
-  // 按对方在「个人资料」里授权过的手机号增补管理员
+  // 按手机号查出成员，确认身份后再授权：手机号只用于查人，落权前人眼核一次
   grant() {
     wx.showModal({
       title: '授权新管理员',
       editable: true,
       placeholderText: '输入 TA 授权过的手机号',
-      confirmText: '授权',
+      confirmText: '查找',
       success: async ({ confirm, content }) => {
         if (!confirm) return;
         const phone = (content || '').trim();
         if (!phone) return wx.showToast({ title: '请输入手机号', icon: 'none' });
+        let candidate;
         try {
-          await admin.grantAdmin(phone);
+          candidate = (await admin.lookupAdminCandidate(phone)).data;
+        } catch (error) {
+          return wx.showToast({ title: error.message, icon: 'none' });
+        }
+        this.confirmGrant(candidate);
+      },
+    });
+  },
+
+  confirmGrant(candidate) {
+    wx.showModal({
+      title: '确认授权',
+      content: `将「${candidate.name}」设为管理员？`,
+      confirmText: '授权',
+      success: async ({ confirm }) => {
+        if (!confirm) return;
+        try {
+          await admin.grantAdmin(candidate.id);
           wx.showToast({ title: '已授权', icon: 'success' });
           this.reload();
         } catch (error) {

@@ -29,18 +29,32 @@ class AdminUserController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    /**
+     * 按手机号查出待授权的成员，返回身份供超管确认（不授权）。
+     */
+    public function candidate(Request $request): JsonResponse
     {
         $validated = $request->validate(['phone' => ['required', 'string']]);
 
-        $resident = Resident::where('phone', $validated['phone'])->where('phone', '!=', '')->first();
+        $resident = $this->findByPhone($validated['phone']);
 
-        if ($resident === null) {
-            throw ValidationException::withMessages(['phone' => '没有找到用这个手机号授权过的成员']);
-        }
+        return response()->json(['data' => [
+            'id' => $resident->id,
+            'name' => $resident->displayName(),
+        ]]);
+    }
 
-        if ($resident->is_admin) {
-            throw ValidationException::withMessages(['phone' => '该成员已经是管理员']);
+    /**
+     * 超管确认身份后按 id 授权：手机号只用于查人，落权前经过一次人眼确认。
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['resident_id' => ['required', 'integer']]);
+
+        $resident = Resident::find($validated['resident_id']);
+
+        if ($resident === null || $resident->is_admin) {
+            throw ValidationException::withMessages(['resident_id' => '该成员不存在或已经是管理员']);
         }
 
         $resident->grantAdmin($this->resident($request));
@@ -57,6 +71,21 @@ class AdminUserController extends Controller
         $resident->revokeAdmin();
 
         return response()->json(['deleted' => true]);
+    }
+
+    private function findByPhone(string $phone): Resident
+    {
+        $resident = Resident::where('phone', $phone)->where('phone', '!=', '')->first();
+
+        if ($resident === null) {
+            throw ValidationException::withMessages(['phone' => '没有找到用这个手机号授权过的成员']);
+        }
+
+        if ($resident->is_admin) {
+            throw ValidationException::withMessages(['phone' => '该成员已经是管理员']);
+        }
+
+        return $resident;
     }
 
     /**
