@@ -65,6 +65,9 @@ class MatterResource extends JsonResource
             'pitch' => $this->payloadValue('pitch', ''),
             'perk' => $this->payloadValue('perk', ''),
             'terms' => $this->payloadValue('terms', []),
+            'relationship' => $this->payloadValue('relationship', ''),
+            'relationship_label' => $this->relationshipLabel(),
+            'rebate_note' => $this->payloadValue('rebate_note', ''),
             'glossary' => $this->payloadValue('glossary', []),
             'final_terms' => $this->payloadValue('final_terms', []),
             'final_note' => $this->payloadValue('final_note', ''),
@@ -99,5 +102,17 @@ class MatterResource extends JsonResource
                 ]
             ),
         ];
+    }
+
+    /** 团购利益关系披露的展示文案（非团购或未填为空）。 */
+    private function relationshipLabel(): string
+    {
+        return match ($this->payloadValue('relationship')) {
+            'merchant_direct' => '商家直供，本团由商家自己发起',
+            'none' => '发起人与商家无利益关系，纯热心张罗',
+            'rebate' => '发起人会从中获得返点或好处',
+            'affiliated' => '发起人关联这家商家',
+            default => '',
+        };
     }
 }

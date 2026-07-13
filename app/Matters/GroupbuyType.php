@@ -51,6 +51,10 @@ class GroupbuyType extends MatterType
         return [
             'pitch' => ['nullable', 'string', 'max:1000'],
             'perk' => ['nullable', 'string', 'max:100'],
+            // 发起人与商家的利益关系披露（业主发起须选，见 MatterController；商家直供由后端置 merchant_direct）
+            'relationship' => ['nullable', 'in:none,rebate,affiliated,merchant_direct'],
+            // 有返点时必须说明去向
+            'rebate_note' => ['nullable', 'required_if:relationship,rebate', 'string', 'max:200'],
             // 逐人报价团购：非标准品，商家需单独和每位报名者沟通需求、单独出方案，
             // 联系互通提前到谈判中
             'needs_survey' => ['sometimes', 'boolean'],
@@ -72,7 +76,15 @@ class GroupbuyType extends MatterType
             'terms' => $validated['terms'] ?? [],
             'glossary' => $validated['glossary'] ?? [],
             'needs_survey' => (bool) ($validated['needs_survey'] ?? false),
+            'relationship' => $validated['relationship'] ?? 'none',
+            'rebate_note' => $validated['rebate_note'] ?? '',
         ];
+    }
+
+    /** 条款/披露实质变更后，已确认参团者需重新确认——比对这些键。 */
+    public function materialPayloadKeys(): array
+    {
+        return ['terms', 'relationship', 'rebate_note'];
     }
 
     /** 方案型开关只在发起时选：中途翻转会改变联系互通的隐私承诺。 */

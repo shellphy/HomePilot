@@ -67,6 +67,18 @@ class SubscribeNotifier
         );
     }
 
+    /**
+     * 团购条款实质变更 → 通知被降级的参团者审核通过后重新确认。
+     *
+     * @param  array<int, int>  $residentIds
+     */
+    public function termsRevised(Matter $matter, array $residentIds): void
+    {
+        $recipients = Resident::whereIn('id', $residentIds)->get()->all();
+
+        $this->notifyMatter($matter, $recipients, '条款有变', '团购条款有更新，审核通过后请重新确认参团');
+    }
+
     public function dealPosted(Matter $matter): void
     {
         $recipients = $matter->confirmedJoins()->with('resident')->get()

@@ -27,6 +27,7 @@ test('a groupbuy accepts a signup window that closes after its start time or has
     // 团购报名窗口本就常晚于开始时间，且开始时间可留空——都应能提交
     $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'title' => '全屋定制团',
         'category' => '家具',
         'target_count' => 10,
@@ -36,6 +37,7 @@ test('a groupbuy accepts a signup window that closes after its start time or has
 
     $this->postJson('/api/matters', [
         'type' => 'groupbuy',
+        'relationship' => 'none',
         'title' => '临期食品团',
         'category' => '食品',
         'target_count' => 5,
