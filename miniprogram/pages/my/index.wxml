@@ -17,10 +17,10 @@
     <!-- 待我处理：聚合下一步动作，点每项直达对应页 -->
     <todo-list todos="{{todos}}" />
 
-    <!-- 相关方认证状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
+    <!-- 相关方核验状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
     <view class="list" wx:if="{{me.party}}">
       <view class="row" hover-class="row-hover" bind:tap="goPartyStatus">
-        <text class="row-title">{{me.party.label}}认证</text>
+        <text class="row-title">{{me.party.label}}核验</text>
         <view class="row-right">
           <text class="row-note {{me.party.review_status === 'rejected' ? 'row-note-todo' : ''}}">{{partyStatusNote}}</text>
           <text class="row-arrow">›</text>
@@ -66,9 +66,9 @@
         </view>
       </view>
       <view class="row" hover-class="row-hover" bind:tap="goAdminParties">
-        <text class="row-title">相关方认证</text>
+        <text class="row-title">相关方核验</text>
         <view class="row-right">
-          <text class="row-note {{partyPendingCount ? 'row-note-todo' : ''}}">{{partyPendingCount ? partyPendingCount + ' 家待认证' : ''}}</text>
+          <text class="row-note {{partyPendingCount ? 'row-note-todo' : ''}}">{{partyPendingCount ? partyPendingCount + ' 家待核验' : ''}}</text>
           <text class="row-arrow">›</text>
         </view>
       </view>

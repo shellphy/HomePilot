@@ -26,7 +26,7 @@ use Illuminate\Support\Collection;
  * @property PartyReviewStatus $review_status
  * @property string $reject_reason
  * @property Carbon|null $reviewed_at
- * @property-read bool $is_listed 派生：review_status 是否为已认证
+ * @property-read bool $is_listed 派生：review_status 是否为已核验
  */
 class Party extends Model
 {
@@ -43,7 +43,7 @@ class Party extends Model
 
     /**
      * 相关方类型注册表：加一种类型改这里即可，API 与小程序入驻页自动跟随。
-     * 所有类型统一走「自助亮明身份 → 管理员认证」一条链路。
+     * 所有类型统一走「自助亮明身份 → 管理员核验」一条链路。
      * name_hint = 入驻表单名称栏的提示；category_label = 档案补充字段的标签
      * （空 = 该类型没有补充字段，主营品类只对商家有意义）；
      * description_hint = 详细介绍的引导语（简介/详细介绍/照片各类型统一，内容自由发挥）。
@@ -74,7 +74,7 @@ class Party extends Model
     }
 
     /**
-     * 公示态 = 认证通过：名录、发起权、官方回应都以此为准。
+     * 公示态 = 核验通过：名录、发起权、官方回应都以此为准。
      *
      * @return Attribute<bool, never>
      */
@@ -110,7 +110,7 @@ class Party extends Model
     }
 
     /**
-     * 治理类相关方（物业/开发商/业委会）：被管理员认证（is_listed）后，
+     * 治理类相关方（物业/开发商/业委会）：被管理员核验（is_listed）后，
      * 其成员可在事项时间线里以官方身份回应。
      */
     public function isGovernance(): bool

@@ -16,7 +16,7 @@ Component({
     joined: Boolean,
     isInitiator: Boolean,
     myReview: Object, // 我的评价（结束后可修改）
-    canRespond: Boolean, // 被认证的治理类相关方成员：可发官方回应
+    canRespond: Boolean, // 被核验的治理类相关方成员：可发官方回应
     isParty: Boolean, // 相关方身份不参与接龙，参与区改为解释 + 切回业主入口
     partyLabel: String, // 当前相关方身份的显示名（解释文案用）
     contacts: Array, // 发起人视角：同意共享的参与者联系方式（互通阶段，如活动报名中）

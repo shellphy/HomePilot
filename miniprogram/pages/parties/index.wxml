@@ -13,11 +13,11 @@
       <view class="party-note">{{item.note}} · 点击看详情</view>
     </view>
 
-    <view wx:if="{{!parties.length}}" class="hint">还没有商家通过认证</view>
+    <view wx:if="{{!parties.length}}" class="hint">还没有商家通过核验</view>
 
     <view class="register-cta">
       <t-button theme="light" size="medium" block bind:tap="goRegister">成为入驻相关方</t-button>
-      <view class="register-note">商家 / 物业 / 业委会都可以入驻，认证后对全小区公示</view>
+      <view class="register-note">商家 / 物业 / 业委会都可以入驻，核验后对全小区公示</view>
     </view>
   </page-status>
 </view>

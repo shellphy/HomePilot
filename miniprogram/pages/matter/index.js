@@ -30,7 +30,7 @@ Page({
     contacts: [], // 牵头人视角：同意共享的参与者联系方式（互通阶段）
     contactRoster: [],
     initiatorContact: null, // 参与者视角：牵头人联系方式（互通阶段且自己同意过共享）
-    canRespond: false, // 被认证的治理类相关方成员：可发官方回应
+    canRespond: false, // 被核验的治理类相关方成员：可发官方回应
     isParty: false, // 相关方身份不参与接龙，改为解释 + 切回业主入口
     partyLabel: '', // 当前相关方身份的显示名（解释文案用）
     myShareContact: false, // 我报名时的联系方式共享意愿（成团后补开共享的入口据此显示）

@@ -14,8 +14,8 @@ Page({
     mineCount: 0,
     censusCount: 0,
     pendingCount: 0,
-    partyPendingCount: 0, // 待认证相关方（有成员但未认证）
-    partyStatusNote: '', // 我的相关方认证状态（审核中/已认证/未通过）
+    partyPendingCount: 0, // 待核验相关方（有成员但未核验）
+    partyStatusNote: '', // 我的相关方核验状态（审核中/已核验/未通过）
   },
 
   onShow() {
@@ -74,7 +74,7 @@ Page({
     wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 认证状态入口：未通过直接去改资料重交，其余去档案详情看公示情况
+  // 核验状态入口：未通过直接去改资料重交，其余去档案详情看公示情况
   goPartyStatus() {
     const party = this.data.me && this.data.me.party;
     if (!party) return;

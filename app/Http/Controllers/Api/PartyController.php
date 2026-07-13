@@ -18,7 +18,7 @@ class PartyController extends Controller
     use ResolvesResident;
 
     /**
-     * 已认证商家名录（面向全小区）：带发起事项数、成团数与评价沉淀。
+     * 已核验商家名录（面向全小区）：带发起事项数、成团数与评价沉淀。
      * 只收商家——物业/业委会等治理身份的公开面是事项时间线里的官方回应署名，不进名录。
      */
     public function index(): JsonResponse
@@ -53,7 +53,7 @@ class PartyController extends Controller
                     'name' => $party->name,
                     'category' => $party->category,
                     'intro' => $party->intro,
-                    // 已认证相关方公开联系电话——入驻本身就是求曝光，电话是最直接的转化
+                    // 已核验相关方公开联系电话——入驻本身就是求曝光，电话是最直接的转化
                     'phone' => $owner?->phone,
                     'matter_count' => (int) $party->getAttribute('matter_count'),
                     'deal_count' => (int) $party->getAttribute('deal_count'),
@@ -67,8 +67,8 @@ class PartyController extends Controller
     }
 
     /**
-     * 相关方详情页：名录点入（已认证对全小区可见）；
-     * 未认证的档案只有管理员（审核前看资料）和归属人自己（预览）能看。
+     * 相关方详情页：名录点入（已核验对全小区可见）；
+     * 未核验的档案只有管理员（审核前看资料）和归属人自己（预览）能看。
      */
     public function show(Request $request, Party $party): JsonResponse
     {
@@ -113,7 +113,7 @@ class PartyController extends Controller
     }
 
     /**
-     * 相关方入驻：创建一个相关方并绑定到当前成员（管理员认证后 is_listed 才为真）。
+     * 相关方入驻：创建一个相关方并绑定到当前成员（管理员核验后 is_listed 才为真）。
      * 商家/物业/业委会等全部走这一条链路，可选类型由 Party::TYPES 声明，前端入驻页自动跟随。
      */
     public function store(Request $request): ResidentResource
@@ -159,8 +159,8 @@ class PartyController extends Controller
             $party = ($last && $last->type === $validated['type']) ? $last : null;
         }
 
-        // 新建，或已认证/已驳回的档案改了公开资料 → 进（回）待认证队列并提醒管理员；
-        // 原样切回身份（资料没变）保留原认证状态
+        // 新建，或已核验/已驳回的档案改了公开资料 → 进（回）待核验队列并提醒管理员；
+        // 原样切回身份（资料没变）保留原核验状态
         $enteredQueue = false;
         if ($party) {
             $changed = [
@@ -190,8 +190,8 @@ class PartyController extends Controller
 
     /**
      * 切回业主身份：只解绑、不删档案。last_party_id 记着它，
-     * 再次入驻同类型身份时原样找回（资料、认证状态都在），
-     * 认证队列里也始终只有这一条档案。
+     * 再次入驻同类型身份时原样找回（资料、核验状态都在），
+     * 核验队列里也始终只有这一条档案。
      */
     public function destroy(Request $request): ResidentResource
     {

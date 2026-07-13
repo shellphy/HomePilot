@@ -11,7 +11,7 @@ test('editing an approved party profile sends it back for re-review', function (
     $merchant->affiliatedParty->approve();
     Sanctum::actingAs($merchant);
 
-    // 改了公开资料（主营）→ 打回待认证，重新过审前退出名录
+    // 改了公开资料（主营）→ 打回待核验，重新过审前退出名录
     $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城中央空调', 'category' => '地暖'])
         ->assertSuccessful()
         ->assertJsonPath('data.party.review_status', 'pending')
@@ -43,7 +43,7 @@ test('a resident can self register as a merchant', function () {
         ->assertJsonPath('data.party.label', '商家')
         ->assertJsonPath('data.party.name', '青城中央空调');
 
-    expect($resident->refresh()->affiliatedParty->is_listed)->toBeFalse(); // 公示名单要管理员认证
+    expect($resident->refresh()->affiliatedParty->is_listed)->toBeFalse(); // 公示名单要管理员核验
 });
 
 test('resubmitting merchant info updates the same party instead of creating another', function () {
@@ -92,7 +92,7 @@ test('switching away and back restores the same party with profile and certifica
         // 档案没删：上次的资料随 /me 下发，资料页据此预填
         ->assertJsonPath('data.last_party.name', '青城中央空调');
 
-    // 再次入驻同类型：找回原档案，认证状态原样保留，不产生新记录
+    // 再次入驻同类型：找回原档案，核验状态原样保留，不产生新记录
     $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城中央空调', 'category' => '中央空调'])
         ->assertSuccessful()
         ->assertJsonPath('data.party.is_listed', true);
@@ -135,13 +135,13 @@ test('party members answer censuses but stay out of rosters', function () {
 });
 
 test('only certified merchants initiate, and only groupbuys or activities', function () {
-    // 未认证商家：发起被拒，提示先认证
+    // 未核验商家：发起被拒，提示先核验
     Sanctum::actingAs(Resident::factory()->merchant()->create());
     $this->postJson('/api/matters', [
         'type' => 'groupbuy', 'category' => '门窗', 'title' => '商家直供团', 'target_count' => 10,
     ])->assertForbidden();
 
-    // 已认证商家：可发团购（署商家名、带认证标识），不能发维权
+    // 已核验商家：可发团购（署商家名、带核验标识），不能发维权
     $certified = Resident::factory()->create([
         'affiliated_party_id' => Party::factory()->listed()->merchant()->create(['name' => '青城门窗'])->id,
     ]);
@@ -184,8 +184,8 @@ test('merchant initiated matters keep the merchant byline after identity switche
 
 test('the certified party directory ships deal counts and review ratings', function () {
     $listed = Party::factory()->listed()->merchant()->create(['name' => '青城门窗', 'category' => '门窗']);
-    Party::factory()->merchant()->create(); // 未认证：不进名录
-    Party::factory()->listed()->create(['type' => Party::TYPE_PROPERTY]); // 治理身份：认证了也不进商家名录
+    Party::factory()->merchant()->create(); // 未核验：不进名录
+    Party::factory()->listed()->create(['type' => Party::TYPE_PROPERTY]); // 治理身份：核验了也不进商家名录
 
     $initiator = Resident::factory()->create(['affiliated_party_id' => $listed->id]);
     $deal = Matter::factory()->done()->for($initiator, 'initiator')->create(['initiator_party_id' => $listed->id]);

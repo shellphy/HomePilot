@@ -22,7 +22,7 @@
     <!-- 待我处理：首页只 peek 最高优先级的几项，其余去「我的」看全量 -->
     <todo-list todos="{{todos}}" limit="{{3}}" />
 
-    <!-- 已认证商家名录入口（有认证商家才出现） -->
+    <!-- 已核验商家名录入口（有核验商家才出现） -->
     <view wx:if="{{listedParties}}" class="card prow" hover-class="row-hover" bind:tap="goParties">
       <text class="prow-title">已核验商家名录</text>
       <text class="prow-note">{{listedParties}} 家 ›</text>

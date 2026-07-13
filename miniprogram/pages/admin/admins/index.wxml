@@ -1,6 +1,6 @@
 <view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-    <view class="hint intro">超级管理员可以增减管理员。管理员做事项审核、相关方认证、社区设置。</view>
+    <view class="hint intro">超级管理员可以增减管理员。管理员做事项审核、相关方核验、社区设置。</view>
     <view class="card">
       <view class="row" wx:for="{{admins}}" wx:key="id">
         <view class="row-main">

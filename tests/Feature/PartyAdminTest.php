@@ -18,7 +18,7 @@ test('admin rejects a party with a reason and it leaves the pending queue', func
 
     expect($party->refresh()->is_listed)->toBeFalse();
 
-    // 驳回态在等归属人改，不再占认证队列的待办
+    // 驳回态在等归属人改，不再占核验队列的待办
     $this->getJson('/api/admin/parties')->assertJsonPath('pending_count', 0);
 });
 
@@ -30,7 +30,7 @@ test('certifying a party is admin only', function () {
 });
 
 test('a self registered property member can post official responses once certified', function () {
-    // 物业和商家走同一条链路：自助亮明身份 → 管理员认证
+    // 物业和商家走同一条链路：自助亮明身份 → 管理员核验
     $member = Resident::factory()->create();
     Sanctum::actingAs($member);
     $this->postJson('/api/me/party', ['type' => 'property', 'name' => '天青府物业服务中心'])
@@ -38,7 +38,7 @@ test('a self registered property member can post official responses once certifi
 
     $matter = Matter::factory()->rights()->create();
 
-    // 认证前不能官方回应
+    // 核验前不能官方回应
     $this->postJson("/api/matters/{$matter->id}/updates", [
         'happened_on' => '2026-07-11',
         'content' => '已收到联名诉求。',
@@ -48,7 +48,7 @@ test('a self registered property member can post official responses once certifi
     $partyId = $member->refresh()->affiliated_party_id;
     $this->putJson("/api/admin/parties/{$partyId}", ['is_approved' => true])->assertSuccessful();
 
-    // 用 fresh 实例重新登录，避免认证前缓存的 affiliatedParty 关系
+    // 用 fresh 实例重新登录，避免核验前缓存的 affiliatedParty 关系
     Sanctum::actingAs($member->fresh());
     $this->postJson("/api/matters/{$matter->id}/updates", [
         'happened_on' => '2026-07-11',
@@ -60,7 +60,7 @@ test('the pending count tracks unlisted parties that have members', function () 
     Sanctum::actingAs(Resident::factory()->admin()->create());
     Party::factory()->create(); // 空壳档案不算待办
     Party::factory()->listed()->create();
-    Resident::factory()->merchant()->create(); // merchant() 绑定一个未认证商家
+    Resident::factory()->merchant()->create(); // merchant() 绑定一个未核验商家
 
     $this->getJson('/api/admin/parties')
         ->assertSuccessful()

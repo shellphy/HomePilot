@@ -3,7 +3,7 @@
 namespace App\Enums;
 
 /**
- * 相关方入驻的认证状态：待认证 → 认证通过公示 / 驳回；驳回后编辑资料即重新回到待认证。
+ * 相关方入驻的核验状态：待核验 → 核验通过公示 / 驳回；驳回后编辑资料即重新回到待核验。
  */
 enum PartyReviewStatus: string
 {
@@ -14,8 +14,8 @@ enum PartyReviewStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => '待认证',
-            self::Approved => '已认证',
+            self::Pending => '待核验',
+            self::Approved => '已核验',
             self::Rejected => '未通过',
         };
     }

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('intro', 60)->default('');
             $table->text('description')->nullable();
             $table->json('images')->nullable();
-            $table->boolean('is_listed')->default(false); // 管理员认证后进入公示商家名单
+            $table->boolean('is_listed')->default(false); // 管理员核验后进入公示商家名单
             $table->timestamps();
         });
     }

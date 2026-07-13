@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "相关方认证",
+  "navigationBarTitleText": "相关方核验",
   "usingComponents": {
     "page-status": "/components/page-status/index"
   }

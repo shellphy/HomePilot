@@ -100,7 +100,7 @@ class SubscribeNotifier
     }
 
     /**
-     * 相关方认证通过 → 通知档案归属人（当前绑定的成员优先，其次最近绑定过的）。
+     * 相关方核验通过 → 通知档案归属人（当前绑定的成员优先，其次最近绑定过的）。
      */
     public function partyListed(Party $party): void
     {
@@ -115,13 +115,13 @@ class SubscribeNotifier
             'pages/party/index?id='.$party->id,
             $party->name,
             $party->typeLabel().'入驻',
-            '认证通过',
+            '核验通过',
             '已进入小区公示名录',
         );
     }
 
     /**
-     * 相关方自助入驻 → 通知管理员去认证。
+     * 相关方自助入驻 → 通知管理员去核验。
      */
     public function partyRegistered(Party $party): void
     {
@@ -130,13 +130,13 @@ class SubscribeNotifier
             'pages/admin/parties/index',
             $party->name,
             $party->typeLabel().'入驻',
-            '待认证',
-            '有新入驻等待认证',
+            '待核验',
+            '有新入驻等待核验',
         ));
     }
 
     /**
-     * 相关方认证被驳回 → 通知归属人（附理由，可改后重交）。
+     * 相关方核验被驳回 → 通知归属人（附理由，可改后重交）。
      */
     public function partyRejected(Party $party): void
     {

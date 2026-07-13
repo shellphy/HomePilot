@@ -205,7 +205,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 发起事项：业主可发起（类型需允许）；已认证商家可发起团购/活动（带商家署名）；
+     * 发起事项：业主可发起（类型需允许）；已核验商家可发起团购/活动（带商家署名）；
      * 其余相关方身份不发起（治理方走官方回应）。管理员不受发起权/身份/楼栋护栏限制，
      * 可代发任何类型并显式署名（物业/业委会的调研）。征集先存草稿并配置题目，
      * 其它类型直接进待审，管理员审核后公示。
@@ -228,7 +228,7 @@ class MatterController extends Controller
 
             if ($party !== null) {
                 abort_unless($party->type === Party::TYPE_MERCHANT, 403, '该身份不发起事项，如需张罗请切回业主身份');
-                abort_unless($party->is_listed, 403, '商家发起需先由管理员认证，请联系管理员');
+                abort_unless($party->is_listed, 403, '商家发起需先由管理员核验，请联系管理员');
                 abort_unless($type->merchantInitiatable(), 403, '商家可以发起团购和活动');
             }
 
