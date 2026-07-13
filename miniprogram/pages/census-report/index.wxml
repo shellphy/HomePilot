@@ -18,37 +18,8 @@
     </block>
 
     <block wx:if="{{report}}">
-      <view class="report-hero">
-        <view class="report-kicker">{{presentation.profile_label}}</view>
-        <view class="report-title">{{report.headline}}</view>
-        <view class="report-overview">{{report.overview}}</view>
-      </view>
-
-      <view class="card" wx:if="{{report.priorities.length}}">
-        <view class="section-title">优先守住</view>
-        <view class="priority" wx:for="{{report.priorities}}" wx:key="title">
-          <view class="item-title">{{index + 1}}. {{item.title}}</view>
-          <view class="item-copy">{{item.reason}}</view>
-          <view class="item-action">下一步：{{item.action}}</view>
-        </view>
-      </view>
-
-      <view class="card" wx:if="{{report.decisions.length}}">
-        <view class="section-title">已经形成的方向</view>
-        <view class="decision" wx:for="{{report.decisions}}" wx:key="topic">
-          <view class="decision-head"><text>{{item.topic}}</text><text class="choice">{{item.choice}}</text></view>
-          <view class="item-copy">{{item.meaning}}</view>
-        </view>
-      </view>
-
-      <view class="card warning-card" wx:if="{{report.risks.length}}">
-        <view class="section-title">{{presentation.risk_label}}</view>
-        <view class="bullet" wx:for="{{report.risks}}" wx:key="*this">• {{item}}</view>
-      </view>
-
-      <view class="card" wx:if="{{report.open_questions.length}}">
-        <view class="section-title">还要确认</view>
-        <view class="check" wx:for="{{report.open_questions}}" wx:key="*this"><text class="box"></text>{{item}}</view>
+      <view class="card">
+        <rich-text class="report-md" nodes="{{reportNodes}}"></rich-text>
       </view>
 
       <view class="actions">

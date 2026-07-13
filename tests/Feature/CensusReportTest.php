@@ -52,9 +52,9 @@ function runQueuedCensusReport(): void
     $queuedJob->handle(app(GenerateCensusReport::class));
 }
 
-test('a resident generates and reuses a structured census report', function () {
+test('a resident generates and reuses a markdown census report', function () {
     Queue::fake();
-    CensusReportGenerator::fake();
+    CensusReportGenerator::fake(["## 我的问卷总结\n\n- 重视环保与防潮"]);
     $resident = Resident::factory()->create(['layout_label' => '130㎡']);
     $matter = reportCensus($resident);
     Sanctum::actingAs($resident);
@@ -74,15 +74,12 @@ test('a resident generates and reuses a structured census report', function () {
     $first = $this->getJson("/api/matters/{$matter->id}/census-report")
         ->assertSuccessful()
         ->assertJsonPath('generation_status', 'completed')
-        ->assertJsonStructure([
-            'report' => ['headline', 'overview', 'priorities', 'decisions', 'open_questions', 'risks'],
-            'presentation' => ['profile_label', 'report_title', 'risk_label'],
-        ])
-        ->assertJsonPath('presentation.report_title', '我的问卷总结');
+        ->assertJsonStructure(['report', 'presentation' => ['empty_description']]);
+    expect($first->json('report'))->toBeString()->toContain('重视环保与防潮');
 
     $this->postJson("/api/matters/{$matter->id}/census-report")
         ->assertSuccessful()
-        ->assertJsonPath('report.headline', $first->json('report.headline'));
+        ->assertJsonPath('report', $first->json('report'));
 
     Queue::assertPushedTimes(GenerateCensusReportJob::class, 1);
     CensusReportGenerator::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('130㎡') && $prompt->contains('老人'));

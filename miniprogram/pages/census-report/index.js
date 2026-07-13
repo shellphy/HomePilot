@@ -1,5 +1,6 @@
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
+const { mdToHtml } = require('../../utils/markdown');
 
 Page({
   behaviors: [load],
@@ -7,7 +8,8 @@ Page({
   data: {
     censusId: null,
     title: '',
-    report: null,
+    report: '',
+    reportNodes: '',
     generating: false,
     generationStatus: 'idle',
     generationError: '',
@@ -44,7 +46,8 @@ Page({
   applyReport(data) {
     this.setData({
       title: data.title || '',
-      report: data.report || null,
+      report: data.report || '',
+      reportNodes: data.report ? mdToHtml(data.report) : '',
       presentation: data.presentation || {},
       generationStatus: data.generation_status || (data.report ? 'completed' : 'idle'),
       generationError: data.generation_error || '',

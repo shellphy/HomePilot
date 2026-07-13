@@ -45,7 +45,7 @@ function censusWithAnswers(): array
         'mode' => Stance::MODE_REGISTER,
         'payload' => [
             'answers' => ['q1' => '多层实木', 'q2' => '希望环保达标'],
-            'ai_report' => ['headline' => '重视环保与防潮'],
+            'ai_report' => "## 我的问卷总结\n\n你重视环保与防潮。",
         ],
     ]);
 

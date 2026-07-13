@@ -207,8 +207,8 @@ PROMPT.$this->matterContext();
                 ->where('resident_id', $this->asker->id)
                 ->first();
             $report = $reportStance?->payload['ai_report'] ?? null;
-            if (is_array($report)) {
-                $lines[] = '已生成的个人问卷报告：'.json_encode($report, JSON_UNESCAPED_UNICODE);
+            if (is_string($report) && $report !== '') {
+                $lines[] = '已生成的个人问卷报告：'.$report;
             }
         }
 

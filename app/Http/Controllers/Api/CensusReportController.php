@@ -32,7 +32,7 @@ class CensusReportController extends Controller
         $answerHash = $generate->answerHash(is_array($answers) ? $answers : []);
         $payload = $stance->payload ?? [];
 
-        if (is_array($payload['ai_report'] ?? null)
+        if (is_string($payload['ai_report'] ?? null) && $payload['ai_report'] !== ''
             && ($payload['ai_report_answers_hash'] ?? null) === $answerHash) {
             return response()->json($this->responseData($matter, $stance));
         }
@@ -67,7 +67,7 @@ class CensusReportController extends Controller
         $answers = $payload['answers'] ?? [];
         $answerHash = hash('sha256', json_encode(is_array($answers) ? $answers : [], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         $report = $payload['ai_report'] ?? null;
-        $reportIsCurrent = is_array($report) && ($payload['ai_report_answers_hash'] ?? null) === $answerHash;
+        $reportIsCurrent = is_string($report) && $report !== '' && ($payload['ai_report_answers_hash'] ?? null) === $answerHash;
         $status = match (true) {
             $reportIsCurrent => 'completed',
             ($payload['ai_report_pending_hash'] ?? null) === $answerHash => 'pending',
