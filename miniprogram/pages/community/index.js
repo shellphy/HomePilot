@@ -130,7 +130,7 @@ Page({
       const contactTip = adminContact ? `联系管理员认证：${adminContact}` : '请联系管理员认证。';
       wx.showModal({
         title: '先完成商家认证',
-        content: `认证后就能以商家身份发起团购和活动，并带「已认证」标识。${contactTip}`,
+        content: `核验后就能以商家身份发起团购和活动，并带「身份已核验」标识。${contactTip}`,
         showCancel: false,
         confirmText: '好的',
       });

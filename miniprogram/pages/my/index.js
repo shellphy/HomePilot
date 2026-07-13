@@ -49,7 +49,7 @@ Page({
       const partyStatusNote = me.party
         ? {
           pending: '审核中',
-          approved: '已认证',
+          approved: '身份已核验',
           rejected: '未通过，点此改资料重交',
         }[me.party.review_status]
         : '';

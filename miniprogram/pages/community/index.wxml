@@ -21,7 +21,7 @@
 
     <!-- 已认证商家名录入口（有认证商家才出现） -->
     <view wx:if="{{listedParties}}" class="card prow" hover-class="row-hover" bind:tap="goParties">
-      <text class="prow-title">已认证商家名录</text>
+      <text class="prow-title">已核验商家名录</text>
       <text class="prow-note">{{listedParties}} 家 ›</text>
     </view>
 
