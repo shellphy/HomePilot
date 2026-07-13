@@ -8,7 +8,7 @@ use Illuminate\Validation\Rule;
 
 /**
  * 征集/摸底：面向全小区收集结构化表态（mode=register），聚合结果匿名公示。
- * 业主与管理员都可发起；参与走登记表态而不是接龙。
+ * 业主与管理员都可发起；参与走登记表态。
  */
 class CensusType extends MatterType
 {

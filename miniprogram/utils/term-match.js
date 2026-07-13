@@ -1,5 +1,5 @@
 // 把一段文案按「买前必懂」的术语切段：命中的段渲染成可点的词，就地弹出决策卡。
-// 教育发生在业主撞见术语的那一刻，而不是让他先去读完术语表。
+// 就地教育：业主撞见术语的那一刻命中即弹卡。
 function splitByTerms(text, terms) {
   const content = String(text || '');
   const candidates = (terms || []).filter((term) => term && term.trim());

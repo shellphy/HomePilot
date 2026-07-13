@@ -12,7 +12,7 @@ use Throwable;
 
 /**
  * 「买前必懂」AI 改写：发起人先手填一段术语说明，这里把它改写得更清楚后回填同一个输入框。
- * AI 只改写不另起炉灶，团长/管理员把关后才随事项提交——草稿不直接落库。
+ * AI 只改写，团长/管理员把关后才随事项提交——草稿不直接落库。
  */
 class GlossaryDraftController extends Controller
 {
