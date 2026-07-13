@@ -16,11 +16,12 @@ test('it seeds the custom furniture primer with a valid question schema', functi
     $questions = $modules->flatMap(fn (array $module): array => $module['questions']);
 
     expect($modules)->toHaveCount(7)
-        ->and($questions)->toHaveCount(24)
+        ->and($questions)->toHaveCount(25)
         ->and($questions->pluck('key')->duplicates())->toBeEmpty()
         ->and($questions->pluck('key'))->toContain(
             'site_readiness',
             'kitchen_workflow',
+            'wardrobe_fittings',
             'appliance_coordination',
             'accessibility_safety',
             'drawing_acceptance',
