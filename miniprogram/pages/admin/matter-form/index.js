@@ -187,7 +187,7 @@ Page({
   addRow(event) {
     this.markDirty();
     const { list } = event.currentTarget.dataset;
-    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '', judge: '', caution: '' };
+    const blank = list === 'terms' ? { label: '', value: '' } : { term: '', explain: '' };
     this.setData({ [list]: [...this.data[list], blank] });
   },
 

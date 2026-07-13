@@ -94,6 +94,21 @@ return [
             ],
         ],
 
+        // DeepSeek 的 Anthropic 兼容端点：借 anthropic driver 拿服务端 web search
+        // （deepseek driver 的 OpenAI 格式不支持 WebSearch）。
+        'deepseek-anthropic' => [
+            'driver' => 'anthropic',
+            'key' => env('DEEPSEEK_API_KEY'),
+            'url' => env('DEEPSEEK_ANTHROPIC_URL', 'https://api.deepseek.com/anthropic/v1'),
+            'models' => [
+                'text' => [
+                    'default' => env('DEEPSEEK_MODEL', 'deepseek-v4-pro'),
+                    'cheapest' => 'deepseek-v4-flash',
+                    'smartest' => 'deepseek-v4-pro',
+                ],
+            ],
+        ],
+
         'eleven' => [
             'driver' => 'eleven',
             'key' => env('ELEVENLABS_API_KEY'),

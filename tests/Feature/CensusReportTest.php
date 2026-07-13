@@ -151,8 +151,10 @@ test('report generation timeouts allow slow structured responses to finish', fun
         ->value;
     $job = new GenerateCensusReportJob(1, 'answer-hash');
 
-    // agent < job < 队列 retry_after，逐层留富余
+    // 联网检索拉长生成时间：agent HTTP 超时 < job 超时 < 队列 retry_after，逐层留富余
     expect($agentTimeout)->toBe(240)
         ->and($job->timeout)->toBe(300)
-        ->and(config('queue.connections.database.retry_after'))->toBe(360);
+        ->and(config('queue.connections.database.retry_after'))->toBe(360)
+        ->and($agentTimeout)->toBeLessThan($job->timeout)
+        ->and($job->timeout)->toBeLessThan(config('queue.connections.database.retry_after'));
 });

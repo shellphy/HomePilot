@@ -7,7 +7,10 @@ use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Laravel\Ai\Streaming\Events\Citation;
+use Laravel\Ai\Streaming\Events\ProviderToolEvent;
 use Laravel\Ai\Streaming\Events\TextDelta;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
@@ -48,29 +51,76 @@ class MatterAiChatController extends Controller
         $agent = new MatterExplainer($matter, $resident);
         $conversationId = $validated['conversation_id'] ?? null;
 
+        Log::info('AI 事项答疑开始', [
+            'matter_id' => $matter->id,
+            'resident_id' => $resident->id,
+            'continuing' => $conversationId !== null,
+        ]);
+
         $stream = ($conversationId !== null
             ? $agent->continue($conversationId, as: $resident)
             : $agent->forUser($resident)
         )->stream($validated['question']);
 
-        return response()->stream(function () use ($stream, $rateKey) {
+        return response()->stream(function () use ($stream, $rateKey, $matter, $resident) {
             try {
                 foreach ($stream as $event) {
                     if ($event instanceof TextDelta && $event->delta !== '') {
                         yield $this->frame(['delta' => $event->delta]);
+
+                        continue;
+                    }
+
+                    // 服务端联网检索：确定搜索词时下发 {searching}（前端显示检索状态），
+                    // 命中来源下发 {source}（附在答案下）。
+                    if ($event instanceof ProviderToolEvent
+                        && $event->type === 'server_tool_use'
+                        && $event->status === 'completed') {
+                        $query = (string) ($event->data['input']['query'] ?? '');
+                        if ($query !== '') {
+                            Log::debug('AI 事项答疑触发联网检索', [
+                                'matter_id' => $matter->id,
+                                'resident_id' => $resident->id,
+                                'query' => $query,
+                            ]);
+                            yield $this->frame(['searching' => $query]);
+                        }
+
+                        continue;
+                    }
+
+                    if ($event instanceof Citation) {
+                        $citation = $event->citation;
+                        yield $this->frame(['source' => [
+                            'title' => $citation->title ?? '',
+                            'url' => $citation->url ?? '',
+                        ]]);
                     }
                 }
-            } catch (Throwable) {
+            } catch (Throwable $e) {
+                Log::warning('AI 事项答疑流式中断', [
+                    'matter_id' => $matter->id,
+                    'resident_id' => $resident->id,
+                    'exception' => $e::class,
+                    'message' => $e->getMessage(),
+                ]);
                 yield $this->frame(['error' => 'AI 暂时不可用，请稍后再试']);
 
                 return;
             }
 
             // 迭代结束后 RememberConversation 中间件才写库并回填 conversation_id
+            $remaining = RateLimiter::remaining($rateKey, self::DAILY_LIMIT);
+            Log::debug('AI 事项答疑完成', [
+                'matter_id' => $matter->id,
+                'resident_id' => $resident->id,
+                'conversation_id' => $stream->conversationId,
+                'remaining_today' => $remaining,
+            ]);
             yield $this->frame([
                 'done' => true,
                 'conversation_id' => $stream->conversationId,
-                'remaining_today' => RateLimiter::remaining($rateKey, self::DAILY_LIMIT),
+                'remaining_today' => $remaining,
             ]);
         }, 200, [
             'Content-Type' => 'text/event-stream',

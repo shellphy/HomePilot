@@ -6,6 +6,7 @@ use App\Ai\Agents\CensusReportGenerator;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
+use Illuminate\Support\Facades\Log;
 
 class GenerateCensusReport
 {
@@ -35,7 +36,19 @@ class GenerateCensusReport
             'answers' => $answers,
         ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_THROW_ON_ERROR);
 
+        Log::info('AI 问卷报告生成开始', [
+            'matter_id' => $matter->id,
+            'stance_id' => $stance->id,
+            'resident_id' => $resident->id,
+        ]);
+
         $report = trim((new CensusReportGenerator)->prompt($prompt)->text);
+
+        Log::debug('AI 问卷报告生成完成', [
+            'matter_id' => $matter->id,
+            'stance_id' => $stance->id,
+            'length' => mb_strlen($report),
+        ]);
 
         // 生成期间答案又变了：丢弃这次结果，别覆盖更新的答案
         $stance->refresh();

@@ -72,7 +72,7 @@ test('the agent instructions carry the matter terms, glossary and community cons
             'pitch' => '我自己家也装这套',
             'perk' => '满 20 户送清洗',
             'terms' => [['label' => '一拖四', 'value' => '3.2 万']],
-            'glossary' => [['term' => '双转子压缩机', 'explain' => '两个转子轮流做功', 'judge' => '看噪音参数', 'caution' => '问清型号']],
+            'glossary' => [['term' => '双转子压缩机', 'explain' => '两个转子轮流做功，更省电也更静音，问清具体型号']],
             'needs_survey' => true,
         ],
     ]);
@@ -86,7 +86,7 @@ test('the agent instructions carry the matter terms, glossary and community cons
         ->toContain('一拖四')
         ->toContain('3.2 万')
         ->toContain('双转子压缩机')
-        ->toContain('看噪音参数')
+        ->toContain('更省电也更静音')
         ->toContain('满 20 户送清洗')
         ->toContain('逐人报价')
         ->toContain('外机位'); // 小区硬条件出厂默认值
