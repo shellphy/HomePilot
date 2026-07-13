@@ -178,13 +178,11 @@ test('non initiator non admin cannot view the consented list', function () {
     $this->getJson("/api/matters/{$census->id}/census-consented")->assertForbidden();
 });
 
-test('admins may view the consented list too', function () {
+test('an admin who is not the initiator cannot view the consented list', function () {
     $census = signedCensus(['initiator_id' => Resident::factory()->create()->id]);
 
     Sanctum::actingAs(Resident::factory()->admin()->create());
-    $this->getJson("/api/matters/{$census->id}/census-consented")
-        ->assertSuccessful()
-        ->assertJsonPath('data', []);
+    $this->getJson("/api/matters/{$census->id}/census-consented")->assertForbidden();
 });
 
 test('the consented endpoint rejects non census matters', function () {

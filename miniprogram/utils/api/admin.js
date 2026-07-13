@@ -1,8 +1,8 @@
 // 管理端服务层：事项审核、相关方认证、社区设置
 const { request } = require('../request');
 
-// 事项 CRUD（创建/详情/编辑/删除）已并入统一 /matters 接口（见 utils/api/matters）。
-// 这里只保留管理端审核类动作：待审列表、审核、相关方认证、社区设置。
+// 事项 CRUD（创建/详情/编辑/删除）走统一 /matters 接口（见 utils/api/matters）。
+// 管理端审核类动作：待审列表、审核、相关方认证、社区设置。
 function listMatters(pendingOnly) {
   return request(`/admin/matters${pendingOnly ? '?pending=1' : ''}`);
 }

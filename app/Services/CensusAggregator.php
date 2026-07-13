@@ -35,7 +35,7 @@ class CensusAggregator
                 $key = (string) ($question['key'] ?? '');
                 $text = (string) ($question['text'] ?? '');
 
-                // 填空题不进公示聚合：原文永不公示，选项类才有可统计的分布
+                // 填空题不进公示聚合（原文不公示）
                 if (($question['type'] ?? '') === 'text') {
                     continue;
                 }

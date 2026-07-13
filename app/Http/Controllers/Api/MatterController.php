@@ -188,7 +188,7 @@ class MatterController extends Controller
     public function updateParticipant(Request $request, Matter $matter, Stance $stance): JsonResponse
     {
         $resident = $this->resident($request);
-        abort_unless($matter->initiator_id === $resident->id || $resident->is_admin, 403);
+        abort_unless($matter->initiator_id === $resident->id, 403);
         abort_unless($stance->matter_id === $matter->id && $stance->mode === Stance::MODE_JOIN, 404);
 
         $validated = $request->validate([
