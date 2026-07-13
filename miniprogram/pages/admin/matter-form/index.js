@@ -341,7 +341,18 @@ Page({
           await matters.deleteMatter(this.data.id);
           this.clearDirty();
           wx.showToast({ title: '已删除', icon: 'success' });
-          setTimeout(() => wx.navigateBack(), 800);
+          // 删除后别退回已失效的详情页（会报「资源找不到」）：跳过它退到上层列表
+          setTimeout(() => {
+            const pages = getCurrentPages();
+            const prevIsDetail = pages[pages.length - 2]?.route === 'pages/matter/index';
+            if (prevIsDetail && pages.length >= 3) {
+              wx.navigateBack({ delta: 2 });
+            } else if (prevIsDetail) {
+              wx.reLaunch({ url: '/pages/community/index' });
+            } else {
+              wx.navigateBack();
+            }
+          }, 800);
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
         }
