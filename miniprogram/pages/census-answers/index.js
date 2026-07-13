@@ -83,7 +83,6 @@ Page({
     });
   },
 
-  // AI 总结按钮：未生成时点了就开始总结，生成中不可点，完成后点开查看
   onSummaryTap() {
     if (this.data.reportStatus === 'pending') {
       return;
@@ -107,7 +106,7 @@ Page({
   },
 
   applyReportStatus(status) {
-    this.setData({ reportStatus: status || 'idle' });
+    this.setData({ reportStatus: status });
     if (status === 'pending') {
       this.startPolling();
     }
@@ -131,7 +130,7 @@ Page({
   async pollReport() {
     try {
       const report = await matters.getCensusReport(this.data.censusId);
-      this.setData({ reportStatus: report.generation_status || 'idle' });
+      this.setData({ reportStatus: report.generation_status });
       if (report.generation_status === 'pending') {
         this.startPolling();
       } else if (report.generation_status === 'failed') {

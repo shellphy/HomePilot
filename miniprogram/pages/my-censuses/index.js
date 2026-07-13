@@ -21,7 +21,7 @@ Page({
   reload() {
     return this.runLoad(async () => {
       const me = await getMe(true);
-      this.setData({ censuses: me.censuses || [] });
+      this.setData({ censuses: me.censuses });
     });
   },
 

@@ -68,7 +68,7 @@ Page({
     }
   },
 
-  // 按最新答案重新生成：发起后退回「我的问卷」，那边按钮变「AI 总结中」跟进进度
+  // 发起后退回「我的问卷」，进度在那边的按钮上跟进
   async regenerate() {
     if (this.data.generating) return;
     this.setData({ generating: true });
