@@ -1,6 +1,5 @@
 // 「大家都在问」：针对事项的公开问答面板。
-// 不是评论区——只有业主提问和负责方（团长/商家/管理员）回答，业主间不互相回复
-//（闲聊留在微信群）；同问聚合热度，好答案可沉淀成「买前必懂」词条。
+// 业主提问、负责方（团长/商家/管理员）回答，业主间不互相回复；同问聚合热度。
 const matters = require('../../utils/api/matters');
 const { guardProfileError } = require('../../utils/profile-guard');
 

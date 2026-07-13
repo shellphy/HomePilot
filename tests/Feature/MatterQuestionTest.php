@@ -42,6 +42,30 @@ test('party identities cannot ask and notices are closed to questions', function
     $this->postJson("/api/matters/{$notice->id}/questions", ['content' => '？'])->assertStatus(422);
 });
 
+test('rights and aid actions are open to questions', function (string $factoryState) {
+    Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋']));
+    $matter = Matter::factory()->{$factoryState}()->create();
+
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '这次有什么风险？'])->assertCreated();
+    $this->getJson("/api/matters/{$matter->id}/questions")->assertJsonPath('can_ask', true);
+})->with(['rights', 'aid']);
+
+test('censuses stay closed to questions', function () {
+    Sanctum::actingAs(Resident::factory()->create(['unit_label' => '3栋']));
+    $census = Matter::factory()->create(['type' => 'census', 'state' => 'open']);
+
+    $this->postJson("/api/matters/{$census->id}/questions", ['content' => '？'])->assertStatus(422);
+});
+
+test('the matter resource flags whether questions are open', function () {
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->getJson('/api/matters/'.Matter::factory()->rights()->create()->id)
+        ->assertJsonPath('data.supports_questions', true);
+    $this->getJson('/api/matters/'.Matter::factory()->notice()->create()->id)
+        ->assertJsonPath('data.supports_questions', false);
+});
+
 test('neighbors echo a question but not their own, and echo toggles', function () {
     $question = MatterQuestion::factory()->create();
 

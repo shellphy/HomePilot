@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
+use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\MatterQuestion;
 use App\Models\Resident;
@@ -20,9 +21,6 @@ use Illuminate\Validation\ValidationException;
 class MatterQuestionController extends Controller
 {
     use ResolvesResident;
-
-    /** 开放问答的事项类型：有决策疑问场景的（团购/活动）。 */
-    private const QUESTION_TYPES = ['groupbuy', 'activity'];
 
     public function index(Request $request, Matter $matter): JsonResponse
     {
@@ -52,7 +50,7 @@ class MatterQuestionController extends Controller
                 'answered_on' => $question->answered_at?->format('m-d'),
             ]),
             // 权限随人走：负责方看到回答入口，团长/管理员看到沉淀入口
-            'can_ask' => $resident->affiliatedParty === null && in_array($matter->type, self::QUESTION_TYPES, true) && $matter->is_approved,
+            'can_ask' => $resident->affiliatedParty === null && MatterTypeRegistry::for($matter->type)->supportsQuestions() && $matter->is_approved,
             'can_answer' => $this->canAnswer($matter, $resident),
             'can_promote' => $matter->type === 'groupbuy'
                 && ($resident->is_admin || $matter->initiator_id === $resident->id),
@@ -64,7 +62,7 @@ class MatterQuestionController extends Controller
         $resident = $this->resident($request);
 
         abort_unless($matter->is_approved, 404);
-        abort_unless(in_array($matter->type, self::QUESTION_TYPES, true), 422, '该事项不开放提问');
+        abort_unless(MatterTypeRegistry::for($matter->type)->supportsQuestions(), 422, '该事项不开放提问');
         abort_if($resident->affiliatedParty !== null, 403, '相关方身份不提问，如有疑问请切回业主身份');
 
         // 提问与接龙同一公示口径：楼栋 + 昵称
