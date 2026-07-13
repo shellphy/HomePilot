@@ -1,17 +1,4 @@
 /* .pair / .add-row 条目列表样式已上移 app.wxss（与用户端团购表单共用） */
-.matter-form-row .frow-label {
-  width: 156rpx;
-}
-
-.matter-form-input {
-  height: 76rpx;
-  padding: 0 20rpx;
-  background: var(--bg-page);
-  border: 1rpx solid var(--line);
-  border-radius: 14rpx;
-  box-sizing: border-box;
-}
-
 .row {
   display: flex;
   align-items: center;

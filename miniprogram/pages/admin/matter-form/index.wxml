@@ -2,10 +2,10 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <!-- 基本信息：短字段统一行式（标签左、值右） -->
     <view class="card form-list">
-      <view class="frow matter-form-row">
+      <view class="frow">
         <text class="frow-label">标题<text class="f-required">*</text></text>
         <input
-          class="frow-input matter-form-input"
+          class="frow-input"
           value="{{title}}"
           placeholder="一句话说清楚这件事"
           maxlength="60"
@@ -16,10 +16,10 @@
 
       <!-- 团购专属短字段 -->
       <block wx:if="{{type === 'groupbuy'}}">
-        <view class="frow matter-form-row">
+        <view class="frow">
           <text class="frow-label">品类<text class="f-required">*</text></text>
           <input
-            class="frow-input matter-form-input"
+            class="frow-input"
             value="{{category}}"
             placeholder="填写商品或服务品类"
             maxlength="30"
@@ -27,10 +27,10 @@
             bind:input="onInput"
           />
         </view>
-        <view class="frow matter-form-row">
+        <view class="frow">
           <text class="frow-label">阶梯优惠</text>
           <input
-            class="frow-input matter-form-input"
+            class="frow-input"
             value="{{perk}}"
             placeholder="例如：满 20 人九折"
             maxlength="100"
@@ -58,13 +58,13 @@
       </block>
 
       <!-- 目标数（团购/活动/互助/维权）：团购必填 ≥1，与业主端发起口径一致 -->
-      <view class="frow matter-form-row" wx:if="{{type !== 'notice' && type !== 'census'}}">
+      <view class="frow" wx:if="{{type !== 'notice' && type !== 'census'}}">
         <text class="frow-label" wx:if="{{type === 'groupbuy'}}"
           >目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text
         >
         <text class="frow-label" wx:else>目标数<text class="q-note">0 表示不设目标</text></text>
         <input
-          class="frow-input matter-form-input"
+          class="frow-input"
           type="number"
           value="{{targetCount}}"
           placeholder="0"
@@ -89,10 +89,10 @@
           data-name="deadline"
           bind:change="onDateTimeChange"
         />
-        <view class="frow matter-form-row">
-          <text class="frow-label">地点{{type === 'activity' || type === 'aid' ? ' *' : ''}}</text>
+        <view class="frow">
+          <text class="frow-label">地点<text wx:if="{{type === 'activity' || type === 'aid'}}" class="f-required">*</text></text>
           <input
-            class="frow-input matter-form-input"
+            class="frow-input"
             value="{{location}}"
             placeholder="例如：小区东门活动室"
             maxlength="120"

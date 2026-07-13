@@ -1,3 +1,8 @@
+/* 表单项之间留出呼吸感：上一项输入框与下一项标题不再贴在一起 */
+.q-title-gap {
+  margin-top: 28rpx;
+}
+
 .row {
   display: flex;
   align-items: center;

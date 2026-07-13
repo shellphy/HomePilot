@@ -1,4 +1,4 @@
-<view class="page-body">
+<view class="page-body has-footer">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <!-- 面包屑：三层编辑里随时知道自己在哪个征集的哪个模块下 -->
     <view class="kicker">{{matterTitle}}{{moduleTitle ? ' › ' + moduleTitle : ''}}</view>
@@ -6,10 +6,10 @@
       <view class="q-title">题目<text class="f-required">*</text></view>
       <input class="fin" value="{{text}}" data-field="text" bind:input="onInput" />
 
-      <view class="q-title">注释<text class="q-note">选填，显示在题干下方，给不熟悉的邻居解释概念</text></view>
+      <view class="q-title q-title-gap">注释<text class="q-note">选填，显示在题干下方，给不熟悉的邻居解释概念</text></view>
       <textarea class="fin farea" auto-height value="{{note}}" data-field="note" bind:input="onInput" />
 
-      <view class="q-title">题型</view>
+      <view class="q-title q-title-gap">题型</view>
       <view class="chips">
         <view class="chip {{type === 'single' ? 'chip-on' : ''}}" data-type="single" bind:tap="pickType">单选</view>
         <view class="chip {{type === 'multi' ? 'chip-on' : ''}}" data-type="multi" bind:tap="pickType">多选</view>
@@ -17,10 +17,10 @@
       </view>
 
       <block wx:if="{{type !== 'text'}}">
-        <view class="q-title">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个；「｜」后可给选项写解释</text></view>
+        <view class="q-title q-title-gap">选项<text class="f-required">*</text><text class="q-note">一行一个，至少两个；「｜」后可给选项写解释</text></view>
         <textarea class="fin farea" auto-height value="{{optionsText}}" data-field="optionsText" bind:input="onInput" />
       </block>
-      <view wx:else class="q-explain">填空题的回答不直接公示；可在公示页的「文本题明细与归纳」里归纳成主题后发布</view>
+      <view wx:else class="q-explain q-explain-gap">填空题的回答不直接公示；可在公示页的「文本题明细与归纳」里归纳成主题后发布</view>
 
       <view class="switch-row">
         <view class="switch-label">必答</view>
@@ -28,8 +28,11 @@
       </view>
     </view>
 
-    <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="save">保存题目</t-button>
-    <!-- 危险操作与保存拉开距离，避免误触（与事项表单同一约定） -->
+    <!-- 危险操作与吸底的保存拉开距离，避免误触（与事项表单同一约定） -->
     <t-button wx:if="{{qi >= 0}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这道题</t-button>
+
+    <view class="footer-bar">
+      <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="save">保存题目</t-button>
+    </view>
   </page-status>
 </view>

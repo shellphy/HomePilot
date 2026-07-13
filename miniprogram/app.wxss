@@ -23,6 +23,9 @@ page {
   --td-brand-color: var(--brand);
   --td-brand-color-active: var(--brand-active);
   --td-brand-color-light: var(--brand-bg);
+  /* 禁用态也走绿系，否则 TDesign 默认回落成浅蓝（#b5c7ff）与主题不搭，
+     如问卷「至少添加一道题」的禁用按钮 */
+  --td-brand-color-disabled: #a7e0c1;
 
   background: var(--bg-page);
   font-size: 28rpx;
