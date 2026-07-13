@@ -20,7 +20,7 @@ class UpdateProfileRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
-     * 可选字段可清空（传空即清空）；手机号走授权接口（/me/phone），相关方身份走 PartyController。
+     * 可选字段可清空（传空即清空）；手机号可微信授权预填或手填，随资料一并保存；相关方身份走 PartyController。
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -34,6 +34,8 @@ class UpdateProfileRequest extends FormRequest
         return [
             'nickname' => ['sometimes', 'nullable', 'string', 'max:30'],
             'avatar' => ['sometimes', 'url', 'max:255'],
+            // 手机号可微信授权预填、也可手填改成别的联系号码，统一随资料保存；允许清空
+            'phone' => ['sometimes', 'nullable', 'string', 'regex:/^(1\d{10})?$/'],
             'unit_label' => $isOwner
                 ? ['sometimes', 'required', Rule::in($settings->buildings)]
                 : ['sometimes', 'nullable', Rule::in($settings->buildings)],
@@ -52,6 +54,7 @@ class UpdateProfileRequest extends FormRequest
             'unit_label.required' => '业主需要选择楼栋号',
             'unit_label.in' => '请从楼栋列表里选择',
             'layout_label.in' => '请从户型列表里选择',
+            'phone.regex' => '请填写正确的手机号',
         ];
     }
 }

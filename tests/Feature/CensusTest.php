@@ -3,7 +3,6 @@
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
-use App\Services\WeChat;
 use Laravel\Sanctum\Sanctum;
 
 function renovationCensus(array $overrides = []): Matter
@@ -78,10 +77,8 @@ test('a complete member profile is a precondition, not part of the form', functi
 
     expect($resident->refresh()->unit_label)->toBe('');
 
-    // 在「个人资料」选好楼栋、授权手机号后，同样的答卷可以提交
-    $this->putJson('/api/me', ['unit_label' => '7栋'])->assertSuccessful();
-    $this->mock(WeChat::class)->shouldReceive('phoneNumberFromCode')->andReturn('13800138000');
-    $this->postJson('/api/me/phone', ['code' => 'auth-code'])->assertSuccessful();
+    // 在「个人资料」填好楼栋、手机号并保存后，同样的答卷可以提交
+    $this->putJson('/api/me', ['unit_label' => '7栋', 'phone' => '13800138000'])->assertSuccessful();
 
     $this->putJson("/api/matters/{$census->id}/census", ['answers' => basicAnswers()])
         ->assertCreated()

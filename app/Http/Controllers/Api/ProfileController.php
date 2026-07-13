@@ -58,15 +58,15 @@ class ProfileController extends Controller
     }
 
     /**
-     * 手机号只能通过微信授权组件写入（code 换真实绑定号码），不接受手填。
+     * 微信授权组件（open-type="getPhoneNumber"）拿到的 code 换真实号码，仅解析返回供前端预填，
+     * 不在此落库；用户可再手动改号，最终随资料一并保存（走 /me PUT）。
+     *
+     * @return array{data: array{phone: string}}
      */
-    public function updatePhone(Request $request, WeChat $weChat): ResidentResource
+    public function resolvePhone(Request $request, WeChat $weChat): array
     {
         $validated = $request->validate(['code' => ['required', 'string']]);
 
-        $resident = $this->resident($request);
-        $resident->update(['phone' => $weChat->phoneNumberFromCode($validated['code'])]);
-
-        return ResidentResource::make($resident->load('affiliatedParty'));
+        return ['data' => ['phone' => $weChat->phoneNumberFromCode($validated['code'])]];
     }
 }
