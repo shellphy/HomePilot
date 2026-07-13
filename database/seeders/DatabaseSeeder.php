@@ -2,26 +2,26 @@
 
 namespace Database\Seeders;
 
+use App\Enums\MatterReviewStatus;
 use App\Models\Matter;
 use App\Models\Resident;
-use App\Models\Stance;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /** 团长老K：管理员 + 装修公司团购发起人。 */
-    private Resident $leader;
+    /** 首位注册的成员，所有正式初始内容均以其名义发布。 */
+    private Resident $publisher;
 
-    /** 正式初始内容：装修公司真实意向团购 + 五份装修问卷。 */
+    /** 正式初始内容：五份装修问卷；团购文案暂存于 decorationGroupbuyDraft()，暂不发布。 */
     public function run(): void
     {
-        // 真机登录后 php artisan admin:grant 你的手机号或成员 ID 即可接管
-        $this->leader = Resident::factory()->inUnit('3栋')->create(['nickname' => '老K', 'is_admin' => true, 'layout_label' => '130㎡']);
+        $this->publisher = Resident::query()->oldest('id')->first()
+            ?? throw new RuntimeException('请先注册首位用户，再执行初始内容 Seeder。');
 
-        $this->decorationGroupbuy();
         $this->hardFinishCensus();
         $this->centralAcPrimerCensus();
         $this->customFurnitureCensus();
@@ -29,9 +29,9 @@ class DatabaseSeeder extends Seeder
         $this->needsCensus();
     }
 
-    private function decorationGroupbuy(): void
+    private function decorationGroupbuyDraft(): void
     {
-        Matter::factory()->survey()->for($this->leader, 'initiator')->create([
+        Matter::factory()->survey()->for($this->publisher, 'initiator')->create([
             'category' => '装修公司',
             'title' => '武汉拜斯达装饰 · 硬装全包意向团购',
             'target_count' => 10,
@@ -80,9 +80,8 @@ class DatabaseSeeder extends Seeder
     {
         $modules = $this->hardFinishModules();
 
-        $census = Matter::factory()->create([
+        $this->publishCensus([
             'type' => 'census',
-            'initiator_id' => null,
             'state' => 'open',
             'category' => '装修',
             'title' => '硬装怎么做 · 答题即入门',
@@ -93,24 +92,6 @@ class DatabaseSeeder extends Seeder
                 'modules' => $modules,
             ],
         ]);
-
-        $questions = collect($modules)->flatMap(fn (array $module): array => $module['questions'])->keyBy('key');
-        foreach (range(1, 42) as $i) {
-            $answers = [];
-            foreach ($questions as $key => $question) {
-                if (! ($question['required'] ?? false) && ! fake()->boolean(75)) {
-                    continue;
-                }
-                $options = $question['options'];
-                $answers[$key] = $question['type'] === 'multi'
-                    ? fake()->randomElements($options, fake()->numberBetween(1, min(3, count($options))))
-                    : fake()->randomElement($options);
-            }
-            Stance::factory()->for($census, 'matter')->create([
-                'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => $answers],
-            ]);
-        }
     }
 
     /**
@@ -489,9 +470,8 @@ class DatabaseSeeder extends Seeder
     {
         $modules = $this->centralAcModules();
 
-        $census = Matter::factory()->create([
+        $this->publishCensus([
             'type' => 'census',
-            'initiator_id' => null,
             'state' => 'open',
             'category' => '中央空调',
             'title' => '中央空调怎么选 · 答题即入门',
@@ -502,25 +482,6 @@ class DatabaseSeeder extends Seeder
                 'modules' => $modules,
             ],
         ]);
-
-        // 用同一份 schema 生成示例答案，选项标签绝不跑偏；必答题人人答、其余按真实场景随机跳过一部分
-        $questions = collect($modules)->flatMap(fn (array $module): array => $module['questions'])->keyBy('key');
-        foreach (range(1, 38) as $i) {
-            $answers = [];
-            foreach ($questions as $key => $question) {
-                if (! ($question['required'] ?? false) && ! fake()->boolean(75)) {
-                    continue;
-                }
-                $options = $question['options'];
-                $answers[$key] = $question['type'] === 'multi'
-                    ? fake()->randomElements($options, fake()->numberBetween(1, min(3, count($options))))
-                    : fake()->randomElement($options);
-            }
-            Stance::factory()->for($census, 'matter')->create([
-                'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => $answers],
-            ]);
-        }
     }
 
     /**
@@ -753,9 +714,8 @@ class DatabaseSeeder extends Seeder
     {
         $modules = $this->customFurnitureModules();
 
-        $census = Matter::factory()->create([
+        $this->publishCensus([
             'type' => 'census',
-            'initiator_id' => null,
             'state' => 'open',
             'category' => '全屋定制',
             'title' => '全屋定制怎么选 · 答题即入门',
@@ -766,24 +726,6 @@ class DatabaseSeeder extends Seeder
                 'modules' => $modules,
             ],
         ]);
-
-        $questions = collect($modules)->flatMap(fn (array $module): array => $module['questions'])->keyBy('key');
-        foreach (range(1, 40) as $i) {
-            $answers = [];
-            foreach ($questions as $key => $question) {
-                if (! ($question['required'] ?? false) && ! fake()->boolean(75)) {
-                    continue;
-                }
-                $options = $question['options'];
-                $answers[$key] = $question['type'] === 'multi'
-                    ? fake()->randomElements($options, fake()->numberBetween(1, min(3, count($options))))
-                    : fake()->randomElement($options);
-            }
-            Stance::factory()->for($census, 'matter')->create([
-                'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => $answers],
-            ]);
-        }
     }
 
     /**
@@ -1034,9 +976,8 @@ class DatabaseSeeder extends Seeder
     {
         $modules = $this->softDecorModules();
 
-        $census = Matter::factory()->create([
+        $this->publishCensus([
             'type' => 'census',
-            'initiator_id' => null,
             'state' => 'open',
             'category' => '软装',
             'title' => '软装怎么搭 · 答题即入门',
@@ -1047,24 +988,6 @@ class DatabaseSeeder extends Seeder
                 'modules' => $modules,
             ],
         ]);
-
-        $questions = collect($modules)->flatMap(fn (array $module): array => $module['questions'])->keyBy('key');
-        foreach (range(1, 40) as $i) {
-            $answers = [];
-            foreach ($questions as $key => $question) {
-                if (! ($question['required'] ?? false) && ! fake()->boolean(75)) {
-                    continue;
-                }
-                $options = $question['options'];
-                $answers[$key] = $question['type'] === 'multi'
-                    ? fake()->randomElements($options, fake()->numberBetween(1, min(3, count($options))))
-                    : fake()->randomElement($options);
-            }
-            Stance::factory()->for($census, 'matter')->create([
-                'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => $answers],
-            ]);
-        }
     }
 
     /**
@@ -1269,9 +1192,8 @@ class DatabaseSeeder extends Seeder
     {
         $modules = $this->needsModules();
 
-        $census = Matter::factory()->create([
+        $this->publishCensus([
             'type' => 'census',
-            'initiator_id' => null,
             'state' => 'open',
             'category' => '装修',
             'title' => '全屋需求摸底 · 说说你家怎么住',
@@ -1282,39 +1204,6 @@ class DatabaseSeeder extends Seeder
                 'modules' => $modules,
             ],
         ]);
-
-        $questions = collect($modules)->flatMap(fn (array $module): array => $module['questions'])->keyBy('key');
-        foreach (range(1, 44) as $i) {
-            $answers = [];
-            foreach ($questions as $key => $question) {
-                if ($question['type'] === 'text') {
-                    // 填空题：约四成人写点内容，其余留空（选填）
-                    if (fake()->boolean(40)) {
-                        $answers[$key] = fake()->randomElement([
-                            '家里有猫，想留个猫爬架和猫砂盆的位置',
-                            '老人同住，卫生间要做无障碍扶手、防滑',
-                            '藏书多，想要一整面书墙',
-                            '爱喝茶，想在客厅留个独立茶室角',
-                            '预算有限，先满足基本收纳和睡眠',
-                            '在家办公，需要安静独立的书房',
-                        ]);
-                    }
-
-                    continue;
-                }
-                if (! ($question['required'] ?? false) && ! fake()->boolean(80)) {
-                    continue;
-                }
-                $options = $question['options'];
-                $answers[$key] = $question['type'] === 'multi'
-                    ? fake()->randomElements($options, fake()->numberBetween(1, min(3, count($options))))
-                    : fake()->randomElement($options);
-            }
-            Stance::factory()->for($census, 'matter')->create([
-                'mode' => Stance::MODE_REGISTER,
-                'payload' => ['answers' => $answers],
-            ]);
-        }
     }
 
     /**
@@ -1514,6 +1403,25 @@ class DatabaseSeeder extends Seeder
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param  array{type: string, state: string, category: string, title: string, target_count: int, payload: array<string, mixed>}  $attributes
+     */
+    private function publishCensus(array $attributes): void
+    {
+        Matter::query()->updateOrCreate(
+            [
+                'type' => 'census',
+                'title' => $attributes['title'],
+            ],
+            array_merge($attributes, [
+                'initiator_id' => $this->publisher->id,
+                'initiator_party_id' => null,
+                'review_status' => MatterReviewStatus::Approved,
+                'reject_reason' => '',
+            ]),
+        );
     }
 
     /** @return array<string, string> */

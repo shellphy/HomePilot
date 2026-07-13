@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\Matter;
-use App\Models\Stance;
+use App\Models\Resident;
 
-test('it seeds the custom furniture primer with a valid question schema and example answers', function () {
+test('it seeds the custom furniture primer with a valid question schema', function () {
+    Resident::factory()->create();
+
     $this->seed();
 
     $census = Matter::query()
@@ -33,24 +35,4 @@ test('it seeds the custom furniture primer with a valid question schema and exam
         }
     });
 
-    $validOptions = $questions->mapWithKeys(
-        fn (array $question): array => [$question['key'] => $question['options']],
-    );
-
-    $stances = Stance::query()
-        ->where('matter_id', $census->id)
-        ->where('mode', Stance::MODE_REGISTER)
-        ->get();
-
-    expect($stances)->toHaveCount(40);
-
-    $stances->each(function (Stance $stance) use ($validOptions): void {
-        foreach ($stance->payload['answers'] as $key => $answer) {
-            expect($validOptions)->toHaveKey($key);
-
-            foreach ((array) $answer as $selectedOption) {
-                expect($validOptions[$key])->toContain($selectedOption);
-            }
-        }
-    });
 });
