@@ -14,7 +14,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * 「大家都在问」：针对事项的公开问答。填好资料的业主、已认证相关方都能问能答；
- * 同问聚合热度，好答案可由团长沉淀成「买前必懂」词条。管理员可删内容、拉黑发问人。
+ * 同问聚合热度，好答案可由团长沉淀成「买前必懂」词条。本人或管理员可删问答，管理员可拉黑成员。
  */
 class MatterQuestionController extends Controller
 {
@@ -45,7 +45,7 @@ class MatterQuestionController extends Controller
                 // 拉黑发问人要定位到人，仅管理员可见
                 'asker_id' => $resident->is_admin ? $question->resident_id : null,
                 'is_mine' => $question->resident_id === $resident->id,
-                'answer_is_mine' => $question->answered_by_id !== null && $question->answered_by_id === $resident->id,
+                'answer_is_mine' => $question->answered_by_id === $resident->id,
                 'echo_count' => (int) ($question->echoers_count ?? 0),
                 'echoed_by_me' => (bool) ($question->echoed_by_me ?? false),
                 'answer' => $question->answer,
@@ -58,7 +58,7 @@ class MatterQuestionController extends Controller
             'can_answer' => $canParticipate,
             'can_promote' => $matter->type === 'groupbuy'
                 && ($resident->is_admin || $matter->initiator_id === $resident->id),
-            // 管理员：删内容、拉黑发问人的入口
+            // 管理员：删内容、拉黑成员的入口
             'can_moderate' => $resident->is_admin,
         ]);
     }

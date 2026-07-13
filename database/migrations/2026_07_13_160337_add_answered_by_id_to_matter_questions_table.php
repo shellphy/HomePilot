@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('matter_questions', function (Blueprint $table) {
-            // 回复人（供管理员拉黑定位）；answered_by 仍是署名快照，二者并存
+            // 回复人：供管理员拉黑与本人删除定位（answered_by 是署名快照）
             $table->foreignId('answered_by_id')->nullable()->after('answered_by')->constrained('residents')->nullOnDelete();
         });
     }

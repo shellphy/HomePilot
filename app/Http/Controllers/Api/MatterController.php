@@ -363,7 +363,7 @@ class MatterController extends Controller
             $updateData['reject_reason'] = '';
         }
 
-        // 编辑已公示的事项一律重新过审：内容改了要多一道检查，管理员也不例外，先从小区页撤下
+        // 编辑已公示的事项一律重新过审：打回待审、从小区页撤下
         if ($matter->is_approved) {
             $updateData['review_status'] = MatterReviewStatus::Pending;
         }

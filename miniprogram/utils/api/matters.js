@@ -143,12 +143,12 @@ function promoteQuestion(questionId, term) {
   return request(`/questions/${questionId}/promote`, { method: 'POST', data: { term } });
 }
 
-// 管理员删除整条问答
+// 删除整条问答（本人或管理员）
 function deleteQuestion(questionId) {
   return request(`/questions/${questionId}`, { method: 'DELETE' });
 }
 
-// 管理员只删回复，保留问题
+// 只删回复保留问题（本人或管理员）
 function deleteAnswer(questionId) {
   return request(`/questions/${questionId}/answer`, { method: 'DELETE' });
 }

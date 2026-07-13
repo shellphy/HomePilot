@@ -1,5 +1,5 @@
 // 「大家都在问」：针对事项的公开问答面板。
-// 填好资料的业主、已认证相关方都能问能答；同问聚合热度。管理员可删内容、拉黑发问人。
+// 填好资料的业主、已认证相关方都能问能答；同问聚合热度。本人或管理员可删问答，管理员可拉黑成员。
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
 const { guardProfileError } = require('../../utils/profile-guard');
@@ -104,7 +104,7 @@ Component({
       }
     },
 
-    // 管理员删除整条问答
+    // 删除整条问答（本人或管理员）
     remove(event) {
       const { id } = event.currentTarget.dataset;
       wx.showModal({
@@ -125,7 +125,7 @@ Component({
       });
     },
 
-    // 管理员只删回复，保留问题
+    // 只删回复保留问题（本人或管理员）
     removeAnswer(event) {
       const { id } = event.currentTarget.dataset;
       wx.showModal({
