@@ -2,17 +2,19 @@
 #
 # 自动 HTTPS 前置：域名 A 记录指向本机、防火墙放行 80/443（TCP + UDP）。
 #
-# 首次部署：
-#   1. cp .env.example .env，填 SERVER_NAME / APP_URL / WECHAT_* / DEEPSEEK_API_KEY，
+# 镜像在开发机上交叉构建后推到镜像仓库，服务器只拉不建（见 docker/build-push.sh）。
+#
+# 首次部署（服务器上只需 docker-compose.yml + .env 两个文件）：
+#   1. docker login registry.cn-hangzhou.aliyuncs.com
+#   2. cp .env.example .env，填 SERVER_NAME / APP_URL / WECHAT_* / DEEPSEEK_API_KEY，
 #      APP_KEY 用 `docker compose run --rm --no-deps app php artisan key:generate --show` 生成
-#   2. docker compose up -d --build（自动迁移 + 签证书）
-# 更新：git pull && docker compose up -d --build
+#   3. docker compose up -d（自动迁移 + 签证书）
+# 更新：docker compose pull && docker compose up -d
+# 回滚：APP_IMAGE=<仓库>:<旧 tag> docker compose up -d
 
 # app 与 worker 复用同一镜像、同一份环境与共享卷（sqlite 库、上传目录都要一致）
 x-app-base: &app-base
-  build:
-    context: .
-    target: app
+  image: ${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit:latest}
   restart: unless-stopped
   env_file: .env
   environment: &app-env

@@ -1,13 +1,15 @@
 # syntax=docker/dockerfile:1
 
 # ---- Composer 依赖 ----
-FROM composer:2 AS vendor
+# 产物是纯 PHP 源码，与架构无关：锁在构建机架构上跑，跨架构构建时免去 QEMU 模拟
+FROM --platform=$BUILDPLATFORM composer:2 AS vendor
 WORKDIR /app
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-progress --ignore-platform-reqs
 
 # ---- 前端资源构建（app.css 会扫描 vendor 内的分页视图，所以需要 vendor）----
-FROM node:22-bookworm-slim AS assets
+# 只有 public/build 里的 JS/CSS 进最终镜像，同样与架构无关，锁在构建机架构上跑
+FROM --platform=$BUILDPLATFORM node:22-bookworm-slim AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
