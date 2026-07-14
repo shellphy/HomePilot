@@ -12,15 +12,16 @@ TAG=${1:-$(git rev-parse --short HEAD)}
 docker buildx inspect homepilot >/dev/null 2>&1 \
     || docker buildx create --name homepilot --driver docker-container
 
-# 同时打 :latest，服务器上 docker compose pull 默认取它；:$TAG 留作回滚锚点
+# 构建缓存留在 homepilot 这个构建器的本地卷里，跨次构建复用；
+# 不导出到 registry —— 阿里云 ACR 不认 buildkit 的 cacheconfig 清单类型，导出必失败。
+# provenance 关掉：单架构镜像无需 OCI index，直出普通 manifest 兼容性更好。
 docker buildx build \
     --builder homepilot \
     --platform linux/amd64 \
     --target app \
     --tag "$IMAGE:$TAG" \
     --tag "$IMAGE:latest" \
-    --cache-from "type=registry,ref=$IMAGE:buildcache" \
-    --cache-to "type=registry,ref=$IMAGE:buildcache,mode=max" \
+    --provenance=false \
     --push \
     .
 
