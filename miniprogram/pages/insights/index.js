@@ -1,4 +1,4 @@
-// 小区数据 tab：全部征集的总览。
+// 征集聚合 hub（从张罗页「正在征集」卡进入）：全部征集的总览。
 // 进行中的征集渲染成带进度与头牌数据的大卡，已结束的收进「往期数据」列表；
 // 单期完整聚合在 pages/census-insights。
 const matters = require('../../utils/api/matters');

@@ -1,11 +1,10 @@
 {
-  "navigationBarTitleText": "天青府家园",
+  "navigationBarTitleText": "市集",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark",
   "usingComponents": {
     "page-status": "/components/page-status/index",
-    "todo-list": "/components/todo-list/index",
-    "notice-card": "/components/notice-card/index",
+    "groupbuy-card": "/components/groupbuy-card/index",
     "matter-card": "/components/matter-card/index"
   }
 }

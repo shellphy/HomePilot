@@ -1,4 +1,4 @@
-<view class="page-body tabbed">
+<view class="page-body">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <!-- 进行中的征集：参与率 + 头牌数据 + 参与按钮；有查看权限时才能点卡片看完整数据 -->
     <block wx:if="{{openCards.length}}">

@@ -1,32 +1,25 @@
-// 张罗页：社区门户——概览、公告、正在张罗的公共事务（活动/互助/维权）、征集入口。
-// 社区名称、口号、张罗类型清单全部来自 /options。
+// 市集页：交易类事项——团购 + 二手闲置。就近发布：发起入口在本页。
 const matters = require('../../utils/api/matters');
 const profile = require('../../utils/api/profile');
-const { getMe, getTodos } = require('../../utils/me');
+const { getMe } = require('../../utils/me');
 const { MARKET_TYPES } = require('../../utils/constants');
 const load = require('../../behaviors/load');
 
-// 各类型的收尾态：压成单行沉底
-const CLOSED = ['done', 'closed', 'resolved'];
+// 收尾态：已成交/已下架/流团压成单行沉底
+const CLOSED = ['done', 'closed', 'resolved', 'aborted'];
 
 Page({
   behaviors: [load],
 
   data: {
     community: {},
-    todos: [], // 待我处理（首页只 peek 最高优先级几项）
     initiatableTypes: [],
     merchantUnlisted: false, // 未核验商家：入口保留，点击引导核验
-    listedParties: 0,
-    openCensusCount: 0, // 正在征集数：喂给指引卡，点进「数据」tab
-    notices: [],
-    doings: [], // 进行中的事：整卡
-    feedTypes: [], // 进行中的事里出现过的类型 {key, label}，≥2 种才露出筛选
+    doings: [], // 在售 / 团购进行中
+    feedTypes: [], // 在售里出现过的类型 {key, label}，≥2 种才露出筛选
     typeFilter: '', // '' 全部 / 其余对应 matter.type
     visibleDoings: [], // doings 按 typeFilter 过滤后的结果
-    finished: [], // 已收尾的事：单行 {id, type, title, note}
-    activeCount: 0,
-    residents: 0,
+    finished: [], // 已收场的：单行 {id, title, note}
   },
 
   onShow() {
@@ -38,36 +31,29 @@ Page({
     wx.stopPullDownRefresh();
   },
 
-  // 社区名称来自 /options（社区设置里改），没取到时用中性兜底
   onShareAppMessage() {
-    const { community, activeCount } = this.data;
+    const { community } = this.data;
     return {
-      title: `${community.name || '小区'} · ${activeCount} 件事正在张罗`,
-      path: '/pages/community/index',
+      title: `${community.name || '小区'} · 邻里市集`,
+      path: '/pages/market/index',
     };
   },
 
   onShareTimeline() {
     const { community } = this.data;
-    return { title: `${community.name || '小区'} · ${community.slogan || ''}` };
+    return { title: `${community.name || '小区'} · 邻里市集` };
   },
 
   reload() {
     return this.runLoad(async () => {
-      const [res, stats, options, me, todos] = await Promise.all([
+      const [res, options, me] = await Promise.all([
         matters.listMatters(),
-        profile.getStats(),
         profile.getOptions(),
         getMe(),
-        getTodos(),
       ]);
-      const notices = res.data.filter((matter) => matter.type === 'notice');
-      // 公共事务 feed：公告、征集、交易类各有专属位置，都不在这里
-      const all = res.data.filter((matter) => matter.type !== 'notice'
-        && matter.type !== 'census'
-        && !MARKET_TYPES.includes(matter.type));
+      const all = res.data.filter((matter) => MARKET_TYPES.includes(matter.type));
       const doings = all.filter((matter) => !CLOSED.includes(matter.state));
-      // 进行中的事出现过的类型，按首次出现顺序去重，供顶部筛选
+      // 在售里出现过的类型，按首次出现顺序去重，供顶部筛选
       const feedTypes = [];
       doings.forEach((matter) => {
         if (!feedTypes.some((type) => type.key === matter.type)) {
@@ -79,18 +65,14 @@ Page({
         title: matter.title,
         note: `${matter.join_count} 人 · ${matter.state_label}`,
       }));
-      // 张罗入口按身份分流：管理员可发起全部类型（含业主/商家发不了的公告），
-      // 业主看 user_initiatable，已核验商家看 merchant_initiatable，
-      // 其余相关方（物业等）没有发起入口（他们的参与方式是官方回应）
       const isMerchant = !!(me.party && me.party.type === 'merchant');
-      // 选中的类型可能已从进行中列表消失（事项收尾了），回落到全部
+      // 选中的类型可能已收场（从在售列表消失），回落到全部
       const typeFilter = feedTypes.some((type) => type.key === this.data.typeFilter) ? this.data.typeFilter : '';
       this.setData({
         community: options.community || {},
-        todos,
-        // 就近发布：张罗页只发起公共事务，交易类在市集发
+        // 就近发布：市集只发起团购/二手，身份分流与张罗页一致
         initiatableTypes: (options.matter_types || []).filter((type) => {
-          if (MARKET_TYPES.includes(type.key)) {
+          if (!MARKET_TYPES.includes(type.key)) {
             return false;
           }
           if (me.is_admin) {
@@ -102,16 +84,11 @@ Page({
           return type.user_initiatable;
         }),
         merchantUnlisted: isMerchant && !me.party.is_listed,
-        listedParties: stats.listed_parties,
-        openCensusCount: stats.open_census_count,
-        notices,
         doings,
         feedTypes,
         typeFilter,
         visibleDoings: this.filterDoings(doings, typeFilter),
         finished,
-        activeCount: doings.length,
-        residents: stats.residents,
       });
     });
   },
@@ -125,28 +102,19 @@ Page({
     this.setData({ typeFilter, visibleDoings: this.filterDoings(this.data.doings, typeFilter) });
   },
 
-  // 正在征集指引卡：聚合 hub 在 insights 子页，这里只放发现入口
-  goCensus() {
-    wx.navigateTo({ url: '/pages/insights/index' });
-  },
-
+  // 收场行点进事项详情
   goFinished(e) {
     wx.navigateTo({ url: `/pages/matter/index?id=${e.currentTarget.dataset.id}` });
   },
 
-  goParties() {
-    wx.navigateTo({ url: '/pages/parties/index' });
-  },
-
-  // 张罗点事：类型清单来自服务端，所有类型走统一创作表单（带 type 参数）
+  // 就近发布：类型清单来自服务端，所有类型走统一创作表单（带 type 参数）
   goCreate() {
     if (this.data.merchantUnlisted) {
-      // 给「联系管理员」一个具体落点：联系方式由社区设置下发
       const adminContact = this.data.community.admin_contact;
       const contactTip = adminContact ? `联系管理员核验：${adminContact}` : '请联系管理员核验。';
       wx.showModal({
         title: '先完成商家核验',
-        content: `核验后就能以商家身份发起活动，并带「身份已核验」标识。${contactTip}`,
+        content: `核验后就能以商家身份发起团购，并带「身份已核验」标识。${contactTip}`,
         showCancel: false,
         confirmText: '好的',
       });
@@ -154,7 +122,7 @@ Page({
     }
     const types = this.data.initiatableTypes;
     wx.showActionSheet({
-      itemList: types.map((type) => `发起${type.label}`),
+      itemList: types.map((type) => `发布${type.label}`),
       success: ({ tapIndex }) => {
         const picked = types[tapIndex];
         wx.navigateTo({ url: `/pages/admin/matter-form/index?type=${picked.key}` });

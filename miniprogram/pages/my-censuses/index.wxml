@@ -9,9 +9,9 @@
         <text class="muted">›</text>
       </view>
 
-      <view wx:if="{{!censuses.length}}" class="hint">你还没参与过小区的问卷。回数据页看看有哪些征集。</view>
+      <view wx:if="{{!censuses.length}}" class="hint">你还没参与过小区的问卷。去看看有哪些正在征集。</view>
     </view>
 
-    <t-button wx:if="{{!censuses.length}}" theme="light" block style="width: 100%" bind:tap="goInsights">去数据页看看</t-button>
+    <t-button wx:if="{{!censuses.length}}" theme="light" block style="width: 100%" bind:tap="goInsights">去看看正在征集</t-button>
   </page-status>
 </view>

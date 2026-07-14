@@ -1,0 +1,116 @@
+/* 市集门户头（与张罗页门户同一视觉语言） */
+.portal {
+  background: linear-gradient(135deg, #067a3f, #06ae56);
+  border-radius: 24rpx;
+  padding: 32rpx 28rpx;
+  margin-bottom: 20rpx;
+  color: #ffffff;
+}
+.portal-name {
+  font-size: 38rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+.portal-sub {
+  font-size: 22rpx;
+  opacity: 0.85;
+  margin-top: 8rpx;
+  line-height: 1.6;
+}
+.portal-stats {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  margin-top: 26rpx;
+}
+.pstat {
+  flex: 1;
+}
+.pstat-num {
+  font-size: 40rpx;
+  font-weight: 700;
+}
+.pstat-unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  opacity: 0.85;
+}
+.pstat-label {
+  font-size: 22rpx;
+  opacity: 0.85;
+  margin-top: 4rpx;
+}
+.portal-btn {
+  flex-shrink: 0;
+  background: #ffffff;
+  color: var(--brand-deep);
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 16rpx 36rpx;
+  border-radius: 999rpx;
+}
+.portal-btn-hover {
+  opacity: 0.8;
+}
+
+.filter-chips {
+  margin: 4rpx 0 12rpx;
+}
+
+.feed-head {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 12rpx 8rpx 16rpx;
+}
+
+/* 已收场的：单行列表 */
+.finished-list {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.drow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  height: 104rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+.drow:last-child {
+  border-bottom: none;
+}
+.drow-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 27rpx;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.drow-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+.drow-note {
+  font-size: 23rpx;
+  color: var(--text-muted);
+}
+.drow-arrow {
+  font-size: 32rpx;
+  line-height: 1;
+  color: var(--line-dark);
+}
+.row-hover {
+  opacity: 0.55;
+}
+
+/* 空态下的行动按钮 */
+.empty-cta {
+  margin-top: 24rpx;
+  display: flex;
+  justify-content: center;
+}

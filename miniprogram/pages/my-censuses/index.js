@@ -30,6 +30,6 @@ Page({
   },
 
   goInsights() {
-    wx.switchTab({ url: '/pages/insights/index' });
+    wx.navigateTo({ url: '/pages/insights/index' });
   },
 });

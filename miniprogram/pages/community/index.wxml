@@ -5,7 +5,7 @@
       <view class="portal-name">{{community.name}}</view>
       <view class="portal-sub" wx:if="{{community.slogan || community.sub_slogan}}">{{community.slogan}}{{community.slogan && community.sub_slogan ? ' · ' : ''}}{{community.sub_slogan}}</view>
       <view class="portal-stats">
-        <!-- 只做氛围数字：去数据页走底部 tab，不在这里塞重复入口 -->
+        <!-- 只做氛围数字 -->
         <view class="pstat">
           <view class="pstat-num">{{residents}}<text class="pstat-unit"> 位</text></view>
           <view class="pstat-label">邻居在这里</view>
@@ -28,7 +28,7 @@
       <text class="prow-note">{{listedParties}} 家 ›</text>
     </view>
 
-    <!-- 正在征集指引卡：征集主体在「数据」tab，首页只放一个发现入口 -->
+    <!-- 正在征集指引卡：征集聚合在 insights 子页，这里只放一个发现入口 -->
     <view wx:if="{{openCensusCount}}" class="card prow" hover-class="row-hover" bind:tap="goCensus">
       <text class="prow-title">正在征集</text>
       <text class="prow-note">{{openCensusCount}} 项 ›</text>
@@ -53,10 +53,7 @@
         bind:tap="pickType"
       >{{item.label}}</view>
     </view>
-    <block wx:for="{{visibleDoings}}" wx:key="id">
-      <groupbuy-card wx:if="{{item.type === 'groupbuy'}}" matter="{{item}}" />
-      <matter-card wx:else matter="{{item}}" />
-    </block>
+    <matter-card wx:for="{{visibleDoings}}" wx:key="id" matter="{{item}}" />
     <!-- 筛选后本类型没有，但整体有事：轻提示，不占号召位 -->
     <view wx:if="{{doings.length && !visibleDoings.length}}" class="hint">这个类型暂时没有正在张罗的事</view>
     <!-- 空态：号召和行动放在同一处，别让人读完还得回头找顶部入口 -->

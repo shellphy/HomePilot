@@ -1,15 +1,15 @@
 const { getMe } = require('../utils/me');
 
 const TABS = [
-  { icon: 'home', value: 'community', label: '小区' },
-  { icon: 'chart-bar', value: 'insights', label: '数据' },
+  { icon: 'home', value: 'community', label: '张罗' },
+  { icon: 'shop', value: 'market', label: '市集' },
   { icon: 'user', value: 'my', label: '我的' },
 ];
 
 Component({
   data: {
     value: '',
-    // 红点：数据 tab = 有我没答的进行中征集；我的 tab = 我牵头/参与的有新动态
+    // 红点：张罗 tab = 有我没答的进行中征集；我的 tab = 我牵头/参与的有新动态
     list: TABS,
   },
 
@@ -31,7 +31,7 @@ Component({
         .then((me) => {
           const dot = { dot: true };
           const badgeFor = {
-            insights: me.has_unanswered_census ? dot : null,
+            community: me.has_unanswered_census ? dot : null,
             my: (me.has_mine_updates || me.has_joined_updates) ? dot : null,
           };
           this.setData({ list: TABS.map((tab) => ({ ...tab, badge: badgeFor[tab.value] || null })) });
