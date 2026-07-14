@@ -473,7 +473,7 @@ class MatterController extends Controller
             'options' => $question['options'] ?? [],
             'option_notes' => $question['option_notes'] ?? [],
             'note' => $question['note'] ?? '',
-        ], JSON_UNESCAPED_UNICODE);
+        ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 
     /**
