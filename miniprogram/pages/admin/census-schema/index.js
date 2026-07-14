@@ -11,6 +11,7 @@ Page({
     title: '',
     modules: [],
     reviewStatus: '',
+    locked: false, // 已公示/已有作答：只能加题，已有题目不可改动或删除
     questionCount: 0,
     hasQuestions: false,
     submitting: false,
@@ -33,6 +34,7 @@ Page({
         title: res.data.title,
         modules,
         reviewStatus: res.data.review_status,
+        locked: !!res.data.census_schema_locked,
         questionCount,
         hasQuestions: questionCount > 0,
       });
@@ -50,6 +52,11 @@ Page({
 
   addModule() {
     wx.navigateTo({ url: `/pages/admin/census-module/index?id=${this.data.id}&mi=-1` });
+  },
+
+  // 已公示的征集看聚合数据（发起者从这里进整体数据面）
+  goInsights() {
+    wx.navigateTo({ url: `/pages/census-insights/index?id=${this.data.id}` });
   },
 
   async submitReview() {

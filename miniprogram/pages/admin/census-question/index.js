@@ -43,12 +43,12 @@ Page({
     note: '',
     type: 'single',
     optionsText: '',
+    readOnly: false, // 已公示征集的已有题目只读，只能返回加新题
     submitting: false,
   },
 
   onLoad(query) {
     this.setData({ id: Number(query.id), mi: Number(query.mi), qi: Number(query.qi) });
-    wx.setNavigationBarTitle({ title: Number(query.qi) < 0 ? '添加题目' : '编辑题目' });
     this.reload();
   },
 
@@ -62,6 +62,8 @@ Page({
       };
       const modules = payload.modules || [];
       const question = this.data.qi >= 0 ? modules[this.data.mi].questions[this.data.qi] : null;
+      // 已公示/已有作答后，已有题目只读；新题（qi<0）仍可自由填写
+      const readOnly = !!res.data.census_schema_locked && this.data.qi >= 0;
       this.setData({
         matterTitle: res.data.title,
         moduleTitle: (modules[this.data.mi] && modules[this.data.mi].title) || '',
@@ -70,7 +72,9 @@ Page({
         note: (question && question.note) || '',
         type: question ? question.type : 'single',
         optionsText: question ? formatOptionLines(question) : '',
+        readOnly,
       });
+      wx.setNavigationBarTitle({ title: readOnly ? '查看题目' : (this.data.qi < 0 ? '添加题目' : '编辑题目') });
     });
   },
 
@@ -79,7 +83,9 @@ Page({
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
+  // 题型胶囊不走 disabled，只读时拦一下
   pickType(event) {
+    if (this.data.readOnly) return;
     this.markDirty();
     this.setData({ type: event.currentTarget.dataset.type });
   },

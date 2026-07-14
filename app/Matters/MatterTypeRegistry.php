@@ -12,6 +12,7 @@ class MatterTypeRegistry
         'census' => CensusType::class,
         'activity' => ActivityType::class,
         'aid' => AidType::class,
+        'secondhand' => SecondhandType::class,
         'rights' => RightsType::class,
         'notice' => NoticeType::class,
     ];

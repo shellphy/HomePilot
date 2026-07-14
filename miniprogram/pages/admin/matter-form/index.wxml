@@ -73,7 +73,7 @@
               class="rel-opt {{relationship === 'affiliated' ? 'rel-opt-on' : ''}}"
               data-value="affiliated"
               bind:tap="pickRelationship"
-            >我关联这家商家</view>
+            >我和这家商家有关系（亲友 / 员工 / 合伙人）</view>
           </view>
           <view class="frow" wx:if="{{relationship === 'rebate'}}">
             <text class="frow-label">返点去向<text class="f-required">*</text></text>
@@ -89,8 +89,8 @@
         </block>
       </block>
 
-      <!-- 目标数（团购/活动/互助/维权）：团购必填 ≥1，与业主端发起口径一致 -->
-      <view class="frow" wx:if="{{type !== 'notice' && type !== 'census'}}">
+      <!-- 目标数（团购/活动/互助/维权）：团购必填 ≥1，与业主端发起口径一致；二手闲置不设目标数 -->
+      <view class="frow" wx:if="{{type !== 'notice' && type !== 'census' && type !== 'secondhand'}}">
         <text class="frow-label" wx:if="{{type === 'groupbuy'}}"
           >目标人数<text class="f-required">*</text><text class="q-note">达到后去和商家谈价</text></text
         >
@@ -129,6 +129,32 @@
             placeholder="例如：小区东门活动室"
             maxlength="120"
             data-field="location"
+            bind:input="onInput"
+          />
+        </view>
+      </block>
+
+      <!-- 二手闲置专属：售价 + 成色 -->
+      <block wx:if="{{type === 'secondhand'}}">
+        <view class="frow">
+          <text class="frow-label">售价<text class="q-note">可写「面议」「免费送」</text></text>
+          <input
+            class="frow-input"
+            value="{{price}}"
+            placeholder="例如：150 元"
+            maxlength="50"
+            data-field="price"
+            bind:input="onInput"
+          />
+        </view>
+        <view class="frow">
+          <text class="frow-label">成色</text>
+          <input
+            class="frow-input"
+            value="{{condition}}"
+            placeholder="例如：9 成新 / 有使用痕迹"
+            maxlength="50"
+            data-field="condition"
             bind:input="onInput"
           />
         </view>
@@ -186,7 +212,7 @@
     <!-- 长文本：公告正文 / 说明 -->
     <view class="card">
       <view class="q-title">
-        {{type === 'notice' ? '公告正文' : (type === 'census' ? '征集说明' : '把事情说清楚')}}
+        {{type === 'notice' ? '公告正文' : (type === 'census' ? '征集说明' : (type === 'secondhand' ? '物品描述' : '把事情说清楚'))}}
         <text wx:if="{{type === 'notice'}}" class="f-required">*</text>
       </view>
       <textarea
@@ -197,6 +223,18 @@
         data-field="body"
         bind:input="onInput"
       />
+    </view>
+
+    <!-- 二手闲置：物品图片（最多 9 张） -->
+    <view class="card" wx:if="{{type === 'secondhand'}}">
+      <view class="q-title">物品图片<text class="q-note">最多 9 张，第一张作封面</text></view>
+      <view class="shots">
+        <view class="shot-wrap" wx:for="{{images}}" wx:key="*this">
+          <image class="shot" src="{{item}}" mode="aspectFill" data-url="{{item}}" bind:tap="previewImage" />
+          <view class="shot-del" data-index="{{index}}" catch:tap="removeImage">✕</view>
+        </view>
+        <view class="shot-add" wx:if="{{images.length < 9}}" bind:tap="chooseImages">{{uploading ? '上传中…' : '+'}}</view>
+      </view>
     </view>
 
     <!-- 征集专属：发起目的（给参与者看，为什么发这次征集） -->

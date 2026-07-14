@@ -94,6 +94,7 @@ Page({
     this.startSummary();
   },
 
+  // 就地生成：按钮转「AI 总结中」带转圈，好了自动变「查看 AI 总结」
   async startSummary() {
     this.setData({ reportStatus: 'pending' });
     try {

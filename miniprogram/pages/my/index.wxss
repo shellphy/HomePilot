@@ -58,31 +58,55 @@
   padding-right: 8rpx;
 }
 
-/* 数据栏 */
+/* 三格数据栏：参与 / 牵头 / 问卷 */
 .stats {
   position: relative;
   background: #ffffff;
   border-radius: 24rpx;
   display: flex;
-  padding: 32rpx 0;
+  padding: 36rpx 0;
   margin-bottom: 24rpx;
 }
 .stat {
+  position: relative;
   flex: 1;
   text-align: center;
+}
+/* 格间细分割线 */
+.stat + .stat::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 56rpx;
+  width: 1rpx;
+  background: var(--line);
 }
 .stat-hover {
   opacity: 0.55;
 }
 .stat-num {
-  font-size: 40rpx;
+  font-size: 44rpx;
   font-weight: 700;
   line-height: 1.2;
+  color: var(--text-primary);
 }
 .stat-label {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: var(--text-muted);
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+/* 未读红点：贴在数字右上角 */
+.stat-dot {
+  position: absolute;
+  top: -4rpx;
+  left: 50%;
+  margin-left: 40rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #fa5151;
 }
 
 /* 列表：大行高 + 细分割线 */
@@ -132,15 +156,5 @@
   font-size: 36rpx;
   line-height: 1;
   color: var(--line-dark);
-  flex-shrink: 0;
-}
-
-
-/* 未读红点：对应列表里有我没看过的新动态 */
-.row-dot {
-  width: 14rpx;
-  height: 14rpx;
-  border-radius: 50%;
-  background: #fa5151;
   flex-shrink: 0;
 }

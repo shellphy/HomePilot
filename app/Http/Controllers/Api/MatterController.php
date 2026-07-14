@@ -348,6 +348,11 @@ class MatterController extends Controller
             }
         }
 
+        // 已公示/已有作答的征集：发起人只能加题，不能改动或删除已有题目（否则和已收答案对不上）
+        if ($matter->type === 'census' && ! $isAdmin && $matter->censusSchemaLocked()) {
+            $this->assertCensusAdditiveOnly($matter->payloadList('modules'), $payload['modules'] ?? []);
+        }
+
         if ($matter->type === 'groupbuy') {
             $effectivePartyId = $isAdmin && array_key_exists('initiator_party_id', $validated)
                 ? $validated['initiator_party_id']
@@ -427,6 +432,48 @@ class MatterController extends Controller
         abort_if(($payload['relationship'] ?? null) === 'merchant_direct', 422, '业主发起的团购请如实披露与商家的关系');
 
         return $payload;
+    }
+
+    /**
+     * 锁定后的征集只允许加题：已有题目（按 key）必须原样保留，改动/删除一律拦下。
+     *
+     * @param  array<array-key, mixed>  $old
+     * @param  array<array-key, mixed>  $new
+     */
+    private function assertCensusAdditiveOnly(array $old, array $new): void
+    {
+        $incoming = [];
+        foreach ($new as $module) {
+            foreach ($module['questions'] ?? [] as $question) {
+                $incoming[$question['key']] = $this->censusQuestionFingerprint($question);
+            }
+        }
+
+        foreach ($old as $module) {
+            foreach ($module['questions'] ?? [] as $question) {
+                if (($incoming[$question['key']] ?? null) !== $this->censusQuestionFingerprint($question)) {
+                    throw ValidationException::withMessages([
+                        'modules' => '题目已公示，只能新增题目，不能改动或删除已有题目',
+                    ]);
+                }
+            }
+        }
+    }
+
+    /**
+     * 题目指纹：只比对影响作答与统计的字段（文案/类型/选项/选项解释/说明）。
+     *
+     * @param  array<string, mixed>  $question
+     */
+    private function censusQuestionFingerprint(array $question): string
+    {
+        return json_encode([
+            'text' => $question['text'] ?? '',
+            'type' => $question['type'] ?? '',
+            'options' => $question['options'] ?? [],
+            'option_notes' => $question['option_notes'] ?? [],
+            'note' => $question['note'] ?? '',
+        ], JSON_UNESCAPED_UNICODE);
     }
 
     /**

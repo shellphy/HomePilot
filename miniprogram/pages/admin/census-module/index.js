@@ -14,6 +14,7 @@ Page({
     title: '',
     intro: '',
     questions: [],
+    locked: false, // 已公示/已有作答：可加题、可改模块名，但不能删整个模块（会带走已有题目）
     submitting: false,
   },
 
@@ -39,6 +40,7 @@ Page({
       this.setData({
         matterTitle: res.data.title,
         modules,
+        locked: !!res.data.census_schema_locked,
         // 从题目页返回会触发 onShow 重拉：标题/引言有未保存的本地编辑时保留，别被服务端值冲掉
         title: current && !this.dirty ? current.title : this.data.title,
         intro: current && !this.dirty ? (current.intro || '') : this.data.intro,
@@ -103,6 +105,9 @@ Page({
 
   remove() {
     if (this.data.mi < 0) return wx.navigateBack();
+    if (this.data.locked) {
+      return wx.showToast({ title: '已有答案，模块不能删，只能加新题', icon: 'none' });
+    }
     wx.showModal({
       title: '删除这个模块？',
       content: '模块下的题目一并移除；已收到的旧答案会和统计对不上',

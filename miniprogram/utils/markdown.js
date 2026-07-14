@@ -18,9 +18,16 @@ function renderInline(text) {
     return `${CODE_MARK}${codes.length - 1}${CODE_MARK}`;
   });
   masked = escapeHtml(masked);
+  // 图片先于链接：![alt](url) 里也含 []()，否则会被链接规则先啃掉留下多余的 !
+  masked = masked.replace(
+    /!\[([^\]]*)\]\(([^)]+)\)/g,
+    (match, alt, url) => `<img src="${url}" alt="${alt}" style="max-width:100%;border-radius:8rpx" />`,
+  );
+  masked = masked.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>'); // 粗斜体先于粗/斜，别被拆开
   masked = masked.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>'); // 加粗先于斜体，别让 ** 被拆成两个 *
   masked = masked.replace(/__([^_]+)__/g, '<strong>$1</strong>');
   masked = masked.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+  masked = masked.replace(/~~([^~]+)~~/g, '<del style="color:#8a8f98">$1</del>'); // 删除线
   // 链接只高亮文字：rich-text 内不可点，保留 URL 反而误导
   masked = masked.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span style="color:#3b6cff">$1</span>');
   masked = masked.replace(
@@ -41,6 +48,38 @@ function isBlockStart(line) {
     /^\s*\d+\.\s+/.test(line) ||
     /^\s*([-*_])(\s*\1){2,}\s*$/.test(line)
   );
+}
+
+// GFM 表格分隔行：| --- | :--: | 这类，至少一个横线，允许对齐冒号
+function isTableSeparator(line) {
+  return /\|/.test(line) && /^\s*\|?(\s*:?-+:?\s*\|)+\s*:?-*:?\s*$/.test(line);
+}
+
+// 把一行按 | 拆成单元格（去掉首尾竖线），转义忽略被 \ 转义的竖线
+function splitTableRow(line) {
+  let text = line.trim();
+  if (text.startsWith('|')) {
+    text = text.slice(1);
+  }
+  if (text.endsWith('|')) {
+    text = text.slice(0, -1);
+  }
+  return text.split('|').map((cell) => cell.trim());
+}
+
+// 列表项前导空格数（tab 记作两个空格），用来按缩进模拟嵌套
+function indentWidth(line) {
+  return line.match(/^(\s*)/)[1].replace(/\t/g, '  ').length;
+}
+
+// 无序列表项：[ ] / [x] 渲染成勾选框并去掉圆点，普通项照常；pad 是嵌套缩进
+function unorderedItem(content, pad) {
+  const task = content.match(/^\[([ xX])\]\s+(.*)$/);
+  if (task) {
+    const done = task[1].toLowerCase() === 'x';
+    return `<li style="margin:2rpx 0;padding-left:${pad}rpx;list-style:none">${done ? '☑' : '☐'} ${renderInline(task[2])}</li>`;
+  }
+  return `<li style="margin:2rpx 0;padding-left:${pad}rpx">${renderInline(content)}</li>`;
 }
 
 const HEADING_SIZES = [34, 32, 30, 29, 28, 28];
@@ -107,21 +146,48 @@ function mdToHtml(text, typing = false) {
         `<div style="border-left:6rpx solid #ddd;padding-left:16rpx;color:#8a8a8a;margin:8rpx 0">${buffer.join('<br>')}</div>`,
       );
     } else if (/^\s*[-*+]\s+/.test(line)) {
-      // 无序列表
+      // 无序列表：按缩进给子项加左内边距模拟嵌套，支持 [ ] / [x] 任务项
+      const baseIndent = indentWidth(line);
       const items = [];
       while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i])) {
-        items.push(`<li style="margin:2rpx 0">${renderInline(lines[i].replace(/^\s*[-*+]\s+/, ''))}</li>`);
+        const pad = Math.max(0, Math.round((indentWidth(lines[i]) - baseIndent) / 2)) * 28;
+        items.push(unorderedItem(lines[i].replace(/^\s*[-*+]\s+/, ''), pad));
         i += 1;
       }
       out.push(`<ul style="margin:6rpx 0;padding-left:36rpx">${items.join('')}</ul>`);
     } else if (/^\s*\d+\.\s+/.test(line)) {
-      // 有序列表
+      // 有序列表：同样按缩进模拟嵌套
+      const baseIndent = indentWidth(line);
       const items = [];
       while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(`<li style="margin:2rpx 0">${renderInline(lines[i].replace(/^\s*\d+\.\s+/, ''))}</li>`);
+        const pad = Math.max(0, Math.round((indentWidth(lines[i]) - baseIndent) / 2)) * 28;
+        items.push(`<li style="margin:2rpx 0;padding-left:${pad}rpx">${renderInline(lines[i].replace(/^\s*\d+\.\s+/, ''))}</li>`);
         i += 1;
       }
       out.push(`<ol style="margin:6rpx 0;padding-left:40rpx">${items.join('')}</ol>`);
+    } else if (/\|/.test(line) && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+      // GFM 表格：表头行 + 分隔行 + 若干数据行；rich-text 支持 table/th/td 标签
+      const header = splitTableRow(line);
+      i += 2; // 跳过表头与分隔行
+      const bodyRows = [];
+      while (i < lines.length && /\|/.test(lines[i]) && !/^\s*$/.test(lines[i])) {
+        bodyRows.push(splitTableRow(lines[i]));
+        i += 1;
+      }
+      const cell = 'border:1rpx solid #e5e6eb;padding:10rpx 14rpx;text-align:left;font-size:26rpx';
+      const head = header
+        .map((text) => `<th style="${cell};background:#f6f7f9;font-weight:600">${renderInline(text)}</th>`)
+        .join('');
+      const rows = bodyRows
+        .map((row) => {
+          // 缺列补空、多列截断，对齐表头列数，避免错行
+          const cells = header.map((_, index) => `<td style="${cell}">${renderInline(row[index] || '')}</td>`).join('');
+          return `<tr>${cells}</tr>`;
+        })
+        .join('');
+      out.push(
+        `<table style="border-collapse:collapse;width:100%;margin:10rpx 0"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table>`,
+      );
     } else {
       // 段落：合并连续的普通行，行内换行渲染成 <br>
       const buffer = [];

@@ -41,6 +41,10 @@
 }
 .questionnaire-action {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
   padding: 16rpx 12rpx;
   font-size: 24rpx;
   font-weight: 600;
@@ -53,6 +57,20 @@
 .questionnaire-action-busy {
   color: var(--text-muted);
   border-color: var(--line);
+}
+/* 生成中转圈：让「AI 总结中」有明确的处理动效，不像卡住 */
+.action-spinner {
+  width: 22rpx;
+  height: 22rpx;
+  border: 3rpx solid var(--line);
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: action-spin 0.7s linear infinite;
+}
+@keyframes action-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .content-heading {
   padding: 14rpx 8rpx 16rpx;

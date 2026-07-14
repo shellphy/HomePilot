@@ -185,6 +185,15 @@ class Matter extends Model
         return false;
     }
 
+    /**
+     * 征集题目锁定：已公示或已有登记作答后，改题会与已收答案对不上，发起人只能加题。
+     */
+    public function censusSchemaLocked(): bool
+    {
+        return $this->is_approved
+            || $this->stances()->where('mode', Stance::MODE_REGISTER)->exists();
+    }
+
     /** @return BelongsTo<Resident, $this> */
     public function initiator(): BelongsTo
     {

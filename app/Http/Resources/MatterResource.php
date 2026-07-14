@@ -71,6 +71,10 @@ class MatterResource extends JsonResource
             'glossary' => $this->payloadValue('glossary', []),
             'final_terms' => $this->payloadValue('final_terms', []),
             'final_note' => $this->payloadValue('final_note', ''),
+            // 二手闲置：售价 / 成色 / 图片
+            'price' => $this->payloadValue('price', ''),
+            'condition' => $this->payloadValue('condition', ''),
+            'images' => $this->payloadValue('images', []),
             'published_on' => $this->created_at?->format('m-d'),
             'starts_at' => $this->starts_at?->toIso8601String(),
             'starts_on' => $this->starts_at?->format('m-d H:i'),
@@ -98,6 +102,8 @@ class MatterResource extends JsonResource
                     'all_states' => $type->allStates(),
                     'initiator_party_id' => $this->initiator_party_id,
                     'created_at' => $this->created_at?->format('Y-m-d H:i'),
+                    // 征集题目是否锁定（已公示/已有作答后只能加题），编辑器据此禁改已有题
+                    'census_schema_locked' => $this->type === 'census' && $this->censusSchemaLocked(),
                 ]
             ),
         ];
@@ -110,7 +116,7 @@ class MatterResource extends JsonResource
             'merchant_direct' => '商家直供，本团由商家自己发起',
             'none' => '发起人与商家无利益关系，纯热心张罗',
             'rebate' => '发起人会从中获得返点或好处',
-            'affiliated' => '发起人关联这家商家',
+            'affiliated' => '发起人和这家商家有关系（亲友、员工或合伙人等）',
             default => '',
         };
     }

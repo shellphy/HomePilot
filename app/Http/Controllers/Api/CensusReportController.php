@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Actions\GenerateCensusReport;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Jobs\GenerateCensusReportJob;
 use App\Matters\CensusReportPresentation;
 use App\Models\Matter;
 use App\Models\Stance;
+use App\Services\GenerateCensusReport;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -28,23 +28,25 @@ class CensusReportController extends Controller
     public function store(Request $request, Matter $matter, GenerateCensusReport $generate): JsonResponse
     {
         $stance = $this->ownedStance($request, $matter);
+        $force = $request->boolean('force');
         $answers = $stance->payload['answers'] ?? [];
         $answerHash = $generate->answerHash(is_array($answers) ? $answers : []);
         $payload = $stance->payload ?? [];
 
-        if (is_string($payload['ai_report'] ?? null) && $payload['ai_report'] !== ''
+        // 非强制时答案没变就复用旧报告；「重新生成」按钮强制重跑，跳过去重
+        if (! $force && is_string($payload['ai_report'] ?? null) && $payload['ai_report'] !== ''
             && ($payload['ai_report_answers_hash'] ?? null) === $answerHash) {
             return response()->json($this->responseData($matter, $stance));
         }
 
-        if (($payload['ai_report_pending_hash'] ?? null) !== $answerHash) {
+        if ($force || ($payload['ai_report_pending_hash'] ?? null) !== $answerHash) {
             $payload['ai_report_status'] = 'pending';
             $payload['ai_report_pending_hash'] = $answerHash;
             $payload['ai_report_requested_at'] = now()->toIso8601String();
             unset($payload['ai_report_failed_hash'], $payload['ai_report_error']);
             $stance->update(['payload' => $payload]);
 
-            GenerateCensusReportJob::dispatch($stance->id, $answerHash);
+            GenerateCensusReportJob::dispatch($stance->id, $answerHash, $force);
         }
 
         return response()->json($this->responseData($matter, $stance->refresh()), 202);
@@ -68,16 +70,17 @@ class CensusReportController extends Controller
         $answerHash = hash('sha256', json_encode(is_array($answers) ? $answers : [], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         $report = $payload['ai_report'] ?? null;
         $reportIsCurrent = is_string($report) && $report !== '' && ($payload['ai_report_answers_hash'] ?? null) === $answerHash;
+        // pending 先于 completed：强制重生成时旧报告仍在且哈希相同，也要显示「生成中」而非旧报告
         $status = match (true) {
-            $reportIsCurrent => 'completed',
             ($payload['ai_report_pending_hash'] ?? null) === $answerHash => 'pending',
+            $reportIsCurrent => 'completed',
             ($payload['ai_report_failed_hash'] ?? null) === $answerHash => 'failed',
             default => 'idle',
         };
 
         return [
             'title' => $matter->title,
-            'report' => $reportIsCurrent ? $report : null,
+            'report' => $status === 'completed' ? $report : null,
             'generation_status' => $status,
             'generation_error' => $status === 'failed' ? ($payload['ai_report_error'] ?? 'AI 报告生成失败，请稍后重试') : null,
             'presentation' => $this->presentation->for($matter),

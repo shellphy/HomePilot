@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Actions\GenerateCensusReport;
 use App\Models\Stance;
+use App\Services\GenerateCensusReport;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -24,7 +24,7 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
 
     public int $uniqueFor = 600;
 
-    public function __construct(public int $stanceId, public string $answerHash) {}
+    public function __construct(public int $stanceId, public string $answerHash, public bool $force = false) {}
 
     public function uniqueId(): string
     {
@@ -38,7 +38,7 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
             return;
         }
 
-        $generate->handle($stance->matter, $stance, $stance->resident, $this->answerHash);
+        $generate->handle($stance->matter, $stance, $stance->resident, $this->answerHash, $this->force);
     }
 
     public function failed(?Throwable $exception): void

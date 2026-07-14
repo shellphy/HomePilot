@@ -10,9 +10,10 @@
       <view class="questionnaire-actions">
         <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
         <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
-        <view class="questionnaire-action {{reportStatus === 'pending' ? 'questionnaire-action-busy' : ''}}" bind:tap="onSummaryTap"
-          >{{reportStatus === 'pending' ? 'AI 总结中' : (reportStatus === 'completed' ? '查看 AI 总结' : 'AI 总结')}}</view
-        >
+        <view class="questionnaire-action {{reportStatus === 'pending' ? 'questionnaire-action-busy' : ''}}" bind:tap="onSummaryTap">
+          <text wx:if="{{reportStatus === 'pending'}}" class="action-spinner"></text>
+          <text>{{reportStatus === 'pending' ? 'AI 总结中' : (reportStatus === 'completed' ? '查看 AI 总结' : 'AI 总结')}}</text>
+        </view>
       </view>
     </view>
 

@@ -31,8 +31,7 @@
   color: var(--text-muted);
   margin-top: 6rpx;
 }
-/* 审核是把关动作，通过/驳回视觉权重接近（都描边），不诱导一键放行；
-   实心绿留给「发布新事项」这类真正的推荐主动作 */
+/* 审核是把关动作，通过/驳回视觉权重接近（都描边），不诱导一键放行 */
 .approve-btn {
   flex-shrink: 0;
   padding: 10rpx 28rpx;

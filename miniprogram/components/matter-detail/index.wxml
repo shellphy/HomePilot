@@ -11,6 +11,23 @@
   </view>
 </view>
 
+<!-- 二手闲置：售价 + 图片（有才显示） -->
+<view class="card" wx:if="{{matter.price || matter.images.length}}">
+  <view wx:if="{{matter.price}}" class="deal-price">{{matter.price}}<text wx:if="{{matter.condition}}" class="deal-cond"> · {{matter.condition}}</text></view>
+  <view wx:if="{{matter.images.length}}" class="gallery">
+    <image
+      wx:for="{{matter.images}}"
+      wx:key="*this"
+      class="gallery-img"
+      src="{{item}}"
+      mode="aspectFill"
+      data-current="{{item}}"
+      data-urls="{{matter.images}}"
+      bind:tap="previewImage"
+    />
+  </view>
+</view>
+
 <view class="card" wx:if="{{matter.starts_on || matter.location || matter.registration_deadline_on}}">
   <view class="kicker">时间与地点</view>
   <view class="term-row" wx:if="{{matter.starts_on}}"><text class="term-label">开始</text><text class="term-value">{{matter.starts_on}}</text></view>

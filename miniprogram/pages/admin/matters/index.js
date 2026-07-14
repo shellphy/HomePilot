@@ -1,4 +1,4 @@
-// 管理端 · 事项列表：审核队列与全部事项，发布新事项的入口
+// 管理端 · 事项列表：审核队列与全部事项（发起入口统一收到首页「我来张罗」）
 const admin = require('../../../utils/api/admin');
 const profile = require('../../../utils/api/profile');
 const load = require('../../../behaviors/load');
@@ -93,17 +93,6 @@ Page({
         } catch (error) {
           wx.showToast({ title: error.message, icon: 'none' });
         }
-      },
-    });
-  },
-
-  // 管理员可发布任何类型（公告、征集这类业主不能自发的也在内）
-  goCreate() {
-    const types = this.data.matterTypes;
-    wx.showActionSheet({
-      itemList: types.map((type) => `发布${type.label}`),
-      success: ({ tapIndex }) => {
-        wx.navigateTo({ url: `/pages/admin/matter-form/index?type=${types[tapIndex].key}` });
       },
     });
   },

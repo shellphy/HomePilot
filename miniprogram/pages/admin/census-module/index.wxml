@@ -24,8 +24,8 @@
       <t-button theme="primary" variant="outline" block style="width: 100%" bind:tap="addQuestion">＋ 添加题目</t-button>
     </block>
 
-    <!-- 危险操作与吸底的保存拉开距离，避免误触（与事项表单同一约定） -->
-    <t-button wx:if="{{mi >= 0}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这个模块</t-button>
+    <!-- 危险操作与吸底的保存拉开距离，避免误触（与事项表单同一约定）；锁定后不能删模块 -->
+    <t-button wx:if="{{mi >= 0 && !locked}}" theme="danger" variant="text" block style="width: 100%; margin-top: 40rpx" bind:tap="remove">删除这个模块</t-button>
 
     <view class="footer-bar">
       <t-button theme="primary" block size="large" style="width: 100%" loading="{{submitting}}" bind:tap="save">保存模块</t-button>

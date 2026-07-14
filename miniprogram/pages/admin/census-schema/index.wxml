@@ -5,12 +5,20 @@
       <text class="schema-edit" bind:tap="editBasics" hover-class="schema-edit-hover">编辑基础信息 ›</text>
     </view>
 
+    <view class="schema-banner schema-banner-done" wx:if="{{locked}}">
+      <text class="schema-banner-title">只能新增题目</text>
+      <text class="schema-banner-sub">已公示或已有邻居作答，已有题目不能改动或删除，否则旧答案会对不上</text>
+    </view>
     <view
       class="schema-banner {{reviewStatus === 'pending' ? 'schema-banner-pending' : 'schema-banner-done'}}"
-      wx:if="{{reviewStatus && reviewStatus !== 'draft'}}"
+      wx:elif="{{reviewStatus && reviewStatus !== 'draft'}}"
     >
       <text class="schema-banner-title">{{reviewStatus === 'pending' ? '已提交审核' : '审核状态已更新'}}</text>
       <text class="schema-banner-sub">{{reviewStatus === 'pending' ? '通过后自动公示到小区页' : '题目改动已保存'}}</text>
+    </view>
+
+    <view class="schema-head" wx:if="{{locked}}">
+      <text class="schema-edit" bind:tap="goInsights" hover-class="schema-edit-hover">查看整体数据 ›</text>
     </view>
 
     <view class="card">
@@ -35,7 +43,8 @@
     <view class="privacy" wx:if="{{reviewStatus === 'draft'}}"
       >这是草稿，不会进入审核队列。至少添加一道题，再提交审核。</view
     >
-    <view class="privacy" wx:else>已经收到答案后，只加新题、不改老题不删选项，否则旧答案会和统计对不上。</view>
+    <view class="privacy" wx:elif="{{locked}}">已有答案后只能加新题：老题的题面、选项都不能改，删题也会让旧答案对不上。</view>
+    <view class="privacy" wx:else>题目改动会重新过审后再公示。</view>
 
     <view class="footer-bar" wx:if="{{reviewStatus === 'draft'}}">
       <t-button

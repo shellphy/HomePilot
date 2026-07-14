@@ -1,11 +1,11 @@
 <?php
 
-use App\Actions\GenerateCensusReport;
 use App\Ai\Agents\CensusReportGenerator;
 use App\Jobs\GenerateCensusReportJob;
 use App\Models\Matter;
 use App\Models\Resident;
 use App\Models\Stance;
+use App\Services\GenerateCensusReport;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Attributes\Timeout as AiTimeout;
 use Laravel\Ai\Prompts\AgentPrompt;
@@ -139,6 +139,48 @@ test('an outdated report job does not overwrite newer answers', function () {
         ->assertSuccessful()
         ->assertJsonPath('generation_status', 'idle')
         ->assertJsonPath('report', null);
+});
+
+test('强制重新生成即便答案没变也会重跑', function () {
+    Queue::fake();
+    $resident = Resident::factory()->create();
+    $matter = reportCensus($resident);
+    $stance = $matter->stances()->where('mode', Stance::MODE_REGISTER)->sole();
+    $hash = app(GenerateCensusReport::class)->answerHash($stance->payload['answers']);
+    // 预置一份和当前答案匹配的已完成报告
+    $stance->update(['payload' => array_merge($stance->payload, [
+        'ai_report' => '## 旧总结',
+        'ai_report_answers_hash' => $hash,
+        'ai_report_status' => 'completed',
+    ])]);
+    Sanctum::actingAs($resident);
+
+    // 普通请求答案没变就复用旧报告，不入队
+    $this->postJson("/api/matters/{$matter->id}/census-report")
+        ->assertSuccessful()
+        ->assertJsonPath('report', '## 旧总结');
+    Queue::assertNotPushed(GenerateCensusReportJob::class);
+
+    // force=true 跳过复用：重新入队、回到 pending 并隐藏旧报告
+    $this->postJson("/api/matters/{$matter->id}/census-report", ['force' => true])
+        ->assertAccepted()
+        ->assertJsonPath('generation_status', 'pending')
+        ->assertJsonPath('report', null);
+    Queue::assertPushed(GenerateCensusReportJob::class, fn (GenerateCensusReportJob $job): bool => $job->force === true);
+
+    // 跑掉强制任务：即便答案没变也覆盖出新报告
+    CensusReportGenerator::fake(['## 新总结']);
+    $forced = null;
+    Queue::assertPushed(GenerateCensusReportJob::class, function (GenerateCensusReportJob $job) use (&$forced): bool {
+        $forced = $job;
+
+        return true;
+    });
+    $forced->handle(app(GenerateCensusReport::class));
+
+    $this->getJson("/api/matters/{$matter->id}/census-report")
+        ->assertJsonPath('generation_status', 'completed')
+        ->assertJsonPath('report', '## 新总结');
 });
 
 test('a resident cannot read another residents report', function () {

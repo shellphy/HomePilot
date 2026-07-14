@@ -4,6 +4,7 @@
 const matters = require('../../../utils/api/matters');
 const admin = require('../../../utils/api/admin');
 const { getMe } = require('../../../utils/me');
+const { uploadImage } = require('../../../utils/request');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
 const { guardProfileError } = require('../../../utils/profile-guard');
@@ -24,6 +25,7 @@ Page({
     type: 'notice',
     typeLabel: '',
     isAdmin: false, // 管理动作（状态/公示/署名/明细/删除）的显示开关
+    isMerchant: false, // 商家发起团购走商家直供，隐藏利益关系披露（由后端自动标注）
     publishedNow: false, // 加载时该事项是否已公示（编辑已公示的会重新送审）
     title: '',
     category: '',
@@ -44,6 +46,12 @@ Page({
     body: '', // 事项正文（公告叫「正文」，其它类型叫「说明」）
     purpose: '', // 仅征集：发起目的自由文本
     perk: '',
+    relationship: '', // 团购利益关系披露（业主发起必选）：none/rebate/affiliated
+    rebateNote: '', // 选 rebate 时的返点去向
+    price: '', // 二手闲置：售价（自由文本，允许面议/免费送）
+    condition: '', // 二手闲置：成色
+    images: [], // 二手闲置：物品图片
+    uploading: false,
     needsSurvey: false, // 团购：逐人报价（业主端发起时锁定，管理端作为纠错通道可改）
     collectsContact: false,
     terms: [],
@@ -59,7 +67,11 @@ Page({
     const id = query.id ? Number(query.id) : null;
     this.setData({ id, type: query.type || 'notice' });
     wx.setNavigationBarTitle({ title: id ? '编辑' : '发起' });
-    if (!id) this.setData({ loaded: true });
+    if (!id) {
+      this.setData({ loaded: true });
+      // 发起时也要知道是不是商家：团购利益关系披露对商家隐藏
+      getMe().then((me) => this.setData({ isMerchant: !!(me.party && me.party.type === 'merchant') }));
+    }
   },
 
   onShow() {
@@ -75,6 +87,7 @@ Page({
       const deadline = splitDateTime(matter.registration_deadline_at);
       this.setData({
         isAdmin: !!me.is_admin,
+        isMerchant: !!(me.party && me.party.type === 'merchant'),
         type: matter.type,
         typeLabel: matter.type_label,
         title: matter.title,
@@ -92,6 +105,11 @@ Page({
         // 内容字段一律读平铺（对所有人可见），不依赖管理员专属的 payload
         body: matter.body || '',
         perk: matter.perk || '',
+        relationship: matter.relationship || '',
+        rebateNote: matter.rebate_note || '',
+        price: matter.price || '',
+        condition: matter.condition || '',
+        images: matter.images || [],
         needsSurvey: !!matter.needs_survey,
         terms: matter.terms || [],
         glossary: matter.glossary || [],
@@ -159,6 +177,45 @@ Page({
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
+  // 团购利益关系披露单选
+  pickRelationship(event) {
+    this.markDirty();
+    this.setData({ relationship: event.currentTarget.dataset.value });
+  },
+
+  // 二手闲置传图：上传得 URL 后追加到 images
+  chooseImages() {
+    if (this.data.uploading) return;
+    const remaining = 9 - this.data.images.length;
+    if (remaining <= 0) return wx.showToast({ title: '最多 9 张', icon: 'none' });
+
+    wx.chooseMedia({
+      count: remaining,
+      mediaType: ['image'],
+      success: async ({ tempFiles }) => {
+        this.setData({ uploading: true });
+        try {
+          const urls = await Promise.all(tempFiles.map((file) => uploadImage(file.tempFilePath)));
+          this.markDirty();
+          this.setData({ images: [...this.data.images, ...urls] });
+        } catch (error) {
+          wx.showToast({ title: error.message, icon: 'none' });
+        } finally {
+          this.setData({ uploading: false });
+        }
+      },
+    });
+  },
+
+  removeImage(event) {
+    this.markDirty();
+    this.setData({ images: this.data.images.filter((_, i) => i !== event.currentTarget.dataset.index) });
+  },
+
+  previewImage(event) {
+    wx.previewImage({ urls: this.data.images, current: event.currentTarget.dataset.url });
+  },
+
   onSwitch(event) {
     this.markDirty();
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
@@ -218,8 +275,13 @@ Page({
   buildContent() {
     const { data } = this;
     const content = { title: data.title.trim(), body: data.body.trim() };
-    if (data.type !== 'notice' && data.type !== 'census') {
+    if (data.type !== 'notice' && data.type !== 'census' && data.type !== 'secondhand') {
       content.target_count = data.targetCount ? Number(data.targetCount) : 0;
+    }
+    if (data.type === 'secondhand') {
+      content.price = data.price.trim();
+      content.condition = data.condition.trim();
+      content.images = data.images;
     }
     if (['groupbuy', 'activity', 'aid'].includes(data.type)) {
       content.starts_at = data.startDate && data.startTime ? `${data.startDate} ${data.startTime}` : null;
@@ -233,6 +295,11 @@ Page({
       content.needs_survey = data.needsSurvey;
       content.terms = data.terms.filter((row) => row.label.trim() && row.value.trim());
       content.glossary = data.glossary.filter((row) => row.term.trim() && row.explain.trim());
+      // 利益关系披露：商家直供由后端自动标注，这里只在非商家已选择时下发
+      if (!data.isMerchant && data.relationship) {
+        content.relationship = data.relationship;
+        content.rebate_note = data.relationship === 'rebate' ? data.rebateNote.trim() : '';
+      }
     }
     if (data.type === 'census') {
       content.purpose = data.purpose.trim();
@@ -253,6 +320,13 @@ Page({
       if (!data.category.trim()) return wx.showToast({ title: '请填写品类', icon: 'none' });
       if (!data.targetCount || Number(data.targetCount) < 1) {
         return wx.showToast({ title: '请填写目标人数', icon: 'none' });
+      }
+      // 业主发起必须披露利益关系（管理员代发、商家直供不强制）
+      if (!data.isMerchant && !data.isAdmin && !data.relationship) {
+        return wx.showToast({ title: '请选择你与商家的关系', icon: 'none' });
+      }
+      if (!data.isMerchant && data.relationship === 'rebate' && !data.rebateNote.trim()) {
+        return wx.showToast({ title: '请填写返点去向', icon: 'none' });
       }
     }
     if (['activity', 'aid'].includes(data.type) && (!data.startDate || !data.startTime || !data.location.trim())) {

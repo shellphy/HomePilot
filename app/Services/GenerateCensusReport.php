@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions;
+namespace App\Services;
 
 use App\Ai\Agents\CensusReportGenerator;
 use App\Models\Matter;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class GenerateCensusReport
 {
-    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null): void
+    public function handle(Matter $matter, Stance $stance, Resident $resident, ?string $expectedHash = null, bool $force = false): void
     {
         $answers = $stance->payload['answers'] ?? [];
         $answerHash = $this->answerHash($answers);
@@ -20,7 +20,8 @@ class GenerateCensusReport
             return;
         }
 
-        if (is_string($existing) && $existing !== '' && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
+        // 强制重生成跳过「已有相同答案的报告就不跑」的短路
+        if (! $force && is_string($existing) && $existing !== '' && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
             return;
         }
 

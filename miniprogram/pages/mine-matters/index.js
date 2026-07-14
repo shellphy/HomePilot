@@ -30,12 +30,9 @@ Page({
 
   goMatter(event) {
     const matter = this.data.matters.find((item) => item.id === event.currentTarget.dataset.id);
-    // 征集按状态直达对应页：公示前改问卷，公示后数据/答题面
+    // 发起者进自己的征集一律是题目编辑器（公示后后端只放行加题）；看数据走编辑器里的入口
     if (matter.type === 'census') {
-      const url = matter.review_status === 'approved'
-        ? `/pages/census-insights/index?id=${matter.id}`
-        : `/pages/admin/census-schema/index?id=${matter.id}`;
-      wx.navigateTo({ url });
+      wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${matter.id}` });
       return;
     }
     wx.navigateTo({ url: `/pages/matter/index?id=${matter.id}` });

@@ -1,18 +1,10 @@
 <view class="page-body {{report ? 'has-footer' : ''}}">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <block wx:if="{{!report}}">
-      <view class="card report-generating" wx:if="{{generationStatus === 'pending'}}">
-        <view class="report-generating-mark">AI</view>
-        <view class="report-generating-copy">
-          <view class="report-generating-title">正在生成总结</view>
-          <view class="report-generating-step">{{genHint}}</view>
-          <view class="report-generating-sub">通常十几秒，好了会自动显示，不用一直守着。</view>
-        </view>
-      </view>
-      <view class="card report-empty" wx:else>
+      <view class="card report-empty">
         <view class="empty-title">{{generationStatus === 'failed' ? '生成失败' : '生成问卷总结'}}</view>
         <view class="empty-copy">{{generationError || presentation.empty_description}}</view>
-        <t-button theme="primary" block size="large" bind:tap="generate"
+        <t-button theme="primary" block size="large" loading="{{generating}}" bind:tap="generate"
           >{{generationStatus === 'failed' ? '重新生成' : '生成'}}</t-button
         >
         <view class="report-by">将由 DeepSeek 大模型生成，仅供参考</view>
@@ -29,7 +21,7 @@
 
   <view class="footer-bar actions" wx:if="{{report}}">
     <t-button theme="light" block size="large" bind:tap="askAi">继续问 AI</t-button>
-    <t-button theme="primary" block size="large" loading="{{generating}}" bind:tap="regenerate">按最新答案重新生成</t-button>
+    <t-button theme="primary" block size="large" loading="{{generating}}" bind:tap="generate">按最新答案重新生成</t-button>
   </view>
 
   <page-container show="{{aiChatShow}}" position="bottom" round custom-style="height: 82vh;" bind:beforeleave="onAiChatLeave" bind:leave="onAiChatLeave">

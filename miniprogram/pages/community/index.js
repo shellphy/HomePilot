@@ -76,7 +76,8 @@ Page({
         title: matter.title,
         note: `${matter.join_count} 人 · ${matter.state_label}`,
       }));
-      // 张罗入口按身份分流：业主看 user_initiatable，已核验商家看 merchant_initiatable，
+      // 张罗入口按身份分流：管理员可发起全部类型（含业主/商家发不了的公告），
+      // 业主看 user_initiatable，已核验商家看 merchant_initiatable，
       // 其余相关方（物业等）没有发起入口（他们的参与方式是官方回应）
       const isMerchant = !!(me.party && me.party.type === 'merchant');
       // 选中的类型可能已从进行中列表消失（事项收尾了），回落到全部
@@ -84,9 +85,15 @@ Page({
       this.setData({
         community: options.community || {},
         todos,
-        initiatableTypes: (options.matter_types || []).filter((type) => (me.party
-          ? isMerchant && me.party.is_listed && type.merchant_initiatable
-          : type.user_initiatable)),
+        initiatableTypes: (options.matter_types || []).filter((type) => {
+          if (me.is_admin) {
+            return true;
+          }
+          if (me.party) {
+            return isMerchant && me.party.is_listed && type.merchant_initiatable;
+          }
+          return type.user_initiatable;
+        }),
         merchantUnlisted: isMerchant && !me.party.is_listed,
         listedParties: stats.listed_parties,
         openCensusCount: stats.open_census_count,

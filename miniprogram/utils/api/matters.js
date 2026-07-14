@@ -95,8 +95,9 @@ function getCensusReport(id) {
   return request(`/matters/${id}/census-report`);
 }
 
-function generateCensusReport(id) {
-  return request(`/matters/${id}/census-report`, { method: 'POST' });
+// force=true 时后端跳过「答案没变就复用」的去重，强制重新生成一份
+function generateCensusReport(id, force = false) {
+  return request(`/matters/${id}/census-report`, { method: 'POST', data: { force } });
 }
 
 // 发起者视图：主动勾选授权的参与者明细（后端限发起者本人/管理员可看）
