@@ -49,6 +49,8 @@ services:
     depends_on:
       - app
     command: php artisan queue:work --tries=3 --timeout=180 --sleep=3 --max-time=3600
+    deploy:
+      replicas: 3
 
 volumes:
   storage-uploads:
