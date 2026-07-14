@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>知行合一 —— 让知识回归行动</title>
-    <meta name="description" content="知行合一致力于连接知识与实践，通过阅读、思考与行动，陪伴每个人把所学变成所行。">
-    <meta name="keywords" content="知行合一,学习成长,知识管理,读书笔记,实践,自我提升">
+    <title>知行合一 —— 我的读书与思考笔记</title>
+    <meta name="description" content="知行合一,我的个人网站。在这里记录读过的书、想通的道理,以及把想法落到行动上的点滴。">
+    <meta name="keywords" content="知行合一,个人博客,读书笔记,学习记录,随笔,自我成长">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <style>
         :root {
@@ -107,14 +107,6 @@
         .about cite { display: block; margin-top: 22px; color: var(--muted); font-style: normal; font-size: 14px; }
         .about .text { margin-top: 34px; color: var(--muted); font-size: 15.5px; text-align: left; }
 
-        /* 联系 */
-        .contact .wrap { max-width: 720px; }
-        .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        @media (max-width: 640px) { .contact-grid { grid-template-columns: 1fr; } }
-        .contact-item { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; }
-        .contact-item .k { font-size: 13px; color: var(--muted); letter-spacing: 0.08em; }
-        .contact-item .v { margin-top: 6px; font-size: 16px; }
-
         /* 页脚 */
         footer { border-top: 1px solid var(--border); padding: 34px 0 40px; text-align: center; color: var(--muted); font-size: 13px; line-height: 2; }
         footer a:hover { color: var(--accent-soft); }
@@ -135,9 +127,8 @@
             <div class="brand"><span class="mark">知</span>知行合一</div>
             <nav class="nav-links">
                 <a href="#philosophy">理念</a>
-                <a href="#features">我们在做</a>
+                <a href="#notes">在记什么</a>
                 <a href="#about">关于</a>
-                <a href="#contact">联系</a>
             </nav>
         </div>
     </header>
@@ -147,12 +138,12 @@
             <div class="wrap">
                 <div class="logo">知</div>
                 <h1>知行合一</h1>
-                <p class="subtitle">让知识回归行动</p>
+                <p class="subtitle">我的读书与思考笔记</p>
                 <p class="lead">
-                    我们相信，读过的书、想通的道理，只有落到行动上才真正属于自己。
-                    知行合一，陪你把「知道」变成「做到」。
+                    这是我的个人网站。我在这里记录读过的书、想通的道理,
+                    也提醒自己:懂了的道理,要真的去做,才算真懂。
                 </p>
-                <a class="cta" href="#features">了解我们在做什么 →</a>
+                <a class="cta" href="#about">关于这个小站 →</a>
             </div>
         </section>
 
@@ -160,15 +151,15 @@
             <div class="wrap">
                 <div>
                     <div class="num">知</div>
-                    <div class="lbl">广泛阅读，独立思考</div>
+                    <div class="lbl">多读书,独立想</div>
                 </div>
                 <div>
                     <div class="num">行</div>
-                    <div class="lbl">动手实践，持续复盘</div>
+                    <div class="lbl">动手做,常复盘</div>
                 </div>
                 <div>
                     <div class="num">合</div>
-                    <div class="lbl">知行相长，日拱一卒</div>
+                    <div class="lbl">知行相长,日拱一卒</div>
                 </div>
             </div>
         </section>
@@ -176,52 +167,52 @@
         <section id="philosophy">
             <div class="wrap">
                 <div class="section-head">
-                    <div class="eyebrow">Our Philosophy</div>
-                    <h2>知是行之始，行是知之成</h2>
-                    <p>知与行从来不是两件事。真正的理解诞生于实践，而每一次行动又反过来加深理解。</p>
+                    <div class="eyebrow">Idea</div>
+                    <h2>为什么叫「知行合一」</h2>
+                    <p>对我来说,知和行从来不是两件事。道理只有落到行动上,才真正长在自己身上。</p>
                 </div>
                 <div class="grid">
                     <div class="card">
                         <div class="icon">📖</div>
                         <h3>以知启行</h3>
-                        <p>从一本书、一个概念、一次思考出发，把碎片化的信息整理成能指导行动的认知。</p>
+                        <p>从一本书、一个概念出发,把零散的信息整理成能指导自己行动的认知。</p>
                     </div>
                     <div class="card">
                         <div class="icon">🌱</div>
                         <h3>以行验知</h3>
-                        <p>再好的道理都要在真实世界里被检验。动手去做，用结果反馈修正自己的判断。</p>
+                        <p>再好的道理也要拿到生活里试一试。动手去做,用结果反过来修正自己的判断。</p>
                     </div>
                     <div class="card">
                         <div class="icon">🔁</div>
                         <h3>知行相长</h3>
-                        <p>读—做—复盘，形成正向循环。一点一滴的积累，最终汇聚成实实在在的改变。</p>
+                        <p>读、做、复盘,循环往复。一点一滴慢慢积累,时间会给出答案。</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="features">
+        <section id="notes">
             <div class="wrap">
                 <div class="section-head">
-                    <div class="eyebrow">What We Do</div>
-                    <h2>我们在做的事</h2>
-                    <p>围绕「学以致用」，我们希望做一些帮助个人成长的小工具与内容。</p>
+                    <div class="eyebrow">Notes</div>
+                    <h2>我在这里记些什么</h2>
+                    <p>都是些自己的记录,不成体系,慢慢写、慢慢补。</p>
                 </div>
                 <div class="grid">
                     <div class="card">
                         <div class="icon">✍️</div>
-                        <h3>读书与思考</h3>
-                        <p>分享读书笔记、思维方法与优质内容，让好的观点更容易被看见、被理解。</p>
+                        <h3>读书笔记</h3>
+                        <p>读过觉得有意思的书,摘一点、想一点,写下当时的理解和疑问。</p>
                     </div>
                     <div class="card">
                         <div class="icon">🗂️</div>
-                        <h3>知识整理</h3>
-                        <p>帮助你把零散的所学沉淀下来，建立属于自己的知识体系，随时可回顾、可调用。</p>
+                        <h3>学习记录</h3>
+                        <p>学新东西时的整理和总结,方便自己以后回头翻,也算给记忆留个备份。</p>
                     </div>
                     <div class="card">
-                        <div class="icon">🎯</div>
-                        <h3>行动陪伴</h3>
-                        <p>把目标拆成可执行的小步骤，记录进展、坚持复盘，让改变真正发生。</p>
+                        <div class="icon">🌤️</div>
+                        <h3>日常随笔</h3>
+                        <p>一些生活里的小感想、想通的小道理,随手记下来,提醒自己别只想不做。</p>
                     </div>
                 </div>
             </div>
@@ -231,48 +222,28 @@
             <div class="wrap">
                 <div class="section-head">
                     <div class="eyebrow">About</div>
-                    <h2>关于知行合一</h2>
+                    <h2>关于这个小站</h2>
                 </div>
                 <blockquote>
-                    「知者行之始，<span>行者知之成</span>。」
+                    「知者行之始,<span>行者知之成</span>。」
                 </blockquote>
                 <cite>—— 王阳明《传习录》</cite>
                 <p class="text">
-                    「知行合一」出自明代思想家王阳明。他认为，知而不行，只是未知；真正的知，
-                    必然包含行动。我们把这句古老的箴言作为名字，是想提醒自己：不做「思想上的巨人、行动上的矮子」。
+                    「知行合一」出自明代思想家王阳明。他认为,知而不行,只是未知;真正的知,
+                    必然包含行动。我拿它给自己的小站命名,是想经常提醒自己:别做「思想上的巨人、行动上的矮子」。
                 </p>
                 <p class="text">
-                    这个网站还很年轻，我们会一点点把它做起来——先从记录、分享与陪伴做起，
-                    和每一位愿意「知行合一」的朋友一起成长。感谢你的到来。
+                    这里是我个人搭的一个小网站,纯粹出于兴趣,记录自己读书、学习和思考的点滴,
+                    不做商业用途。网站还很简陋,我会一点点把它补充起来。谢谢你顺路来看看。
                 </p>
-            </div>
-        </section>
-
-        <section id="contact" class="contact">
-            <div class="wrap">
-                <div class="section-head">
-                    <div class="eyebrow">Contact</div>
-                    <h2>联系我们</h2>
-                    <p>有任何想法、建议或合作意向，欢迎与我们取得联系。</p>
-                </div>
-                <div class="contact-grid">
-                    <div class="contact-item">
-                        <div class="k">邮箱</div>
-                        <div class="v">hello@example.com</div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="k">合作 / 反馈</div>
-                        <div class="v">欢迎来信，我们会尽快回复</div>
-                    </div>
-                </div>
             </div>
         </section>
     </main>
 
     <footer>
         <div class="wrap">
-            <div class="status"><span class="dot"></span>网站持续建设中</div>
-            <div>&copy; {{ date('Y') }} 知行合一 · 保留所有权利</div>
+            <div class="status"><span class="dot"></span>网站持续更新中</div>
+            <div>&copy; {{ date('Y') }} 知行合一 · 个人网站</div>
             <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">备案号审核中</a></div>
         </div>
     </footer>
