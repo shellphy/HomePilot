@@ -1,5 +1,9 @@
 // 事项相关的共享常量（列表、详情、发起页都用，改文案只改这里）
 
+// 归「市集」tab 的交易类事项：团购 + 二手闲置。
+// 单一真源——市集页据此聚合、张罗页据此从公共事务 feed 里排除，两端必须一致。
+const MARKET_TYPES = ['groupbuy', 'secondhand'];
+
 const PILL_CLASS = {
   open: 'pill-open',
   negotiating: 'pill-negotiating',
@@ -43,4 +47,4 @@ function starsOf(rating) {
   return '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
 }
 
-module.exports = { PILL_CLASS, TYPE_META, pillClass, joinPercent, stateOptions, starsOf };
+module.exports = { MARKET_TYPES, PILL_CLASS, TYPE_META, pillClass, joinPercent, stateOptions, starsOf };

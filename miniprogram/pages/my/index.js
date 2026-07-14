@@ -85,11 +85,11 @@ Page({
     wx.navigateTo({ url: `/pages/party/index?id=${party.id}` });
   },
 
-  // 我的问卷：答过一份直接落到个人问卷，多份进列表页选；没答过就去数据 tab 逛逛
+  // 我的问卷：答过一份直接落到个人问卷，多份进列表页选；没答过就去征集 hub 逛逛
   goCensus() {
     const censuses = (this.data.me && this.data.me.censuses) || [];
     if (!censuses.length) {
-      wx.switchTab({ url: '/pages/insights/index' });
+      wx.navigateTo({ url: '/pages/insights/index' });
       return;
     }
     if (censuses.length === 1) {
