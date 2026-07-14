@@ -37,14 +37,7 @@ class RightsType extends MatterType
 
     public function payloadRules(): array
     {
-        return [
-            'pitch' => ['nullable', 'string', 'max:1000'],
-        ];
-    }
-
-    public function payloadFrom(array $validated): array
-    {
-        return ['pitch' => $validated['pitch'] ?? ''];
+        return [];
     }
 
     /** 牵头人不再推进时的收场出口：与「已有结果」分开，不了了之也要有个交代。 */

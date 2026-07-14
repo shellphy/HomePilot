@@ -36,7 +36,7 @@ class CensusOverviewController extends Controller
                     'title' => $matter->title,
                     'state' => $matter->state,
                     'state_label' => $matter->state === 'open' ? '征集中' : '已结束',
-                    'pitch' => $matter->payloadValue('pitch', ''),
+                    'body' => $matter->body,
                     'registered' => $registered,
                     'my_answered' => count($myStance?->payload['answers'] ?? []),
                     'aggregates_visible' => $aggregatesVisible,

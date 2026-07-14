@@ -66,11 +66,12 @@ test('changing groupbuy terms downgrades confirmed participants and notifies the
     Event::assertDispatched(GroupbuyTermsRevised::class);
 });
 
-test('changing only the pitch keeps confirmations intact', function () {
+test('changing only the body keeps confirmations intact', function () {
     Event::fake([GroupbuyTermsRevised::class]);
     $initiator = Resident::factory()->create(['unit_label' => '3栋']);
     $matter = Matter::factory()->open()->for($initiator, 'initiator')->create([
-        'payload' => ['relationship' => 'none', 'terms' => [['label' => '定金', 'value' => '500']], 'pitch' => '老卖点', 'needs_survey' => false],
+        'body' => '老卖点',
+        'payload' => ['relationship' => 'none', 'terms' => [['label' => '定金', 'value' => '500']], 'needs_survey' => false],
     ]);
     $joiner = Resident::factory()->create();
     Stance::factory()->for($matter, 'matter')->for($joiner, 'resident')->create();
@@ -82,7 +83,7 @@ test('changing only the pitch keeps confirmations intact', function () {
         'target_count' => $matter->target_count,
         'relationship' => 'none',
         'terms' => [['label' => '定金', 'value' => '500']], // 不变
-        'pitch' => '新卖点', // 非实质
+        'body' => '新卖点', // 非实质
     ])->assertSuccessful();
 
     expect($matter->joins()->where('resident_id', $joiner->id)->first()->joinStageValue())

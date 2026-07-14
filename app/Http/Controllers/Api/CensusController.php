@@ -43,7 +43,7 @@ class CensusController extends Controller
         return response()->json([
             'title' => $matter->title,
             'state' => $matter->state,
-            'pitch' => $matter->payloadValue('pitch', ''),
+            'body' => $matter->body,
             'purpose' => $matter->payloadValue('purpose', ''),
             'report_presentation' => $this->presentation->for($matter),
             'modules' => $matter->payloadValue('modules', []),

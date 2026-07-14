@@ -49,7 +49,6 @@ class GroupbuyType extends MatterType
     public function payloadRules(): array
     {
         return [
-            'pitch' => ['nullable', 'string', 'max:1000'],
             'perk' => ['nullable', 'string', 'max:100'],
             // 发起人与商家的利益关系披露（业主发起须选，商家直供由后端标注）
             'relationship' => ['nullable', 'in:none,rebate,affiliated,merchant_direct'],
@@ -70,7 +69,6 @@ class GroupbuyType extends MatterType
     public function payloadFrom(array $validated): array
     {
         return [
-            'pitch' => $validated['pitch'] ?? '',
             'perk' => $validated['perk'] ?? '',
             'terms' => $validated['terms'] ?? [],
             'glossary' => $validated['glossary'] ?? [],

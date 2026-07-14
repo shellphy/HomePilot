@@ -31,7 +31,6 @@ Page({
       const res = await matters.getMatter(this.data.id);
       const payload = res.data.payload || {};
       this._preserved = {
-        pitch: payload.pitch || '',
         purpose: payload.purpose || '',
         collects_contact: !!payload.collects_contact,
       };

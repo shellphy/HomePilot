@@ -98,8 +98,8 @@ PROMPT.$this->matterContext();
             $lines[] = '这是逐人报价的团购：报名后发起方单独和每位报名者沟通需求，各自的方案和报价单独谈。';
         }
 
-        if (($pitch = (string) $this->matter->payloadValue('pitch', '')) !== '') {
-            $lines[] = "发起人的话：{$pitch}";
+        if ($this->matter->body !== '') {
+            $lines[] = "发起人的话：{$this->matter->body}";
         }
 
         // 征集：注入目的、问卷题目与选项解释、提问业主自己的登记、各题多数选择，

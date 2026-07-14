@@ -98,7 +98,7 @@ test('admin publishes a census with a questionnaire and missing keys are generat
     $response = $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '车位需求摸底',
-        'pitch' => '统计有多少户需要车位',
+        'body' => '统计有多少户需要车位',
         'collects_contact' => false,
         'modules' => [[
             'title' => '基础',
@@ -124,8 +124,8 @@ test('admin edits keep existing question keys and unrelated payload fields', fun
     $census = Matter::factory()->create([
         'type' => 'census',
         'state' => 'open',
+        'body' => '原说明',
         'payload' => [
-            'pitch' => '原说明',
             'final_note' => '别的字段',
             'modules' => [[
                 'key' => 'basic',

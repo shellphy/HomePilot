@@ -17,8 +17,8 @@ class MatterResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
-     * payload 按类型平铺为顶层字段：groupbuy 的 pitch/perk/terms/glossary/final_terms/final_note、
-     * notice 的 body——小程序端不感知 payload 这个实现细节。
+     * 正文走 body 列；payload 里的类型专属字段（groupbuy 的 perk/terms/glossary/relationship/rebate_note/final_terms/final_note）
+     * 平铺为顶层字段——小程序端不感知 payload 这个实现细节。
      *
      * @return array<int|string, mixed>
      */
@@ -62,7 +62,7 @@ class MatterResource extends JsonResource
             'needs_survey' => (bool) $this->payloadValue('needs_survey', false),
             'register_count' => (int) ($this->register_count ?? 0),
             'registered_by_me' => (bool) ($this->registered_by_me ?? false),
-            'pitch' => $this->payloadValue('pitch', ''),
+            'body' => $this->body,
             'perk' => $this->payloadValue('perk', ''),
             'terms' => $this->payloadValue('terms', []),
             'relationship' => $this->payloadValue('relationship', ''),
@@ -71,7 +71,6 @@ class MatterResource extends JsonResource
             'glossary' => $this->payloadValue('glossary', []),
             'final_terms' => $this->payloadValue('final_terms', []),
             'final_note' => $this->payloadValue('final_note', ''),
-            'body' => $this->payloadValue('body', ''),
             'published_on' => $this->created_at?->format('m-d'),
             'starts_at' => $this->starts_at?->toIso8601String(),
             'starts_on' => $this->starts_at?->format('m-d H:i'),

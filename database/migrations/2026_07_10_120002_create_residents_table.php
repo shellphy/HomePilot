@@ -25,6 +25,14 @@ return new class extends Migration
             // last_party_id = 我的相关方档案（切回业主也记着，再入驻原样找回）
             $table->foreignId('last_party_id')->nullable()->constrained('parties')->nullOnDelete();
             $table->boolean('is_admin')->default(false);
+            // 超级管理员：唯一能在应用内增减管理员的角色（创始人由 CLI 种下）
+            $table->boolean('is_super_admin')->default(false);
+            // 授权审计：这个管理员是谁授权的、何时授权（CLI 种下的为 null）
+            $table->foreignId('admin_granted_by_id')->nullable()->constrained('residents')->nullOnDelete();
+            $table->timestamp('admin_granted_at')->nullable();
+            // 拉黑：被限制参与社区互动（提问/回复/接龙/发起/答问卷），仍可浏览
+            $table->timestamp('blocked_at')->nullable();
+            $table->foreignId('blocked_by_id')->nullable()->constrained('residents')->nullOnDelete();
             $table->string('room_label', 30)->default('');
             $table->string('layout_label', 30)->default(''); // 户型（从社区设置的户型清单里选，如 107㎡）
             // 「我牵头的 / 我参与的」两类列表的已读时间：与事项的 last_activity_at 比对出红点

@@ -16,7 +16,7 @@
           <view class="fcard-tag">征集中</view>
           <view class="fcard-title">{{item.title}}</view>
         </view>
-        <view wx:if="{{item.pitch}}" class="fcard-pitch">{{item.pitch}}</view>
+        <view wx:if="{{item.body}}" class="fcard-pitch">{{item.body}}</view>
         <view wx:if="{{item.top}}" class="fcard-top"
           >「{{item.top.question}}」答得最多的是 {{item.top.label}}（{{item.top.count}} 人）</view
         >

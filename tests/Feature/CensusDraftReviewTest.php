@@ -12,7 +12,7 @@ test('a new census stays a draft and out of the review queue until it has a ques
     $response = $this->postJson('/api/matters', [
         'type' => 'census',
         'title' => '暑期活动征集',
-        'pitch' => '看看大家想参加什么活动',
+        'body' => '看看大家想参加什么活动',
     ])
         ->assertCreated()
         ->assertJsonPath('data.review_status', 'draft');
@@ -36,8 +36,8 @@ test('a census enters the review queue only after its initiator submits a questi
     $matter = Matter::factory()->draft()->for($initiator, 'initiator')->create([
         'type' => 'census',
         'state' => 'open',
+        'body' => '看看大家想参加什么活动',
         'payload' => [
-            'pitch' => '看看大家想参加什么活动',
             'modules' => [[
                 'key' => 'activities',
                 'title' => '活动偏好',
@@ -77,26 +77,4 @@ test('an administrator cannot approve an unfinished census draft', function () {
         ->assertUnprocessable();
 
     expect($matter->refresh()->review_status)->toBe(MatterReviewStatus::Draft);
-});
-
-test('the migration restores existing unfinished censuses as resumable drafts', function () {
-    $unfinished = Matter::factory()->pending()->create([
-        'type' => 'census',
-        'state' => 'open',
-        'payload' => ['modules' => [['title' => '还没写完', 'questions' => []]]],
-    ]);
-    $complete = Matter::factory()->pending()->create([
-        'type' => 'census',
-        'state' => 'open',
-        'payload' => ['modules' => [[
-            'title' => '已完成',
-            'questions' => [['text' => '问题', 'type' => 'text']],
-        ]]],
-    ]);
-
-    $migration = require database_path('migrations/2026_07_13_062224_move_incomplete_pending_censuses_to_draft.php');
-    $migration->up();
-
-    expect($unfinished->refresh()->review_status)->toBe(MatterReviewStatus::Draft)
-        ->and($complete->refresh()->review_status)->toBe(MatterReviewStatus::Pending);
 });

@@ -14,7 +14,7 @@ test('an owner without a unit label cannot initiate and gets a structured profil
     $this->postJson('/api/matters', [
         'type' => 'activity',
         'title' => '周六建材市场组团踩点',
-        'pitch' => '早上九点小区北门集合',
+        'body' => '早上九点小区北门集合',
     ])->assertUnprocessable()->assertJsonValidationErrors('profile');
 });
 
@@ -24,7 +24,7 @@ test('an owner with a unit label initiates normally', function () {
     $this->postJson('/api/matters', [
         'type' => 'activity',
         'title' => '周六建材市场组团踩点',
-        'pitch' => '早上九点小区北门集合',
+        'body' => '早上九点小区北门集合',
     ])->assertCreated();
 });
 

@@ -45,6 +45,16 @@ abstract class MatterType
         return [];
     }
 
+    /**
+     * 事项正文（body 列）的验证规则；类型可覆盖是否必填与长度上限。
+     *
+     * @return array<int, mixed>
+     */
+    public function bodyRules(): array
+    {
+        return ['nullable', 'string', 'max:1000'];
+    }
+
     /** 业主是否可以从小程序发起该类型事项（否=仅管理端创建）。 */
     public function userInitiatable(): bool
     {

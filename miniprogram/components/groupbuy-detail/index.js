@@ -70,7 +70,7 @@ Component({
         {
           pillClass: pillClass(matter.state),
           percent: joinPercent(matter),
-          pitchSegments: splitByTerms(matter.pitch, glossaryTerms),
+          pitchSegments: splitByTerms(matter.body, glossaryTerms),
           termRows: (matter.terms || []).map((row) => ({
             label: row.label,
             segments: splitByTerms(row.value, glossaryTerms),

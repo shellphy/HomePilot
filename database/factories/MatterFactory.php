@@ -27,8 +27,8 @@ class MatterFactory extends Factory
             'state' => 'seeking',
             'review_status' => MatterReviewStatus::Approved,
             'target_count' => fake()->numberBetween(10, 40),
+            'body' => fake()->sentence(),
             'payload' => [
-                'pitch' => fake()->sentence(),
                 'perk' => '',
                 'terms' => [],
                 'glossary' => [],
@@ -90,7 +90,8 @@ class MatterFactory extends Factory
             'type' => 'activity',
             'state' => 'open',
             'category' => '',
-            'payload' => ['pitch' => fake()->sentence()],
+            'body' => fake()->sentence(),
+            'payload' => [],
         ]);
     }
 
@@ -100,7 +101,8 @@ class MatterFactory extends Factory
             'type' => 'aid',
             'state' => 'open',
             'category' => '',
-            'payload' => ['pitch' => fake()->sentence()],
+            'body' => fake()->sentence(),
+            'payload' => [],
         ]);
     }
 
@@ -110,7 +112,8 @@ class MatterFactory extends Factory
             'type' => 'rights',
             'state' => 'collecting',
             'category' => '',
-            'payload' => ['pitch' => fake()->sentence()],
+            'body' => fake()->sentence(),
+            'payload' => [],
         ]);
     }
 
@@ -124,7 +127,8 @@ class MatterFactory extends Factory
             'state' => 'published',
             'category' => '',
             'target_count' => 0,
-            'payload' => ['body' => fake()->paragraph()],
+            'body' => fake()->paragraph(),
+            'payload' => [],
         ]);
     }
 }

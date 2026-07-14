@@ -30,8 +30,8 @@ function updateParticipant(id, stanceId, data) {
 }
 
 // 统一创作：所有类型（团购/活动/互助/维权/征集/公告）的发起。
-// data 里的内容字段（title/category/target_count/pitch/perk/terms/glossary/
-// purpose/collects_contact/body/needs_survey/modules 等）都走顶层，不包 payload。
+// data 里的内容字段（title/body/category/target_count/perk/terms/glossary/
+// purpose/collects_contact/needs_survey/modules 等）都走顶层，不包 payload。
 function createMatter(type, data) {
   return request('/matters', { method: 'POST', data: { type, ...data } });
 }

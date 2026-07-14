@@ -13,8 +13,8 @@ function renovationCensus(array $overrides = []): Matter
         'category' => '装修',
         'title' => '装修意向摸底',
         'target_count' => 600,
+        'body' => '摸一摸全小区的装修意向',
         'payload' => [
-            'pitch' => '摸一摸全小区的装修意向',
             'collects_contact' => true,
             'modules' => array_merge([[
                 'key' => 'basic',
@@ -75,7 +75,7 @@ test('the census ships its schema, my answers and aggregates', function () {
     $this->getJson("/api/matters/{$census->id}/census")
         ->assertSuccessful()
         ->assertJsonPath('title', '装修意向摸底')
-        ->assertJsonPath('pitch', '摸一摸全小区的装修意向')
+        ->assertJsonPath('body', '摸一摸全小区的装修意向')
         ->assertJsonPath('modules.0.key', 'basic')
         ->assertJsonPath('collects_contact', true)
         ->assertJsonPath('registered_count', 5)

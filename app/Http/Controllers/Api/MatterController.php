@@ -271,6 +271,7 @@ class MatterController extends Controller
             'initiator_id' => $resident->id,
             'initiator_party_id' => $initiatorPartyId,
             'title' => $validated['title'],
+            'body' => $validated['body'] ?? '',
             'category' => $validated['category'] ?? '',
             'state' => $type->initialState(),
             'target_count' => $validated['target_count'] ?? 0,
@@ -359,6 +360,7 @@ class MatterController extends Controller
 
         $updateData = [
             'title' => $validated['title'],
+            'body' => array_key_exists('body', $validated) ? ($validated['body'] ?? '') : $matter->body,
             'category' => $validated['category'] ?? $matter->category,
             'state' => $validated['state'] ?? $matter->state,
             'target_count' => $validated['target_count'] ?? $matter->target_count,
@@ -566,6 +568,7 @@ class MatterController extends Controller
         return array_merge(
             [
                 'title' => ['required', 'string', 'max:60'],
+                'body' => $type->bodyRules(),
                 'starts_at' => ['sometimes', 'nullable', 'date'],
                 // 开始时间与报名截止各自独立：团购报名窗口常晚于开始时间，开始时间也可留空
                 'registration_deadline_at' => ['sometimes', 'nullable', 'date'],
