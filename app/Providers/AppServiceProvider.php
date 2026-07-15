@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\DevCommands;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +29,21 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         $this->configureDevCommands();
+        $this->configureQueueLogging();
+    }
+
+    /** 队列任务失败默认只进 failed_jobs 表，这里统一补一行日志。 */
+    protected function configureQueueLogging(): void
+    {
+        Queue::failing(function (JobFailed $event): void {
+            Log::error('队列任务失败', [
+                'job' => $event->job->resolveName(),
+                'connection' => $event->connectionName,
+                'queue' => $event->job->getQueue(),
+                'attempts' => $event->job->attempts(),
+                'error' => $event->exception->getMessage(),
+            ]);
+        });
     }
 
     /**

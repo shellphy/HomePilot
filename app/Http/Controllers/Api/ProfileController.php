@@ -9,6 +9,7 @@ use App\Http\Resources\ResidentResource;
 use App\Models\Matter;
 use App\Services\WeChat;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class ProfileController extends Controller
@@ -67,6 +68,10 @@ class ProfileController extends Controller
     {
         $validated = $request->validate(['code' => ['required', 'string']]);
 
-        return ['data' => ['phone' => $weChat->phoneNumberFromCode($validated['code'])]];
+        $phone = $weChat->phoneNumberFromCode($validated['code']);
+
+        Log::info('手机号授权换取成功', ['resident_id' => $this->resident($request)->id]);
+
+        return ['data' => ['phone' => $phone]];
     }
 }

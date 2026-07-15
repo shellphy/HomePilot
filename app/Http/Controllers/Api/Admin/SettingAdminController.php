@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Settings\CommunitySettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 管理端 · 社区设置。
@@ -13,6 +15,8 @@ use Illuminate\Http\Request;
  */
 class SettingAdminController extends Controller
 {
+    use ResolvesResident;
+
     /**
      * 设置表单的分组与控件描述（kind：input 单行 / textarea 多行 / number 数字 / list 一行一项）。
      * 管理端按此渲染，新增设置字段只改后端：CommunitySettings 属性、settings 迁移、这里和 update 的规则。
@@ -71,8 +75,24 @@ class SettingAdminController extends Controller
         // 唯一可留空的设置项：空字符串会被全局中间件转成 null，回填空串再存
         $validated['ai_context'] ??= '';
 
+        $before = $settings->toArray();
+
         $settings->fill($validated);
         $settings->save();
+
+        // 值里有大段文案，只记改了哪些键
+        $changed = array_keys(array_filter(
+            $settings->toArray(),
+            fn (mixed $value, string $key): bool => ($before[$key] ?? null) !== $value,
+            ARRAY_FILTER_USE_BOTH,
+        ));
+
+        if ($changed !== []) {
+            Log::info('审计 · 修改小区设置', [
+                'actor_id' => $this->resident($request)->id,
+                'changed' => $changed,
+            ]);
+        }
 
         return response()->json(['data' => $settings->toArray()]);
     }

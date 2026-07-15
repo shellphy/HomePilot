@@ -8,6 +8,7 @@ use App\Http\Resources\ResidentResource;
 use App\Models\Resident;
 use App\Services\WeChat;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -17,6 +18,12 @@ class AuthController extends Controller
 
         // 服务号 H5 先认识的人再打开小程序，认到同一个 unionid 上并补齐 openid_mp
         $resident = Resident::updateOrCreate(['unionid' => $unionid], ['openid_mp' => $openid]);
+
+        // unionid/openid 是身份凭证，不进日志
+        Log::info('登录成功', [
+            'resident_id' => $resident->id,
+            'registered' => $resident->wasRecentlyCreated,
+        ]);
 
         return response()->json([
             'token' => $resident->createToken('miniprogram')->plainTextToken,

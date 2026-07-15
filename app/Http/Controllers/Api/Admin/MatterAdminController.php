@@ -12,6 +12,7 @@ use App\Models\Matter;
 use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 管理端 · 事项：审核队列与通过/驳回。
@@ -66,6 +67,14 @@ class MatterAdminController extends Controller
         } else {
             $matter->reject($validated['reason'] ?? '');
         }
+
+        Log::info('审计 · 事项审核', [
+            'actor_id' => $this->resident($request)->id,
+            'matter_id' => $matter->id,
+            'approved' => $matter->is_approved,
+            'was_approved' => $wasApproved,
+            'has_reason' => filled($validated['reason'] ?? ''),
+        ]);
 
         // 审核结果对发起人是关键动态：喂给「我的」页未读红点。
         // 通过只在状态真的翻正时记；驳回每次都记（理由可能更新）。

@@ -10,6 +10,7 @@ use App\Models\Party;
 use App\Models\Resident;
 use App\Models\Stance;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 订阅消息通知：站内各类动态统一翻译成「活动状态提醒」模板的四个字段再下发。
@@ -119,6 +120,8 @@ class SubscribeNotifier
         $owner = $this->partyOwner($party);
 
         if ($owner === null) {
+            Log::warning('相关方核验通过但找不到档案归属人', ['party_id' => $party->id]);
+
             return;
         }
 
@@ -155,6 +158,8 @@ class SubscribeNotifier
         $owner = $this->partyOwner($party);
 
         if ($owner === null) {
+            Log::warning('相关方核验驳回但找不到档案归属人', ['party_id' => $party->id]);
+
             return;
         }
 
@@ -200,12 +205,16 @@ class SubscribeNotifier
 
     private function send(Resident $recipient, string $page, string $title, string $typeLabel, string $stateWord, string $hint): void
     {
-        $this->weChat->sendSubscribeMessage($recipient->openid_mp, $page, [
+        $sent = $this->weChat->sendSubscribeMessage($recipient->openid_mp, $page, [
             'thing1' => ['value' => $this->clip($title, self::THING_LIMIT)],
             'thing5' => ['value' => $this->clip($typeLabel, self::THING_LIMIT)],
             'short_thing3' => ['value' => $this->clip($stateWord, self::SHORT_THING_LIMIT)],
             'thing4' => ['value' => $this->clip($hint, self::THING_LIMIT)],
         ]);
+
+        if (! $sent) {
+            Log::debug('订阅消息未送达', ['resident_id' => $recipient->id, 'page' => $page]);
+        }
     }
 
     /**

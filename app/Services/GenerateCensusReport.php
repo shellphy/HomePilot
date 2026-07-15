@@ -17,11 +17,15 @@ class GenerateCensusReport
         $existing = $stance->payload['ai_report'] ?? null;
 
         if ($expectedHash !== null && $expectedHash !== $answerHash) {
+            Log::debug('AI 问卷报告跳过：答案已变更', ['stance_id' => $stance->id]);
+
             return;
         }
 
         // 强制重生成跳过「已有相同答案的报告就不跑」的短路
         if (! $force && is_string($existing) && $existing !== '' && ($stance->payload['ai_report_answers_hash'] ?? '') === $answerHash) {
+            Log::debug('AI 问卷报告跳过：已有同答案的报告', ['stance_id' => $stance->id]);
+
             return;
         }
 
@@ -57,6 +61,11 @@ class GenerateCensusReport
         if ($expectedHash !== null
             && ($this->answerHash($latestAnswers) !== $expectedHash
                 || ($stance->payload['ai_report_pending_hash'] ?? null) !== $expectedHash)) {
+            Log::info('AI 问卷报告生成后被丢弃：答案在生成期间变了', [
+                'matter_id' => $matter->id,
+                'stance_id' => $stance->id,
+            ]);
+
             return;
         }
 

@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Enums\PartyReviewStatus;
 use App\Events\PartyListed;
 use App\Events\PartyRejected;
+use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Party;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 管理端 · 相关方：查看入驻档案，核验通过公示 / 驳回附理由。
@@ -16,6 +18,8 @@ use Illuminate\Http\Request;
  */
 class PartyAdminController extends Controller
 {
+    use ResolvesResident;
+
     public function index(): JsonResponse
     {
         $parties = Party::latest()->get();
@@ -65,6 +69,15 @@ class PartyAdminController extends Controller
         } else {
             $party->reject($validated['reason'] ?? '');
         }
+
+        // 档案只留 reviewed_at，核验人不落库
+        Log::info('审计 · 相关方核验', [
+            'actor_id' => $this->resident($request)->id,
+            'party_id' => $party->id,
+            'approved' => $validated['is_approved'],
+            'was_listed' => $wasListed,
+            'has_reason' => filled($validated['reason'] ?? ''),
+        ]);
 
         if ($party->is_listed && ! $wasListed) {
             PartyListed::dispatch($party);

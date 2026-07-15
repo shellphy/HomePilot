@@ -18,6 +18,7 @@ use App\Models\Stance;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -332,9 +333,20 @@ class MatterController extends Controller
 
         $validated = $request->validate($rules);
 
+        $stateChanging = ($validated['state'] ?? $matter->state) !== $matter->state;
+
         // 发起人受顺序流转守卫（跳步/回退/终态回退都拦），管理员绕过（Rule::in 仍拦非法值）
-        if (! $isAdmin && ($validated['state'] ?? $matter->state) !== $matter->state) {
+        if ($stateChanging && ! $isAdmin) {
             $this->guardTransition($matter, $validated['state']);
+        }
+
+        if ($stateChanging && $isAdmin) {
+            Log::info('审计 · 管理员绕过状态守卫', [
+                'actor_id' => $this->resident($request)->id,
+                'matter_id' => $matter->id,
+                'from' => $matter->state,
+                'to' => $validated['state'],
+            ]);
         }
 
         $previousState = $matter->state;
@@ -512,7 +524,15 @@ class MatterController extends Controller
      */
     public function destroy(Request $request, Matter $matter): JsonResponse
     {
-        abort_unless($this->resident($request)->is_admin, 403);
+        $admin = $this->resident($request);
+        abort_unless($admin->is_admin, 403);
+
+        Log::info('审计 · 删除事项', [
+            'actor_id' => $admin->id,
+            'matter_id' => $matter->id,
+            'type' => $matter->type,
+            'initiator_id' => $matter->initiator_id,
+        ]);
 
         $matter->delete();
 
