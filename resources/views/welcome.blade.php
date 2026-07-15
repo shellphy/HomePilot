@@ -244,7 +244,7 @@
         <div class="wrap">
             <div class="status"><span class="dot"></span>网站持续更新中</div>
             <div>&copy; {{ date('Y') }} 知行合一 · 个人网站</div>
-            <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">备案号审核中</a></div>
+            <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">鄂ICP备2023000342号-1</a></div>
         </div>
     </footer>
 </body>
