@@ -16,7 +16,11 @@ return new class extends Migration
     {
         Schema::create('residents', function (Blueprint $table) {
             $table->id();
-            $table->string('openid')->unique();
+            // 认人只认 unionid：同一个人在小程序和服务号下的 openid 不同，
+            // 只有开放平台账号下的 unionid 跨端唯一
+            $table->string('unionid')->unique();
+            // 小程序订阅消息的 touser 要的是小程序这一端的 openid
+            $table->string('openid_mp')->default('');
             $table->string('nickname', 30)->default('');
             $table->string('avatar')->default('');
             $table->string('phone', 20)->default('');

@@ -33,7 +33,7 @@ class GrantAdmin extends Command
 
         $this->info(sprintf(
             '%s（ID %d）%s%s权限',
-            $resident->nickname ?: $resident->openid,
+            $resident->nickname ?: $resident->unionid,
             $resident->id,
             $revoke ? '已收回' : '已获得',
             $resident->is_super_admin ? '超级管理员' : '管理员',
