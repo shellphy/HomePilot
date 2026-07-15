@@ -3,9 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>知行合一 —— 我的读书与思考笔记</title>
-    <meta name="description" content="知行合一,我的个人网站。在这里记录读过的书、想通的道理,以及把想法落到行动上的点滴。">
-    <meta name="keywords" content="知行合一,个人博客,读书笔记,学习记录,随笔,自我成长">
+    <title>个人学习心得 —— 我的读书与学习笔记</title>
+    <meta name="description" content="个人学习心得,我的个人网站。在这里记录读过的书、学到的东西和想通的道理,以「知行合一」自勉。">
+    <meta name="keywords" content="个人学习心得,个人博客,读书笔记,学习记录,随笔,知行合一,自我成长">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <style>
         :root {
@@ -124,7 +124,7 @@
 <body>
     <header>
         <div class="wrap nav">
-            <div class="brand"><span class="mark">知</span>知行合一</div>
+            <div class="brand"><span class="mark">学</span>个人学习心得</div>
             <nav class="nav-links">
                 <a href="#philosophy">理念</a>
                 <a href="#notes">在记什么</a>
@@ -136,11 +136,11 @@
     <main>
         <section class="hero">
             <div class="wrap">
-                <div class="logo">知</div>
-                <h1>知行合一</h1>
-                <p class="subtitle">我的读书与思考笔记</p>
+                <div class="logo">学</div>
+                <h1>个人学习心得</h1>
+                <p class="subtitle">我的读书与学习笔记 · 知行合一</p>
                 <p class="lead">
-                    这是我的个人网站。我在这里记录读过的书、想通的道理,
+                    这是我的个人网站。我在这里记录读过的书、学到的东西和想通的道理,
                     也提醒自己:懂了的道理,要真的去做,才算真懂。
                 </p>
                 <a class="cta" href="#about">关于这个小站 →</a>
@@ -168,8 +168,8 @@
             <div class="wrap">
                 <div class="section-head">
                     <div class="eyebrow">Idea</div>
-                    <h2>为什么叫「知行合一」</h2>
-                    <p>对我来说,知和行从来不是两件事。道理只有落到行动上,才真正长在自己身上。</p>
+                    <h2>我记学习心得的方式:知行合一</h2>
+                    <p>对我来说,知和行从来不是两件事。学到的道理只有落到行动上,才真正长在自己身上。</p>
                 </div>
                 <div class="grid">
                     <div class="card">
@@ -230,7 +230,7 @@
                 <cite>—— 王阳明《传习录》</cite>
                 <p class="text">
                     「知行合一」出自明代思想家王阳明。他认为,知而不行,只是未知;真正的知,
-                    必然包含行动。我拿它给自己的小站命名,是想经常提醒自己:别做「思想上的巨人、行动上的矮子」。
+                    必然包含行动。我把它当成记学习心得的座右铭,提醒自己:别做「思想上的巨人、行动上的矮子」。
                 </p>
                 <p class="text">
                     这里是我个人搭的一个小网站,纯粹出于兴趣,记录自己读书、学习和思考的点滴,
@@ -243,7 +243,7 @@
     <footer>
         <div class="wrap">
             <div class="status"><span class="dot"></span>网站持续更新中</div>
-            <div>&copy; {{ date('Y') }} 知行合一 · 个人网站</div>
+            <div>&copy; {{ date('Y') }} 个人学习心得 · 个人网站</div>
             <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">鄂ICP备2023000342号-1</a></div>
         </div>
     </footer>
