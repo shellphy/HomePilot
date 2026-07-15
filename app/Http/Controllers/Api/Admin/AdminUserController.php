@@ -62,13 +62,13 @@ class AdminUserController extends Controller
         return response()->json(['data' => $this->present($resident->load('adminGrantedBy'))], 201);
     }
 
-    public function destroy(Resident $resident): JsonResponse
+    public function destroy(Request $request, Resident $resident): JsonResponse
     {
         // 超级管理员不在应用内收回（创始人由 CLI 管理）
         abort_if($resident->is_super_admin, 422, '超级管理员不能在这里收回');
         abort_unless($resident->is_admin, 404);
 
-        $resident->revokeAdmin();
+        $resident->revokeAdmin($this->resident($request));
 
         return response()->json(['deleted' => true]);
     }

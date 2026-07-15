@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Resident;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class GrantAdmin extends Command
 {
@@ -30,6 +31,12 @@ class GrantAdmin extends Command
             // 收回时一并撤掉超管；授权时仅 --super 升为超管，普通授权不动超管身份
             'is_super_admin' => $revoke ? false : ($this->option('super') ? true : $resident->is_super_admin),
         ])->save();
+
+        Log::info('审计 · CLI 变更管理员权限', [
+            'target_id' => $resident->id,
+            'is_admin' => $resident->is_admin,
+            'is_super_admin' => $resident->is_super_admin,
+        ]);
 
         $this->info(sprintf(
             '%s（ID %d）%s%s权限',

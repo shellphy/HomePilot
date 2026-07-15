@@ -11,6 +11,7 @@ use App\Services\CensusAggregator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -146,6 +147,13 @@ class CensusController extends Controller
             'visible_to_initiator' => $validated['visible_to_initiator'],
         ]));
 
+        Log::info('问卷授权变更', [
+            'matter_id' => $matter->id,
+            'resident_id' => $resident->id,
+            'stance_id' => $stance->id,
+            'visible_to_initiator' => $validated['visible_to_initiator'],
+        ]);
+
         return response()->json(['visible_to_initiator' => $validated['visible_to_initiator']]);
     }
 
@@ -180,6 +188,14 @@ class CensusController extends Controller
                 'created_at' => $stance->created_at?->format('Y-m-d H:i'),
                 'answers' => $this->readableAnswers($stance, $questions),
             ]);
+
+        // 响应里有邻居的手机号与逐题答案，只记数量不记内容
+        Log::info('查看已授权问卷名单', [
+            'matter_id' => $matter->id,
+            'resident_id' => $resident->id,
+            'count' => $consented->count(),
+            'with_contact' => $collectsContact,
+        ]);
 
         return response()->json(['data' => $consented]);
     }

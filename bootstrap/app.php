@@ -6,6 +6,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,4 +29,30 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // HttpException 在框架的 internalDontReport 里，report 回调不会触发，
+        // 得先 stopIgnoring 捞回来自己分级记，再返回 false 挡住默认日志栈。
+        $exceptions->stopIgnoring(HttpException::class);
+
+        $exceptions->report(function (HttpException $e): bool {
+            $status = $e->getStatusCode();
+            $request = request();
+
+            $context = [
+                'status' => $status,
+                'method' => $request->method(),
+                'path' => $request->path(),
+                'resident_id' => $request->user()?->id,
+                'reason' => $e->getMessage(),
+            ];
+
+            match (true) {
+                $status >= 500 => Log::error('请求异常终止', $context),
+                $status === 429 => Log::warning('请求被限流', $context),
+                in_array($status, [401, 403], true) => Log::warning('请求被拒绝', $context),
+                default => null,
+            };
+
+            return false;
+        });
     })->create();

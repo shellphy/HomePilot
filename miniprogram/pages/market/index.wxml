@@ -16,6 +16,7 @@
           bind:tap="goCreate"
         >我要发布</view>
       </view>
+      <view class="portal-note">平台只搭台，不经手资金。钱货请双方当面两清。</view>
     </view>
 
     <!-- 类型筛选：在售里有 ≥2 种类型（团购/闲置）时才露出 -->

@@ -51,11 +51,11 @@ class AdminBlockController extends Controller
         return response()->json(['data' => $this->present($resident->load('blockedBy'))], 201);
     }
 
-    public function destroy(Resident $resident): JsonResponse
+    public function destroy(Request $request, Resident $resident): JsonResponse
     {
         abort_unless($resident->isBlocked(), 404);
 
-        $resident->unblock();
+        $resident->unblock($this->resident($request));
 
         return response()->json(['deleted' => true]);
     }

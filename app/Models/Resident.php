@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\HasApiTokens;
 
 /**
@@ -87,6 +88,8 @@ class Resident extends Authenticatable
             'admin_granted_by_id' => $by->id,
             'admin_granted_at' => now(),
         ])->save();
+
+        Log::info('审计 · 授予管理员', ['actor_id' => $by->id, 'target_id' => $this->id]);
     }
 
     /**
@@ -111,24 +114,31 @@ class Resident extends Authenticatable
             'blocked_at' => now(),
             'blocked_by_id' => $by->id,
         ])->save();
+
+        Log::info('审计 · 拉黑成员', ['actor_id' => $by->id, 'target_id' => $this->id]);
     }
 
-    public function unblock(): void
+    /** 解除拉黑，清掉拉黑记录。 */
+    public function unblock(Resident $by): void
     {
         $this->forceFill([
             'blocked_at' => null,
             'blocked_by_id' => null,
         ])->save();
+
+        Log::info('审计 · 解除拉黑', ['actor_id' => $by->id, 'target_id' => $this->id]);
     }
 
     /** 收回管理员，清掉授权记录（超级管理员身份不受影响）。 */
-    public function revokeAdmin(): void
+    public function revokeAdmin(Resident $by): void
     {
         $this->forceFill([
             'is_admin' => false,
             'admin_granted_by_id' => null,
             'admin_granted_at' => null,
         ])->save();
+
+        Log::info('审计 · 收回管理员', ['actor_id' => $by->id, 'target_id' => $this->id]);
     }
 
     /**

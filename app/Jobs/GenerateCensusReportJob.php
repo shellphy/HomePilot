@@ -35,6 +35,8 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
     {
         $stance = Stance::query()->with(['matter', 'resident'])->find($this->stanceId);
         if ($stance === null || $stance->matter === null) {
+            Log::warning('AI 问卷报告任务跳过：表态或事项已不存在', ['stance_id' => $this->stanceId]);
+
             return;
         }
 
@@ -43,7 +45,16 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
 
     public function failed(?Throwable $exception): void
     {
+        // 记在前面：答案已变更时下面会提前返回
+        Log::error('AI 问卷报告生成失败', [
+            'stance_id' => $this->stanceId,
+            'answer_hash' => $this->answerHash,
+            'error' => $exception?->getMessage(),
+        ]);
+
         $stance = Stance::find($this->stanceId);
+
+        // 答案已变更：状态交给更新的那次任务写
         if ($stance === null || ($stance->payload['ai_report_pending_hash'] ?? null) !== $this->answerHash) {
             return;
         }
@@ -54,11 +65,5 @@ class GenerateCensusReportJob implements ShouldBeUnique, ShouldQueue
         $payload['ai_report_error'] = 'AI 报告生成失败，请稍后重试';
         unset($payload['ai_report_pending_hash']);
         $stance->update(['payload' => $payload]);
-
-        Log::error('Census report generation failed', [
-            'stance_id' => $this->stanceId,
-            'answer_hash' => $this->answerHash,
-            'error' => $exception?->getMessage(),
-        ]);
     }
 }
