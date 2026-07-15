@@ -19,7 +19,8 @@ class ResidentFactory extends Factory
     public function definition(): array
     {
         return [
-            'openid' => fake()->unique()->md5(),
+            'unionid' => fake()->unique()->md5(),
+            'openid_mp' => fake()->unique()->md5(),
             'nickname' => fake()->firstName(),
             'unit_label' => fake()->numberBetween(1, 8).'栋',
             'layout_label' => fake()->randomElement(['107㎡', '130㎡', '154㎡']),

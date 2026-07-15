@@ -46,7 +46,7 @@ test('flipping the state notifies participants with template fields but skips th
     expect($messages)->toHaveCount(1);
 
     $message = $messages->sole();
-    expect($message['touser'])->toBe($participant->openid)
+    expect($message['touser'])->toBe($participant->openid_mp)
         ->and($message['template_id'])->toBe('tpl-test')
         ->and($message['page'])->toBe("pages/matter/index?id={$matter->id}")
         ->and($message['data']['thing1']['value'])->toBe('中央空调团购')
@@ -62,14 +62,14 @@ test('approving notifies the initiator and rejecting carries the reason', functi
     $this->putJson("/api/admin/matters/{$matter->id}/approve", ['is_approved' => true])->assertSuccessful();
 
     $approved = sentSubscribeMessages()->sole();
-    expect($approved['touser'])->toBe($initiator->openid)
+    expect($approved['touser'])->toBe($initiator->openid_mp)
         ->and($approved['data']['short_thing3']['value'])->toBe('已公示');
 
     $this->putJson("/api/admin/matters/{$matter->id}/approve", ['is_approved' => false, 'reason' => '标题写得太模糊'])
         ->assertSuccessful();
 
     $rejected = sentSubscribeMessages()->last();
-    expect($rejected['touser'])->toBe($initiator->openid)
+    expect($rejected['touser'])->toBe($initiator->openid_mp)
         ->and($rejected['data']['short_thing3']['value'])->toBe('未过审')
         ->and($rejected['data']['thing4']['value'])->toBe('标题写得太模糊');
 });
@@ -82,7 +82,7 @@ test('joining notifies the initiator with a type-appropriate word', function () 
     $this->postJson("/api/matters/{$activity->id}/join")->assertCreated();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($initiator->openid)
+    expect($message['touser'])->toBe($initiator->openid_mp)
         ->and($message['data']['short_thing3']['value'])->toBe('新增报名')
         ->and($message['data']['thing4']['value'])->toBe('5栋 老王 加入了名单');
 
@@ -115,7 +115,7 @@ test('a new review notifies the initiator once and revisions stay quiet', functi
     $this->putJson("/api/matters/{$matter->id}/review", ['rating' => 5, 'content' => '靠谱'])->assertCreated();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($initiator->openid)
+    expect($message['touser'])->toBe($initiator->openid_mp)
         ->and($message['data']['short_thing3']['value'])->toBe('收到评价')
         ->and($message['data']['thing4']['value'])->toBe('收到一条 5 星评价');
 
@@ -138,7 +138,7 @@ test('publishing the deal notifies confirmed participants only', function () {
     ])->assertSuccessful();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($confirmed->openid)
+    expect($message['touser'])->toBe($confirmed->openid_mp)
         ->and($message['data']['short_thing3']['value'])->toBe('成交公示');
 });
 
@@ -155,7 +155,7 @@ test('posting a progress update notifies participants with the content', functio
     ])->assertCreated();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($participant->openid)
+    expect($message['touser'])->toBe($participant->openid_mp)
         ->and($message['data']['short_thing3']['value'])->toBe('有新进展')
         ->and($message['data']['thing4']['value'])->toBe('已和商家谈妥第一轮价格');
 });
@@ -168,7 +168,7 @@ test('listing a party notifies its owner and only on the flip', function () {
     $this->putJson("/api/admin/parties/{$party->id}", ['is_approved' => true])->assertSuccessful();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($owner->openid)
+    expect($message['touser'])->toBe($owner->openid_mp)
         ->and($message['page'])->toBe("pages/party/index?id={$party->id}")
         ->and($message['data']['thing1']['value'])->toBe('青城中央空调')
         ->and($message['data']['short_thing3']['value'])->toBe('核验通过');
@@ -185,7 +185,7 @@ test('self-registering a party notifies the admins to certify it', function () {
     $this->postJson('/api/me/party', ['type' => 'merchant', 'name' => '青城中央空调'])->assertSuccessful();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($admin->openid)
+    expect($message['touser'])->toBe($admin->openid_mp)
         ->and($message['data']['thing1']['value'])->toBe('青城中央空调')
         ->and($message['data']['short_thing3']['value'])->toBe('待核验');
 });
@@ -199,7 +199,7 @@ test('rejecting a party notifies its owner with the reason', function () {
         ->assertSuccessful();
 
     $message = sentSubscribeMessages()->sole();
-    expect($message['touser'])->toBe($owner->openid)
+    expect($message['touser'])->toBe($owner->openid_mp)
         ->and($message['data']['short_thing3']['value'])->toBe('未通过')
         ->and($message['data']['thing4']['value'])->toBe('请补充营业执照');
 });

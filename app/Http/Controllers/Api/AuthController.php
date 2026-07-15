@@ -13,9 +13,10 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request, WeChat $weChat): JsonResponse
     {
-        $openid = $weChat->openidFromCode($request->validated('code'));
+        ['openid' => $openid, 'unionid' => $unionid] = $weChat->sessionFromCode($request->validated('code'));
 
-        $resident = Resident::firstOrCreate(['openid' => $openid]);
+        // 服务号 H5 先认识的人再打开小程序，认到同一个 unionid 上并补齐 openid_mp
+        $resident = Resident::updateOrCreate(['unionid' => $unionid], ['openid_mp' => $openid]);
 
         return response()->json([
             'token' => $resident->createToken('miniprogram')->plainTextToken,

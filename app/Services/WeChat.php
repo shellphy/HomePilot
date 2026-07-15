@@ -10,11 +10,14 @@ use Illuminate\Validation\ValidationException;
 class WeChat
 {
     /**
-     * 用小程序 wx.login 拿到的 code 换 openid（code2session）。
+     * 用小程序 wx.login 拿到的 code 换身份（code2session）。
+     * 小程序绑在开放平台账号下，unionid 随 code2session 一并下发。
+     *
+     * @return array{openid: string, unionid: string}
      *
      * @throws ValidationException
      */
-    public function openidFromCode(string $code): string
+    public function sessionFromCode(string $code): array
     {
         try {
             $response = Http::timeout(5)
@@ -31,12 +34,14 @@ class WeChat
         }
 
         $openid = $response->json('openid');
+        $unionid = $response->json('unionid');
 
-        if (! $response->successful() || blank($openid)) {
+        // unionid 缺失说明小程序脱离了开放平台账号，认人的锚点没了
+        if (! $response->successful() || blank($openid) || blank($unionid)) {
             throw ValidationException::withMessages(['code' => '微信登录失败，请重试']);
         }
 
-        return $openid;
+        return ['openid' => $openid, 'unionid' => $unionid];
     }
 
     /**
@@ -74,11 +79,11 @@ class WeChat
      *
      * @param  array<string, array{value: string}>  $data
      */
-    public function sendSubscribeMessage(string $openid, string $page, array $data): bool
+    public function sendSubscribeMessage(string $openidMp, string $page, array $data): bool
     {
         $templateId = config('services.wechat.subscribe_template_id');
 
-        if (blank($templateId) || blank($openid)) {
+        if (blank($templateId) || blank($openidMp)) {
             return false;
         }
 
@@ -89,7 +94,7 @@ class WeChat
                 ->post(
                     'https://api.weixin.qq.com/cgi-bin/message/subscribe/send?access_token='.$this->accessToken(),
                     [
-                        'touser' => $openid,
+                        'touser' => $openidMp,
                         'template_id' => $templateId,
                         'page' => $page,
                         'data' => $data,

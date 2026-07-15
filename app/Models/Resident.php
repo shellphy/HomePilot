@@ -14,9 +14,11 @@ use Laravel\Sanctum\HasApiTokens;
 
 /**
  * 成员：人通过与户的关系存在于社区中。
+ * unionid 是人本身，openid_mp 是他在小程序这一端的投影。
  *
  * @property int $id
- * @property string $openid
+ * @property string $unionid
+ * @property string $openid_mp
  * @property string $nickname
  * @property string $avatar
  * @property string $phone
@@ -43,7 +45,8 @@ class Resident extends Authenticatable
     use HasApiTokens, HasFactory;
 
     protected $fillable = [
-        'openid',
+        'unionid',
+        'openid_mp',
         'nickname',
         'avatar',
         'phone',

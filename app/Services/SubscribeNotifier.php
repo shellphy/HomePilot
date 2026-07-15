@@ -200,7 +200,7 @@ class SubscribeNotifier
 
     private function send(Resident $recipient, string $page, string $title, string $typeLabel, string $stateWord, string $hint): void
     {
-        $this->weChat->sendSubscribeMessage($recipient->openid, $page, [
+        $this->weChat->sendSubscribeMessage($recipient->openid_mp, $page, [
             'thing1' => ['value' => $this->clip($title, self::THING_LIMIT)],
             'thing5' => ['value' => $this->clip($typeLabel, self::THING_LIMIT)],
             'short_thing3' => ['value' => $this->clip($stateWord, self::SHORT_THING_LIMIT)],
