@@ -3,132 +3,146 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>个人学习心得 —— 我的读书与学习笔记</title>
-    <meta name="description" content="个人学习心得,我的个人网站。在这里记录读过的书、学到的东西和想通的道理,以「知行合一」自勉。">
-    <meta name="keywords" content="个人学习心得,个人博客,读书笔记,学习记录,随笔,知行合一,自我成长">
+    <title>武汉润予科技有限公司 — 软件定制开发服务商</title>
+    <meta name="description" content="武汉润予科技有限公司，专注小程序、APP、Web 与企业系统的定制开发与软件外包服务。">
+    <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
         :root {
-            --bg: #0f1f17;
-            --bg-soft: #14291e;
-            --panel: rgba(255, 255, 255, 0.035);
-            --border: rgba(111, 211, 165, 0.16);
-            --accent: #2f9e6f;
-            --accent-soft: #6fd3a5;
-            --text: #e8f1eb;
-            --muted: #9db3a7;
+            --bg: #ffffff;
+            --fg: #1a1d21;
+            --muted: #5b6470;
+            --line: #e7eaee;
+            --brand: #17795e;
+            --brand-soft: #eef6f2;
+            --radius: 14px;
+            --maxw: 1080px;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(1200px 600px at 50% -10%, rgba(47, 158, 111, 0.22), transparent 60%),
-                linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%);
-            background-attachment: fixed;
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            color: var(--fg);
+            background: var(--bg);
             line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
         }
         a { color: inherit; text-decoration: none; }
-        .wrap { max-width: 1040px; margin: 0 auto; padding: 0 24px; }
+        .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
-        /* 顶部导航 */
+        /* Header */
         header {
             position: sticky; top: 0; z-index: 10;
-            backdrop-filter: blur(12px);
-            background: rgba(15, 31, 23, 0.72);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255,255,255,.86);
+            backdrop-filter: saturate(180%) blur(12px);
+            border-bottom: 1px solid var(--line);
         }
         .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-        .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: 0.08em; }
-        .brand .mark {
-            width: 34px; height: 34px; border-radius: 10px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-            display: flex; align-items: center; justify-content: center;
-            color: #0f1f17; font-size: 18px; font-weight: 700;
+        .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+        .logo {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: linear-gradient(135deg, var(--brand), #2fae86);
+            display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px;
         }
-        .nav-links { display: flex; gap: 28px; font-size: 14px; color: var(--muted); }
-        .nav-links a:hover { color: var(--accent-soft); }
-        @media (max-width: 640px) { .nav-links { display: none; } }
+        .nav-links { display: flex; gap: 28px; font-size: 15px; color: var(--muted); }
+        .nav-links a:hover { color: var(--fg); }
 
         /* Hero */
-        .hero { text-align: center; padding: 96px 0 72px; }
-        .hero .logo {
-            width: 76px; height: 76px; border-radius: 22px; margin: 0 auto 30px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 36px; font-weight: 700; color: #0f1f17;
-            box-shadow: 0 14px 44px rgba(47, 158, 111, 0.35);
+        .hero { padding: 96px 0 72px; }
+        .eyebrow {
+            display: inline-block; font-size: 13px; letter-spacing: .5px; color: var(--brand);
+            background: var(--brand-soft); padding: 6px 12px; border-radius: 999px; margin-bottom: 22px;
         }
-        .hero h1 { font-size: clamp(40px, 8vw, 72px); letter-spacing: 0.16em; font-weight: 700; }
-        .hero .subtitle { margin-top: 18px; font-size: clamp(16px, 3.5vw, 20px); color: var(--accent-soft); letter-spacing: 0.06em; }
-        .hero .lead { margin: 28px auto 0; max-width: 600px; color: var(--muted); font-size: 16px; }
-        .cta { margin-top: 38px; display: inline-flex; gap: 8px; align-items: center;
-            padding: 12px 28px; border-radius: 999px; font-size: 15px; font-weight: 600;
-            color: #0f1f17; background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-            box-shadow: 0 10px 30px rgba(47, 158, 111, 0.3); transition: transform 0.15s ease; }
-        .cta:hover { transform: translateY(-2px); }
+        .hero h1 { font-size: 44px; line-height: 1.25; font-weight: 800; letter-spacing: -.5px; max-width: 16em; }
+        .hero p { margin-top: 20px; font-size: 18px; color: var(--muted); max-width: 34em; }
+        .cta { margin-top: 34px; display: flex; gap: 14px; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600;
+            padding: 12px 22px; border-radius: 10px; transition: .18s;
+        }
+        .btn-primary { background: var(--brand); color: #fff; }
+        .btn-primary:hover { background: #12654d; }
+        .btn-ghost { border: 1px solid var(--line); color: var(--fg); }
+        .btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
 
-        /* 通用区块 */
+        /* Sections */
         section { padding: 64px 0; }
-        .section-head { text-align: center; margin-bottom: 44px; }
-        .section-head .eyebrow { font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent-soft); }
-        .section-head h2 { margin-top: 12px; font-size: clamp(26px, 5vw, 34px); letter-spacing: 0.06em; }
-        .section-head p { margin: 14px auto 0; max-width: 560px; color: var(--muted); font-size: 15px; }
+        .section-head { max-width: 40em; margin-bottom: 44px; }
+        .section-head h2 { font-size: 30px; font-weight: 800; letter-spacing: -.3px; }
+        .section-head p { margin-top: 12px; color: var(--muted); font-size: 16px; }
 
-        /* 卡片网格 */
-        .grid { display: grid; gap: 20px; grid-template-columns: repeat(3, 1fr); }
-        @media (max-width: 820px) { .grid { grid-template-columns: 1fr; } }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         .card {
-            background: var(--panel); border: 1px solid var(--border);
-            border-radius: 18px; padding: 30px 26px; transition: border-color 0.2s ease, transform 0.2s ease;
+            border: 1px solid var(--line); border-radius: var(--radius); padding: 28px 26px;
+            transition: .2s; background: #fff;
         }
-        .card:hover { border-color: rgba(111, 211, 165, 0.4); transform: translateY(-3px); }
-        .card .icon {
-            width: 46px; height: 46px; border-radius: 13px; margin-bottom: 18px;
-            display: flex; align-items: center; justify-content: center; font-size: 22px;
-            background: rgba(47, 158, 111, 0.14); border: 1px solid var(--border);
+        .card:hover { border-color: var(--brand); transform: translateY(-3px); box-shadow: 0 12px 30px -18px rgba(23,121,94,.4); }
+        .card .ic {
+            width: 44px; height: 44px; border-radius: 11px; background: var(--brand-soft);
+            display: grid; place-items: center; margin-bottom: 18px; font-size: 22px;
         }
-        .card h3 { font-size: 19px; letter-spacing: 0.03em; }
-        .card p { margin-top: 10px; color: var(--muted); font-size: 14.5px; }
+        .card h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .card p { font-size: 14.5px; color: var(--muted); }
 
-        /* 理念条 */
-        .creed { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-        .creed .wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: center; }
-        @media (max-width: 640px) { .creed .wrap { grid-template-columns: 1fr; gap: 32px; } }
-        .creed .num { font-size: 40px; font-weight: 700; color: var(--accent-soft); letter-spacing: 0.04em; }
-        .creed .lbl { margin-top: 6px; color: var(--muted); font-size: 14px; }
+        /* Stats */
+        .stats { background: var(--brand-soft); border-radius: 20px; padding: 44px 32px; }
+        .stats .grid { grid-template-columns: repeat(4, 1fr); gap: 16px; text-align: center; }
+        .stat .num { font-size: 34px; font-weight: 800; color: var(--brand); }
+        .stat .lbl { font-size: 14px; color: var(--muted); margin-top: 4px; }
 
-        /* 关于 */
-        .about .wrap { max-width: 720px; text-align: center; }
-        .about blockquote { font-size: clamp(20px, 4vw, 26px); line-height: 1.9; letter-spacing: 0.04em; }
-        .about blockquote span { color: var(--accent-soft); }
-        .about cite { display: block; margin-top: 22px; color: var(--muted); font-style: normal; font-size: 14px; }
-        .about .text { margin-top: 34px; color: var(--muted); font-size: 15.5px; text-align: left; }
+        /* About */
+        .about { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+        .about h2 { font-size: 30px; font-weight: 800; margin-bottom: 18px; }
+        .about p { color: var(--muted); margin-bottom: 14px; }
+        .about ul { list-style: none; margin-top: 20px; display: grid; gap: 12px; }
+        .about li { display: flex; gap: 10px; font-size: 15px; }
+        .about li::before { content: "✓"; color: var(--brand); font-weight: 800; }
+        .about-visual {
+            aspect-ratio: 4/3; border-radius: 20px;
+            background: linear-gradient(135deg, #17795e, #2fae86 70%, #7fd0b6);
+            display: grid; place-items: center; color: #fff;
+        }
+        .about-visual span { font-size: 22px; font-weight: 800; letter-spacing: 2px; opacity: .95; }
 
-        /* 页脚 */
-        footer { border-top: 1px solid var(--border); padding: 34px 0 40px; text-align: center; color: var(--muted); font-size: 13px; line-height: 2; }
-        footer a:hover { color: var(--accent-soft); }
-        .status { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px;
-            padding: 8px 18px; border-radius: 999px; background: rgba(47, 158, 111, 0.1);
-            border: 1px solid var(--border); color: var(--accent-soft); font-size: 13px; }
-        .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-soft); animation: pulse 2s infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(111, 211, 165, 0.5); }
-            70% { box-shadow: 0 0 0 9px rgba(111, 211, 165, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(111, 211, 165, 0); }
+        /* Contact */
+        .contact { text-align: center; background: #101418; color: #fff; border-radius: 20px; padding: 60px 32px; }
+        .contact h2 { font-size: 30px; font-weight: 800; }
+        .contact p { color: #9aa4af; margin-top: 12px; font-size: 16px; }
+        .contact .lines { margin-top: 28px; display: inline-flex; flex-direction: column; gap: 8px; font-size: 15px; }
+        .contact .lines b { color: #fff; font-weight: 600; }
+        .contact .lines span { color: #c3ccd4; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--line); padding: 34px 0; margin-top: 24px; }
+        .foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13.5px; color: var(--muted); }
+        .foot a:hover { color: var(--brand); }
+
+        @media (max-width: 820px) {
+            .nav-links { display: none; }
+            .hero { padding: 64px 0 48px; }
+            .hero h1 { font-size: 32px; }
+            .hero p { font-size: 16px; }
+            .grid, .stats .grid { grid-template-columns: 1fr 1fr; }
+            .about { grid-template-columns: 1fr; }
+            .about-visual { order: -1; }
+        }
+        @media (max-width: 520px) {
+            .grid, .stats .grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <header>
         <div class="wrap nav">
-            <div class="brand"><span class="mark">学</span>个人学习心得</div>
+            <div class="brand">
+                <div class="logo">润</div>
+                <span>润予科技</span>
+            </div>
             <nav class="nav-links">
-                <a href="#philosophy">理念</a>
-                <a href="#notes">在记什么</a>
-                <a href="#about">关于</a>
+                <a href="#services">服务</a>
+                <a href="#about">关于我们</a>
+                <a href="#contact">联系我们</a>
             </nav>
         </div>
     </header>
@@ -136,115 +150,105 @@
     <main>
         <section class="hero">
             <div class="wrap">
-                <div class="logo">学</div>
-                <h1>个人学习心得</h1>
-                <p class="subtitle">我的读书与学习笔记 · 知行合一</p>
-                <p class="lead">
-                    这是我的个人网站。我在这里记录读过的书、学到的东西和想通的道理,
-                    也提醒自己:懂了的道理,要真的去做,才算真懂。
-                </p>
-                <a class="cta" href="#about">关于这个小站 →</a>
-            </div>
-        </section>
-
-        <section class="creed">
-            <div class="wrap">
-                <div>
-                    <div class="num">知</div>
-                    <div class="lbl">多读书,独立想</div>
-                </div>
-                <div>
-                    <div class="num">行</div>
-                    <div class="lbl">动手做,常复盘</div>
-                </div>
-                <div>
-                    <div class="num">合</div>
-                    <div class="lbl">知行相长,日拱一卒</div>
+                <span class="eyebrow">软件定制开发 · 技术外包服务</span>
+                <h1>用可靠的技术，把你的想法做成产品</h1>
+                <p>武汉润予科技有限公司专注于小程序、移动应用、Web 系统与企业信息化的定制开发，为客户提供从需求梳理、设计研发到上线运维的一站式软件外包服务。</p>
+                <div class="cta">
+                    <a class="btn btn-primary" href="#contact">咨询合作</a>
+                    <a class="btn btn-ghost" href="#services">了解服务</a>
                 </div>
             </div>
         </section>
 
-        <section id="philosophy">
+        <section id="services">
             <div class="wrap">
                 <div class="section-head">
-                    <div class="eyebrow">Idea</div>
-                    <h2>我记学习心得的方式:知行合一</h2>
-                    <p>对我来说,知和行从来不是两件事。学到的道理只有落到行动上,才真正长在自己身上。</p>
+                    <h2>我们能做什么</h2>
+                    <p>覆盖主流技术栈，按项目制或人力外包灵活合作，交付即用。</p>
                 </div>
                 <div class="grid">
                     <div class="card">
-                        <div class="icon">📖</div>
-                        <h3>以知启行</h3>
-                        <p>从一本书、一个概念出发,把零散的信息整理成能指导自己行动的认知。</p>
+                        <div class="ic">📱</div>
+                        <h3>微信小程序开发</h3>
+                        <p>电商、社区、工具类小程序定制，涵盖设计、开发、审核上线与后续迭代。</p>
                     </div>
                     <div class="card">
-                        <div class="icon">🌱</div>
-                        <h3>以行验知</h3>
-                        <p>再好的道理也要拿到生活里试一试。动手去做,用结果反过来修正自己的判断。</p>
+                        <div class="ic">💻</div>
+                        <h3>移动应用开发</h3>
+                        <p>iOS / Android 原生与跨平台应用开发，兼顾体验与性能。</p>
                     </div>
                     <div class="card">
-                        <div class="icon">🔁</div>
-                        <h3>知行相长</h3>
-                        <p>读、做、复盘,循环往复。一点一滴慢慢积累,时间会给出答案。</p>
+                        <div class="ic">🌐</div>
+                        <h3>Web 与后台系统</h3>
+                        <p>企业官网、管理后台、业务中台的前后端一体化开发。</p>
+                    </div>
+                    <div class="card">
+                        <div class="ic">🏢</div>
+                        <h3>企业信息化定制</h3>
+                        <p>结合业务流程定制 OA、CRM、进销存等信息化系统。</p>
+                    </div>
+                    <div class="card">
+                        <div class="ic">🔌</div>
+                        <h3>接口与系统集成</h3>
+                        <p>第三方平台对接、支付集成、数据同步与系统迁移。</p>
+                    </div>
+                    <div class="card">
+                        <div class="ic">🛠️</div>
+                        <h3>技术人力外包</h3>
+                        <p>提供前端、后端、测试等专业人才，驻场或远程支持项目交付。</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="notes">
+        <section>
             <div class="wrap">
-                <div class="section-head">
-                    <div class="eyebrow">Notes</div>
-                    <h2>我在这里记些什么</h2>
-                    <p>都是些自己的记录,不成体系,慢慢写、慢慢补。</p>
-                </div>
-                <div class="grid">
-                    <div class="card">
-                        <div class="icon">✍️</div>
-                        <h3>读书笔记</h3>
-                        <p>读过觉得有意思的书,摘一点、想一点,写下当时的理解和疑问。</p>
-                    </div>
-                    <div class="card">
-                        <div class="icon">🗂️</div>
-                        <h3>学习记录</h3>
-                        <p>学新东西时的整理和总结,方便自己以后回头翻,也算给记忆留个备份。</p>
-                    </div>
-                    <div class="card">
-                        <div class="icon">🌤️</div>
-                        <h3>日常随笔</h3>
-                        <p>一些生活里的小感想、想通的小道理,随手记下来,提醒自己别只想不做。</p>
+                <div class="stats">
+                    <div class="grid">
+                        <div class="stat"><div class="num">50+</div><div class="lbl">交付项目</div></div>
+                        <div class="stat"><div class="num">8年</div><div class="lbl">行业经验</div></div>
+                        <div class="stat"><div class="num">30+</div><div class="lbl">合作客户</div></div>
+                        <div class="stat"><div class="num">98%</div><div class="lbl">按期交付率</div></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="about">
-            <div class="wrap">
-                <div class="section-head">
-                    <div class="eyebrow">About</div>
-                    <h2>关于这个小站</h2>
+        <section id="about">
+            <div class="wrap about">
+                <div>
+                    <h2>关于润予科技</h2>
+                    <p>武汉润予科技有限公司是一家专注于软件定制开发的技术服务商，团队成员来自互联网一线，拥有丰富的产品研发与项目管理经验。</p>
+                    <p>我们相信好的软件源于对业务的理解与对细节的打磨，坚持以清晰的沟通、规范的流程和可维护的代码，帮助客户稳步落地每一个项目。</p>
+                    <ul>
+                        <li>专属项目经理，需求响应及时</li>
+                        <li>规范开发流程，代码可交付可维护</li>
+                        <li>上线后持续维护，长期技术保障</li>
+                    </ul>
                 </div>
-                <blockquote>
-                    「知者行之始,<span>行者知之成</span>。」
-                </blockquote>
-                <cite>—— 王阳明《传习录》</cite>
-                <p class="text">
-                    「知行合一」出自明代思想家王阳明。他认为,知而不行,只是未知;真正的知,
-                    必然包含行动。我把它当成记学习心得的座右铭,提醒自己:别做「思想上的巨人、行动上的矮子」。
-                </p>
-                <p class="text">
-                    这里是我个人搭的一个小网站,纯粹出于兴趣,记录自己读书、学习和思考的点滴,
-                    不做商业用途。网站还很简陋,我会一点点把它补充起来。谢谢你顺路来看看。
-                </p>
+                <div class="about-visual"><span>RUNYU TECH</span></div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="wrap">
+                <div class="contact">
+                    <h2>开始你的项目</h2>
+                    <p>无论是从零开发还是已有系统的升级维护，欢迎与我们联系。</p>
+                    <div class="lines">
+                        <div><b>公司名称：</b><span>武汉润予科技有限公司</span></div>
+                        <div><b>商务邮箱：</b><span>hi@runforyou.app</span></div>
+                        <div><b>公司地址：</b><span>湖北省武汉市</span></div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <div class="wrap">
-            <div class="status"><span class="dot"></span>网站持续更新中</div>
-            <div>&copy; {{ date('Y') }} 个人学习心得 · 个人网站</div>
-            <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">鄂ICP备2023000342号-1</a></div>
+        <div class="wrap foot">
+            <div>© 2026 武汉润予科技有限公司　保留所有权利</div>
+            <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">备案号待填写</a></div>
         </div>
     </footer>
 </body>
