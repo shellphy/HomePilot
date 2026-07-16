@@ -20,10 +20,12 @@ x-app-base: &app-base
   environment: &app-env
     DB_CONNECTION: sqlite
     DB_DATABASE: /var/www/html/storage/database/database.sqlite
-    LOG_CHANNEL: stderr
+    # 日志按天切割写文件，落在具名卷里跨重新部署保留（保留天数见 LOG_DAILY_DAYS）
+    LOG_CHANNEL: daily
   volumes: &app-volumes
     - storage-uploads:/var/www/html/storage/app/public
     - sqlite-data:/var/www/html/storage/database
+    - storage-logs:/var/www/html/storage/logs
 
 services:
   app:
@@ -40,6 +42,7 @@ services:
     volumes:
       - storage-uploads:/var/www/html/storage/app/public
       - sqlite-data:/var/www/html/storage/database
+      - storage-logs:/var/www/html/storage/logs
       # 证书/ACME 账号必须持久化，否则重启重签会撞 Let's Encrypt 限流
       - caddy-data:/data
       - caddy-config:/config
@@ -57,5 +60,6 @@ services:
 volumes:
   storage-uploads:
   sqlite-data:
+  storage-logs:
   caddy-data:
   caddy-config:
