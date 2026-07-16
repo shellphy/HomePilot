@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\SecCheckScene;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
 use App\Models\MatterQuestion;
 use App\Models\Resident;
+use App\Rules\SafeText;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -71,7 +73,7 @@ class MatterQuestionController extends Controller
         $this->assertCanParticipate($resident, '提问');
 
         $validated = $request->validate([
-            'content' => ['required', 'string', 'max:300'],
+            'content' => ['required', 'string', 'max:300', new SafeText($resident, SecCheckScene::Forum)],
         ]);
 
         $question = $matter->questions()->create([
@@ -111,7 +113,7 @@ class MatterQuestionController extends Controller
         $this->assertCanParticipate($resident, '回复');
 
         $validated = $request->validate([
-            'content' => ['required', 'string', 'max:1000'],
+            'content' => ['required', 'string', 'max:1000', new SafeText($resident, SecCheckScene::Forum)],
         ]);
 
         $question->update([

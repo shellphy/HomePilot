@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\SecCheckScene;
 use App\Events\MatterUpdatePosted;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MatterUpdateResource;
 use App\Models\Matter;
+use App\Rules\SafeText;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -28,7 +30,7 @@ class MatterUpdateController extends Controller
 
         $validated = $request->validate([
             'happened_on' => ['required', 'date'],
-            'content' => ['required', 'string', 'max:500'],
+            'content' => ['required', 'string', 'max:500', new SafeText($resident, SecCheckScene::Forum)],
             'images' => ['nullable', 'array', 'max:9'],
             'images.*' => ['url'],
         ], [

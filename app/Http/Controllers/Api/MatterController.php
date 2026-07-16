@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\MatterReviewStatus;
+use App\Enums\SecCheckScene;
 use App\Events\GroupbuyTermsRevised;
 use App\Events\MatterDealPosted;
 use App\Events\MatterStateChanged;
@@ -15,6 +16,7 @@ use App\Models\Matter;
 use App\Models\Party;
 use App\Models\Resident;
 use App\Models\Stance;
+use App\Rules\SafeText;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -244,6 +246,8 @@ class MatterController extends Controller
         }
 
         $rules = $this->rulesFor($typeKey);
+        $rules['title'][] = new SafeText($resident, SecCheckScene::Forum);
+        $rules['body'][] = new SafeText($resident, SecCheckScene::Forum);
 
         if ($isAdmin) {
             // 署名发起：管理员代建的调研可亮明发起方
@@ -325,6 +329,8 @@ class MatterController extends Controller
         $rules = array_merge($this->rulesFor($matter->type), [
             'state' => ['sometimes', Rule::in(array_keys($type->allStates()))],
         ]);
+        $rules['title'][] = new SafeText($resident, SecCheckScene::Forum);
+        $rules['body'][] = new SafeText($resident, SecCheckScene::Forum);
 
         if ($isAdmin) {
             $rules['initiator_party_id'] = ['sometimes', 'nullable', Rule::exists('parties', 'id')];

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\SecCheckScene;
 use App\Models\Resident;
+use App\Rules\SafeText;
 use App\Settings\CommunitySettings;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -31,8 +33,13 @@ class UpdateProfileRequest extends FormRequest
         $isOwner = ! $user instanceof Resident || $user->affiliated_party_id === null;
         $settings = app(CommunitySettings::class);
 
+        $nicknameRules = ['sometimes', 'nullable', 'string', 'max:30'];
+        if ($user instanceof Resident) {
+            $nicknameRules[] = new SafeText($user, SecCheckScene::Profile);
+        }
+
         return [
-            'nickname' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'nickname' => $nicknameRules,
             'avatar' => ['sometimes', 'url', 'max:255'],
             // 手机号可微信授权预填、也可手填改成别的联系号码，统一随资料保存；允许清空
             'phone' => ['sometimes', 'nullable', 'string', 'regex:/^(1\d{10})?$/'],

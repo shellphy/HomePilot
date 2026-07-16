@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\PartyReviewStatus;
+use App\Enums\SecCheckScene;
 use App\Events\PartyRegistered;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ResidentResource;
 use App\Models\Party;
 use App\Models\Stance;
+use App\Rules\SafeText;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -127,11 +129,11 @@ class PartyController extends Controller
 
         $validated = $request->validate([
             'type' => ['required', Rule::in($selfRegistrable)],
-            'name' => ['required', 'string', 'max:50'],
+            'name' => ['required', 'string', 'max:50', new SafeText($resident, SecCheckScene::Profile)],
             'category' => ['sometimes', 'nullable', 'string', 'max:30'],
             // 自我介绍（各类型统一，内容自由发挥）：简介上名录列表行，详细介绍和照片进详情页
-            'intro' => ['sometimes', 'nullable', 'string', 'max:60'],
-            'description' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'intro' => ['sometimes', 'nullable', 'string', 'max:60', new SafeText($resident, SecCheckScene::Profile)],
+            'description' => ['sometimes', 'nullable', 'string', 'max:2000', new SafeText($resident, SecCheckScene::Profile)],
             'images' => ['sometimes', 'nullable', 'array', 'max:9'],
             'images.*' => ['required', 'string', 'max:300'],
         ], [

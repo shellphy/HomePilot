@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\SecCheckScene;
 use App\Events\MatterReviewed;
 use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
@@ -9,6 +10,7 @@ use App\Http\Resources\ReviewResource;
 use App\Matters\MatterTypeRegistry;
 use App\Models\Matter;
 use App\Models\Stance;
+use App\Rules\SafeText;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -29,7 +31,7 @@ class ReviewController extends Controller
 
         $validated = $request->validate([
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
-            'content' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'content' => ['sometimes', 'nullable', 'string', 'max:500', new SafeText($resident, SecCheckScene::Comment)],
         ], [
             'rating.required' => '请先打个分',
         ]);

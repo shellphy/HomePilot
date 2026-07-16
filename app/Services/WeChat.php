@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\SecCheckScene;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Cache;
@@ -138,6 +139,65 @@ class WeChat
         }
 
         return true;
+    }
+
+    /**
+     * 文本内容安全检测（msgSecCheck v2，同步）。只拦明确违规（suggest=risky），
+     * 疑似（review）与正常放行。微信超时或接口报错也放行并记日志：不为机审抖动
+     * 堵死发帖，事项本体还有人工审核兜底。
+     *
+     * openid 用小程序端的 openid_mp，微信要求该用户近两小时内访问过小程序：用户
+     * 正在发帖时天然满足，代发/补数据等 openid 为空的场景则跳过检测。
+     */
+    public function msgSecCheck(string $content, SecCheckScene $scene, string $openidMp): bool
+    {
+        // 未配置凭证（本地/测试）或拿不到 openid 都无从调起，直接放行
+        if (blank(config('services.wechat.appid')) || blank(config('services.wechat.secret'))) {
+            return true;
+        }
+
+        if (blank($content) || blank($openidMp)) {
+            return true;
+        }
+
+        // 每次实际发起检测都留痕，方便观测调用量；内容原文与 openid 是敏感数据，只记长度
+        Log::info('内容安全检测发起', ['scene' => $scene->value, 'length' => mb_strlen($content)]);
+
+        try {
+            $response = Http::timeout(5)
+                ->connectTimeout(3)
+                ->retry([100, 500], throw: false)
+                ->post(
+                    'https://api.weixin.qq.com/wxa/msg_sec_check?access_token='.$this->accessToken(),
+                    [
+                        'version' => 2,
+                        'openid' => $openidMp,
+                        'scene' => $scene->value,
+                        'content' => mb_substr($content, 0, 2500),
+                    ],
+                );
+        } catch (ConnectionException|ValidationException $e) {
+            Log::warning('内容安全检测中断', ['scene' => $scene->value, 'error' => $e->getMessage()]);
+
+            return true;
+        }
+
+        if (! $response->successful() || (int) $response->json('errcode') !== 0) {
+            Log::warning('内容安全检测失败', [...$this->failureContext($response), 'scene' => $scene->value]);
+
+            return true;
+        }
+
+        $suggest = $response->json('result.suggest');
+
+        // 检测结果都记 info，pass/review/risky 分布可查；命中原文不入日志，只留分类标签
+        Log::info('内容安全检测结果', [
+            'scene' => $scene->value,
+            'suggest' => $suggest,
+            'label' => $response->json('result.label'),
+        ]);
+
+        return $suggest !== 'risky';
     }
 
     /**
