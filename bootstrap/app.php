@@ -48,7 +48,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
             match (true) {
                 $status >= 500 => Log::error('请求异常终止', $context),
-                $status === 429 => Log::warning('请求被限流', $context),
                 in_array($status, [401, 403], true) => Log::warning('请求被拒绝', $context),
                 default => null,
             };
