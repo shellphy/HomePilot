@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Matter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 use Laravel\Ai\Streaming\Events\Citation;
 use Laravel\Ai\Streaming\Events\ProviderToolEvent;
 use Laravel\Ai\Streaming\Events\TextDelta;
@@ -21,14 +20,11 @@ use Throwable;
  *
  * 回答以 SSE（text/event-stream）逐字下发，让前端打字机式渲染、并支持中途停止：
  * 每个 `data:` 帧是一段 JSON——{delta} 增量文字、{error} 出错、
- * {done, conversation_id, remaining_today} 收尾（会话此刻才落库）。
+ * {done, conversation_id} 收尾（会话此刻才落库）。
  */
 class MatterAiChatController extends Controller
 {
     use ResolvesResident;
-
-    /** 每人每天的提问上限：模型便宜，限额从宽，只防脚本刷接口。 */
-    private const DAILY_LIMIT = 100;
 
     public function store(Request $request, Matter $matter): StreamedResponse
     {
@@ -45,12 +41,6 @@ class MatterAiChatController extends Controller
             'answers' => ['sometimes', 'array'],
         ]);
 
-        $rateKey = 'matter-ai-chat:'.$resident->id;
-        if (RateLimiter::tooManyAttempts($rateKey, self::DAILY_LIMIT)) {
-            abort(429, '今天的 AI 提问次数用完了，明天再来；急事可在本页向团长提问');
-        }
-        RateLimiter::hit($rateKey, 86400);
-
         $agent = new MatterExplainer($matter, $resident, $validated['answers'] ?? null);
         $conversationId = $validated['conversation_id'] ?? null;
 
@@ -65,7 +55,7 @@ class MatterAiChatController extends Controller
             : $agent->forUser($resident)
         )->stream($validated['question']);
 
-        return response()->stream(function () use ($stream, $rateKey, $matter, $resident) {
+        return response()->stream(function () use ($stream, $matter, $resident) {
             try {
                 foreach ($stream as $event) {
                     if ($event instanceof TextDelta && $event->delta !== '') {
@@ -113,17 +103,14 @@ class MatterAiChatController extends Controller
             }
 
             // 迭代结束后 RememberConversation 中间件才写库并回填 conversation_id
-            $remaining = RateLimiter::remaining($rateKey, self::DAILY_LIMIT);
             Log::debug('AI 事项答疑完成', [
                 'matter_id' => $matter->id,
                 'resident_id' => $resident->id,
                 'conversation_id' => $stream->conversationId,
-                'remaining_today' => $remaining,
             ]);
             yield $this->frame([
                 'done' => true,
                 'conversation_id' => $stream->conversationId,
-                'remaining_today' => $remaining,
             ]);
         }, 200, [
             'Content-Type' => 'text/event-stream',

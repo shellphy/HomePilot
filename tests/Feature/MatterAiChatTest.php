@@ -3,7 +3,6 @@
 use App\Ai\Agents\MatterExplainer;
 use App\Models\Matter;
 use App\Models\Resident;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Testing\TestResponse;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Sanctum\Sanctum;
@@ -33,7 +32,7 @@ function sseAnswer(TestResponse $response): string
         ->join('');
 }
 
-/** 取收尾帧（带 conversation_id / remaining_today）。 */
+/** 取收尾帧（带 conversation_id）。 */
 function sseDone(TestResponse $response): array
 {
     return collect(sseEvents($response))->firstWhere('done', true) ?? [];
@@ -49,8 +48,7 @@ test('a resident asks the ai about a groupbuy and can follow up in the same conv
     ])->assertSuccessful();
 
     expect(sseAnswer($first))->toBe('一台外机带四个内机。')
-        ->and(sseDone($first)['conversation_id'])->not->toBeNull()
-        ->and(sseDone($first)['remaining_today'])->toBe(99);
+        ->and(sseDone($first)['conversation_id'])->not->toBeNull();
 
     $second = $this->postJson("/api/matters/{$matter->id}/ai-chat", [
         'question' => '那我家三房够吗？',
@@ -90,22 +88,6 @@ test('the agent instructions carry the matter terms, glossary and community cons
         ->toContain('满 20 户送清洗')
         ->toContain('逐人报价')
         ->toContain('外机位'); // 小区硬条件出厂默认值
-});
-
-test('the daily limit cuts off with a friendly message', function () {
-    MatterExplainer::fake();
-    $matter = Matter::factory()->create();
-    $resident = Resident::factory()->create();
-    Sanctum::actingAs($resident);
-
-    foreach (range(1, 100) as $i) {
-        RateLimiter::hit('matter-ai-chat:'.$resident->id, 86400);
-    }
-
-    $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '还能问吗？'])
-        ->assertStatus(429);
-
-    MatterExplainer::assertNeverPrompted();
 });
 
 test('notices do not offer ai chat and unapproved matters stay hidden', function () {

@@ -22,7 +22,6 @@ Component({
     input: '',
     busy: false, // 一轮问答进行中（请求在途或打字机未追完）：发送键变停止键
     streamingIndex: -1, // 正在流式输出的 AI 气泡下标（-1 表示无）
-    remaining: null, // 今日剩余提问次数（后端下发）
     scrollTo: '',
   },
 
@@ -119,12 +118,9 @@ Component({
       });
 
       this.stream.promise
-        .then(({ conversationId, remaining, aborted }) => {
+        .then(({ conversationId, aborted }) => {
           if (aborted) return; // 停止/关闭已在别处收尾
           if (conversationId) this.conversationId = conversationId;
-          if (remaining !== null && remaining !== undefined) {
-            this.setData({ remaining });
-          }
           this.receiving = false; // 让打字机把剩余文字追完后收尾
           this.startTyping();
         })

@@ -42,7 +42,6 @@
       </view>
     </view>
 
-    <view wx:if="{{remaining !== null && remaining <= 5}}" class="chat-quota">今天还能问 {{remaining}} 次</view>
     <view id="chat-bottom" class="chat-anchor"></view>
   </scroll-view>
 

@@ -110,12 +110,6 @@
 .bubble-source + .bubble-source {
   margin-top: 4rpx;
 }
-.chat-quota {
-  text-align: center;
-  font-size: 22rpx;
-  color: var(--warn);
-  padding: 8rpx 0;
-}
 .chat-anchor {
   height: 2rpx;
 }

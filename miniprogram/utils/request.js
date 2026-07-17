@@ -119,7 +119,7 @@ function indexOfFrameBoundary(bytes) {
 // SSE 流式请求：后端逐帧下发 `data: {json}`，这里边收边解，
 // 每个 delta 交给 onDelta 回调（打字机式渲染）。返回 { abort, promise }：
 // - abort() 中断请求（配合前端的停止按钮）；
-// - promise 成功时解析为 { conversationId, remaining, aborted }，出错时 reject。
+// - promise 成功时解析为 { conversationId, aborted }，出错时 reject。
 function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSource } = {}) {
   const state = { task: null, aborted: false };
 
@@ -131,7 +131,7 @@ function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSo
   const run = (token) =>
     new Promise((resolve, reject) => {
       let buffer = new Uint8Array(0);
-      const result = { conversationId: null, remaining: null };
+      const result = { conversationId: null };
       let streamError = null;
 
       const handleFrame = (frameBytes) => {
@@ -158,7 +158,6 @@ function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSo
               onSource(event.source);
             } else if (event.done) {
               result.conversationId = event.conversation_id || null;
-              result.remaining = event.remaining_today === undefined ? null : event.remaining_today;
             }
           });
       };
@@ -192,7 +191,7 @@ function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSo
             reject(Object.assign(new Error('登录已过期，请重试'), { unauthorized: true }));
             return;
           }
-          // 非流式错误（如 429 超限）：整段 buffer 就是后端的 JSON 错误体，取其 message 显示
+          // 非流式错误（如 422 不支持答疑）：整段 buffer 就是后端的 JSON 错误体，取其 message 显示
           if (res.statusCode < 200 || res.statusCode >= 300) {
             let message = 'AI 暂时不可用，请稍后再试';
             try {
