@@ -44,7 +44,7 @@
 
   <!-- AI 答疑悬浮入口：固定在右下角，随吸底操作条高度上浮避让（仅已过审的团购/活动） -->
   <ai-quick-ask
-    wx:if="{{matter && matter.is_approved && (matter.type === 'groupbuy' || matter.type === 'activity')}}"
+    wx:if="{{aiChatEnabled && matter && matter.is_approved && (matter.type === 'groupbuy' || matter.type === 'activity')}}"
     matter-id="{{matter.id}}"
     matter-title="{{matter.title}}"
     questions="{{quickQuestions}}"

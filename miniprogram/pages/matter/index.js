@@ -36,6 +36,7 @@ Page({
     myShareContact: false, // 我报名时的联系方式共享意愿（成团后补开共享的入口据此显示）
     myJoinStage: '', // 我的承诺档位（团购分意向/确认）：接龙中的意向登记者看到「确认参团」入口
     communityName: '小区', // 兜底文案，实际名称由 /options 下发
+    aiChatEnabled: false, // AI 答疑开关，由 /options 下发
     aiChatShow: false, // AI 答疑半屏面板（ai-quick-ask / 术语弹层通过页面方法呼出）
     dockReserve: 0, // 吸底操作条实测高度（px），据此精确预留底部空间，见 onDockMeasure
     quickQuestions: [], // AI 悬浮入口的预设问题，随 matter 类型/阶段变化
@@ -92,6 +93,7 @@ Page({
       if (options.community && options.community.name) {
         this.setData({ communityName: options.community.name });
       }
+      this.setData({ aiChatEnabled: !!(options.ai && options.ai.chat) });
       // 征集类事项的详情就是它的公示面（小区数据页对应期次）
       if (res.data.type === 'census') {
         wx.redirectTo({ url: `/pages/census-insights/index?id=${res.data.id}` });

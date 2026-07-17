@@ -1,4 +1,5 @@
 const matters = require('../../utils/api/matters');
+const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 
 function formatAnswer(value) {
@@ -40,6 +41,7 @@ Page({
     initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的问卷」授权
     visibleToInitiator: false, // 是否把匿名破例授权给这个发起者本人（默认关）
     reportStatus: 'idle', // AI 总结：idle 未生成 / pending 生成中 / completed 可查看 / failed 失败
+    aiReportEnabled: false, // AI 征集报告开关，由 /options 下发
   },
 
   onLoad(query) {
@@ -67,7 +69,10 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const census = await matters.getCensus(this.data.censusId);
+      const [census, ai] = await Promise.all([
+        matters.getCensus(this.data.censusId),
+        profile.getAiFeatures(),
+      ]);
       const answeredCount = Object.keys(census.answers || {}).length;
       this.setData({
         answerModules: answerModules(census, this.data.answerModules),
@@ -75,8 +80,9 @@ Page({
         censusState: census.state || '',
         initiatorParty: census.initiator_party || null,
         visibleToInitiator: !!census.my_visible_to_initiator,
+        aiReportEnabled: !!ai.census_report,
       });
-      if (answeredCount > 0) {
+      if (answeredCount > 0 && ai.census_report) {
         const report = await matters.getCensusReport(this.data.censusId);
         this.applyReportStatus(report.generation_status);
       }

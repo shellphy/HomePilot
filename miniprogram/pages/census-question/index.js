@@ -1,7 +1,7 @@
 // 题目编辑：题干 / 注释 / 单选多选填空 / 选项（一行一个）。走统一 /matters 接口。
-const matters = require('../../../utils/api/matters');
-const load = require('../../../behaviors/load');
-const dirty = require('../../../behaviors/dirty');
+const matters = require('../../utils/api/matters');
+const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
 
 // 选项行语法：「选项｜解释」（半角 | 也认）。解释显示在答题页选项下方——
 // 答题的过程就是建概念，选项即术语卡。答案只存选项本身，解释可随时改。

@@ -1,7 +1,7 @@
 // 问卷模块：标题/引言 + 该模块的题目列表。走统一 /matters 接口。
-const matters = require('../../../utils/api/matters');
-const load = require('../../../behaviors/load');
-const dirty = require('../../../behaviors/dirty');
+const matters = require('../../utils/api/matters');
+const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
 
 Page({
   behaviors: [load, dirty],
@@ -56,14 +56,14 @@ Page({
 
   goQuestion(event) {
     const { qi } = event.currentTarget.dataset;
-    wx.navigateTo({ url: `/pages/admin/census-question/index?id=${this.data.id}&mi=${this.data.mi}&qi=${qi}` });
+    wx.navigateTo({ url: `/pages/census-question/index?id=${this.data.id}&mi=${this.data.mi}&qi=${qi}` });
   },
 
   addQuestion() {
     if (this.data.mi < 0) {
       return wx.showToast({ title: '先保存模块，再加题目', icon: 'none' });
     }
-    wx.navigateTo({ url: `/pages/admin/census-question/index?id=${this.data.id}&mi=${this.data.mi}&qi=-1` });
+    wx.navigateTo({ url: `/pages/census-question/index?id=${this.data.id}&mi=${this.data.mi}&qi=-1` });
   },
 
   async save() {

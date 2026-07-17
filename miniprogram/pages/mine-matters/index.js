@@ -32,7 +32,7 @@ Page({
     const matter = this.data.matters.find((item) => item.id === event.currentTarget.dataset.id);
     // 发起者进自己的征集一律是题目编辑器（公示后后端只放行加题）；看数据走编辑器里的入口
     if (matter.type === 'census') {
-      wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${matter.id}` });
+      wx.navigateTo({ url: `/pages/census-schema/index?id=${matter.id}` });
       return;
     }
     wx.navigateTo({ url: `/pages/matter/index?id=${matter.id}` });

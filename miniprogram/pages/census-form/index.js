@@ -2,6 +2,7 @@
 // 联系方式属于成员档案（「我的 · 个人资料」维护）；要求档案完整的征集，
 // 在这里只做前置引导，表单里没有联系方式字段。
 const matters = require('../../utils/api/matters');
+const profile = require('../../utils/api/profile');
 const { getMe, invalidateMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
@@ -19,6 +20,8 @@ Page({
     picked: {}, // {'题key::选项': true}，WXML 不能调 indexOf，用查表渲染选中态
     needProfile: false, // 该征集要求档案完整且当前缺失 → 先去完善个人资料
     submitting: false,
+    aiChatEnabled: false, // AI 答疑开关，由 /options 下发
+    aiReportEnabled: false, // AI 征集报告开关，由 /options 下发
     aiChatShow: false, // AI 答疑半屏面板（每道题「问 AI」呼出）
   },
 
@@ -60,11 +63,17 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [census, me] = await Promise.all([matters.getCensus(this.data.id), getMe()]);
+      const [census, me, ai] = await Promise.all([
+        matters.getCensus(this.data.id),
+        getMe(),
+        profile.getAiFeatures(),
+      ]);
       const answers = census.answers || {};
       this.setData({
+        aiChatEnabled: !!ai.chat,
+        aiReportEnabled: !!ai.census_report,
         title: census.title,
-        // 空模块是管理端「先建模块再逐题添加」的中间态，作答时跳过
+        // 空模块是出题时「先建模块再逐题添加」的中间态，作答时跳过
         modules: census.modules
           .filter((module) => (module.questions || []).length)
           .map((module) => ({

@@ -157,7 +157,7 @@ Page({
       itemList: types.map((type) => `发起${type.label}`),
       success: ({ tapIndex }) => {
         const picked = types[tapIndex];
-        wx.navigateTo({ url: `/pages/admin/matter-form/index?type=${picked.key}` });
+        wx.navigateTo({ url: `/pages/matter-form/index?type=${picked.key}` });
       },
     });
   },
