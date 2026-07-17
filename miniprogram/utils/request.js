@@ -131,7 +131,7 @@ function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSo
   const run = (token) =>
     new Promise((resolve, reject) => {
       let buffer = new Uint8Array(0);
-      const result = { conversationId: null };
+      let conversationId = null;
       let streamError = null;
 
       const handleFrame = (frameBytes) => {
@@ -157,7 +157,7 @@ function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSo
             } else if (event.source && onSource) {
               onSource(event.source);
             } else if (event.done) {
-              result.conversationId = event.conversation_id || null;
+              conversationId = event.conversation_id || null;
             }
           });
       };
@@ -208,13 +208,13 @@ function streamRequest(path, { method = 'POST', data, onDelta, onSearching, onSo
             reject(streamError);
             return;
           }
-          resolve({ ...result, aborted: false });
+          resolve({ conversationId, aborted: false });
         },
         // abort 触发的也是 fail，按「用户主动停止」处理，保留已收到的文字
         fail: (err) => {
           const errMsg = (err && err.errMsg) || '';
           if (state.aborted || errMsg.includes('abort')) {
-            resolve({ ...result, aborted: true });
+            resolve({ conversationId, aborted: true });
             return;
           }
           reject(new Error(errMsg.includes('timeout') ? '网络超时，请稍后重试' : '网络异常，请检查网络后重试'));
