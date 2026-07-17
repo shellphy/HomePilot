@@ -330,7 +330,7 @@
     <view class="term-pop-title">{{activeTerm.term}}</view>
     <view class="gl-explain">{{activeTerm.explain}}</view>
     <view class="term-pop-source">来自本团购的「买前必懂」，由发起人整理</view>
-    <t-button theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi"
+    <t-button wx:if="{{aiChatEnabled}}" theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi"
       >问 AI：我家该怎么选</t-button
     >
   </view>

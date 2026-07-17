@@ -11,12 +11,18 @@ use Illuminate\Http\JsonResponse;
 class OptionController extends Controller
 {
     /**
-     * 静态配置统一下发：社区身份与文案、表单选项、可发起的事项类型。
-     * 全部来自数据库 settings（小程序「小区管理 · 社区设置」可视化编辑），改配置不发版、不改代码。
+     * 静态配置统一下发：社区身份与文案、表单选项、可发起的事项类型、AI 能力开关。
+     * 除 ai 外均来自数据库 settings（小程序「小区管理 · 社区设置」可视化编辑），改配置不发版、不改代码。
+     * ai 来自环境变量，随部署固定。
      */
     public function index(CommunitySettings $settings): JsonResponse
     {
         return response()->json([
+            'ai' => [
+                'chat' => (bool) config('features.ai.chat'),
+                'census_report' => (bool) config('features.ai.census_report'),
+                'glossary_draft' => (bool) config('features.ai.glossary_draft'),
+            ],
             'community' => [
                 'name' => $settings->name,
                 'slogan' => $settings->slogan,

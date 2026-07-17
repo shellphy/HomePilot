@@ -19,6 +19,13 @@ function invalidateOptions() {
   optionsCache = null;
 }
 
+// AI 入口开关：{ chat, census_report, glossary_draft }，取不到按关闭处理
+function getAiFeatures() {
+  return getOptions()
+    .then((options) => options.ai || {})
+    .catch(() => ({}));
+}
+
 function getStats() {
   return request('/stats');
 }
@@ -36,6 +43,7 @@ function getParty(id) {
 module.exports = {
   getOptions,
   invalidateOptions,
+  getAiFeatures,
   getStats,
   listParties,
   getParty,

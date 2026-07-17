@@ -1,5 +1,6 @@
 // 征集详情页：单期征集的完整聚合公示面（从征集卡片、小区数据 tab、答完题跳转进来）。
 const matters = require('../../utils/api/matters');
+const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 
 // 条形按总参与人数归一：100% = 全员都选了这项，百分比可直读
@@ -18,21 +19,7 @@ Page({
   data: {
     censusId: null,
     block: null,
-    aiChatShow: false,
-  },
-
-  // 快捷提问组件经 getCurrentPages 调到这里：半屏弹出 AI 面板
-  openAiChat(options) {
-    this.setData({ aiChatShow: true });
-    this.selectComponent('#aiChat').open(options);
-  },
-
-  onAiChatLeave() {
-    if (!this.data.aiChatShow) return;
-    // 关闭面板顺手中断在途的流式回答，别让它在后台继续跑
-    const panel = this.selectComponent('#aiChat');
-    if (panel) panel.close();
-    this.setData({ aiChatShow: false });
+    aiReportEnabled: false, // AI 征集报告开关，由 /options 下发
   },
 
   goMyRegistration() {
@@ -75,7 +62,11 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const census = await matters.getCensus(this.data.censusId);
+      const [census, ai] = await Promise.all([
+        matters.getCensus(this.data.censusId),
+        profile.getAiFeatures(),
+      ]);
+      this.setData({ aiReportEnabled: !!ai.census_report });
       const expandedSections = Object.fromEntries(
         ((this.data.block && this.data.block.sections) || []).map((section) => [section.title, section.expanded]),
       );

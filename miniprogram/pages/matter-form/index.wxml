@@ -290,13 +290,13 @@
               data-field="term"
               bind:input="onRowInput"
             />
-            <view class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 改写</view>
+            <view wx:if="{{aiDraftEnabled}}" class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 改写</view>
             <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
           </view>
           <textarea
             class="fin farea"
             auto-height
-            placeholder="先用大白话写一句这个词是什么、怎么选、避什么坑，再点 AI 改写"
+            placeholder="{{aiDraftEnabled ? '先用大白话写一句这个词是什么、怎么选、避什么坑，再点 AI 改写' : '用大白话写一句这个词是什么、怎么选、避什么坑'}}"
             value="{{item.explain}}"
             maxlength="500"
             data-list="glossary"

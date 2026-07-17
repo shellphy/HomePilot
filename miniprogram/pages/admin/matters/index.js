@@ -49,7 +49,7 @@ Page({
   },
 
   goEdit(event) {
-    wx.navigateTo({ url: `/pages/admin/matter-form/index?id=${event.currentTarget.dataset.id}` });
+    wx.navigateTo({ url: `/pages/matter-form/index?id=${event.currentTarget.dataset.id}` });
   },
 
   // 通过即对全小区公示，且按钮在列表行上容易误触，先确认再执行

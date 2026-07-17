@@ -1,4 +1,5 @@
 const matters = require('../../utils/api/matters');
+const profile = require('../../utils/api/profile');
 const load = require('../../behaviors/load');
 const { mdToHtml } = require('../../utils/markdown');
 
@@ -13,6 +14,8 @@ Page({
     generating: false,
     generationStatus: 'idle',
     generationError: '',
+    aiChatEnabled: false, // AI 答疑开关，由 /options 下发
+    aiReportEnabled: false, // AI 征集报告开关，由 /options 下发
     aiChatShow: false,
     presentation: {},
   },
@@ -31,7 +34,12 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      this.applyReport(await matters.getCensusReport(this.data.censusId));
+      const [report, ai] = await Promise.all([
+        matters.getCensusReport(this.data.censusId),
+        profile.getAiFeatures(),
+      ]);
+      this.setData({ aiChatEnabled: !!ai.chat, aiReportEnabled: !!ai.census_report });
+      this.applyReport(report);
     });
   },
 

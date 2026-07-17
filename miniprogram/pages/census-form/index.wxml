@@ -10,7 +10,7 @@
     </block>
 
     <block wx:elif="{{current}}">
-      <view class="ai-report-preview" wx:if="{{moduleIndex === 0}}">
+      <view class="ai-report-preview" wx:if="{{moduleIndex === 0 && aiReportEnabled}}">
         <view class="ai-preview-head">
           <view class="ai-preview-mark">AI</view>
           <view>
@@ -37,7 +37,7 @@
           </view>
         </view>
         <!-- 疑问冒头就地问：题面直传给 AI，不懂这道题不用退出去查 -->
-        <view class="ask-ai" data-qkey="{{question.key}}" data-text="{{question.text}}" bind:tap="askQuestion">不懂这道题？问 AI</view>
+        <view wx:if="{{aiChatEnabled}}" class="ask-ai" data-qkey="{{question.key}}" data-text="{{question.text}}" bind:tap="askQuestion">不懂这道题？问 AI</view>
         <view wx:if="{{question.note}}" class="q-explain">{{question.note}}</view>
         <textarea
           wx:if="{{question.type === 'text'}}"

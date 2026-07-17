@@ -1,6 +1,7 @@
 // 团购详情体：该类型的全部行为（报名/评价/流转/成交公示入口）都在组件内，
 // 数据变更后向页面发 refresh 事件，由页面重新拉取。
 const matters = require('../../utils/api/matters');
+const profile = require('../../utils/api/profile');
 const { pillClass, joinPercent, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
 const { splitByTerms } = require('../../utils/term-match');
@@ -46,8 +47,15 @@ Component({
     termRows: [],
     finalRows: [],
     activeTerm: null,
+    aiChatEnabled: false, // AI 答疑开关，由 /options 下发
     rosterKeyword: '',
     filteredRoster: [],
+  },
+
+  lifetimes: {
+    attached() {
+      profile.getAiFeatures().then((ai) => this.setData({ aiChatEnabled: !!ai.chat }));
+    },
   },
 
   observers: {
@@ -346,7 +354,7 @@ Component({
     // ---- 以下仅发起人可见的操作 ----
 
     goEdit() {
-      wx.navigateTo({ url: `/pages/admin/matter-form/index?id=${this.data.matter.id}` });
+      wx.navigateTo({ url: `/pages/matter-form/index?id=${this.data.matter.id}` });
     },
 
     goProgress() {

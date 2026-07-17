@@ -1,15 +1,16 @@
 // 统一创作/编辑事项：所有身份共用一套表单与 /matters 接口，按类型显示对应内容字段。
 // 内容字段（标题/说明/品类/目标数/团购条件/征集设置/问卷入口）人人可编辑；
 // 状态流转、公示开关、署名发起方、登记明细/文本题归纳、删除等管理动作按 is_admin 显示。
-const matters = require('../../../utils/api/matters');
-const admin = require('../../../utils/api/admin');
-const { getMe } = require('../../../utils/me');
-const { uploadImage } = require('../../../utils/request');
-const load = require('../../../behaviors/load');
-const dirty = require('../../../behaviors/dirty');
-const { guardProfileError } = require('../../../utils/profile-guard');
-const { requestSubscribe } = require('../../../utils/subscribe');
-const { draftGlossaryRow } = require('../../../utils/glossary-draft');
+const matters = require('../../utils/api/matters');
+const admin = require('../../utils/api/admin');
+const profile = require('../../utils/api/profile');
+const { getMe } = require('../../utils/me');
+const { uploadImage } = require('../../utils/request');
+const load = require('../../behaviors/load');
+const dirty = require('../../behaviors/dirty');
+const { guardProfileError } = require('../../utils/profile-guard');
+const { requestSubscribe } = require('../../utils/subscribe');
+const { draftGlossaryRow } = require('../../utils/glossary-draft');
 
 function splitDateTime(value) {
   if (!value) return { date: '', time: '' };
@@ -26,6 +27,7 @@ Page({
     typeLabel: '',
     isAdmin: false, // 管理动作（状态/公示/署名/明细/删除）的显示开关
     isMerchant: false, // 商家发起团购走商家直供，隐藏利益关系披露（由后端自动标注）
+    aiDraftEnabled: false, // AI 术语改写开关，由 /options 下发
     publishedNow: false, // 加载时该事项是否已公示（编辑已公示的会重新送审）
     title: '',
     category: '',
@@ -52,7 +54,7 @@ Page({
     condition: '', // 二手闲置：成色
     images: [], // 二手闲置：物品图片
     uploading: false,
-    needsSurvey: false, // 团购：逐人报价（业主端发起时锁定，管理端作为纠错通道可改）
+    needsSurvey: false, // 团购：逐人报价（发起时锁定，管理员可改作为纠错通道）
     collectsContact: false,
     terms: [],
     glossary: [],
@@ -67,6 +69,7 @@ Page({
     const id = query.id ? Number(query.id) : null;
     this.setData({ id, type: query.type || 'notice' });
     wx.setNavigationBarTitle({ title: id ? '编辑' : '发起' });
+    profile.getAiFeatures().then((ai) => this.setData({ aiDraftEnabled: !!ai.glossary_draft }));
     if (!id) {
       this.setData({ loaded: true });
       // 发起时也要知道是不是商家：团购利益关系披露对商家隐藏
@@ -92,7 +95,7 @@ Page({
         typeLabel: matter.type_label,
         title: matter.title,
         category: matter.category || '',
-        // 审核态回显（三态：pending/approved/rejected + 驳回理由），管理端编辑器据此渲染公示开关/驳回提示
+        // 审核态回显（三态：pending/approved/rejected + 驳回理由），据此渲染公示开关/驳回提示
         reviewStatus: matter.review_status,
         reviewStatusLabel: matter.review_status_label,
         rejectReason: matter.reject_reason || '',
@@ -268,7 +271,7 @@ Page({
   },
 
   goSchema() {
-    wx.navigateTo({ url: `/pages/admin/census-schema/index?id=${this.data.id}` });
+    wx.navigateTo({ url: `/pages/census-schema/index?id=${this.data.id}` });
   },
 
   // 收敛按类型的内容字段为一份顶层数据（不包 payload，后端 payloadFrom 自行归拢）
@@ -373,7 +376,7 @@ Page({
         this.clearDirty();
         if (data.type === 'census') {
           wx.showToast({ title: '基础信息已保存', icon: 'success' });
-          wx.redirectTo({ url: `/pages/admin/census-schema/index?id=${res.data.id}` });
+          wx.redirectTo({ url: `/pages/census-schema/index?id=${res.data.id}` });
         } else if (data.isAdmin) {
           wx.showToast({ title: '已发布', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
