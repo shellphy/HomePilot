@@ -18,4 +18,4 @@ docker buildx build \
     .
 
 echo "已推送基础镜像 $IMAGE:$TAG"
-echo "服务器仅在基础镜像变化时执行：make pull"
+echo "服务器仅在基础镜像变化时执行：docker compose pull && docker compose up -d"

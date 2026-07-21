@@ -2,7 +2,6 @@
 x-app-base: &app-base
   image: ${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit:base}
   restart: unless-stopped
-  env_file: .env
   environment: &app-env
     DB_CONNECTION: sqlite
     DB_DATABASE: /app/storage/database/database.sqlite
@@ -30,7 +29,6 @@ services:
     image: ${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit:base}
     user: root
     restart: "no"
-    env_file: .env
     environment:
       APP_UID: ${APP_UID:-1000}
       APP_GID: ${APP_GID:-1000}
