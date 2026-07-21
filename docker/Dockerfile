@@ -15,11 +15,10 @@ COPY --from=node /usr/local/lib/node_modules/ /usr/local/lib/node_modules/
 
 COPY docker/Caddyfile /etc/frankenphp/Caddyfile
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
-COPY docker/healthcheck.php /usr/local/bin/healthcheck.php
 RUN chmod +x /usr/local/bin/entrypoint.sh \
     && setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/frankenphp
 
-# 工具缓存不写入源码目录。
+# Caddy 数据写入共享 storage，Composer 和 npm 缓存写入 /tmp。
 ENV HOME=/tmp \
     XDG_DATA_HOME=/app/storage/framework/caddy/data \
     XDG_CONFIG_HOME=/app/storage/framework/caddy/config \

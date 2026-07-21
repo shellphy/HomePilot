@@ -19,6 +19,6 @@ case "$role" in
         ;;
 
     *)
-        exec "$@"
+        exec php artisan "$@"
         ;;
 esac
