@@ -54,6 +54,24 @@ test('a blocked resident cannot join or initiate', function () {
     $this->postJson('/api/matters', ['type' => 'activity', 'title' => '想张罗个活动'])->assertForbidden();
 });
 
+test('a blocked resident cannot use interaction endpoints but can still browse and log out', function () {
+    $matter = Matter::factory()->create();
+    $blocked = Resident::factory()->blocked()->create();
+    Sanctum::actingAs($blocked);
+
+    $this->getJson('/api/matters')->assertSuccessful();
+    $this->getJson("/api/matters/{$matter->id}")->assertSuccessful();
+
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '还能提问吗'])->assertForbidden();
+    $this->putJson("/api/matters/{$matter->id}/review", ['rating' => 5])->assertForbidden();
+    $this->postJson("/api/matters/{$matter->id}/updates", ['content' => '更新'])->assertForbidden();
+    $this->postJson('/api/glossary/draft', ['term' => '术语', 'draft' => '说明'])->assertForbidden();
+    $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '问题'])->assertForbidden();
+    $this->postJson('/api/uploads')->assertForbidden();
+
+    $this->postJson('/api/logout')->assertSuccessful();
+});
+
 test('a non-admin cannot reach block management', function (string $method, string $uri) {
     Sanctum::actingAs(Resident::factory()->create());
 

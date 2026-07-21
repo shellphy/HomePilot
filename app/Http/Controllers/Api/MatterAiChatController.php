@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Concerns\ResolvesResident;
 use App\Http\Controllers\Controller;
 use App\Models\Matter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Laravel\Ai\Streaming\Events\Citation;
 use Laravel\Ai\Streaming\Events\ProviderToolEvent;
@@ -43,6 +44,16 @@ class MatterAiChatController extends Controller
 
         $agent = new MatterExplainer($matter, $resident, $validated['answers'] ?? null);
         $conversationId = $validated['conversation_id'] ?? null;
+
+        if ($conversationId !== null) {
+            $conversationBelongsToMatter = DB::table(config('ai.conversations.tables.conversations', 'agent_conversations'))
+                ->where('id', $conversationId)
+                ->where('user_id', $resident->id)
+                ->where('matter_id', $matter->id)
+                ->exists();
+
+            abort_unless($conversationBelongsToMatter, 404);
+        }
 
         Log::info('AI 事项答疑开始', [
             'matter_id' => $matter->id,
@@ -103,6 +114,11 @@ class MatterAiChatController extends Controller
             }
 
             // 迭代结束后 RememberConversation 中间件才写库并回填 conversation_id
+            DB::table(config('ai.conversations.tables.conversations', 'agent_conversations'))
+                ->where('id', $stream->conversationId)
+                ->where('user_id', $resident->id)
+                ->update(['matter_id' => $matter->id]);
+
             Log::debug('AI 事项答疑完成', [
                 'matter_id' => $matter->id,
                 'resident_id' => $resident->id,

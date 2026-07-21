@@ -119,3 +119,38 @@ test('guests cannot use ai chat', function () {
 
     $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '？'])->assertUnauthorized();
 });
+
+test('ai chat rejects a conversation from another resident or matter', function () {
+    MatterExplainer::fake(['第一轮', '不应执行']);
+    $resident = Resident::factory()->create();
+    $firstMatter = Matter::factory()->create();
+    $secondMatter = Matter::factory()->create();
+    Sanctum::actingAs($resident);
+
+    $first = $this->postJson("/api/matters/{$firstMatter->id}/ai-chat", ['question' => '开始'])
+        ->assertSuccessful();
+    $conversationId = sseDone($first)['conversation_id'];
+
+    $this->postJson("/api/matters/{$secondMatter->id}/ai-chat", [
+        'question' => '跨事项续聊',
+        'conversation_id' => $conversationId,
+    ])->assertNotFound();
+
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->postJson("/api/matters/{$firstMatter->id}/ai-chat", [
+        'question' => '跨用户续聊',
+        'conversation_id' => $conversationId,
+    ])->assertNotFound();
+});
+
+test('disabled ai chat is not callable even when authenticated', function () {
+    config(['features.ai.chat' => false]);
+    MatterExplainer::fake();
+    $matter = Matter::factory()->create();
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '？'])
+        ->assertNotFound();
+
+    MatterExplainer::assertNeverPrompted();
+});

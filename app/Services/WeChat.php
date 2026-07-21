@@ -143,49 +143,48 @@ class WeChat
 
     /**
      * 文本内容安全检测（msgSecCheck v2，同步）。只拦明确违规（suggest=risky），
-     * 疑似（review）与正常放行。微信超时或接口报错也放行并记日志：不为机审抖动
-     * 堵死发帖，事项本体还有人工审核兜底。
+     * 疑似（review）与正常放行。生产环境中接口不可用时拒绝本次提交，避免内容未经
+     * 审核直接公开；本地与测试环境未配置微信凭证时仍可开发。
      *
      * openid 用小程序端的 openid_mp，微信要求该用户近两小时内访问过小程序：用户
-     * 正在发帖时天然满足，代发/补数据等 openid 为空的场景则跳过检测。
+     * 正在发帖时天然满足；生产环境里 openid 为空时拒绝本次提交。
      */
     public function msgSecCheck(string $content, SecCheckScene $scene, string $openidMp): bool
     {
-        // 未配置凭证（本地/测试）或拿不到 openid 都无从调起，直接放行
-        if (blank(config('services.wechat.appid')) || blank(config('services.wechat.secret'))) {
+        if (blank($content)) {
             return true;
         }
 
-        if (blank($content) || blank($openidMp)) {
-            return true;
+        if (blank(config('services.wechat.appid')) || blank(config('services.wechat.secret')) || blank($openidMp)) {
+            Log::warning('内容安全检测缺少调用条件', [
+                'scene' => $scene->value,
+                'has_credentials' => filled(config('services.wechat.appid')) && filled(config('services.wechat.secret')),
+                'has_openid_mp' => filled($openidMp),
+            ]);
+
+            return ! app()->isProduction();
         }
 
         // 每次实际发起检测都留痕，方便观测调用量；内容原文与 openid 是敏感数据，只记长度
         Log::info('内容安全检测发起', ['scene' => $scene->value, 'length' => mb_strlen($content)]);
 
         try {
-            $response = Http::timeout(5)
-                ->connectTimeout(3)
-                ->retry([100, 500], throw: false)
-                ->post(
-                    'https://api.weixin.qq.com/wxa/msg_sec_check?access_token='.$this->accessToken(),
-                    [
-                        'version' => 2,
-                        'openid' => $openidMp,
-                        'scene' => $scene->value,
-                        'content' => mb_substr($content, 0, 2500),
-                    ],
-                );
+            $response = $this->requestMsgSecCheck($content, $scene, $openidMp);
+
+            if ($this->hasInvalidAccessToken($response)) {
+                Cache::forget('wechat.access_token');
+                $response = $this->requestMsgSecCheck($content, $scene, $openidMp);
+            }
         } catch (ConnectionException|ValidationException $e) {
             Log::warning('内容安全检测中断', ['scene' => $scene->value, 'error' => $e->getMessage()]);
 
-            return true;
+            return false;
         }
 
         if (! $response->successful() || (int) $response->json('errcode') !== 0) {
             Log::warning('内容安全检测失败', [...$this->failureContext($response), 'scene' => $scene->value]);
 
-            return true;
+            return false;
         }
 
         $suggest = $response->json('result.suggest');
@@ -198,6 +197,27 @@ class WeChat
         ]);
 
         return $suggest !== 'risky';
+    }
+
+    private function requestMsgSecCheck(string $content, SecCheckScene $scene, string $openidMp): Response
+    {
+        return Http::timeout(5)
+            ->connectTimeout(3)
+            ->retry([100, 500], throw: false)
+            ->post(
+                'https://api.weixin.qq.com/wxa/msg_sec_check?access_token='.$this->accessToken(),
+                [
+                    'version' => 2,
+                    'openid' => $openidMp,
+                    'scene' => $scene->value,
+                    'content' => mb_substr($content, 0, 2500),
+                ],
+            );
+    }
+
+    private function hasInvalidAccessToken(Response $response): bool
+    {
+        return in_array((int) $response->json('errcode'), [40001, 40014, 42001], true);
     }
 
     /**

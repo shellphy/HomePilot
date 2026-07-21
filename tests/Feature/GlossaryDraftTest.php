@@ -45,3 +45,14 @@ test('guests cannot use the drafter', function () {
 
     GlossaryDrafter::assertNeverPrompted();
 });
+
+test('disabled glossary drafting is not callable', function () {
+    config(['features.ai.glossary_draft' => false]);
+    GlossaryDrafter::fake();
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson('/api/glossary/draft', ['term' => '断桥铝', 'draft' => '隔热条'])
+        ->assertNotFound();
+
+    GlossaryDrafter::assertNeverPrompted();
+});

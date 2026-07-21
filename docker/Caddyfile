@@ -30,12 +30,12 @@
 
 # SERVER_NAME 即 HTTPS 开关：`:80` 纯 HTTP；域名则自动签发 HTTPS + 80→443 跳转
 {$SERVER_NAME::80} {
-	root * /var/www/html/public
+	root * /app/public
 
 	# 不开压缩：SSE 分块 + gzip 在小程序端解析不可靠
 	# 用户上传直接从共享卷提供，免 storage:link
 	handle_path /storage/* {
-		root * /var/www/html/storage/app/public
+		root * /app/storage/app/public
 		file_server
 	}
 

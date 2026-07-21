@@ -8,7 +8,9 @@ use App\Http\Resources\ResidentResource;
 use App\Models\Resident;
 use App\Services\WeChat;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -29,5 +31,16 @@ class AuthController extends Controller
             'token' => $resident->createToken('miniprogram')->plainTextToken,
             'resident' => ResidentResource::make($resident),
         ]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        $token = $request->user('sanctum')?->currentAccessToken();
+
+        if ($token instanceof PersonalAccessToken) {
+            $token->delete();
+        }
+
+        return response()->json(['message' => '已退出登录']);
     }
 }

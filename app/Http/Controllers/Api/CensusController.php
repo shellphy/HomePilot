@@ -137,6 +137,11 @@ class CensusController extends Controller
         ]);
 
         $resident = $this->resident($request);
+
+        if ($validated['visible_to_initiator']) {
+            $this->assertNotBlocked($resident);
+        }
+
         $stance = $matter->stances()
             ->where('mode', Stance::MODE_REGISTER)
             ->where('resident_id', $resident->id)

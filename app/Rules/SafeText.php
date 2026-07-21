@@ -25,7 +25,7 @@ class SafeText implements ValidationRule
         }
 
         if (! app(WeChat::class)->msgSecCheck($value, $this->scene, $this->resident->openid_mp)) {
-            $fail('内容包含违规信息，请修改后再发布。');
+            $fail('内容暂时无法通过安全审核，请稍后重试或修改后再发布。');
         }
     }
 }
