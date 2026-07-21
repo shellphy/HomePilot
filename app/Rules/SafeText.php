@@ -8,9 +8,6 @@ use App\Services\WeChat;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-/**
- * 用户提交的文本走微信内容安全检测，命中违规即校验失败。
- */
 class SafeText implements ValidationRule
 {
     public function __construct(
@@ -25,7 +22,7 @@ class SafeText implements ValidationRule
         }
 
         if (! app(WeChat::class)->msgSecCheck($value, $this->scene, $this->resident->openid_mp)) {
-            $fail('内容包含违规信息，请修改后再发布。');
+            $fail('内容暂时无法通过安全审核，请稍后重试或修改后再发布。');
         }
     }
 }

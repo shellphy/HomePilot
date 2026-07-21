@@ -19,6 +19,10 @@ beforeEach(function () {
     Http::fake([
         'api.weixin.qq.com/cgi-bin/stable_token' => Http::response(['access_token' => 'fake-token']),
         'api.weixin.qq.com/cgi-bin/message/subscribe/send*' => Http::response(['errcode' => 0, 'errmsg' => 'ok']),
+        'api.weixin.qq.com/wxa/msg_sec_check*' => Http::response([
+            'errcode' => 0,
+            'result' => ['suggest' => 'pass', 'label' => 100],
+        ]),
     ]);
 });
 

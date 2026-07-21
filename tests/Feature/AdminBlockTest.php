@@ -2,6 +2,7 @@
 
 use App\Models\Matter;
 use App\Models\Resident;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\Sanctum;
 
 test('an admin blocks a resident, who then shows up in the block list', function () {
@@ -52,6 +53,31 @@ test('a blocked resident cannot join or initiate', function () {
 
     $this->postJson("/api/matters/{$matter->id}/join")->assertForbidden();
     $this->postJson('/api/matters', ['type' => 'activity', 'title' => '想张罗个活动'])->assertForbidden();
+});
+
+test('a blocked resident cannot use interaction endpoints but can still browse and log out', function () {
+    $matter = Matter::factory()->create();
+    $blocked = Resident::factory()->blocked()->create();
+    $token = $blocked->createToken('miniprogram');
+    $this->withToken($token->plainTextToken);
+    Log::spy();
+
+    $this->getJson('/api/matters')->assertSuccessful();
+    $this->getJson("/api/matters/{$matter->id}")->assertSuccessful();
+
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '还能提问吗'])->assertForbidden();
+    $this->putJson("/api/matters/{$matter->id}/review", ['rating' => 5])->assertForbidden();
+    $this->postJson("/api/matters/{$matter->id}/updates", ['content' => '更新'])->assertForbidden();
+    $this->postJson('/api/glossary/draft', ['term' => '术语', 'draft' => '说明'])->assertForbidden();
+    $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '问题'])->assertForbidden();
+    $this->postJson('/api/uploads')->assertForbidden();
+
+    $this->postJson('/api/logout')->assertSuccessful();
+
+    Log::shouldHaveReceived('warning')->withArgs(
+        fn (string $message, array $context): bool => $message === '封禁用户尝试社区互动'
+            && $context['resident_id'] === $blocked->id,
+    );
 });
 
 test('a non-admin cannot reach block management', function (string $method, string $uri) {

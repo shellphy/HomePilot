@@ -1,26 +1,49 @@
 #!/bin/sh
 set -e
 
-# 仅在启动 FrankenPHP 服务时做初始化；docker compose run 执行的一次性命令直接放行
-if [ "$1" != "frankenphp" ]; then
-    exec "$@"
-fi
+role="${1:-app}"
+cd /app
 
-if [ -z "$APP_KEY" ]; then
-    echo "错误：APP_KEY 未设置。" >&2
-    echo "请先执行 docker compose run --rm --no-deps app php artisan key:generate --show，" >&2
-    echo "并将生成的 key 填入 .env 的 APP_KEY。" >&2
-    exit 1
-fi
+case "$role" in
+    app)
+        if [ -z "$APP_KEY" ]; then
+            echo "错误：APP_KEY 未设置。" >&2
+            exit 1
+        fi
 
-# SQLite 库文件在具名卷里，首次启动创建（卷目录已是 www-data 属主）
-if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ] && [ -n "$DB_DATABASE" ]; then
-    mkdir -p "$(dirname "$DB_DATABASE")"
-    [ -f "$DB_DATABASE" ] || touch "$DB_DATABASE"
-fi
+        if [ "${SERVER_NAME:-:80}" != ":80" ]; then
+            if [ "${APP_ENV:-}" != "production" ]; then
+                echo "错误：HTTPS 部署要求 APP_ENV=production（必须全小写）。" >&2
+                exit 1
+            fi
 
-php artisan migrate --force
+            if [ "${APP_DEBUG:-false}" != "false" ]; then
+                echo "错误：生产部署要求 APP_DEBUG=false。" >&2
+                exit 1
+            fi
 
-php artisan optimize
+            case "${APP_URL:-}" in
+                https://*) ;;
+                *)
+                    echo "错误：HTTPS 部署要求 APP_URL 使用 https://。" >&2
+                    exit 1
+                    ;;
+            esac
+        fi
 
-exec "$@"
+        exec frankenphp run --config /etc/frankenphp/Caddyfile
+        ;;
+
+    queue)
+        shift
+        exec php artisan queue:work "$@"
+        ;;
+
+    scheduler)
+        exec php artisan schedule:work
+        ;;
+
+    *)
+        exec "$@"
+        ;;
+esac

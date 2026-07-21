@@ -2,10 +2,14 @@
 
 use App\Models\Matter;
 use App\Models\Resident;
+use App\Services\WeChat;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
 
 beforeEach(function () {
+    app()->forgetInstance(WeChat::class);
+    Cache::forget('wechat.access_token');
     config([
         'services.wechat.appid' => 'test-appid',
         'services.wechat.secret' => 'test-secret',
@@ -16,9 +20,6 @@ beforeEach(function () {
     ]);
 });
 
-/**
- * 把内容安全接口的判定固定成某个 suggest（risky/pass/review），换 token 的请求单独放行。
- */
 function fakeMsgSecCheck(string $suggest): void
 {
     Http::fake([
@@ -65,7 +66,7 @@ test('正常（pass）放行', function () {
         ->assertCreated();
 });
 
-test('微信接口报错时放行（fail-open），不堵死发帖', function () {
+test('微信接口报错时拒绝本次提交，避免未审核内容公开', function () {
     Http::fake([
         'api.weixin.qq.com/cgi-bin/stable_token' => Http::response(['access_token' => 'fake-token']),
         'api.weixin.qq.com/wxa/msg_sec_check*' => Http::response([], 500),
@@ -75,18 +76,47 @@ test('微信接口报错时放行（fail-open），不堵死发帖', function ()
     Sanctum::actingAs(Resident::factory()->create());
 
     $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '任意内容'])
-        ->assertCreated();
+        ->assertUnprocessable()
+        ->assertJsonValidationErrorFor('content');
 });
 
-test('用户没有小程序 openid 时跳过检测，直接放行', function () {
-    // openid 为空则连接口都不调，即便内容会被判违规也放行
+test('access token 失效时清除缓存并重试一次内容审核', function () {
+    Http::fake([
+        'api.weixin.qq.com/cgi-bin/stable_token' => Http::sequence()
+            ->push(['access_token' => 'expired-token'])
+            ->push(['access_token' => 'fresh-token']),
+        'api.weixin.qq.com/wxa/msg_sec_check*' => Http::sequence()
+            ->push(['errcode' => 42001, 'errmsg' => 'access_token expired'])
+            ->push(['errcode' => 0, 'result' => ['suggest' => 'pass', 'label' => 100]], 200),
+    ]);
+    $matter = Matter::factory()->create();
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '正常内容'])
+        ->assertCreated();
+
+    Http::assertSentCount(4);
+});
+
+test('用户没有小程序 openid 时拒绝提交', function () {
     fakeMsgSecCheck('risky');
     $matter = Matter::factory()->create();
 
     Sanctum::actingAs(Resident::factory()->create(['openid_mp' => '']));
 
     $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '违规内容'])
-        ->assertCreated();
+        ->assertUnprocessable()
+        ->assertJsonValidationErrorFor('content');
 
     Http::assertNotSent(fn ($request): bool => str_contains($request->url(), 'msg_sec_check'));
+});
+
+test('微信返回未知审核结果时拒绝提交', function () {
+    fakeMsgSecCheck('unknown');
+    $matter = Matter::factory()->create();
+    Sanctum::actingAs(Resident::factory()->create());
+
+    $this->postJson("/api/matters/{$matter->id}/questions", ['content' => '任意内容'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrorFor('content');
 });

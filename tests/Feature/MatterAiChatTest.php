@@ -3,15 +3,12 @@
 use App\Ai\Agents\MatterExplainer;
 use App\Models\Matter;
 use App\Models\Resident;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Testing\TestResponse;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Sanctum\Sanctum;
 
-/**
- * 把 SSE 流拆成事件数组：每个 `data:` 帧是一段 JSON。
- *
- * @return list<array<string, mixed>>
- */
+/** @return list<array<string, mixed>> */
 function sseEvents(TestResponse $response): array
 {
     return collect(explode("\n\n", $response->streamedContent()))
@@ -23,7 +20,6 @@ function sseEvents(TestResponse $response): array
         ->all();
 }
 
-/** 拼接流里所有 delta，得到完整回答。 */
 function sseAnswer(TestResponse $response): string
 {
     return collect(sseEvents($response))
@@ -32,7 +28,6 @@ function sseAnswer(TestResponse $response): string
         ->join('');
 }
 
-/** 取收尾帧（带 conversation_id）。 */
 function sseDone(TestResponse $response): array
 {
     return collect(sseEvents($response))->firstWhere('done', true) ?? [];
@@ -55,7 +50,6 @@ test('a resident asks the ai about a groupbuy and can follow up in the same conv
         'conversation_id' => sseDone($first)['conversation_id'],
     ])->assertSuccessful();
 
-    // fake 在续聊路径下按默认响应兜底，这里只关心会话延续与有回答
     expect(sseAnswer($second))->toBeString()->not->toBeEmpty()
         ->and(sseDone($second)['conversation_id'])->toBe(sseDone($first)['conversation_id']);
 
@@ -79,7 +73,7 @@ test('the agent instructions carry the matter terms, glossary and community cons
     $instructions = (string) (new MatterExplainer($matter, $asker))->instructions();
 
     expect($instructions)
-        ->toContain('130㎡') // 提问业主的户型，答疑按「我家」的实际情况
+        ->toContain('130㎡')
         ->toContain('中央空调团购')
         ->toContain('一拖四')
         ->toContain('3.2 万')
@@ -87,7 +81,7 @@ test('the agent instructions carry the matter terms, glossary and community cons
         ->toContain('更省电也更静音')
         ->toContain('满 20 户送清洗')
         ->toContain('逐人报价')
-        ->toContain('外机位'); // 小区硬条件出厂默认值
+        ->toContain('外机位');
 });
 
 test('notices do not offer ai chat and unapproved matters stay hidden', function () {
@@ -118,4 +112,46 @@ test('guests cannot use ai chat', function () {
     $matter = Matter::factory()->create();
 
     $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '？'])->assertUnauthorized();
+});
+
+test('ai chat rejects a conversation from another resident or matter', function () {
+    MatterExplainer::fake(['第一轮', '不应执行']);
+    $resident = Resident::factory()->create();
+    $firstMatter = Matter::factory()->create();
+    $secondMatter = Matter::factory()->create();
+    Sanctum::actingAs($resident);
+
+    $first = $this->postJson("/api/matters/{$firstMatter->id}/ai-chat", ['question' => '开始'])
+        ->assertSuccessful();
+    $conversationId = sseDone($first)['conversation_id'];
+
+    $this->postJson("/api/matters/{$secondMatter->id}/ai-chat", [
+        'question' => '跨事项续聊',
+        'conversation_id' => $conversationId,
+    ])->assertNotFound();
+
+    Sanctum::actingAs(Resident::factory()->create());
+    $this->postJson("/api/matters/{$firstMatter->id}/ai-chat", [
+        'question' => '跨用户续聊',
+        'conversation_id' => $conversationId,
+    ])->assertNotFound();
+});
+
+test('disabled ai chat is not callable even when authenticated', function () {
+    config(['features.ai.chat' => false]);
+    MatterExplainer::fake();
+    $matter = Matter::factory()->create();
+    $resident = Resident::factory()->create();
+    Sanctum::actingAs($resident);
+    Log::spy();
+
+    $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '？'])
+        ->assertNotFound();
+
+    MatterExplainer::assertNeverPrompted();
+    Log::shouldHaveReceived('info')->withArgs(
+        fn (string $message, array $context): bool => $message === '已关闭的功能被调用'
+            && $context['feature'] === 'ai.chat'
+            && $context['resident_id'] === $resident->id,
+    );
 });

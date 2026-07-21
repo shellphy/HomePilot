@@ -8,7 +8,9 @@ use App\Http\Resources\ResidentResource;
 use App\Models\Resident;
 use App\Services\WeChat;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -16,10 +18,8 @@ class AuthController extends Controller
     {
         ['openid' => $openid, 'unionid' => $unionid] = $weChat->sessionFromCode($request->validated('code'));
 
-        // 服务号 H5 先认识的人再打开小程序，认到同一个 unionid 上并补齐 openid_mp
         $resident = Resident::updateOrCreate(['unionid' => $unionid], ['openid_mp' => $openid]);
 
-        // unionid/openid 是身份凭证，不进日志
         Log::info('登录成功', [
             'resident_id' => $resident->id,
             'registered' => $resident->wasRecentlyCreated,
@@ -29,5 +29,16 @@ class AuthController extends Controller
             'token' => $resident->createToken('miniprogram')->plainTextToken,
             'resident' => ResidentResource::make($resident),
         ]);
+    }
+
+    public function logout(Request $request): JsonResponse
+    {
+        /** @var PersonalAccessToken $token */
+        $token = $request->user('sanctum')->currentAccessToken();
+        $token->delete();
+
+        Log::info('退出登录', ['resident_id' => $request->user('sanctum')->getAuthIdentifier()]);
+
+        return response()->json(['message' => '已退出登录']);
     }
 }

@@ -57,6 +57,19 @@ test('report agent does not assume questionnaire content is correct', function (
         ->toContain('不要顺着明显错误继续推导');
 });
 
+test('disabled census reports cannot be read or generated', function () {
+    config(['features.ai.census_report' => false]);
+    Queue::fake();
+    $resident = Resident::factory()->create();
+    $matter = reportCensus($resident);
+    Sanctum::actingAs($resident);
+
+    $this->getJson("/api/matters/{$matter->id}/census-report")->assertNotFound();
+    $this->postJson("/api/matters/{$matter->id}/census-report")->assertNotFound();
+
+    Queue::assertNothingPushed();
+});
+
 test('a resident generates and reuses a markdown census report', function () {
     Queue::fake();
     CensusReportGenerator::fake(["## 我的问卷总结\n\n- 重视环保与防潮"]);
