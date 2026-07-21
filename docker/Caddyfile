@@ -25,7 +25,6 @@
 {$SERVER_NAME::80} {
 	root * /app/public
 
-	# 上传目录由持久化卷提供。
 	handle_path /storage/* {
 		root * /app/storage/app/public
 		file_server

@@ -21,8 +21,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh \
 
 # 工具缓存不写入源码目录。
 ENV HOME=/tmp \
-    XDG_DATA_HOME=/tmp \
-    XDG_CONFIG_HOME=/tmp \
+    XDG_DATA_HOME=/app/storage/framework/caddy/data \
+    XDG_CONFIG_HOME=/app/storage/framework/caddy/config \
     COMPOSER_HOME=/tmp/composer \
     npm_config_cache=/tmp/npm
 
