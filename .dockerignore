@@ -13,7 +13,6 @@ phpstan.neon
 README.md
 AGENTS.md
 CLAUDE.md
-Dockerfile
 docker-compose.yml
 .dockerignore
 .env

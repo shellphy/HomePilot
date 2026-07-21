@@ -10,6 +10,7 @@ docker buildx inspect homepilot >/dev/null 2>&1 \
 
 docker buildx build \
     --builder homepilot \
+    --file docker/Dockerfile \
     --platform linux/amd64 \
     --target base \
     --tag "$IMAGE:$TAG" \

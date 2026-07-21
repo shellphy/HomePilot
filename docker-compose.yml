@@ -10,10 +10,6 @@ x-app-base: &app-base
   working_dir: /app
   volumes:
     - .:/app
-    - storage-uploads:/app/storage/app/public
-    - sqlite-data:/app/storage/database
-    - storage-logs:/app/storage/logs
-    - ${BACKUP_DIR:-./storage/backups}:/backups
   stop_grace_period: 30s
   logging:
     driver: json-file
@@ -57,8 +53,3 @@ services:
     depends_on:
       app:
         condition: service_healthy
-
-volumes:
-  storage-uploads:
-  sqlite-data:
-  storage-logs:
