@@ -13,9 +13,6 @@ use Illuminate\Validation\ValidationException;
 class WeChat
 {
     /**
-     * 用小程序 wx.login 拿到的 code 换身份（code2session）。
-     * 小程序绑在开放平台账号下，unionid 随 code2session 一并下发。
-     *
      * @return array{openid: string, unionid: string}
      *
      * @throws ValidationException
@@ -41,7 +38,6 @@ class WeChat
         $openid = $response->json('openid');
         $unionid = $response->json('unionid');
 
-        // unionid 缺失说明小程序脱离了开放平台账号，认人的锚点没了
         if (! $response->successful() || blank($openid) || blank($unionid)) {
             Log::warning('微信 code2session 未拿到可用身份', [
                 ...$this->failureContext($response),
@@ -55,11 +51,7 @@ class WeChat
         return ['openid' => $openid, 'unionid' => $unionid];
     }
 
-    /**
-     * 用手机号授权组件（open-type="getPhoneNumber"）拿到的 code 换手机号。
-     *
-     * @throws ValidationException
-     */
+    /** @throws ValidationException */
     public function phoneNumberFromCode(string $code): string
     {
         try {
@@ -79,7 +71,6 @@ class WeChat
         $phone = $response->json('phone_info.purePhoneNumber');
 
         if (! $response->successful() || (int) $response->json('errcode') !== 0 || blank($phone)) {
-            // 手机号本身是 PII，只记拿到没拿到
             Log::warning('微信手机号换取失败', [
                 ...$this->failureContext($response),
                 'has_phone' => filled($phone),
@@ -92,10 +83,6 @@ class WeChat
     }
 
     /**
-     * 下发订阅消息（「活动状态提醒」模板）。微信的规则是一次授权一次下发：
-     * 额度不足、用户拒收、模板未配置等一律返回 false 不抛——通知是锦上添花，
-     * 失败不打扰主流程，站内红点兜底。收件人 openid 是 PII，只记 page。
-     *
      * @param  array<string, array{value: string}>  $data
      */
     public function sendSubscribeMessage(string $openidMp, string $page, array $data): bool
@@ -132,7 +119,6 @@ class WeChat
         }
 
         if (! $response->successful() || (int) $response->json('errcode') !== 0) {
-            // 43101 同时表示用户拒收与额度耗尽，errcode 分不开这两者
             Log::warning('订阅消息下发失败', [...$this->failureContext($response), 'page' => $page]);
 
             return false;
@@ -141,37 +127,29 @@ class WeChat
         return true;
     }
 
-    /**
-     * 文本内容安全检测（msgSecCheck v2，同步）。只拦明确违规（suggest=risky），
-     * 疑似（review）与正常放行。生产环境中接口不可用时拒绝本次提交，避免内容未经
-     * 审核直接公开；本地与测试环境未配置微信凭证时仍可开发。
-     *
-     * openid 用小程序端的 openid_mp，微信要求该用户近两小时内访问过小程序：用户
-     * 正在发帖时天然满足；生产环境里 openid 为空时拒绝本次提交。
-     */
     public function msgSecCheck(string $content, SecCheckScene $scene, string $openidMp): bool
     {
-        if (blank($content)) {
-            return true;
-        }
-
-        if (blank(config('services.wechat.appid')) || blank(config('services.wechat.secret')) || blank($openidMp)) {
-            Log::warning('内容安全检测缺少调用条件', [
+        if (blank(config('services.wechat.appid')) || blank(config('services.wechat.secret'))) {
+            Log::error('内容安全检测未配置微信凭证', [
                 'scene' => $scene->value,
-                'has_credentials' => filled(config('services.wechat.appid')) && filled(config('services.wechat.secret')),
-                'has_openid_mp' => filled($openidMp),
             ]);
 
-            return ! app()->isProduction();
+            return false;
         }
 
-        // 每次实际发起检测都留痕，方便观测调用量；内容原文与 openid 是敏感数据，只记长度
-        Log::info('内容安全检测发起', ['scene' => $scene->value, 'length' => mb_strlen($content)]);
+        if (blank($openidMp)) {
+            Log::warning('内容安全检测缺少用户 openid', ['scene' => $scene->value]);
+
+            return false;
+        }
 
         try {
             $response = $this->requestMsgSecCheck($content, $scene, $openidMp);
 
             if ($this->hasInvalidAccessToken($response)) {
+                Log::info('微信 access_token 失效，刷新后重试内容安全检测', [
+                    'scene' => $scene->value,
+                ]);
                 Cache::forget('wechat.access_token');
                 $response = $this->requestMsgSecCheck($content, $scene, $openidMp);
             }
@@ -189,11 +167,21 @@ class WeChat
 
         $suggest = $response->json('result.suggest');
 
-        // 检测结果都记 info，pass/review/risky 分布可查；命中原文不入日志，只留分类标签
+        if (! in_array($suggest, ['pass', 'review', 'risky'], true)) {
+            Log::warning('内容安全检测返回未知结果', [
+                'scene' => $scene->value,
+                'suggest' => $suggest,
+                'label' => $response->json('result.label'),
+            ]);
+
+            return false;
+        }
+
         Log::info('内容安全检测结果', [
             'scene' => $scene->value,
             'suggest' => $suggest,
             'label' => $response->json('result.label'),
+            'length' => mb_strlen($content),
         ]);
 
         return $suggest !== 'risky';
@@ -220,11 +208,7 @@ class WeChat
         return in_array((int) $response->json('errcode'), [40001, 40014, 42001], true);
     }
 
-    /**
-     * 服务端接口调用凭证（stable_token，普通模式下重复获取返回同一个 token）。
-     *
-     * @throws ValidationException
-     */
+    /** @throws ValidationException */
     private function accessToken(): string
     {
         return Cache::remember('wechat.access_token', now()->addMinutes(100), function (): string {
@@ -246,7 +230,6 @@ class WeChat
             $token = $response->json('access_token');
 
             if (! $response->successful() || blank($token)) {
-                // token 拿不到会连带拖垮所有订阅消息
                 Log::error('微信 access_token 获取失败', $this->failureContext($response));
 
                 throw ValidationException::withMessages(['code' => '微信服务暂时不可用，请稍后再试']);
@@ -257,8 +240,6 @@ class WeChat
     }
 
     /**
-     * 微信业务错误也返回 HTTP 200，errcode 只在 body 里。
-     *
      * @return array{status: int, errcode: mixed, errmsg: mixed}
      */
     private function failureContext(Response $response): array

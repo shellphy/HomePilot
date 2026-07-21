@@ -2,6 +2,7 @@
 
 use App\Models\Resident;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 test('login exchanges the wechat code for a token and creates the resident', function () {
     Http::preventStrayRequests();
@@ -90,17 +91,18 @@ test('login requires a code', function () {
 });
 
 test('unauthenticated api requests get a 401 json even without an accept header', function () {
-    // 回归：曾因默认重定向到不存在的 login 路由而 500
     $this->get('/api/me')->assertUnauthorized();
 });
 
 test('an authenticated resident can log out the current access token', function () {
     $resident = Resident::factory()->create();
     $token = $resident->createToken('miniprogram');
+    Log::spy();
 
     $this->withToken($token->plainTextToken)->postJson('/api/logout')->assertSuccessful();
 
     expect($resident->tokens()->count())->toBe(0);
+    Log::shouldHaveReceived('info')->with('退出登录', ['resident_id' => $resident->id]);
 });
 
 test('login attempts are rate limited by client address', function () {

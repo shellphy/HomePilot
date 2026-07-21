@@ -6,6 +6,7 @@ use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -13,23 +14,24 @@ use SQLite3;
 use Throwable;
 use ZipArchive;
 
-#[Signature('app:backup {--path= : Override the configured backup directory}')]
-#[Description('Create a consistent SQLite snapshot and archive public uploads')]
+#[Signature('app:backup {--path= : 指定备份目录}')]
+#[Description('备份 SQLite 数据库和用户上传文件')]
 class BackupApplication extends Command
 {
     public function handle(): int
     {
-        $sourceDatabase = config('database.connections.sqlite.database');
-        $backupRoot = $this->option('path') ?: config('backup.path');
+        $sourceDatabase = (string) config('database.connections.sqlite.database');
+        $backupRoot = (string) ($this->option('path') ?: config('backup.path'));
+        $retentionDays = (int) config('backup.retention_days');
 
-        if (! is_string($sourceDatabase) || $sourceDatabase === ':memory:' || ! is_file($sourceDatabase)) {
+        if ($sourceDatabase === ':memory:' || ! is_file($sourceDatabase)) {
             $this->components->error('SQLite 数据库文件不存在，无法备份。');
 
             return self::FAILURE;
         }
 
-        if (! is_string($backupRoot) || blank($backupRoot) || $backupRoot === '/') {
-            $this->components->error('备份目录配置无效。');
+        if (blank($backupRoot) || $backupRoot === '/' || $retentionDays < 1) {
+            $this->components->error('备份目录或保留天数配置无效。');
 
             return self::FAILURE;
         }
@@ -45,15 +47,22 @@ class BackupApplication extends Command
             $this->backupDatabase($sourceDatabase, $temporaryDirectory.'/database.sqlite');
             $this->archiveUploads(storage_path('app/public'), $temporaryDirectory.'/uploads.zip');
             File::moveDirectory($temporaryDirectory, $finalDirectory);
-            $this->pruneExpiredBackups($backupRoot);
+            $deletedBackups = $this->pruneExpiredBackups($backupRoot, $retentionDays);
         } catch (Throwable $exception) {
             File::deleteDirectory($temporaryDirectory);
-            report($exception);
+            Log::error('应用备份失败', [
+                'backup_root' => $backupRoot,
+                'exception' => $exception,
+            ]);
             $this->components->error('备份失败：'.$exception->getMessage());
 
             return self::FAILURE;
         }
 
+        Log::info('应用备份完成', [
+            'directory' => $finalDirectory,
+            'deleted_backups' => $deletedBackups,
+        ]);
         $this->components->info("备份已写入 {$finalDirectory}");
 
         return self::SUCCESS;
@@ -102,9 +111,10 @@ class BackupApplication extends Command
         }
     }
 
-    private function pruneExpiredBackups(string $backupRoot): void
+    private function pruneExpiredBackups(string $backupRoot, int $retentionDays): int
     {
-        $cutoff = now()->subDays(max(1, (int) config('backup.retention_days')));
+        $cutoff = now()->subDays($retentionDays);
+        $deletedBackups = 0;
 
         foreach (File::directories($backupRoot) as $directory) {
             $name = basename($directory);
@@ -117,7 +127,10 @@ class BackupApplication extends Command
 
             if ($createdAt !== false && $createdAt < $cutoff->toDateTimeImmutable()) {
                 File::deleteDirectory($directory);
+                $deletedBackups++;
             }
         }
+
+        return $deletedBackups;
     }
 }

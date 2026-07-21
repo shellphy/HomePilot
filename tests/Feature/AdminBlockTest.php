@@ -2,6 +2,7 @@
 
 use App\Models\Matter;
 use App\Models\Resident;
+use Illuminate\Support\Facades\Log;
 use Laravel\Sanctum\Sanctum;
 
 test('an admin blocks a resident, who then shows up in the block list', function () {
@@ -57,7 +58,9 @@ test('a blocked resident cannot join or initiate', function () {
 test('a blocked resident cannot use interaction endpoints but can still browse and log out', function () {
     $matter = Matter::factory()->create();
     $blocked = Resident::factory()->blocked()->create();
-    Sanctum::actingAs($blocked);
+    $token = $blocked->createToken('miniprogram');
+    $this->withToken($token->plainTextToken);
+    Log::spy();
 
     $this->getJson('/api/matters')->assertSuccessful();
     $this->getJson("/api/matters/{$matter->id}")->assertSuccessful();
@@ -70,6 +73,11 @@ test('a blocked resident cannot use interaction endpoints but can still browse a
     $this->postJson('/api/uploads')->assertForbidden();
 
     $this->postJson('/api/logout')->assertSuccessful();
+
+    Log::shouldHaveReceived('warning')->withArgs(
+        fn (string $message, array $context): bool => $message === '封禁用户尝试社区互动'
+            && $context['resident_id'] === $blocked->id,
+    );
 });
 
 test('a non-admin cannot reach block management', function (string $method, string $uri) {

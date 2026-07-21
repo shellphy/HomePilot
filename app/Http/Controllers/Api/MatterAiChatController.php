@@ -15,14 +15,7 @@ use Laravel\Ai\Streaming\Events\TextDelta;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Throwable;
 
-/**
- * 业主侧 AI 答疑（多轮）：带着事项上下文回答，conversation_id 续聊。
- * AI 解释概念、不代表承诺；涉及商家具体承诺的引导去向团长/商家提问留档。
- *
- * 回答以 SSE（text/event-stream）逐字下发，让前端打字机式渲染、并支持中途停止：
- * 每个 `data:` 帧是一段 JSON——{delta} 增量文字、{error} 出错、
- * {done, conversation_id} 收尾（会话此刻才落库）。
- */
+/** 事项上下文的多轮 AI 答疑，以 SSE 返回结果。 */
 class MatterAiChatController extends Controller
 {
     use ResolvesResident;
@@ -31,14 +24,13 @@ class MatterAiChatController extends Controller
     {
         $resident = $this->resident($request);
 
-        // 公示后人人可问；公示前只有发起人能问，方便自己边办边理清
         abort_unless($matter->is_approved || $matter->initiator_id === $resident->id, 404);
         abort_unless(in_array($matter->type, ['groupbuy', 'activity', 'census'], true), 422, '该事项不支持 AI 答疑');
 
         $validated = $request->validate([
             'question' => ['required', 'string', 'max:300'],
             'conversation_id' => ['sometimes', 'nullable', 'string', 'max:64'],
-            // 征集填写页问 AI 时带上当前（可能未保存）的答案，让 AI 看到屏幕上的实时选择
+            // 征集填写页会传入尚未保存的答案。
             'answers' => ['sometimes', 'array'],
         ]);
 
@@ -75,8 +67,6 @@ class MatterAiChatController extends Controller
                         continue;
                     }
 
-                    // 服务端联网检索：确定搜索词时下发 {searching}（前端显示检索状态），
-                    // 命中来源下发 {source}（附在答案下）。
                     if ($event instanceof ProviderToolEvent
                         && $event->type === 'server_tool_use'
                         && $event->status === 'completed') {
@@ -105,19 +95,14 @@ class MatterAiChatController extends Controller
                 Log::warning('AI 事项答疑流式中断', [
                     'matter_id' => $matter->id,
                     'resident_id' => $resident->id,
-                    'exception' => $e::class,
-                    'message' => $e->getMessage(),
+                    'exception' => $e,
                 ]);
                 yield $this->frame(['error' => 'AI 暂时不可用，请稍后再试']);
 
                 return;
             }
 
-            // 迭代结束后 RememberConversation 中间件才写库并回填 conversation_id
-            DB::table(config('ai.conversations.tables.conversations', 'agent_conversations'))
-                ->where('id', $stream->conversationId)
-                ->where('user_id', $resident->id)
-                ->update(['matter_id' => $matter->id]);
+            $this->bindConversationToMatter($stream->conversationId, $resident->id, $matter->id);
 
             Log::debug('AI 事项答疑完成', [
                 'matter_id' => $matter->id,
@@ -132,17 +117,23 @@ class MatterAiChatController extends Controller
             'Content-Type' => 'text/event-stream',
             'Cache-Control' => 'no-cache',
             'Connection' => 'keep-alive',
-            'X-Accel-Buffering' => 'no', // 让 nginx 等反代不缓冲，逐帧透传
+            'X-Accel-Buffering' => 'no',
         ]);
     }
 
     /**
-     * 拼一帧 SSE 事件（Laravel 的流式响应会在每次 yield 后自动冲刷）。
-     *
      * @param  array<string, mixed>  $payload
      */
     private function frame(array $payload): string
     {
         return 'data: '.json_encode($payload, JSON_UNESCAPED_UNICODE)."\n\n";
+    }
+
+    private function bindConversationToMatter(string $conversationId, int $residentId, int $matterId): void
+    {
+        DB::table(config('ai.conversations.tables.conversations', 'agent_conversations'))
+            ->where('id', $conversationId)
+            ->where('user_id', $residentId)
+            ->update(['matter_id' => $matterId]);
     }
 }

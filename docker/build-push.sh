@@ -1,6 +1,5 @@
 #!/bin/sh
-# 在可访问海外仓库的开发机交叉构建 amd64 运行时基础镜像并推送阿里云。
-# 业务代码不进入镜像；普通发布只需服务器 git pull 后执行 make 目标。
+# 构建 amd64 基础镜像并推送阿里云。
 set -e
 
 IMAGE=${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit}

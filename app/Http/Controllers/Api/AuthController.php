@@ -18,10 +18,8 @@ class AuthController extends Controller
     {
         ['openid' => $openid, 'unionid' => $unionid] = $weChat->sessionFromCode($request->validated('code'));
 
-        // 服务号 H5 先认识的人再打开小程序，认到同一个 unionid 上并补齐 openid_mp
         $resident = Resident::updateOrCreate(['unionid' => $unionid], ['openid_mp' => $openid]);
 
-        // unionid/openid 是身份凭证，不进日志
         Log::info('登录成功', [
             'resident_id' => $resident->id,
             'registered' => $resident->wasRecentlyCreated,
@@ -35,11 +33,11 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
-        $token = $request->user('sanctum')?->currentAccessToken();
+        /** @var PersonalAccessToken $token */
+        $token = $request->user('sanctum')->currentAccessToken();
+        $token->delete();
 
-        if ($token instanceof PersonalAccessToken) {
-            $token->delete();
-        }
+        Log::info('退出登录', ['resident_id' => $request->user('sanctum')->getAuthIdentifier()]);
 
         return response()->json(['message' => '已退出登录']);
     }

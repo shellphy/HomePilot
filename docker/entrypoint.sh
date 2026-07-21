@@ -1,5 +1,4 @@
 #!/bin/sh
-# 同一基础镜像分派 Web、队列和调度器；其它命令原样执行，供 Makefile 运维使用。
 set -e
 
 role="${1:-app}"

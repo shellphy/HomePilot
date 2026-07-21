@@ -8,9 +8,6 @@ use App\Services\WeChat;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-/**
- * 用户提交的文本走微信内容安全检测，命中违规即校验失败。
- */
 class SafeText implements ValidationRule
 {
     public function __construct(

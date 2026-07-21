@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 test('the backup command creates a consistent database snapshot and upload archive', function () {
@@ -24,6 +25,7 @@ test('the backup command creates a consistent database snapshot and upload archi
         'backup.path' => $backupPath,
         'backup.retention_days' => 7,
     ]);
+    Log::spy();
 
     try {
         $this->artisan('app:backup')->assertSuccessful();
@@ -42,6 +44,14 @@ test('the backup command creates a consistent database snapshot and upload archi
 
         expect(File::isDirectory($backupPath.'/homepilot-20200101-030000'))->toBeFalse()
             ->and(File::isDirectory($backupPath.'/manual-files'))->toBeTrue();
+
+        Log::shouldHaveReceived('info')->withArgs(
+            fn (string $message, array $context): bool => $message === '应用备份完成'
+                && $context['deleted_backups'] === 1,
+        );
+
+        config(['backup.retention_days' => 0]);
+        $this->artisan('app:backup')->assertFailed();
     } finally {
         File::delete($uploadPath);
         File::deleteDirectory($temporaryRoot);

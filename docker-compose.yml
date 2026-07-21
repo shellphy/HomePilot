@@ -1,4 +1,4 @@
-# 服务器保留 Git 工作区，业务代码 bind mount 到容器；基础镜像只提供运行环境。
+# 服务器 Git 工作区挂载到基础运行镜像的 /app。
 x-app-base: &app-base
   image: ${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit:base}
   restart: unless-stopped
@@ -25,7 +25,7 @@ x-app-base: &app-base
       condition: service_completed_successfully
 
 services:
-  # 为任意宿主 uid/gid 初始化持久化卷；业务容器仍以非 root 身份运行。
+  # 使用 APP_UID/APP_GID 初始化持久化目录权限。
   volume-init:
     image: ${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit:base}
     user: root
@@ -47,7 +47,7 @@ services:
       - caddy-config:/config
       - ${BACKUP_DIR:-/var/backups/homepilot}:/backups
 
-  # 运维命令容器；Makefile 使用 docker compose run 覆盖 command。
+  # Makefile 通过该服务执行一次性运维命令。
   cli:
     <<: *app-base
     restart: "no"
