@@ -238,7 +238,7 @@
                     <div class="lines">
                         <div><b>公司名称：</b><span>武汉润予科技有限公司</span></div>
                         <div><b>商务邮箱：</b><span>hi@runforyou.app</span></div>
-                        <div><b>公司地址：</b><span>湖北省武汉市</span></div>
+                        <div><b>公司地址：</b><span>湖北省武汉东湖新技术开发区光谷创业街9栋A区1层256号</span></div>
                     </div>
                 </div>
             </div>
