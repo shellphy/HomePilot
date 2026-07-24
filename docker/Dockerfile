@@ -1,6 +1,3 @@
-# syntax=docker/dockerfile:1
-
-# 只包含运行环境，业务代码由服务器 Git 工作区挂载。
 ARG FRANKENPHP_IMAGE=dunglas/frankenphp:1.12.4-php8.5
 ARG NODE_IMAGE=node:24.18.0-bookworm-slim
 

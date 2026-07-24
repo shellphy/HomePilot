@@ -2,7 +2,6 @@
 x-app-base: &app-base
   image: ${APP_IMAGE:-registry.cn-hangzhou.aliyuncs.com/shellphy/homepolit:base}
   restart: unless-stopped
-  user: "${APP_UID:-1000}:${APP_GID:-1000}"
   volumes:
     - .:/app
   stop_grace_period: 30s

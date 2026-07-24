@@ -4,10 +4,11 @@
 //   后端启动命令：php artisan serve --host=0.0.0.0
 // - trial（体验版）/ release（正式版）：走线上域名，需在小程序后台配置为合法域名
 const API_BASES = {
-  develop: 'http://127.0.0.1:8000/api',
+  develop: 'https://tianqingfu.runforyou.cn/api',
   trial: 'https://tianqingfu.runforyou.cn/api',
   release: 'https://tianqingfu.runforyou.cn/api',
 };
+
 
 const { envVersion } = wx.getAccountInfoSync().miniProgram;
 
