@@ -248,7 +248,7 @@
     <footer>
         <div class="wrap foot">
             <div>© 2026 武汉润予科技有限公司　保留所有权利</div>
-            <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">备案号待填写</a></div>
+            <div><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">鄂ICP备2026037231号-2</a></div>
         </div>
     </footer>
 </body>

@@ -22,11 +22,11 @@
         />
       </view>
 
-      <!-- 手机号：手填或微信授权预填皆可，业主与相关方通用；点保存才写入 -->
-      <!-- 授权按钮放标签右侧，输入框始终 flex 到行尾右对齐，与其余行的值对齐一致 -->
+      <!-- 手机号支持快捷获取或手动填写，业主与相关方通用；点保存才写入 -->
+      <!-- 快捷登录按钮放标签右侧，输入框始终 flex 到行尾右对齐，与其余行的值对齐一致 -->
       <view class="frow">
         <text class="frow-label">手机号</text>
-        <button class="frow-inline-btn" open-type="getPhoneNumber" bind:getphonenumber="onGetPhone">微信授权</button>
+        <button class="frow-inline-btn" open-type="getPhoneNumber" bind:getphonenumber="onGetPhone">快捷登录</button>
         <input
           class="frow-input"
           type="number"

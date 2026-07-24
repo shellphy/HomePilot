@@ -33,7 +33,7 @@
   background-size: 100% 100%;
 }
 
-/* 手机号行微信授权预填按钮：压平成绿色行内文字链，不显边框盒子 */
+/* 快捷登录按钮：压平成绿色行内文字链，不显边框盒子 */
 .frow-inline-btn {
   flex-shrink: 0;
   width: auto;
