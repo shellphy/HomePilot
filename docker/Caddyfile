@@ -14,8 +14,9 @@
 		php_ini display_startup_errors Off
 		php_ini log_errors On
 		php_ini expose_php Off
-		# make app 会在代码更新后重启 Web 服务。
-		php_ini opcache.validate_timestamps 0
+		# 实时检查代码更新，部署后无需重启 Web 服务。
+		php_ini opcache.validate_timestamps 1
+		php_ini opcache.revalidate_freq 0
 		php_ini opcache.memory_consumption 128
 		php_ini opcache.max_accelerated_files 20000
 	}
