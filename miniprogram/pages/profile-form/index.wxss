@@ -49,6 +49,15 @@
   border: none;
 }
 
+/* 手机号行多一个快捷授权入口，给 11 位号码保留稳定的可见宽度 */
+.phone-row {
+  gap: 16rpx;
+}
+.phone-input {
+  flex-basis: 240rpx;
+  min-width: 240rpx;
+}
+
 /* 相关方档案照片（与进展页同一套九宫格交互） */
 .shots {
   display: flex;
