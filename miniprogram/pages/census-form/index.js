@@ -6,6 +6,10 @@ const { getMe, invalidateMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 
+function needsContactProfile(me) {
+  return !me.phone || (!me.party && !me.unit_label);
+}
+
 Page({
   behaviors: [load, dirty],
 
@@ -57,7 +61,7 @@ Page({
   async onShow() {
     if (!this.data.loaded || !this.data.needProfile) return;
     const me = await getMe();
-    this.setData({ needProfile: !me.unit_label || !me.phone });
+    this.setData({ needProfile: needsContactProfile(me) });
   },
 
   reload() {
@@ -87,7 +91,7 @@ Page({
           })),
         answers,
         picked: this.buildPicked(answers),
-        needProfile: census.collects_contact && (!me.unit_label || !me.phone),
+        needProfile: census.collects_contact && needsContactProfile(me),
       });
       this.showModule(0);
     });
