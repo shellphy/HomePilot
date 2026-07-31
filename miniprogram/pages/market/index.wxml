@@ -2,20 +2,17 @@
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
     <!-- 市集门户头 -->
     <view class="portal">
-      <view class="portal-name">邻里市集</view>
-      <view class="portal-sub">团购拼一波，闲置传一手</view>
-      <view class="portal-stats">
-        <view class="pstat">
-          <view class="pstat-num">{{doings.length}}<text class="pstat-unit"> 件</text></view>
-          <view class="pstat-label">正在市集</view>
-        </view>
+      <view class="portal-head">
+        <view class="portal-name">邻里市集</view>
         <view
           class="portal-btn"
           hover-class="portal-btn-hover"
           wx:if="{{initiatableTypes.length || merchantUnlisted}}"
           bind:tap="goCreate"
-        >我要发布</view>
+          >我要发布</view
+        >
       </view>
+      <view class="portal-sub">团购拼一波，闲置传一手</view>
       <view class="portal-note">平台只搭台，不经手资金。钱货请双方当面两清。</view>
     </view>
 
@@ -28,7 +25,8 @@
         wx:key="key"
         data-type="{{item.key}}"
         bind:tap="pickType"
-      >{{item.label}}</view>
+        >{{item.label}}</view
+      >
     </view>
 
     <!-- 团购用 groupbuy-card，二手闲置用通用 matter-card -->

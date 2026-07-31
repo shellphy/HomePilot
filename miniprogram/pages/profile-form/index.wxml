@@ -71,15 +71,21 @@
           </view>
         </picker>
         <view class="frow">
-          <text class="frow-label">房号<text class="f-optional">选填</text></text>
-          <input class="frow-input" value="{{roomLabel}}" data-field="roomLabel" bind:input="onInput" />
+          <text class="frow-label">房号</text>
+          <input
+            class="frow-input"
+            value="{{roomLabel}}"
+            data-field="roomLabel"
+            bind:input="onInput"
+            placeholder="选填"
+          />
         </view>
         <view class="frow" wx:if="{{ownerVerified}}">
           <text class="frow-label">业主认证</text>
           <text class="frow-value verified-text">已认证</text>
         </view>
         <view class="frow" wx:else>
-          <text class="frow-label">认证邀请码</text>
+          <text class="frow-label">邀请码</text>
           <input
             class="frow-input invite-input"
             value="{{inviteCode}}"
