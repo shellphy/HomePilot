@@ -16,16 +16,8 @@ test('options ship community identity, form choices and initiatable matter types
         ->and($types->firstWhere('key', 'census')['user_initiatable'])->toBeTrue();
 });
 
-test('ai feature switches ship per capability', function () {
-    config([
-        'features.ai.chat' => true,
-        'features.ai.census_report' => false,
-        'features.ai.glossary_draft' => true,
-    ]);
-
+test('options do not expose deployment-level ai switches', function () {
     $this->getJson('/api/options')
         ->assertSuccessful()
-        ->assertJsonPath('ai.chat', true)
-        ->assertJsonPath('ai.census_report', false)
-        ->assertJsonPath('ai.glossary_draft', true);
+        ->assertJsonMissingPath('ai');
 });

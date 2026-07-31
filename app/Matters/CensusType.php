@@ -6,10 +6,7 @@ use App\Models\Matter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
-/**
- * 征集/摸底：面向全小区收集结构化表态（mode=register），聚合结果匿名公示。
- * 业主与管理员都可发起；参与走登记表态。
- */
+/** 征集：已认证用户提交结构化表态，聚合结果匿名公示。 */
 class CensusType extends MatterType
 {
     public function key(): string
@@ -35,7 +32,7 @@ class CensusType extends MatterType
         return [
             // 发起目的：自由文本，发起者写为什么发这次征集，给参与者看
             'purpose' => ['nullable', 'string', 'max:1000'],
-            // 署名发起：物业/业委会/商家想做的调研由管理员代建，结果对全小区公开
+            // 是否要求参与者提供联系方式。
             'collects_contact' => ['sometimes', 'boolean'],
             'modules' => ['sometimes', 'array'],
             'modules.*.key' => ['sometimes', 'string', 'max:30'],

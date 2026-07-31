@@ -74,7 +74,7 @@
 }
 /* 格间细分割线 */
 .stat + .stat::before {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   top: 50%;
@@ -157,4 +157,11 @@
   line-height: 1;
   color: var(--line-dark);
   flex-shrink: 0;
+}
+
+.invite-code {
+  color: var(--brand);
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 3rpx;
 }

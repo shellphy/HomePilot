@@ -1,26 +1,30 @@
-// 把一段文案按「买前必懂」的术语切段：命中的段渲染成可点的词，就地弹出决策卡。
-// 就地教育：业主撞见术语的那一刻命中即弹卡。
+function findFirstTerm(content, terms) {
+  return terms.reduce(
+    (first, term) => {
+      const index = content.indexOf(term);
+      if (index === -1 || (first.index !== -1 && index >= first.index)) {
+        return first;
+      }
+
+      return { index, term };
+    },
+    { index: -1, term: '' },
+  );
+}
+
 function splitByTerms(text, terms) {
   const content = String(text || '');
   const candidates = (terms || []).filter((term) => term && term.trim());
   if (!content) return [];
   if (!candidates.length) return [{ text: content }];
 
-  // 长词优先：同一位置「中央空调」不能被「空调」截胡
+  // 长词优先，避免“中央空调”被“空调”截断。
   const sorted = [...candidates].sort((a, b) => b.length - a.length);
   const segments = [];
   let rest = content;
 
   while (rest) {
-    let hitIndex = -1;
-    let hitTerm = '';
-    for (const term of sorted) {
-      const index = rest.indexOf(term);
-      if (index !== -1 && (hitIndex === -1 || index < hitIndex)) {
-        hitIndex = index;
-        hitTerm = term;
-      }
-    }
+    const { index: hitIndex, term: hitTerm } = findFirstTerm(rest, sorted);
     if (hitIndex === -1) {
       segments.push({ text: rest });
       break;

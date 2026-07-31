@@ -1,7 +1,4 @@
-// 团购详情体：该类型的全部行为（报名/评价/流转/成交公示入口）都在组件内，
-// 数据变更后向页面发 refresh 事件，由页面重新拉取。
 const matters = require('../../utils/api/matters');
-const profile = require('../../utils/api/profile');
 const { pillClass, joinPercent, stateOptions, starsOf } = require('../../utils/constants');
 const { guardProfileError } = require('../../utils/profile-guard');
 const { splitByTerms } = require('../../utils/term-match');
@@ -25,6 +22,7 @@ Component({
     partyLabel: String, // 当前相关方身份的显示名（解释文案用）
     myShareContact: Boolean, // 我报名时的共享意愿：成团后没共享的看不到团长电话，给补开入口
     myJoinStage: String, // 我的承诺档位（intent=登记意向 / confirmed=确认参团）
+    canUseAi: Boolean,
   },
 
   data: {
@@ -47,15 +45,8 @@ Component({
     termRows: [],
     finalRows: [],
     activeTerm: null,
-    aiChatEnabled: false, // AI 答疑开关，由 /options 下发
     rosterKeyword: '',
     filteredRoster: [],
-  },
-
-  lifetimes: {
-    attached() {
-      profile.getAiFeatures().then((ai) => this.setData({ aiChatEnabled: !!ai.chat }));
-    },
   },
 
   observers: {
@@ -110,10 +101,13 @@ Component({
     'contactRoster, rosterKeyword': function (contactRoster, rosterKeyword) {
       const keyword = (rosterKeyword || '').trim().toLowerCase();
       this.setData({
-        filteredRoster: (contactRoster || []).filter((row) => !keyword
-          || row.name.toLowerCase().includes(keyword)
-          || (row.phone || '').includes(keyword)
-          || (row.leader_note || '').toLowerCase().includes(keyword)),
+        filteredRoster: (contactRoster || []).filter(
+          (row) =>
+            !keyword ||
+            row.name.toLowerCase().includes(keyword) ||
+            (row.phone || '').includes(keyword) ||
+            (row.leader_note || '').toLowerCase().includes(keyword),
+        ),
       });
     },
   },

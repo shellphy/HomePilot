@@ -26,12 +26,16 @@ class ResidentTodoList
      */
     public function for(Resident $resident): array
     {
-        $todos = [
+        $participationTodos = $resident->isVerifiedParticipant() ? [
             ...$this->censusesToAnswer($resident),
             ...$this->groupbuysToConfirm($resident),
             ...$this->mattersToReview($resident),
             ...$this->questionsToAnswer($resident),
             ...$this->dealsToPost($resident),
+        ] : [];
+
+        $todos = [
+            ...$participationTodos,
             ...$this->mattersWithProgress($resident),
             ...$this->adminQueues($resident),
         ];

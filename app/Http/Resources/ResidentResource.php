@@ -29,6 +29,8 @@ class ResidentResource extends JsonResource
             'layout_label' => $this->layout_label,
             'phone' => $this->phone,
             'is_admin' => $this->is_admin,
+            'is_owner_verified' => $this->isOwnerVerified(),
+            'is_verified_participant' => $this->isVerifiedParticipant(),
             // 超级管理员：在「我的」露出「管理员」管理入口
             'is_super_admin' => $this->is_super_admin,
             // 「我的」页红点：我牵头的/我参与的有没有我没看过的新动态（POST /me/seen 标记已读）

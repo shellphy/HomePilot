@@ -1,4 +1,3 @@
-// 我的：我家在小区里的档案（标准布局：头像区 + 分组单元格）
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
 const { getMe, getTodos } = require('../../utils/me');
@@ -14,8 +13,9 @@ Page({
     mineCount: 0,
     censusCount: 0,
     pendingCount: 0,
-    partyPendingCount: 0, // 待核验相关方（有成员但未核验）
-    partyStatusNote: '', // 我的相关方核验状态（审核中/已核验/未通过）
+    partyPendingCount: 0,
+    partyStatusNote: '',
+    invitationCode: '',
   },
 
   onShow() {
@@ -29,31 +29,33 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      // /me 强制刷新：未读红点（has_mine_updates 等）要反映最新动态，不能吃会话缓存
       const [me, mineRes, joinedRes, todos] = await Promise.all([
         getMe(true),
         matters.listMine(),
         matters.listJoined(),
         getTodos(),
       ]);
-      const [pendingCount, partyPendingCount] = me.is_admin
-        ? await Promise.all([
+      let pendingCount = 0;
+      let partyPendingCount = 0;
+      let invitationCode = '';
+      if (me.is_admin) {
+        [pendingCount, partyPendingCount, invitationCode] = await Promise.all([
           admin.listMatters(true).then((res) => res.pending_count),
           admin.listParties().then((res) => res.pending_count),
-        ])
-        : [0, 0];
+          admin.getInvitationCode().then((res) => res.data.code),
+        ]);
+      }
 
-      // 身份行：业主 · 楼栋 · 房号（空项不显示）；相关方则是 类型 · 名称
       const identityLine = me.party
         ? [me.party.label, me.party.name].filter(Boolean).join(' · ')
         : ['业主', me.unit_label, me.room_label].filter(Boolean).join(' · ');
 
       const partyStatusNote = me.party
         ? {
-          pending: '审核中',
-          approved: '身份已核验',
-          rejected: '未通过，点此改资料重交',
-        }[me.party.review_status]
+            pending: '审核中',
+            approved: '身份已核验',
+            rejected: '未通过，点此改资料重交',
+          }[me.party.review_status]
         : '';
 
       this.setData({
@@ -66,6 +68,7 @@ Page({
         joinedCount: joinedRes.data.length,
         pendingCount,
         partyPendingCount,
+        invitationCode,
       });
     });
   },
@@ -74,10 +77,8 @@ Page({
     wx.navigateTo({ url: '/pages/profile-form/index' });
   },
 
-  // 核验状态入口：未通过直接去改资料重交，其余去档案详情看公示情况
   goPartyStatus() {
-    const party = this.data.me && this.data.me.party;
-    if (!party) return;
+    const { party } = this.data.me;
     if (party.review_status === 'rejected') {
       wx.navigateTo({ url: '/pages/profile-form/index' });
       return;
@@ -85,9 +86,12 @@ Page({
     wx.navigateTo({ url: `/pages/party/index?id=${party.id}` });
   },
 
-  // 我的问卷：答过一份直接落到个人问卷，多份进列表页选；没答过就去征集 hub 逛逛
+  copyInvitationCode() {
+    wx.setClipboardData({ data: this.data.invitationCode });
+  },
+
   goCensus() {
-    const censuses = (this.data.me && this.data.me.censuses) || [];
+    const censuses = this.data.me.censuses || [];
     if (!censuses.length) {
       wx.navigateTo({ url: '/pages/insights/index' });
       return;

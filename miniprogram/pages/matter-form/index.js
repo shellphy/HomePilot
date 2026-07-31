@@ -3,7 +3,6 @@
 // 状态流转、公示开关、署名发起方、登记明细/文本题归纳、删除等管理动作按 is_admin 显示。
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
-const profile = require('../../utils/api/profile');
 const { getMe } = require('../../utils/me');
 const { uploadImage } = require('../../utils/request');
 const load = require('../../behaviors/load');
@@ -27,7 +26,7 @@ Page({
     typeLabel: '',
     isAdmin: false, // 管理动作（状态/公示/署名/明细/删除）的显示开关
     isMerchant: false, // 商家发起团购走商家直供，隐藏利益关系披露（由后端自动标注）
-    aiDraftEnabled: false, // AI 术语改写开关，由 /options 下发
+    canUseAi: false,
     publishedNow: false, // 加载时该事项是否已公示（编辑已公示的会重新送审）
     title: '',
     category: '',
@@ -69,11 +68,14 @@ Page({
     const id = query.id ? Number(query.id) : null;
     this.setData({ id, type: query.type || 'notice' });
     wx.setNavigationBarTitle({ title: id ? '编辑' : '发起' });
-    profile.getAiFeatures().then((ai) => this.setData({ aiDraftEnabled: !!ai.glossary_draft }));
     if (!id) {
       this.setData({ loaded: true });
-      // 发起时也要知道是不是商家：团购利益关系披露对商家隐藏
-      getMe().then((me) => this.setData({ isMerchant: !!(me.party && me.party.type === 'merchant') }));
+      getMe().then((me) =>
+        this.setData({
+          isMerchant: !!(me.party && me.party.type === 'merchant'),
+          canUseAi: !!me.is_verified_participant,
+        }),
+      );
     }
   },
 
@@ -91,6 +93,7 @@ Page({
       this.setData({
         isAdmin: !!me.is_admin,
         isMerchant: !!(me.party && me.party.type === 'merchant'),
+        canUseAi: !!me.is_verified_participant,
         type: matter.type,
         typeLabel: matter.type_label,
         title: matter.title,
@@ -411,10 +414,10 @@ Page({
           await matters.deleteMatter(this.data.id);
           this.clearDirty();
           wx.showToast({ title: '已删除', icon: 'success' });
-          // 删除后别退回已失效的详情页（会报「资源找不到」）：跳过它退到上层列表
           setTimeout(() => {
             const pages = getCurrentPages();
-            const prevIsDetail = pages[pages.length - 2]?.route === 'pages/matter/index';
+            const previousPage = pages[pages.length - 2];
+            const prevIsDetail = previousPage && previousPage.route === 'pages/matter/index';
             if (prevIsDetail && pages.length >= 3) {
               wx.navigateBack({ delta: 2 });
             } else if (prevIsDetail) {

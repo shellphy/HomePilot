@@ -10,7 +10,7 @@
     </block>
 
     <block wx:elif="{{current}}">
-      <view class="ai-report-preview" wx:if="{{moduleIndex === 0 && aiReportEnabled}}">
+      <view class="ai-report-preview" wx:if="{{moduleIndex === 0 && canUseAi}}">
         <view class="ai-preview-head">
           <view class="ai-preview-mark">AI</view>
           <view>
@@ -28,7 +28,13 @@
         <view wx:if="{{current.intro}}" class="step-intro">{{current.intro}}</view>
       </view>
 
-      <view class="card question-card" wx:for="{{current.questions}}" wx:for-item="question" wx:for-index="questionIndex" wx:key="key">
+      <view
+        class="card question-card"
+        wx:for="{{current.questions}}"
+        wx:for-item="question"
+        wx:for-index="questionIndex"
+        wx:key="key"
+      >
         <view class="q-head">
           <text class="q-index">{{questionIndex + 1}}</text>
           <view class="q-title">
@@ -36,8 +42,14 @@
             <text wx:if="{{question.type === 'multi'}}" class="q-note">可多选</text>
           </view>
         </view>
-        <!-- 疑问冒头就地问：题面直传给 AI，不懂这道题不用退出去查 -->
-        <view wx:if="{{aiChatEnabled}}" class="ask-ai" data-qkey="{{question.key}}" data-text="{{question.text}}" bind:tap="askQuestion">不懂这道题？问 AI</view>
+        <view
+          wx:if="{{canUseAi}}"
+          class="ask-ai"
+          data-qkey="{{question.key}}"
+          data-text="{{question.text}}"
+          bind:tap="askQuestion"
+          >不懂这道题？问 AI</view
+        >
         <view wx:if="{{question.note}}" class="q-explain">{{question.note}}</view>
         <textarea
           wx:if="{{question.type === 'text'}}"
@@ -74,18 +86,22 @@
             data-qtype="{{question.type}}"
             data-value="{{option}}"
             bind:tap="pick"
-          >{{option}}</view>
+            >{{option}}</view
+          >
         </view>
       </view>
 
       <view class="nav-btns">
-        <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" style="flex: 1" bind:tap="prev">上一步</t-button>
-        <t-button theme="primary" size="large" style="flex: 2" loading="{{submitting}}" bind:tap="next">{{moduleIndex + 1 < modules.length ? '下一模块' : '完成'}}</t-button>
+        <t-button wx:if="{{moduleIndex > 0}}" theme="light" size="large" style="flex: 1" bind:tap="prev"
+          >上一步</t-button
+        >
+        <t-button theme="primary" size="large" style="flex: 2" loading="{{submitting}}" bind:tap="next"
+          >{{moduleIndex + 1 < modules.length ? '下一模块' : '完成'}}</t-button
+        >
       </view>
     </block>
   </page-status>
 
-  <!-- AI 答疑半屏面板：page-container 原生支持返回手势关闭 -->
   <page-container
     show="{{aiChatShow}}"
     position="bottom"

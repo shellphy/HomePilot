@@ -25,6 +25,7 @@ class ResidentFactory extends Factory
             'unit_label' => fake()->numberBetween(1, 8).'栋',
             'layout_label' => fake()->randomElement(['107㎡', '130㎡', '154㎡']),
             'phone' => fake()->numerify('138########'),
+            'owner_verified_at' => now(),
         ];
     }
 
@@ -42,6 +43,11 @@ class ResidentFactory extends Factory
     public function withoutUnit(): static
     {
         return $this->state(fn (): array => ['unit_label' => '']);
+    }
+
+    public function unverifiedOwner(): static
+    {
+        return $this->state(fn (): array => ['owner_verified_at' => null]);
     }
 
     /**

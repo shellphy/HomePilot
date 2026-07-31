@@ -1,5 +1,4 @@
-// 当前用户信息的内存缓存：多个页面 onShow 都要 /me，没必要每次切 tab 都打接口。
-// 任何会改动 /me 返回内容的写操作，都必须走 updateMe() 或调用 invalidateMe()。
+// /me 会话缓存；写操作同步更新或主动失效。
 const { request } = require('./request');
 
 let cached = null;
@@ -22,43 +21,52 @@ async function updateMe(data) {
   return res.data;
 }
 
+async function verifyOwner(inviteCode) {
+  const res = await request('/me/verify-owner', { method: 'POST', data: { invite_code: inviteCode } });
+  cached = Promise.resolve(res.data);
+  return res.data;
+}
+
 function invalidateMe() {
   cached = null;
 }
 
-// 标记「我牵头的(mine) / 我参与的(joined)」列表已读：打开列表页时调用，
-// 清掉「我的」页与 tab 上的未读红点（has_mine_updates / has_joined_updates）
+// kind: mine | joined
 async function markSeen(kind) {
   const res = await request('/me/seen', { method: 'POST', data: { kind } });
   cached = Promise.resolve(res.data);
   return res.data;
 }
 
-// 手机号预填：官方组件（open-type="getPhoneNumber"）拿到的 code 换微信绑定号码，
-// 只解析返回、不落库（用户可再改号，最终随资料 updateMe 一并保存）
 async function resolvePhone(code) {
   const res = await request('/me/phone', { method: 'POST', data: { code } });
   return res.data.phone;
 }
 
-// 「待我处理」：聚合的待办列表，全部从当前状态派生（做完即消失）
 function getTodos() {
   return request('/me/todos').then((res) => res.data);
 }
 
-// 相关方入驻：创建并绑定相关方（可入驻类型由 /options 的 party_types 下发）
-// profile = { name, category, intro, description, images }
 async function bindParty(type, profile) {
   const res = await request('/me/party', { method: 'POST', data: { type, ...profile } });
   cached = Promise.resolve(res.data);
   return res.data;
 }
 
-// 切回业主身份
 async function unbindParty() {
   const res = await request('/me/party', { method: 'DELETE' });
   cached = Promise.resolve(res.data);
   return res.data;
 }
 
-module.exports = { getMe, updateMe, invalidateMe, markSeen, getTodos, resolvePhone, bindParty, unbindParty };
+module.exports = {
+  getMe,
+  updateMe,
+  verifyOwner,
+  invalidateMe,
+  markSeen,
+  getTodos,
+  resolvePhone,
+  bindParty,
+  unbindParty,
+};

@@ -1,6 +1,5 @@
-// 征集详情页：单期征集的完整聚合公示面（从征集卡片、小区数据 tab、答完题跳转进来）。
 const matters = require('../../utils/api/matters');
-const profile = require('../../utils/api/profile');
+const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 // 条形按总参与人数归一：100% = 全员都选了这项，百分比可直读
@@ -19,7 +18,7 @@ Page({
   data: {
     censusId: null,
     block: null,
-    aiReportEnabled: false, // AI 征集报告开关，由 /options 下发
+    canUseAi: false,
   },
 
   goMyRegistration() {
@@ -62,11 +61,8 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [census, ai] = await Promise.all([
-        matters.getCensus(this.data.censusId),
-        profile.getAiFeatures(),
-      ]);
-      this.setData({ aiReportEnabled: !!ai.census_report });
+      const [census, me] = await Promise.all([matters.getCensus(this.data.censusId), getMe()]);
+      this.setData({ canUseAi: !!me.is_verified_participant });
       const expandedSections = Object.fromEntries(
         ((this.data.block && this.data.block.sections) || []).map((section) => [section.title, section.expanded]),
       );

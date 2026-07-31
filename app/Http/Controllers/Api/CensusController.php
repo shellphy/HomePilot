@@ -79,9 +79,14 @@ class CensusController extends Controller
         $resident = $this->resident($request);
         $this->assertNotBlocked($resident);
 
-        if ($matter->payloadValue('collects_contact') && ($resident->unit_label === '' || $resident->phone === '')) {
+        $missingRequiredProfile = $resident->phone === ''
+            || ($resident->affiliated_party_id === null && $resident->unit_label === '');
+
+        if ($matter->payloadValue('collects_contact') && $missingRequiredProfile) {
             throw ValidationException::withMessages([
-                'profile' => '参与前请先在「我的 · 个人资料」里选好楼栋号并授权手机号',
+                'profile' => $resident->affiliated_party_id === null
+                    ? '参与前请先在「我的 · 个人资料」里选好楼栋号并授权手机号'
+                    : '参与前请先在「我的 · 个人资料」里授权手机号',
             ]);
         }
 
@@ -140,6 +145,7 @@ class CensusController extends Controller
 
         if ($validated['visible_to_initiator']) {
             $this->assertNotBlocked($resident);
+            abort_unless($resident->isVerifiedParticipant(), 403, '请先完成身份认证');
         }
 
         $stance = $matter->stances()

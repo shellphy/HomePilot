@@ -63,17 +63,20 @@
               class="rel-opt {{relationship === 'none' ? 'rel-opt-on' : ''}}"
               data-value="none"
               bind:tap="pickRelationship"
-            >与商家无利益关系，纯热心张罗</view>
+              >与商家无利益关系，纯热心张罗</view
+            >
             <view
               class="rel-opt {{relationship === 'rebate' ? 'rel-opt-on' : ''}}"
               data-value="rebate"
               bind:tap="pickRelationship"
-            >我会从中获得返点或好处</view>
+              >我会从中获得返点或好处</view
+            >
             <view
               class="rel-opt {{relationship === 'affiliated' ? 'rel-opt-on' : ''}}"
               data-value="affiliated"
               bind:tap="pickRelationship"
-            >我和这家商家有关系（亲友 / 员工 / 合伙人）</view>
+              >我和这家商家有关系（亲友 / 员工 / 合伙人）</view
+            >
           </view>
           <view class="frow" wx:if="{{relationship === 'rebate'}}">
             <text class="frow-label">返点去向<text class="f-required">*</text></text>
@@ -122,7 +125,9 @@
           bind:change="onDateTimeChange"
         />
         <view class="frow">
-          <text class="frow-label">地点<text wx:if="{{type === 'activity' || type === 'aid'}}" class="f-required">*</text></text>
+          <text class="frow-label"
+            >地点<text wx:if="{{type === 'activity' || type === 'aid'}}" class="f-required">*</text></text
+          >
           <input
             class="frow-input"
             value="{{location}}"
@@ -212,7 +217,8 @@
     <!-- 长文本：公告正文 / 说明 -->
     <view class="card">
       <view class="q-title">
-        {{type === 'notice' ? '公告正文' : (type === 'census' ? '征集说明' : (type === 'secondhand' ? '物品描述' : '把事情说清楚'))}}
+        {{type === 'notice' ? '公告正文' : (type === 'census' ? '征集说明' : (type === 'secondhand' ? '物品描述' :
+        '把事情说清楚'))}}
         <text wx:if="{{type === 'notice'}}" class="f-required">*</text>
       </view>
       <textarea
@@ -233,7 +239,9 @@
           <image class="shot" src="{{item}}" mode="aspectFill" data-url="{{item}}" bind:tap="previewImage" />
           <view class="shot-del" data-index="{{index}}" catch:tap="removeImage">✕</view>
         </view>
-        <view class="shot-add" wx:if="{{images.length < 9}}" bind:tap="chooseImages">{{uploading ? '上传中…' : '+'}}</view>
+        <view class="shot-add" wx:if="{{images.length < 9}}" bind:tap="chooseImages"
+          >{{uploading ? '上传中…' : '+'}}</view
+        >
       </view>
     </view>
 
@@ -290,13 +298,13 @@
               data-field="term"
               bind:input="onRowInput"
             />
-            <view wx:if="{{aiDraftEnabled}}" class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 改写</view>
+            <view wx:if="{{canUseAi}}" class="pair-ai" data-index="{{index}}" bind:tap="aiDraft">AI 改写</view>
             <view class="pair-del" data-list="glossary" data-index="{{index}}" bind:tap="removeRow">✕</view>
           </view>
           <textarea
             class="fin farea"
             auto-height
-            placeholder="{{aiDraftEnabled ? '先用大白话写一句这个词是什么、怎么选、避什么坑，再点 AI 改写' : '用大白话写一句这个词是什么、怎么选、避什么坑'}}"
+            placeholder="{{canUseAi ? '先用大白话写一句这个词是什么、怎么选、避什么坑，再点 AI 改写' : '用大白话写一句这个词是什么、怎么选、避什么坑'}}"
             value="{{item.explain}}"
             maxlength="500"
             data-list="glossary"

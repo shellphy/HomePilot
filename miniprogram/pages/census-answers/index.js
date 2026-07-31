@@ -1,5 +1,5 @@
 const matters = require('../../utils/api/matters');
-const profile = require('../../utils/api/profile');
+const { getMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 
 function formatAnswer(value) {
@@ -41,7 +41,7 @@ Page({
     initiatorParty: null, // 署名发起方；有署名才给「让发起者看到我的问卷」授权
     visibleToInitiator: false, // 是否把匿名破例授权给这个发起者本人（默认关）
     reportStatus: 'idle', // AI 总结：idle 未生成 / pending 生成中 / completed 可查看 / failed 失败
-    aiReportEnabled: false, // AI 征集报告开关，由 /options 下发
+    canUseAi: false,
   },
 
   onLoad(query) {
@@ -69,10 +69,8 @@ Page({
 
   reload() {
     return this.runLoad(async () => {
-      const [census, ai] = await Promise.all([
-        matters.getCensus(this.data.censusId),
-        profile.getAiFeatures(),
-      ]);
+      const [census, me] = await Promise.all([matters.getCensus(this.data.censusId), getMe()]);
+      const canUseAi = !!me.is_verified_participant;
       const answeredCount = Object.keys(census.answers || {}).length;
       this.setData({
         answerModules: answerModules(census, this.data.answerModules),
@@ -80,9 +78,9 @@ Page({
         censusState: census.state || '',
         initiatorParty: census.initiator_party || null,
         visibleToInitiator: !!census.my_visible_to_initiator,
-        aiReportEnabled: !!ai.census_report,
+        canUseAi,
       });
-      if (answeredCount > 0 && ai.census_report) {
+      if (answeredCount > 0 && canUseAi) {
         const report = await matters.getCensusReport(this.data.censusId);
         this.applyReportStatus(report.generation_status);
       }
@@ -134,20 +132,22 @@ Page({
     }
   },
 
-  async pollReport() {
-    try {
-      const report = await matters.getCensusReport(this.data.censusId);
-      this.setData({ reportStatus: report.generation_status });
-      if (report.generation_status === 'pending') {
-        this.startPolling();
-      } else if (report.generation_status === 'failed') {
-        wx.showToast({ title: report.generation_error || '生成失败，请稍后重试', icon: 'none' });
-      }
-    } catch {
-      if (this.pageActive) {
-        this.startPolling();
-      }
-    }
+  pollReport() {
+    return matters
+      .getCensusReport(this.data.censusId)
+      .then((report) => {
+        this.setData({ reportStatus: report.generation_status });
+        if (report.generation_status === 'pending') {
+          this.startPolling();
+        } else if (report.generation_status === 'failed') {
+          wx.showToast({ title: report.generation_error || '生成失败，请稍后重试', icon: 'none' });
+        }
+      })
+      .catch(() => {
+        if (this.pageActive) {
+          this.startPolling();
+        }
+      });
   },
 
   // 授权开关：开启是把联系方式+逐题答案交给发起者，先二次确认；关闭随时、无摩擦

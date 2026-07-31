@@ -1,89 +1,104 @@
 <view class="page-body tabbed">
   <page-status loaded="{{loaded}}" error="{{loadError}}" bind:retry="reload">
-  <block wx:if="{{me}}">
-    <!-- 头部：头像昵称直接融在淡渐变页面背景上（常规「我的」页结构） -->
-    <view class="hero-bg"></view>
-    <!-- 整行都是资料入口，头像在这里只是展示（编辑在内页） -->
-    <view class="profile" hover-class="profile-hover" bind:tap="goProfile">
-      <image wx:if="{{me.avatar}}" class="avatar" src="{{me.avatar}}" mode="aspectFill" />
-      <view wx:else class="avatar avatar-fallback"></view>
-      <view class="profile-main">
-        <view class="profile-name">{{me.nickname || '未设置昵称'}}</view>
-        <view class="profile-sub" wx:if="{{identityLine}}">{{identityLine}}</view>
+    <block wx:if="{{me}}">
+      <view class="hero-bg"></view>
+      <view class="profile" hover-class="profile-hover" bind:tap="goProfile">
+        <image wx:if="{{me.avatar}}" class="avatar" src="{{me.avatar}}" mode="aspectFill" />
+        <view wx:else class="avatar avatar-fallback"></view>
+        <view class="profile-main">
+          <view class="profile-name">{{me.nickname || '未设置昵称'}}</view>
+          <view class="profile-sub" wx:if="{{identityLine}}">{{identityLine}}</view>
+        </view>
+        <text class="profile-arrow">›</text>
       </view>
-      <text class="profile-arrow">›</text>
-    </view>
 
-    <!-- 相关方核验状态：入驻后一眼看到审核进展，未通过可直接去改资料重交 -->
-    <view class="list" wx:if="{{me.party}}">
-      <view class="row" hover-class="row-hover" bind:tap="goPartyStatus">
-        <text class="row-title">{{me.party.label}}核验</text>
-        <view class="row-right">
-          <text class="row-note {{me.party.review_status === 'rejected' ? 'row-note-todo' : ''}}">{{partyStatusNote}}</text>
-          <text class="row-arrow">›</text>
+      <view class="list" wx:if="{{me.party}}">
+        <view class="row" hover-class="row-hover" bind:tap="goPartyStatus">
+          <text class="row-title">{{me.party.label}}核验</text>
+          <view class="row-right">
+            <text class="row-note {{me.party.review_status === 'rejected' ? 'row-note-todo' : ''}}"
+              >{{partyStatusNote}}</text
+            >
+            <text class="row-arrow">›</text>
+          </view>
         </view>
       </view>
-    </view>
+      <view class="list" wx:else>
+        <view class="row" hover-class="row-hover" bind:tap="goProfile">
+          <text class="row-title">业主认证</text>
+          <view class="row-right">
+            <text class="row-note {{me.is_owner_verified ? '' : 'row-note-todo'}}"
+              >{{me.is_owner_verified ? '已认证' : '未认证，点此填写邀请码'}}</text
+            >
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+      </view>
 
-    <!-- 三格并排：参与 / 牵头 / 问卷 -->
-    <view class="stats">
-      <view class="stat" hover-class="stat-hover" bind:tap="goJoined">
-        <view class="stat-dot" wx:if="{{me.has_joined_updates}}"></view>
-        <view class="stat-num">{{joinedCount}}</view>
-        <view class="stat-label">我参与的</view>
+      <view class="stats">
+        <view class="stat" hover-class="stat-hover" bind:tap="goJoined">
+          <view class="stat-dot" wx:if="{{me.has_joined_updates}}"></view>
+          <view class="stat-num">{{joinedCount}}</view>
+          <view class="stat-label">我参与的</view>
+        </view>
+        <view class="stat" hover-class="stat-hover" bind:tap="goMine">
+          <view class="stat-dot" wx:if="{{me.has_mine_updates}}"></view>
+          <view class="stat-num">{{mineCount}}</view>
+          <view class="stat-label">我牵头的</view>
+        </view>
+        <view class="stat" hover-class="stat-hover" bind:tap="goCensus">
+          <view class="stat-num">{{censusCount}}</view>
+          <view class="stat-label">我的问卷</view>
+        </view>
       </view>
-      <view class="stat" hover-class="stat-hover" bind:tap="goMine">
-        <view class="stat-dot" wx:if="{{me.has_mine_updates}}"></view>
-        <view class="stat-num">{{mineCount}}</view>
-        <view class="stat-label">我牵头的</view>
-      </view>
-      <view class="stat" hover-class="stat-hover" bind:tap="goCensus">
-        <view class="stat-num">{{censusCount}}</view>
-        <view class="stat-label">我的问卷</view>
-      </view>
-    </view>
 
-    <!-- 管理员功能（is_admin 由 admin:grant 授权），直接平铺不做二级入口 -->
-    <view class="list" wx:if="{{me.is_admin}}">
-      <view class="row" hover-class="row-hover" bind:tap="goAdminMatters">
-        <text class="row-title">全部事项</text>
-        <view class="row-right">
-          <!-- 待办是「有活要干」，不能和普通计数一样淡 -->
-          <text class="row-note {{pendingCount ? 'row-note-todo' : ''}}">{{pendingCount ? pendingCount + ' 件待审核' : ''}}</text>
-          <text class="row-arrow">›</text>
+      <view class="list" wx:if="{{me.is_admin}}">
+        <view class="row" wx:if="{{invitationCode}}" hover-class="row-hover" bind:tap="copyInvitationCode">
+          <text class="row-title">业主邀请码</text>
+          <view class="row-right">
+            <text class="invite-code">{{invitationCode}}</text>
+            <text class="row-note">复制</text>
+          </view>
+        </view>
+        <view class="row" hover-class="row-hover" bind:tap="goAdminMatters">
+          <text class="row-title">全部事项</text>
+          <view class="row-right">
+            <text class="row-note {{pendingCount ? 'row-note-todo' : ''}}"
+              >{{pendingCount ? pendingCount + ' 件待审核' : ''}}</text
+            >
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+        <view class="row" hover-class="row-hover" bind:tap="goAdminParties">
+          <text class="row-title">相关方核验</text>
+          <view class="row-right">
+            <text class="row-note {{partyPendingCount ? 'row-note-todo' : ''}}"
+              >{{partyPendingCount ? partyPendingCount + ' 家待核验' : ''}}</text
+            >
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+        <view class="row" hover-class="row-hover" bind:tap="goAdminSettings">
+          <text class="row-title">社区设置</text>
+          <view class="row-right">
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+        <view class="row" hover-class="row-hover" bind:tap="goAdminBlocks">
+          <text class="row-title">拉黑名单</text>
+          <view class="row-right">
+            <text class="row-arrow">›</text>
+          </view>
+        </view>
+        <view class="row" wx:if="{{me.is_super_admin}}" hover-class="row-hover" bind:tap="goAdminUsers">
+          <text class="row-title">管理员</text>
+          <view class="row-right">
+            <text class="row-arrow">›</text>
+          </view>
         </view>
       </view>
-      <view class="row" hover-class="row-hover" bind:tap="goAdminParties">
-        <text class="row-title">相关方核验</text>
-        <view class="row-right">
-          <text class="row-note {{partyPendingCount ? 'row-note-todo' : ''}}">{{partyPendingCount ? partyPendingCount + ' 家待核验' : ''}}</text>
-          <text class="row-arrow">›</text>
-        </view>
-      </view>
-      <view class="row" hover-class="row-hover" bind:tap="goAdminSettings">
-        <text class="row-title">社区设置</text>
-        <view class="row-right">
-          <text class="row-arrow">›</text>
-        </view>
-      </view>
-      <view class="row" hover-class="row-hover" bind:tap="goAdminBlocks">
-        <text class="row-title">拉黑名单</text>
-        <view class="row-right">
-          <text class="row-arrow">›</text>
-        </view>
-      </view>
-      <!-- 管理员管理：只有超级管理员能增减管理员 -->
-      <view class="row" wx:if="{{me.is_super_admin}}" hover-class="row-hover" bind:tap="goAdminUsers">
-        <text class="row-title">管理员</text>
-        <view class="row-right">
-          <text class="row-arrow">›</text>
-        </view>
-      </view>
-    </view>
 
-    <!-- 待我处理：放在最下方（普通用户在「我的问卷」之下、管理员在「拉黑名单」之下），聚合下一步动作 -->
-    <todo-list todos="{{todos}}" />
-
-  </block>
+      <todo-list todos="{{todos}}" />
+    </block>
   </page-status>
 </view>

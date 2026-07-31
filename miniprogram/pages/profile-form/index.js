@@ -1,10 +1,6 @@
-// 个人资料：设置列表式行布局，头像、昵称、手机号（快捷获取或手填）对所有身份通用；
-// 身份（业主/商家/物业…，选项由服务端下发，点击行弹 action-sheet 切换）决定下方行——
-// 业主选楼栋（社区设置的楼栋清单）/填房号；相关方填名称，补充字段（如商家主营）
-// 由类型元数据 category_label 决定是否出现。保存时按身份落库（含身份切换）。
 const { uploadImage } = require('../../utils/request');
 const profile = require('../../utils/api/profile');
-const { getMe, updateMe, resolvePhone, bindParty, unbindParty } = require('../../utils/me');
+const { getMe, updateMe, verifyOwner, resolvePhone, bindParty, unbindParty } = require('../../utils/me');
 const { requestSubscribe } = require('../../utils/subscribe');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
@@ -16,19 +12,20 @@ Page({
     avatar: '',
     nickname: '',
     phone: '',
-    identity: 'resident', // 'resident' 或相关方类型 key
+    identity: 'resident',
     identityLabel: '业主',
-    identities: [],       // [{key, label, name_hint, category_label}]，业主 + 服务端下发的可自助入驻类型
-    identityMeta: {},     // 当前相关方类型的表单元数据（名称提示、补充字段标签）
-    // 业主字段
-    buildings: [],        // 楼栋清单（社区设置下发），楼栋号只能从中选
+    identities: [],
+    identityMeta: {},
+    wasParty: false,
+    buildings: [],
     buildingIndex: -1,
     unitLabel: '',
     roomLabel: '',
-    layouts: [],          // 户型清单（社区设置下发），选填
+    layouts: [],
     layoutIndex: -1,
     layoutLabel: '',
-    // 相关方字段（简介/详细介绍/照片各类型统一，内容自由发挥）
+    ownerVerified: false,
+    inviteCode: '',
     partyName: '',
     partyCategory: '',
     partyIntro: '',
@@ -57,6 +54,7 @@ Page({
         phone: me.phone || '',
         identity,
         identities,
+        wasParty: !!me.party,
         identityLabel: current ? current.label : (me.party && me.party.label) || '业主',
         identityMeta: current || {},
         buildings,
@@ -66,7 +64,8 @@ Page({
         layouts,
         layoutIndex: layouts.indexOf(me.layout_label),
         layoutLabel: me.layout_label || '',
-        // 没有在用的相关方身份时，按上次的档案预填（切走再切回来不用重填）
+        ownerVerified: !!me.is_owner_verified,
+        inviteCode: '',
         partyName: (me.party && me.party.name) || (me.last_party && me.last_party.name) || '',
         partyCategory: (me.party && me.party.category) || (me.last_party && me.last_party.category) || '',
         partyIntro: (me.party && me.party.intro) || (me.last_party && me.last_party.intro) || '',
@@ -76,7 +75,6 @@ Page({
     });
   },
 
-  // 微信原生头像选择：上传拿 URL 后只更新预览并标脏，点保存时落库
   async onChooseAvatar(event) {
     try {
       const url = await uploadImage(event.detail.avatarUrl);
@@ -87,7 +85,6 @@ Page({
     }
   },
 
-  // 快捷登录组件回调：拿 code 换号码预填进输入框，不落库；点保存才写入
   async onGetPhone(event) {
     if (!event.detail.code) {
       wx.showToast({ title: '未授权，可手动填写手机号', icon: 'none' });
@@ -131,8 +128,6 @@ Page({
     this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
   },
 
-  // ---- 相关方档案照片（门头/资质/服务现场，最多 9 张）----
-
   chooseImages() {
     if (this.data.uploading) return;
     const remaining = 9 - this.data.partyImages.length;
@@ -168,9 +163,24 @@ Page({
 
   async submit() {
     const {
-      identity, identityMeta, avatar, nickname, phone, unitLabel, roomLabel, layoutLabel,
-      partyName, partyCategory, partyIntro, partyDescription, partyImages,
-      submitting, uploading,
+      identity,
+      identityMeta,
+      wasParty,
+      avatar,
+      nickname,
+      phone,
+      unitLabel,
+      roomLabel,
+      layoutLabel,
+      ownerVerified,
+      inviteCode,
+      partyName,
+      partyCategory,
+      partyIntro,
+      partyDescription,
+      partyImages,
+      submitting,
+      uploading,
     } = this.data;
     if (submitting || uploading) return;
 
@@ -181,27 +191,27 @@ Page({
       return wx.showToast({ title: '请填写名称', icon: 'none' });
     }
 
+    const shouldVerifyOwner = identity === 'resident' && !ownerVerified && inviteCode.trim() !== '';
     this.setData({ submitting: true });
     try {
-      // 头像、手机号对业主/相关方通用；头像为空不下发（url 校验不接受空串）
       const commonFields = { nickname: nickname.trim(), phone: phone.trim() };
       if (avatar) commonFields.avatar = avatar;
       if (identity === 'resident') {
-        const me = await getMe();
-        if (me.party) await unbindParty(); // 从相关方切回业主
+        if (wasParty) await unbindParty();
         await updateMe({
           ...commonFields,
           unit_label: unitLabel,
           room_label: roomLabel.trim(),
           layout_label: layoutLabel,
         });
+        if (shouldVerifyOwner) {
+          await verifyOwner(inviteCode.trim());
+        }
       } else {
-        // 入驻提交顺手收一次订阅授权：核验结果的通知才有额度可推
         await requestSubscribe();
         await updateMe(commonFields);
         await bindParty(identity, {
           name: partyName.trim(),
-          // 补充字段只有声明了 category_label 的类型才有（商家主营），其余类型不携带
           category: identityMeta.category_label ? partyCategory.trim() : '',
           intro: partyIntro.trim(),
           description: partyDescription.trim(),
@@ -209,8 +219,7 @@ Page({
         });
       }
       this.clearDirty();
-      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
-      wx.showToast({ title: '已保存', icon: 'success' });
+      wx.showToast({ title: shouldVerifyOwner ? '认证成功' : '已保存', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (error) {
       wx.showToast({ title: error.message, icon: 'none' });

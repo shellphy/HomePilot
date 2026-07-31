@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Middleware\EnsureAdmin;
-use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsureNotBlocked;
 use App\Http\Middleware\EnsureSuperAdmin;
+use App\Http\Middleware\EnsureVerifiedParticipant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,9 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => EnsureAdmin::class,
-            'feature' => EnsureFeatureEnabled::class,
             'not_blocked' => EnsureNotBlocked::class,
             'super_admin' => EnsureSuperAdmin::class,
+            'verified_participant' => EnsureVerifiedParticipant::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(30)->by($request->ip()));
         RateLimiter::for('uploads', fn (Request $request): Limit => Limit::perMinute(30)->by((string) $request->user()?->getAuthIdentifier()));
         RateLimiter::for('wechat-phone', fn (Request $request): Limit => Limit::perMinute(10)->by((string) $request->user()?->getAuthIdentifier()));
+        RateLimiter::for('owner-verification', fn (Request $request): Limit => Limit::perMinute(5)->by((string) $request->user()?->getAuthIdentifier()));
     }
 
     protected function configureHealthChecks(): void

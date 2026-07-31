@@ -89,3 +89,12 @@
   align-items: center;
   justify-content: center;
 }
+
+.verified-text {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+.invite-input {
+  letter-spacing: 4rpx;
+}

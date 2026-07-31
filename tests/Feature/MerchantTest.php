@@ -112,12 +112,13 @@ test('flip-flopping identities does not stack pending records in the queue', fun
     expect(Party::count())->toBe(1);
 });
 
-test('party members answer censuses but stay out of rosters', function () {
+test('verified party members answer censuses but stay out of rosters', function () {
     $matter = Matter::factory()->open()->create();
-    $merchant = Resident::factory()->merchant()->create();
+    $party = Party::factory()->listed()->merchant()->create();
+    $merchant = Resident::factory()->create(['affiliated_party_id' => $party->id]);
     Sanctum::actingAs($merchant);
 
-    // 接龙名单是业主的信任背书：相关方不进名单；征集答题不受影响
+    // 接龙名单是业主的信任背书：相关方不进名单；核验后可以参与征集
     $census = Matter::factory()->create([
         'type' => 'census',
         'state' => 'open',

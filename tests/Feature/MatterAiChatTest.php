@@ -3,7 +3,6 @@
 use App\Ai\Agents\MatterExplainer;
 use App\Models\Matter;
 use App\Models\Resident;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Testing\TestResponse;
 use Laravel\Ai\Prompts\AgentPrompt;
 use Laravel\Sanctum\Sanctum;
@@ -135,23 +134,4 @@ test('ai chat rejects a conversation from another resident or matter', function 
         'question' => '跨用户续聊',
         'conversation_id' => $conversationId,
     ])->assertNotFound();
-});
-
-test('disabled ai chat is not callable even when authenticated', function () {
-    config(['features.ai.chat' => false]);
-    MatterExplainer::fake();
-    $matter = Matter::factory()->create();
-    $resident = Resident::factory()->create();
-    Sanctum::actingAs($resident);
-    Log::spy();
-
-    $this->postJson("/api/matters/{$matter->id}/ai-chat", ['question' => '？'])
-        ->assertNotFound();
-
-    MatterExplainer::assertNeverPrompted();
-    Log::shouldHaveReceived('info')->withArgs(
-        fn (string $message, array $context): bool => $message === '已关闭的功能被调用'
-            && $context['feature'] === 'ai.chat'
-            && $context['resident_id'] === $resident->id,
-    );
 });

@@ -31,6 +31,10 @@ use Laravel\Sanctum\HasApiTokens;
  * @property bool $is_super_admin
  * @property int|null $admin_granted_by_id
  * @property Carbon|null $admin_granted_at
+ * @property Carbon|null $owner_verified_at
+ * @property int|null $owner_verified_by_id
+ * @property string|null $owner_invitation_code
+ * @property Carbon|null $owner_invitation_code_expires_at
  * @property Carbon|null $blocked_at
  * @property int|null $blocked_by_id
  * @property Carbon|null $mine_seen_at
@@ -58,12 +62,18 @@ class Resident extends Authenticatable
         'last_party_id',
     ];
 
+    protected $hidden = [
+        'owner_invitation_code',
+    ];
+
     protected function casts(): array
     {
         return [
             'is_admin' => 'boolean',
             'is_super_admin' => 'boolean',
             'admin_granted_at' => 'datetime',
+            'owner_verified_at' => 'datetime',
+            'owner_invitation_code_expires_at' => 'datetime',
             'blocked_at' => 'datetime',
             'mine_seen_at' => 'datetime',
             'joined_seen_at' => 'datetime',
@@ -78,6 +88,24 @@ class Resident extends Authenticatable
     public function adminGrantedBy(): BelongsTo
     {
         return $this->belongsTo(Resident::class, 'admin_granted_by_id');
+    }
+
+    public function isOwnerVerified(): bool
+    {
+        return $this->is_admin || $this->owner_verified_at !== null;
+    }
+
+    public function isVerifiedParticipant(): bool
+    {
+        if ($this->is_admin) {
+            return true;
+        }
+
+        if ($this->affiliated_party_id === null) {
+            return $this->owner_verified_at !== null;
+        }
+
+        return $this->affiliatedParty->is_listed;
     }
 
     /** 设为管理员并记下是谁、何时授权（审计）。 */
@@ -183,6 +211,10 @@ class Resident extends Authenticatable
      */
     public function hasUnansweredCensus(): bool
     {
+        if (! $this->isVerifiedParticipant()) {
+            return false;
+        }
+
         return Matter::approved()
             ->where('type', 'census')
             ->where('state', 'open')

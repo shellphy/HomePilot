@@ -23,9 +23,18 @@
 
 <view class="card" wx:if="{{matter.starts_on || matter.location || matter.registration_deadline_on}}">
   <view class="kicker">时间与地点</view>
-  <view class="term-row" wx:if="{{matter.starts_on}}"><text class="term-label">开始</text><text class="term-value">{{matter.starts_on}}</text></view>
-  <view class="term-row" wx:if="{{matter.registration_deadline_on}}"><text class="term-label">报名截止</text><text class="term-value">{{matter.registration_deadline_on}}{{matter.registration_closed ? '（已截止）' : ''}}</text></view>
-  <view class="term-row" wx:if="{{matter.location}}"><text class="term-label">地点</text><text class="term-value">{{matter.location}}</text></view>
+  <view class="term-row" wx:if="{{matter.starts_on}}"
+    ><text class="term-label">开始</text><text class="term-value">{{matter.starts_on}}</text></view
+  >
+  <view class="term-row" wx:if="{{matter.registration_deadline_on}}"
+    ><text class="term-label">报名截止</text
+    ><text class="term-value"
+      >{{matter.registration_deadline_on}}{{matter.registration_closed ? '（已截止）' : ''}}</text
+    ></view
+  >
+  <view class="term-row" wx:if="{{matter.location}}"
+    ><text class="term-label">地点</text><text class="term-value">{{matter.location}}</text></view
+  >
 </view>
 
 <view class="card" wx:if="{{matter.body}}">
@@ -134,11 +143,15 @@
 
 <!-- 联系互通阶段：团长见同意共享的参团者 -->
 <view class="card deal-card" wx:if="{{isInitiator && contactRoster.length}}">
-  <view class="kicker"
-    >参与管理（{{contactRoster.length}}）· 仅你可见</view
-  >
+  <view class="kicker">参与管理（{{contactRoster.length}}）· 仅你可见</view>
   <input class="fin" placeholder="搜索姓名、手机号或备注" value="{{rosterKeyword}}" bind:input="onRosterSearch" />
-  <view class="term-row" wx:for="{{filteredRoster}}" wx:key="stance_id" data-index="{{index}}" bind:tap="editParticipant">
+  <view
+    class="term-row"
+    wx:for="{{filteredRoster}}"
+    wx:key="stance_id"
+    data-index="{{index}}"
+    bind:tap="editParticipant"
+  >
     <view>
       <view class="term-label">{{item.name}} · {{item.contact_status === 'contacted' ? '已联系' : '待联系'}}</view>
       <view class="share-note">{{item.leader_note || (item.share_contact ? '尚无备注' : '未同意共享手机号')}}</view>
@@ -321,7 +334,9 @@
 <!-- 相关方身份：不进接龙名单，但说清楚为什么、怎么参与 -->
 <view class="cta-dock" wx:if="{{matter.join_open && isParty}}">
   <view class="party-note">你正以「{{partyLabel}}」身份浏览，接龙名单仅向业主开放</view>
-  <t-button theme="light" block size="large" style="width: 100%" bind:tap="goSwitchIdentity">切回业主身份并报名</t-button>
+  <t-button theme="light" block size="large" style="width: 100%" bind:tap="goSwitchIdentity"
+    >切回业主身份并报名</t-button
+  >
 </view>
 
 <!-- 就地解释弹层：点中文案里的术语时弹出对应的「买前必懂」决策卡 -->
@@ -330,7 +345,14 @@
     <view class="term-pop-title">{{activeTerm.term}}</view>
     <view class="gl-explain">{{activeTerm.explain}}</view>
     <view class="term-pop-source">来自本团购的「买前必懂」，由发起人整理</view>
-    <t-button wx:if="{{aiChatEnabled}}" theme="light" size="medium" block style="width: 100%" class="term-pop-ask" bind:tap="askTermAi"
+    <t-button
+      wx:if="{{canUseAi}}"
+      theme="light"
+      size="medium"
+      block
+      style="width: 100%"
+      class="term-pop-ask"
+      bind:tap="askTermAi"
       >问 AI：我家该怎么选</t-button
     >
   </view>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Matter;
+use App\Models\Party;
 use App\Models\Resident;
 use App\Models\Stance;
 use Laravel\Sanctum\Sanctum;
@@ -153,9 +154,10 @@ test('the census rejects unknown questions and invalid options', function (array
     '多选含未知选项' => [['interests' => ['买飞机']]],
 ]);
 
-test('merchants register like anyone else and closed censuses stop taking answers', function () {
+test('verified merchants register like anyone else and closed censuses stop taking answers', function () {
     $census = renovationCensus();
-    Sanctum::actingAs(Resident::factory()->merchant()->create());
+    $merchant = Party::factory()->listed()->merchant()->create();
+    Sanctum::actingAs(Resident::factory()->create(['affiliated_party_id' => $merchant->id]));
     $this->putJson("/api/matters/{$census->id}/census", ['answers' => basicAnswers()])->assertCreated();
 
     $closed = renovationCensus(['state' => 'closed']);

@@ -1,20 +1,4 @@
-// 「买前必懂」的 AI 改写：业主端与管理端表单共用。
-// 发起人先手填一段说明，AI 只把它改顺，回填同一个输入框后仍由填表人把关。
 const matters = require('./api/matters');
-
-function draftGlossaryRow(page, index) {
-  const row = page.data.glossary[index];
-  if (!row || !row.term.trim()) {
-    wx.showToast({ title: '先填术语再改写', icon: 'none' });
-    return;
-  }
-  if (!(row.explain || '').trim()) {
-    wx.showToast({ title: '先自己写一句，AI 帮你改顺', icon: 'none' });
-    return;
-  }
-
-  doRewrite(page, index, row);
-}
 
 async function doRewrite(page, index, row) {
   if (page._draftingGlossary) return;
@@ -32,6 +16,20 @@ async function doRewrite(page, index, row) {
   } finally {
     page._draftingGlossary = false;
   }
+}
+
+function draftGlossaryRow(page, index) {
+  const row = page.data.glossary[index];
+  if (!row || !row.term.trim()) {
+    wx.showToast({ title: '先填术语再改写', icon: 'none' });
+    return;
+  }
+  if (!(row.explain || '').trim()) {
+    wx.showToast({ title: '先自己写一句，AI 帮你改顺', icon: 'none' });
+    return;
+  }
+
+  doRewrite(page, index, row);
 }
 
 module.exports = { draftGlossaryRow };

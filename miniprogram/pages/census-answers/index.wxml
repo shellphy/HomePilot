@@ -10,9 +10,16 @@
       <view class="questionnaire-actions">
         <view class="questionnaire-action" wx:if="{{censusState === 'open'}}" bind:tap="goEdit">修改问卷</view>
         <view class="questionnaire-action" bind:tap="goStats">整体数据</view>
-        <view wx:if="{{aiReportEnabled}}" class="questionnaire-action {{reportStatus === 'pending' ? 'questionnaire-action-busy' : ''}}" bind:tap="onSummaryTap">
+        <view
+          wx:if="{{canUseAi}}"
+          class="questionnaire-action {{reportStatus === 'pending' ? 'questionnaire-action-busy' : ''}}"
+          bind:tap="onSummaryTap"
+        >
           <text wx:if="{{reportStatus === 'pending'}}" class="action-spinner"></text>
-          <text>{{reportStatus === 'pending' ? 'AI 总结中' : (reportStatus === 'completed' ? '查看 AI 总结' : 'AI 总结')}}</text>
+          <text
+            >{{reportStatus === 'pending' ? 'AI 总结中' : (reportStatus === 'completed' ? '查看 AI 总结' : 'AI
+            总结')}}</text
+          >
         </view>
       </view>
     </view>
@@ -30,7 +37,11 @@
       <view class="content-heading-title">我的回答</view>
     </view>
 
-    <view class="card registration-module {{item.expanded ? 'registration-module-open' : ''}}" wx:for="{{answerModules}}" wx:key="key">
+    <view
+      class="card registration-module {{item.expanded ? 'registration-module-open' : ''}}"
+      wx:for="{{answerModules}}"
+      wx:key="key"
+    >
       <view class="registration-module-head" data-index="{{index}}" bind:tap="toggleModule">
         <view class="registration-module-title">{{item.title}}</view>
         <view class="registration-module-meta">
@@ -39,7 +50,13 @@
         </view>
       </view>
       <view wx:if="{{item.expanded}}" class="registration-answers">
-        <view class="registration-answer" wx:for="{{item.questions}}" wx:for-item="question" wx:for-index="questionIndex" wx:key="key">
+        <view
+          class="registration-answer"
+          wx:for="{{item.questions}}"
+          wx:for-item="question"
+          wx:for-index="questionIndex"
+          wx:key="key"
+        >
           <view class="registration-question-row">
             <text class="registration-question-index">{{questionIndex + 1}}</text>
             <view class="registration-question">{{question.text}}</view>

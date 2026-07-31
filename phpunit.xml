@@ -36,8 +36,5 @@
         <env name="WECHAT_APPID" value="" force="true"/>
         <env name="WECHAT_SECRET" value="" force="true"/>
         <env name="DEEPSEEK_API_KEY" value="" force="true"/>
-        <env name="AI_CHAT_ENABLED" value="true" force="true"/>
-        <env name="AI_CENSUS_REPORT_ENABLED" value="true" force="true"/>
-        <env name="AI_GLOSSARY_DRAFT_ENABLED" value="true" force="true"/>
     </php>
 </phpunit>

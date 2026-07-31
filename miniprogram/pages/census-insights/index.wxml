@@ -12,10 +12,17 @@
       </view>
 
       <!-- 我的问卷入口固定在聚合内容前，不必滑到页面底部 -->
-      <view class="card my-registration-entry" wx:if="{{block.myAnswered}}" hover-class="frow-hover" bind:tap="goMyRegistration">
+      <view
+        class="card my-registration-entry"
+        wx:if="{{block.myAnswered}}"
+        hover-class="frow-hover"
+        bind:tap="goMyRegistration"
+      >
         <view>
           <view class="my-registration-title">查看我的问卷</view>
-          <view class="my-registration-sub">已回答 {{block.myAnswered}} 题 · {{aiReportEnabled ? '查看答案和 AI 总结' : '查看答案'}}</view>
+          <view class="my-registration-sub"
+            >已回答 {{block.myAnswered}} 题 · {{canUseAi ? '查看答案和 AI 总结' : '查看答案'}}</view
+          >
         </view>
         <text class="frow-arrow">›</text>
       </view>
@@ -26,7 +33,8 @@
         size="large"
         style="width: 100%; margin-bottom: 24rpx"
         bind:tap="goCensusForm"
-      >参与问卷</t-button>
+        >参与问卷</t-button
+      >
 
       <view class="card hint" wx:if="{{!block.aggregatesVisible}}">
         为避免他人的选择影响你的判断，进行中的统计会在你完成登记后展示；少于 {{block.aggregatesMinimum}} 份时暂不公开。
