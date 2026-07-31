@@ -23,17 +23,6 @@
           </view>
         </view>
       </view>
-      <view class="list" wx:else>
-        <view class="row" hover-class="row-hover" bind:tap="goProfile">
-          <text class="row-title">业主认证</text>
-          <view class="row-right">
-            <text class="row-note {{me.is_owner_verified ? '' : 'row-note-todo'}}"
-              >{{me.is_owner_verified ? '已认证' : '未认证，点此填写邀请码'}}</text
-            >
-            <text class="row-arrow">›</text>
-          </view>
-        </view>
-      </view>
 
       <view class="stats">
         <view class="stat" hover-class="stat-hover" bind:tap="goJoined">

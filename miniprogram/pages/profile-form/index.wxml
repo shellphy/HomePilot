@@ -86,7 +86,7 @@
             data-field="inviteCode"
             bind:input="onInput"
             maxlength="8"
-            placeholder="向管理员获取"
+            placeholder="选填"
           />
         </view>
       </block>
@@ -137,9 +137,6 @@
     </block>
 
     <view class="privacy">手机号和房号不会公示，仅必要时用于联系你。</view>
-    <view class="privacy" wx:if="{{identity === 'resident' && !ownerVerified}}"
-      >未认证业主可以浏览公开内容；填写管理员提供的有效邀请码并认证后，才能参与社区互动。</view
-    >
     <view class="privacy" wx:if="{{identity === 'merchant'}}"
       >商家身份对全小区公开。通过核验后，你可以带「身份已核验」标识发起团购和活动，并进入商家名录；商家身份不参与业主接龙，想参与随时切回业主身份。</view
     >
