@@ -72,6 +72,10 @@ test('the agent instructions carry the matter terms, glossary and community cons
     $instructions = (string) (new MatterExplainer($matter, $asker))->instructions();
 
     expect($instructions)
+        ->toContain('问题不必出现在当前事项或问卷题目中')
+        ->toContain('其他小区生活或相关政策问题，按用户实际问题正常回答')
+        ->toContain('说明适用地区和时间')
+        ->not->toContain('只聊这件事相关的内容')
         ->toContain('130㎡')
         ->toContain('中央空调团购')
         ->toContain('一拖四')
