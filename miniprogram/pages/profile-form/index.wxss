@@ -51,11 +51,18 @@
 
 /* 手机号行多一个快捷授权入口，给 11 位号码保留稳定的可见宽度 */
 .phone-row {
-  gap: 16rpx;
+  gap: 12rpx;
+}
+.phone-row .frow-inline-btn {
+  flex: 0 0 104rpx;
+  width: 104rpx;
+  padding: 0;
+  font-size: 24rpx;
 }
 .phone-input {
-  flex-basis: 240rpx;
-  min-width: 240rpx;
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
 }
 
 /* 相关方档案照片（与进展页同一套九宫格交互） */

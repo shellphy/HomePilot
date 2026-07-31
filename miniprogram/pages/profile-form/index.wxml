@@ -35,6 +35,7 @@
           value="{{phone}}"
           data-field="phone"
           bind:input="onInput"
+          maxlength="11"
           placeholder="手动填写"
         />
       </view>
