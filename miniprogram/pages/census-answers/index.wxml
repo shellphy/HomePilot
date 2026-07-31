@@ -16,10 +16,9 @@
           bind:tap="onSummaryTap"
         >
           <text wx:if="{{reportStatus === 'pending'}}" class="action-spinner"></text>
-          <text
-            >{{reportStatus === 'pending' ? 'AI 总结中' : (reportStatus === 'completed' ? '查看 AI 总结' : 'AI
-            总结')}}</text
-          >
+          <text wx:if="{{reportStatus === 'pending'}}">AI 总结中</text>
+          <text wx:elif="{{reportStatus === 'completed'}}">查看 AI 总结</text>
+          <text wx:else>AI 总结</text>
         </view>
       </view>
     </view>
