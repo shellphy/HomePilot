@@ -2,6 +2,7 @@
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
+const { syncInputValue } = require('../../utils/input');
 
 Page({
   behaviors: [load, dirty],
@@ -35,12 +36,12 @@ Page({
   onRowInput(event) {
     this.markDirty();
     const { index, key } = event.currentTarget.dataset;
-    this.setData({ [`finalTerms[${index}].${key}`]: event.detail.value });
+    syncInputValue(this, `finalTerms[${index}].${key}`, event.detail.value);
   },
 
   onNoteInput(event) {
     this.markDirty();
-    this.setData({ finalNote: event.detail.value });
+    syncInputValue(this, 'finalNote', event.detail.value);
   },
 
   addTerm() {

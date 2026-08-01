@@ -4,6 +4,7 @@ const admin = require('../../../utils/api/admin');
 const { invalidateOptions } = require('../../../utils/api/profile');
 const load = require('../../../behaviors/load');
 const dirty = require('../../../behaviors/dirty');
+const { syncInputValue } = require('../../../utils/input');
 
 Page({
   behaviors: [load, dirty],
@@ -32,7 +33,7 @@ Page({
 
   onInput(event) {
     this.markDirty();
-    this.setData({ [`values.${event.currentTarget.dataset.key}`]: event.detail.value });
+    syncInputValue(this, `values.${event.currentTarget.dataset.key}`, event.detail.value);
   },
 
   async save() {

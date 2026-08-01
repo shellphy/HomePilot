@@ -10,6 +10,7 @@ const dirty = require('../../behaviors/dirty');
 const { guardProfileError } = require('../../utils/profile-guard');
 const { requestSubscribe } = require('../../utils/subscribe');
 const { draftGlossaryRow } = require('../../utils/glossary-draft');
+const { syncInputValue } = require('../../utils/input');
 
 function splitDateTime(value) {
   if (!value) return { date: '', time: '' };
@@ -180,7 +181,7 @@ Page({
 
   onInput(event) {
     this.markDirty();
-    this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
+    syncInputValue(this, event.currentTarget.dataset.field, event.detail.value);
   },
 
   // 团购利益关系披露单选
@@ -266,7 +267,7 @@ Page({
   onRowInput(event) {
     this.markDirty();
     const { list, index, field } = event.currentTarget.dataset;
-    this.setData({ [`${list}[${index}].${field}`]: event.detail.value });
+    syncInputValue(this, `${list}[${index}].${field}`, event.detail.value);
   },
 
   aiDraft(event) {

@@ -2,6 +2,7 @@
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
+const { syncInputValue } = require('../../utils/input');
 
 Page({
   behaviors: [load, dirty],
@@ -51,7 +52,7 @@ Page({
 
   onInput(event) {
     this.markDirty();
-    this.setData({ [event.currentTarget.dataset.field]: event.detail.value });
+    syncInputValue(this, event.currentTarget.dataset.field, event.detail.value);
   },
 
   goQuestion(event) {

@@ -1,6 +1,7 @@
 const { uploadImage } = require('../../utils/request');
 const matters = require('../../utils/api/matters');
 const dirty = require('../../behaviors/dirty');
+const { syncInputValue } = require('../../utils/input');
 
 function today() {
   const now = new Date();
@@ -33,7 +34,7 @@ Page({
 
   onInput(event) {
     this.markDirty();
-    this.setData({ content: event.detail.value });
+    syncInputValue(this, 'content', event.detail.value);
   },
 
   chooseImages() {

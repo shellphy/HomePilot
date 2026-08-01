@@ -5,6 +5,7 @@ const { pillClass, TYPE_META, stateOptions, starsOf } = require('../../utils/con
 const { guardProfileError } = require('../../utils/profile-guard');
 const { requestSubscribe } = require('../../utils/subscribe');
 const { unbindParty } = require('../../utils/me');
+const { syncInputValue } = require('../../utils/input');
 
 Component({
   options: {
@@ -196,7 +197,7 @@ Component({
     },
 
     onReviewInput(event) {
-      this.setData({ reviewContent: event.detail.value });
+      syncInputValue(this, 'reviewContent', event.detail.value);
     },
 
     async submitReview() {

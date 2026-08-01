@@ -5,6 +5,7 @@
 // AI 解释概念不代表承诺，涉及商家承诺的引导去向团长/商家提问。
 const matters = require('../../utils/api/matters');
 const { mdToHtml } = require('../../utils/markdown');
+const { syncInputValue } = require('../../utils/input');
 
 const CACHE_LIMIT = 40; // 本地只留最近几十条，够回看即可
 const TYPE_INTERVAL = 24; // 打字机每帧间隔（ms）
@@ -75,7 +76,7 @@ Component({
     },
 
     onInput(event) {
-      this.setData({ input: event.detail.value });
+      syncInputValue(this, 'input', event.detail.value);
     },
 
     // 发送键在忙时充当停止键

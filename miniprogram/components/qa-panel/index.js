@@ -3,6 +3,7 @@
 const matters = require('../../utils/api/matters');
 const admin = require('../../utils/api/admin');
 const { guardProfileError } = require('../../utils/profile-guard');
+const { syncInputValue } = require('../../utils/input');
 
 Component({
   options: {
@@ -66,7 +67,7 @@ Component({
     },
 
     onEditorInput(event) {
-      this.setData({ editorText: event.detail.value });
+      syncInputValue(this, 'editorText', event.detail.value);
     },
 
     async submitEditor() {

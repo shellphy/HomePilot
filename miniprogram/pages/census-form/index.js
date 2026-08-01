@@ -5,6 +5,7 @@ const matters = require('../../utils/api/matters');
 const { getMe, invalidateMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
+const { syncInputValue } = require('../../utils/input');
 
 function needsContactProfile(me) {
   return !me.phone || (!me.party && !me.unit_label);
@@ -125,7 +126,7 @@ Page({
   // 填空题：输入即记，空白视为未作答（提交时过滤）
   onText(event) {
     this.markDirty();
-    this.setData({ [`answers.${event.currentTarget.dataset.qkey}`]: event.detail.value });
+    syncInputValue(this, `answers.${event.currentTarget.dataset.qkey}`, event.detail.value);
   },
 
   buildPicked(answers) {
