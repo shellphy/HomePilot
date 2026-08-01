@@ -21,7 +21,7 @@ class GlossaryDraftController extends Controller
         $validated = $request->validate([
             'term' => ['required', 'string', 'max:30'],
             'draft' => ['required', 'string', 'max:500'],
-            'category' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:300'],
         ]);
 
         $category = $validated['category'] ?? '';

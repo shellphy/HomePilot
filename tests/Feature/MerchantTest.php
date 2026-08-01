@@ -46,6 +46,29 @@ test('a resident can self register as a merchant', function () {
     expect($resident->refresh()->affiliatedParty->is_listed)->toBeFalse(); // 公示名单要管理员核验
 });
 
+test('a merchant category may contain up to 100 characters', function () {
+    $resident = Resident::factory()->create();
+    Sanctum::actingAs($resident);
+
+    $category = str_repeat('品', 100);
+
+    $this->postJson('/api/me/party', [
+        'type' => 'merchant',
+        'name' => '青城家居',
+        'category' => $category,
+    ])
+        ->assertSuccessful()
+        ->assertJsonPath('data.party.category', $category);
+
+    $this->postJson('/api/me/party', [
+        'type' => 'merchant',
+        'name' => '青城家居',
+        'category' => str_repeat('品', 101),
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('category');
+});
+
 test('resubmitting merchant info updates the same party instead of creating another', function () {
     $resident = Resident::factory()->create();
     Sanctum::actingAs($resident);

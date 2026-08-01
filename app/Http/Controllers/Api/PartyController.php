@@ -130,7 +130,7 @@ class PartyController extends Controller
         $validated = $request->validate([
             'type' => ['required', Rule::in($selfRegistrable)],
             'name' => ['required', 'string', 'max:50', new SafeText($resident, SecCheckScene::Profile)],
-            'category' => ['sometimes', 'nullable', 'string', 'max:30'],
+            'category' => ['sometimes', 'nullable', 'string', 'max:100'],
             // 自我介绍（各类型统一，内容自由发挥）：简介上名录列表行，详细介绍和照片进详情页
             'intro' => ['sometimes', 'nullable', 'string', 'max:60', new SafeText($resident, SecCheckScene::Profile)],
             'description' => ['sometimes', 'nullable', 'string', 'max:2000', new SafeText($resident, SecCheckScene::Profile)],
