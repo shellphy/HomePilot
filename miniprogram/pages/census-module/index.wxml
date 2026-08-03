@@ -5,8 +5,6 @@
     <view class="card">
       <view class="q-title">模块标题<text class="f-required">*</text></view>
       <input class="fin" value="{{title}}" data-field="title" bind:input="onInput" />
-      <view class="q-title q-title-gap">模块引言<text class="q-note">显示在这组题目上方</text></view>
-      <input class="fin" value="{{intro}}" data-field="intro" bind:input="onInput" />
     </view>
 
     <block wx:if="{{mi >= 0}}">

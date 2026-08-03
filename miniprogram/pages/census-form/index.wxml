@@ -24,7 +24,6 @@
         <view class="meter step-meter">
           <view class="meter-fill" style="width: {{(moduleIndex + 1) / modules.length * 100}}%"></view>
         </view>
-        <view wx:if="{{current.intro}}" class="step-intro">{{current.intro}}</view>
       </view>
 
       <view
@@ -49,7 +48,6 @@
           bind:tap="askQuestion"
           >不懂这道题？问 AI</view
         >
-        <view wx:if="{{question.note}}" class="q-explain">{{question.note}}</view>
         <textarea
           wx:if="{{question.type === 'text'}}"
           class="fin farea"

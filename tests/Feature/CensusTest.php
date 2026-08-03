@@ -216,7 +216,7 @@ test('text questions accept free-form answers but stay out of the public aggrega
                 'title' => '探店情况',
                 'questions' => [
                     ['key' => 'visited', 'text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司']],
-                    ['key' => 'pitfall', 'text' => '踩过什么坑或有什么心得？', 'type' => 'text', 'note' => '只做管理端参考，不公开展示'],
+                    ['key' => 'pitfall', 'text' => '踩过什么坑或有什么心得？', 'type' => 'text'],
                 ],
             ]],
         ],

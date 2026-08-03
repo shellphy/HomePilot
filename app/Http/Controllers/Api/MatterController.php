@@ -479,7 +479,7 @@ class MatterController extends Controller
     }
 
     /**
-     * 题目指纹：只比对影响作答与统计的字段（文案/类型/选项/说明）。
+     * 题目指纹：只比对影响作答与统计的字段（文案/类型/选项）。
      *
      * @param  array<string, mixed>  $question
      */
@@ -489,7 +489,6 @@ class MatterController extends Controller
             'text' => $question['text'] ?? '',
             'type' => $question['type'] ?? '',
             'options' => $question['options'] ?? [],
-            'note' => $question['note'] ?? '',
         ], JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 

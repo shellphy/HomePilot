@@ -1,4 +1,4 @@
-// 问卷模块：标题/引言 + 该模块的题目列表。走统一 /matters 接口。
+// 问卷模块与题目统一通过 matters 接口保存。
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
@@ -13,7 +13,6 @@ Page({
     matterTitle: '',
     modules: [],
     title: '',
-    intro: '',
     questions: [],
     locked: false, // 已公示/已有作答：可加题、可改模块名，但不能删整个模块（会带走已有题目）
     submitting: false,
@@ -42,9 +41,8 @@ Page({
         matterTitle: res.data.title,
         modules,
         locked: !!res.data.census_schema_locked,
-        // 从题目页返回会触发 onShow 重拉：标题/引言有未保存的本地编辑时保留，别被服务端值冲掉
+        // 从题目页返回时保留未保存的模块标题。
         title: current && !this.dirty ? current.title : this.data.title,
-        intro: current && !this.dirty ? (current.intro || '') : this.data.intro,
         questions: current ? current.questions : [],
       });
     });
@@ -68,15 +66,15 @@ Page({
   },
 
   async save() {
-    const { id, mi, modules, title, intro, submitting } = this.data;
+    const { id, mi, modules, title, submitting } = this.data;
     if (submitting) return;
     if (!title.trim()) return wx.showToast({ title: '先填模块标题', icon: 'none' });
 
     const next = modules.map((module) => ({ ...module }));
     if (mi >= 0) {
-      next[mi] = { ...next[mi], title: title.trim(), intro: intro.trim() };
+      next[mi] = { ...next[mi], title: title.trim() };
     } else {
-      next.push({ title: title.trim(), intro: intro.trim(), questions: [] });
+      next.push({ title: title.trim(), questions: [] });
     }
 
     this.setData({ submitting: true });

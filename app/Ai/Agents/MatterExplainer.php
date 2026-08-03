@@ -54,7 +54,7 @@ class MatterExplainer implements Agent, Conversational, HasTools
 规则：
 - 简短回答（默认 150 字以内），先给结论再给理由，居民追问时再展开。
 - 居民问某道问卷题时，先解释这道题为什么要问、会影响什么，再结合已选答案和事项背景给出建议。
-- 问卷题目、说明和选项不一定正确；不要顺着明显错误继续推导，先指出并纠正，拿不准时联网查证。
+- 问卷题目和选项不一定正确；不要顺着明显错误继续推导，先指出并纠正，拿不准时联网查证。
 - 信息不足以判断时，只追问一个最影响选择的关键问题。
 - 区分“必须遵守的安全 / 规范底线”和“可以按预算偏好选择的方案”。
 - 当前事项或问卷相关问题，优先结合下面的背景资料回答；其他小区生活或相关政策问题，按用户实际问题正常回答。
@@ -148,13 +148,8 @@ PROMPT.$this->matterContext();
 
         foreach ($this->matter->payloadList('modules') as $module) {
             $moduleTitle = trim((string) ($module['title'] ?? ''));
-            $moduleIntro = trim((string) ($module['intro'] ?? ''));
             if ($moduleTitle !== '') {
-                $moduleLine = "模块：{$moduleTitle}";
-                if ($moduleIntro !== '') {
-                    $moduleLine .= "；模块说明：{$moduleIntro}";
-                }
-                $questionLines[] = $moduleLine;
+                $questionLines[] = "模块：{$moduleTitle}";
             }
 
             foreach ((array) ($module['questions'] ?? []) as $question) {
@@ -165,24 +160,16 @@ PROMPT.$this->matterContext();
                 }
 
                 $type = (string) ($question['type'] ?? 'single');
-                $note = trim((string) ($question['note'] ?? ''));
                 $options = array_values(array_map('strval', (array) ($question['options'] ?? [])));
                 $questionMap[$key] = ['text' => $text, 'type' => $type, 'options' => $options];
 
                 if ($type === 'text') {
-                    $questionLine = "题目：{$text}（填空题）";
-                    if ($note !== '') {
-                        $questionLine .= "；题目说明：{$note}";
-                    }
-                    $questionLines[] = $questionLine;
+                    $questionLines[] = "题目：{$text}（填空题）";
 
                     continue;
                 }
 
                 $questionLine = "题目：{$text}";
-                if ($note !== '') {
-                    $questionLine .= "；题目说明：{$note}";
-                }
                 if ($options !== []) {
                     $questionLine .= '；选项：'.implode(' / ', $options);
                 }
@@ -191,7 +178,7 @@ PROMPT.$this->matterContext();
         }
 
         if ($questionLines !== []) {
-            $lines[] = '完整问卷结构、说明与选项：';
+            $lines[] = '完整问卷结构与选项：';
             foreach ($questionLines as $line) {
                 $lines[] = "- {$line}";
             }

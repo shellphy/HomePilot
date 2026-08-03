@@ -32,7 +32,7 @@
       >
         <view class="row-main">
           <view class="row-title">{{item.title}}</view>
-          <view class="row-sub">{{item.questions.length}} 道题{{item.intro ? ' · ' + item.intro : ''}}</view>
+          <view class="row-sub">{{item.questions.length}} 道题</view>
         </view>
         <text class="row-arrow">›</text>
       </view>

@@ -33,17 +33,15 @@ class CensusType extends MatterType
             'purpose' => ['nullable', 'string', 'max:1000'],
             'collects_contact' => ['sometimes', 'boolean'],
             'modules' => ['sometimes', 'array'],
-            'modules.*' => ['array:key,title,intro,questions'],
+            'modules.*' => ['array:key,title,questions'],
             'modules.*.key' => ['sometimes', 'string', 'max:30'],
             'modules.*.title' => ['required', 'string', 'max:30'],
-            'modules.*.intro' => ['sometimes', 'nullable', 'string', 'max:200'],
             // 允许空模块：小程序端「先建模块再逐题添加」的中间态；业主端渲染时跳过
             'modules.*.questions' => ['sometimes', 'array'],
-            'modules.*.questions.*' => ['array:key,text,type,note,options'],
+            'modules.*.questions.*' => ['array:key,text,type,options'],
             'modules.*.questions.*.key' => ['sometimes', 'string', 'max:30'],
             'modules.*.questions.*.text' => ['required', 'string', 'max:100'],
             'modules.*.questions.*.type' => ['required', Rule::in(['single', 'multi', 'text'])],
-            'modules.*.questions.*.note' => ['sometimes', 'nullable', 'string', 'max:200'],
             // 填空题没有选项（前端不传该键）；选择题至少两个
             'modules.*.questions.*.options' => ['required_unless:modules.*.questions.*.type,text', 'array', 'min:2'],
             'modules.*.questions.*.options.*' => ['required', 'string', 'max:50'],
@@ -53,7 +51,7 @@ class CensusType extends MatterType
     /**
      * 取出 payload 并给模块/题目自动补 key（答案按 key 存，缺失时生成、已有的不动）。
      *
-     * @param  array{purpose?: string|null, collects_contact?: bool, modules?: array<int, array{key?: string, title: string, intro?: string|null, questions?: array<int, array{key?: string, text: string, type: string, note?: string|null, options?: array<int, string>}>}>}  $validated
+     * @param  array{purpose?: string|null, collects_contact?: bool, modules?: array<int, array{key?: string, title: string, questions?: array<int, array{key?: string, text: string, type: string, options?: array<int, string>}>}>}  $validated
      */
     public function payloadFrom(array $validated): array
     {

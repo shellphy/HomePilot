@@ -8,9 +8,6 @@
       <view class="q-title">题目<text wx:if="{{!readOnly}}" class="f-required">*</text></view>
       <input class="fin" value="{{text}}" data-field="text" bind:input="onInput" disabled="{{readOnly}}" />
 
-      <view class="q-title q-title-gap">注释<text wx:if="{{!readOnly}}" class="q-note">选填，显示在题干下方，给不熟悉的邻居解释概念</text></view>
-      <textarea class="fin farea" auto-height value="{{note}}" data-field="note" bind:input="onInput" disabled="{{readOnly}}" />
-
       <view class="q-title q-title-gap">题型</view>
       <view class="chips">
         <view class="chip {{type === 'single' ? 'chip-on' : ''}}" data-type="single" bind:tap="pickType">单选</view>

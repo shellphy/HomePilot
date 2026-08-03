@@ -17,13 +17,11 @@ function censusWithAnswers(): array
             'modules' => [[
                 'key' => 'm1',
                 'title' => '柜体',
-                'intro' => '先确定柜体材料，再比较价格。',
                 'questions' => [
                     [
                         'key' => 'q1',
                         'text' => '柜体倾向哪种板材？',
                         'type' => 'single',
-                        'note' => '板材影响环保、防潮和预算。',
                         'options' => ['颗粒板', '多层实木'],
                     ],
                     [
@@ -66,9 +64,7 @@ test('census ai context carries purpose, questions, my answer and top choice', f
         ->toContain('不要顺着明显错误继续推导')
         ->toContain('开团前先摸清大家想装什么')
         ->toContain('模块：柜体')
-        ->toContain('先确定柜体材料，再比较价格。')
         ->toContain('柜体倾向哪种板材？')
-        ->toContain('板材影响环保、防潮和预算。')
         ->toContain('选项：颗粒板 / 多层实木')
         ->toContain('柜体倾向哪种板材？→多层实木')
         ->toContain('希望环保达标')
@@ -111,7 +107,6 @@ test('census ai context includes every question without truncation', function ()
         'key' => "q{$number}",
         'text' => "第 {$number} 道硬装题",
         'type' => 'single',
-        'note' => "第 {$number} 道说明",
         'options' => ['需要', '不需要'],
     ])->all();
 
@@ -128,8 +123,7 @@ test('census ai context includes every question without truncation', function ()
 
     expect($instructions)
         ->toContain('第 1 道硬装题')
-        ->toContain('第 28 道硬装题')
-        ->toContain('第 28 道说明');
+        ->toContain('第 28 道硬装题');
 });
 
 test('renovation matter injects community hard conditions', function () {

@@ -213,7 +213,7 @@ test('admin deletes a matter', function () {
         ->and(Matter::withTrashed()->find($matter->id))->not->toBeNull();
 });
 
-test('census schema accepts text questions without options and keeps question notes', function () {
+test('census schema accepts text questions without options', function () {
     Sanctum::actingAs(Resident::factory()->admin()->create());
 
     $this->postJson('/api/matters', [
@@ -222,13 +222,12 @@ test('census schema accepts text questions without options and keeps question no
         'modules' => [[
             'title' => '探店情况',
             'questions' => [
-                ['text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司'], 'note' => '去过门店或约过量房都算'],
+                ['text' => '去看过哪些装修公司？', 'type' => 'multi', 'options' => ['A 公司', 'B 公司']],
                 ['text' => '踩过什么坑？', 'type' => 'text'],
             ],
         ]],
     ])
         ->assertCreated()
-        ->assertJsonPath('data.payload.modules.0.questions.0.note', '去过门店或约过量房都算')
         ->assertJsonPath('data.payload.modules.0.questions.1.type', 'text');
 
     // 选择题仍必须带至少两个选项

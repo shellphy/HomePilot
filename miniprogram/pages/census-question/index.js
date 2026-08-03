@@ -20,7 +20,6 @@ Page({
     matterTitle: '',
     modules: [],
     text: '',
-    note: '',
     type: 'single',
     optionsText: '',
     readOnly: false,
@@ -48,7 +47,6 @@ Page({
         moduleTitle: (modules[this.data.mi] && modules[this.data.mi].title) || '',
         modules,
         text: question ? question.text : '',
-        note: (question && question.note) || '',
         type: question ? question.type : 'single',
         optionsText: question ? (question.options || []).join('\n') : '',
         readOnly,
@@ -75,7 +73,7 @@ Page({
   },
 
   async save() {
-    const { id, mi, qi, modules, text, note, type, optionsText, submitting } = this.data;
+    const { id, mi, qi, modules, text, type, optionsText, submitting } = this.data;
     if (submitting) return;
     if (!text.trim()) return wx.showToast({ title: '先填题目', icon: 'none' });
 
@@ -83,7 +81,7 @@ Page({
     if (type !== 'text' && options.length < 2) return wx.showToast({ title: '至少两个选项，一行一个', icon: 'none' });
 
     const next = modules.map((module) => ({ ...module, questions: [...module.questions] }));
-    const question = { text: text.trim(), note: note.trim(), type };
+    const question = { text: text.trim(), type };
     if (type !== 'text') {
       question.options = options;
     }
