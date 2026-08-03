@@ -30,16 +30,16 @@ class CensusType extends MatterType
     public function payloadRules(): array
     {
         return [
-            // 发起目的：自由文本，发起者写为什么发这次征集，给参与者看
             'purpose' => ['nullable', 'string', 'max:1000'],
-            // 是否要求参与者提供联系方式。
             'collects_contact' => ['sometimes', 'boolean'],
             'modules' => ['sometimes', 'array'],
+            'modules.*' => ['array:key,title,intro,questions'],
             'modules.*.key' => ['sometimes', 'string', 'max:30'],
             'modules.*.title' => ['required', 'string', 'max:30'],
             'modules.*.intro' => ['sometimes', 'nullable', 'string', 'max:200'],
             // 允许空模块：小程序端「先建模块再逐题添加」的中间态；业主端渲染时跳过
             'modules.*.questions' => ['sometimes', 'array'],
+            'modules.*.questions.*' => ['array:key,text,type,note,options'],
             'modules.*.questions.*.key' => ['sometimes', 'string', 'max:30'],
             'modules.*.questions.*.text' => ['required', 'string', 'max:100'],
             'modules.*.questions.*.type' => ['required', Rule::in(['single', 'multi', 'text'])],
@@ -47,14 +47,13 @@ class CensusType extends MatterType
             // 填空题没有选项（前端不传该键）；选择题至少两个
             'modules.*.questions.*.options' => ['required_unless:modules.*.questions.*.type,text', 'array', 'min:2'],
             'modules.*.questions.*.options.*' => ['required', 'string', 'max:50'],
-            // 选项解释（与 options 平行的数组，答案仍只存选项本身）：答题即建概念
-            'modules.*.questions.*.option_notes' => ['sometimes', 'array'],
-            'modules.*.questions.*.option_notes.*' => ['nullable', 'string', 'max:100'],
         ];
     }
 
     /**
      * 取出 payload 并给模块/题目自动补 key（答案按 key 存，缺失时生成、已有的不动）。
+     *
+     * @param  array{purpose?: string|null, collects_contact?: bool, modules?: array<int, array{key?: string, title: string, intro?: string|null, questions?: array<int, array{key?: string, text: string, type: string, note?: string|null, options?: array<int, string>}>}>}  $validated
      */
     public function payloadFrom(array $validated): array
     {
@@ -66,12 +65,11 @@ class CensusType extends MatterType
             $payload['collects_contact'] = (bool) $validated['collects_contact'];
         }
 
-        if (isset($validated['modules']) && is_array($validated['modules'])) {
+        if (isset($validated['modules'])) {
             $payload['modules'] = collect($validated['modules'])
                 ->map(function (array $module): array {
                     $module['key'] = $module['key'] ?? 'm_'.Str::lower(Str::random(6));
-                    $questions = $module['questions'] ?? [];
-                    $module['questions'] = collect(is_array($questions) ? $questions : [])
+                    $module['questions'] = collect($module['questions'] ?? [])
                         ->map(function (array $question): array {
                             $question['key'] = $question['key'] ?? 'q_'.Str::lower(Str::random(6));
 

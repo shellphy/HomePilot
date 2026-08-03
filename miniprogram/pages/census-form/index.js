@@ -1,6 +1,4 @@
-// 征集表态表单：schema 由征集事项下发，本页对任何征集通用，只负责答案。
-// 联系方式属于成员档案（「我的 · 个人资料」维护）；要求档案完整的征集，
-// 在这里只做前置引导，表单里没有联系方式字段。
+// 通用问卷答题页；联系方式只从个人资料读取。
 const matters = require('../../utils/api/matters');
 const { getMe, invalidateMe } = require('../../utils/me');
 const load = require('../../behaviors/load');
@@ -22,10 +20,10 @@ Page({
     current: null,
     answers: {},
     picked: {}, // {'题key::选项': true}，WXML 不能调 indexOf，用查表渲染选中态
-    needProfile: false, // 该征集要求档案完整且当前缺失 → 先去完善个人资料
+    needProfile: false,
     submitting: false,
     canUseAi: false,
-    aiChatShow: false, // AI 答疑半屏面板（每道题「问 AI」呼出）
+    aiChatShow: false,
   },
 
   onLoad(query) {
@@ -33,7 +31,6 @@ Page({
     this.reload();
   },
 
-  // 填写问卷时每道题的「问 AI」：把题面直接写进问题，AI 顺着这道题讲该怎么选
   askQuestion(event) {
     const { qkey, text } = event.currentTarget.dataset;
     const currentAnswer = this.data.answers[qkey];
@@ -58,7 +55,6 @@ Page({
     if (this.data.aiChatShow) this.setData({ aiChatShow: false });
   },
 
-  // 从「个人资料」页回来时重查门槛
   async onShow() {
     if (!this.data.loaded || !this.data.needProfile) return;
     const me = await getMe();
@@ -72,24 +68,8 @@ Page({
       this.setData({
         canUseAi: !!me.is_verified_participant,
         title: census.title,
-        // 空模块是出题时「先建模块再逐题添加」的中间态，作答时跳过
-        modules: census.modules
-          .filter((module) => (module.questions || []).length)
-          .map((module) => ({
-            ...module,
-            // 带选项解释的题渲染成竖排选项行（填写过程即建概念），没有解释的保持横排 chips
-            questions: module.questions.map((question) => {
-              const notes = question.option_notes || [];
-              const hasNotes = notes.some((note) => note && note.trim());
-              return {
-                ...question,
-                hasNotes,
-                optionRows: hasNotes
-                  ? (question.options || []).map((label, i) => ({ label, note: (notes[i] || '').trim() }))
-                  : [],
-              };
-            }),
-          })),
+        // 创建模块和添加题目分两步，空模块不进入答题流程。
+        modules: census.modules.filter((module) => (module.questions || []).length),
         answers,
         picked: this.buildPicked(answers),
         needProfile: census.collects_contact && needsContactProfile(me),
@@ -123,7 +103,6 @@ Page({
     this.setData({ answers, picked: this.buildPicked(answers) });
   },
 
-  // 填空题：输入即记，空白视为未作答（提交时过滤）
   onText(event) {
     this.markDirty();
     syncInputValue(this, `answers.${event.currentTarget.dataset.qkey}`, event.detail.value);
@@ -160,12 +139,11 @@ Page({
         await matters.saveCensus(id, { answers: moduleAnswers });
         invalidateMe(); // 「我的」页展示问卷进度，需要重新拉
       }
-      this.clearDirty(); // 当前模块已落库，返回不再拦
+      this.clearDirty();
 
       if (moduleIndex + 1 < modules.length) {
         this.showModule(moduleIndex + 1);
       } else {
-        // 存完立刻跳转（按钮 loading 已给过反馈），目标页即完成态，不再空等
         const pages = getCurrentPages();
         const prev = pages[pages.length - 2];
         if (prev && prev.route === 'pages/census-answers/index') {

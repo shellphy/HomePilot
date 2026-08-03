@@ -103,8 +103,6 @@ PROMPT.$this->matterContext();
             $lines[] = "发起人的话：{$this->matter->body}";
         }
 
-        // 征集：注入目的、问卷题目与选项解释、提问业主自己的登记、各题多数选择，
-        // AI 才既能讲清某道题、又能基于「我家怎么答的」做整体分析。
         if ($this->matter->type === 'census') {
             foreach ($this->censusContextLines() as $censusLine) {
                 $lines[] = $censusLine;
@@ -132,7 +130,7 @@ PROMPT.$this->matterContext();
     }
 
     /**
-     * 征集专属上下文：发起目的、问卷题目与选项解释、提问业主的登记、各题多数选择。
+     * 征集专属上下文：发起目的、问卷题目、提问业主的登记、各题多数选择。
      *
      * @return array<int, string>
      */
@@ -144,7 +142,7 @@ PROMPT.$this->matterContext();
             $lines[] = "发起目的：{$purpose}";
         }
 
-        /** @var array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}> $questionMap */
+        /** @var array<string, array{text: string, type: string, options: array<int, string>}> $questionMap */
         $questionMap = [];
         $questionLines = [];
 
@@ -169,8 +167,7 @@ PROMPT.$this->matterContext();
                 $type = (string) ($question['type'] ?? 'single');
                 $note = trim((string) ($question['note'] ?? ''));
                 $options = array_values(array_map('strval', (array) ($question['options'] ?? [])));
-                $notes = array_map('strval', (array) ($question['option_notes'] ?? []));
-                $questionMap[$key] = ['text' => $text, 'type' => $type, 'options' => $options, 'notes' => $notes];
+                $questionMap[$key] = ['text' => $text, 'type' => $type, 'options' => $options];
 
                 if ($type === 'text') {
                     $questionLine = "题目：{$text}（填空题）";
@@ -182,18 +179,12 @@ PROMPT.$this->matterContext();
                     continue;
                 }
 
-                $pairs = [];
-                foreach ($options as $i => $option) {
-                    $optionNote = trim((string) ($notes[$i] ?? ''));
-                    $pairs[] = $optionNote !== '' ? "{$option}｜{$optionNote}" : $option;
-                }
-
                 $questionLine = "题目：{$text}";
                 if ($note !== '') {
                     $questionLine .= "；题目说明：{$note}";
                 }
-                if ($pairs !== []) {
-                    $questionLine .= '；选项：'.implode(' / ', $pairs);
+                if ($options !== []) {
+                    $questionLine .= '；选项：'.implode(' / ', $options);
                 }
                 $questionLines[] = $questionLine;
             }
@@ -237,7 +228,7 @@ PROMPT.$this->matterContext();
     /**
      * 提问业主自己的登记：把答案的 key/选项换算成题面文字。
      *
-     * @param  array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}>  $questionMap
+     * @param  array<string, array{text: string, type: string, options: array<int, string>}>  $questionMap
      * @return array<int, string>
      */
     private function myRegistrationLines(array $questionMap): array
@@ -284,7 +275,7 @@ PROMPT.$this->matterContext();
     /**
      * 各题多数选择：匿名聚合每道选择题的最高票选项。
      *
-     * @param  array<string, array{text: string, type: string, options: array<int, string>, notes: array<int, string>}>  $questionMap
+     * @param  array<string, array{text: string, type: string, options: array<int, string>}>  $questionMap
      * @return array<int, string>
      */
     private function topChoiceLines(array $questionMap): array

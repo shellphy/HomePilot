@@ -1,34 +1,13 @@
-// 题目编辑：题干 / 注释 / 单选多选填空 / 选项（一行一个）。走统一 /matters 接口。
 const matters = require('../../utils/api/matters');
 const load = require('../../behaviors/load');
 const dirty = require('../../behaviors/dirty');
 const { syncInputValue } = require('../../utils/input');
 
-// 选项行语法：「选项｜解释」（半角 | 也认）。解释显示在答题页选项下方——
-// 答题的过程就是建概念，选项即术语卡。答案只存选项本身，解释可随时改。
 function parseOptionLines(optionsText) {
-  const options = [];
-  const optionNotes = [];
-  optionsText.split('\n').forEach((line) => {
-    const trimmed = line.trim();
-    if (!trimmed) return;
-    const splitIndex = trimmed.search(/[｜|]/);
-    if (splitIndex === -1) {
-      options.push(trimmed);
-      optionNotes.push('');
-    } else {
-      options.push(trimmed.slice(0, splitIndex).trim());
-      optionNotes.push(trimmed.slice(splitIndex + 1).trim());
-    }
-  });
-  return { options, optionNotes };
-}
-
-function formatOptionLines(question) {
-  const notes = question.option_notes || [];
-  return (question.options || [])
-    .map((option, index) => (notes[index] ? `${option}｜${notes[index]}` : option))
-    .join('\n');
+  return optionsText
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 Page({
@@ -44,7 +23,7 @@ Page({
     note: '',
     type: 'single',
     optionsText: '',
-    readOnly: false, // 已公示征集的已有题目只读，只能返回加新题
+    readOnly: false,
     submitting: false,
   },
 
@@ -71,7 +50,7 @@ Page({
         text: question ? question.text : '',
         note: (question && question.note) || '',
         type: question ? question.type : 'single',
-        optionsText: question ? formatOptionLines(question) : '',
+        optionsText: question ? (question.options || []).join('\n') : '',
         readOnly,
       });
       let navigationTitle = '编辑题目';
@@ -100,31 +79,29 @@ Page({
     if (submitting) return;
     if (!text.trim()) return wx.showToast({ title: '先填题目', icon: 'none' });
 
-    const { options, optionNotes } = parseOptionLines(optionsText);
+    const options = parseOptionLines(optionsText);
     if (type !== 'text' && options.length < 2) return wx.showToast({ title: '至少两个选项，一行一个', icon: 'none' });
 
     const next = modules.map((module) => ({ ...module, questions: [...module.questions] }));
     const question = { text: text.trim(), note: note.trim(), type };
     if (type !== 'text') {
       question.options = options;
-      question.option_notes = optionNotes;
     }
     if (qi >= 0) {
       // 保留原 key：答案按它存储，改题面不换 key
       next[mi].questions[qi] = { ...next[mi].questions[qi], ...question };
       if (type === 'text') {
-        delete next[mi].questions[qi].options; // 选择题改填空：不留下过时选项
-        delete next[mi].questions[qi].option_notes;
+        delete next[mi].questions[qi].options;
       }
     } else {
-      next[mi].questions.push(question); // key 由服务端生成
+      next[mi].questions.push(question);
     }
 
     this.setData({ submitting: true });
     try {
       await matters.updateMatter(id, { title: this.data.matterTitle, ...this._preserved, modules: next });
       this.clearDirty();
-      // 成功后不复位 submitting：按钮保持 loading 直到返回，堵住 toast 800ms 里的二次提交
+      // 保持 loading，防止提示关闭前重复提交。
       wx.showToast({ title: '已保存', icon: 'success' });
       setTimeout(() => wx.navigateBack(), 800);
     } catch (error) {
@@ -150,7 +127,7 @@ Page({
             ...this._preserved,
             modules: next,
           });
-          this.clearDirty(); // 题目已删，未保存的编辑不必再拦返回
+          this.clearDirty();
           wx.showToast({ title: '已删除', icon: 'success' });
           setTimeout(() => wx.navigateBack(), 800);
         } catch (error) {
